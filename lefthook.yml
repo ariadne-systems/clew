@@ -1,0 +1,8 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{ts,js,json,jsonc}"
+      run: pnpm biome check --no-errors-on-unmatched --staged
+    typecheck:
+      run: pnpm typecheck

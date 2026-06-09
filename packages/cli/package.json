@@ -1,0 +1,40 @@
+{
+  "name": "@ariadne-thread/cli",
+  "version": "0.0.0",
+  "description": "Command-line interface for ariadne-thread.",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "author": "Ariadne Systems GmbH",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/ariadne-forge/ariadne-thread-cli.git",
+    "directory": "packages/cli"
+  },
+  "sideEffects": false,
+  "bin": {
+    "ariadne": "./dist/index.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@ariadne-thread/core": "workspace:*",
+    "commander": "^15.0.0",
+    "picocolors": "^1.1.1",
+    "pino": "^10.3.1"
+  },
+  "scripts": {
+    "build": "tsdown"
+  }
+}
