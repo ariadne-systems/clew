@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "idToken": {
+    "pattern": "[A-Z]{2,4}-[0-9]{3}",
+    "inlineForm": "[<ID>]"
+  },
+  "artifacts": [
+    {
+      "path": "docs/spec/architecture.md",
+      "traceableTypes": ["ARCH", "CON"]
+    }
+  ],
+  "index": {
+    "path": "docs/spec/traceables.index.json"
+  },
+  "generators": ["typescript", "java"],
+  "jira": {
+    "referenceField": "Traceables",
+    "validateReferencesAgainstIndex": true
+  }
+}
