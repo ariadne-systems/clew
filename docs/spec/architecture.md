@@ -3,7 +3,7 @@
 This document is the framing for the CLI.
 It is narrative.
 This document explains the shape.
-The atomic, anchored architecture rules and constraints are authored as ARCH and CON requirements when the architecture they constrain is built; those requirements are what the code is checked against.
+The atomic, anchored architecture rules and constraints are authored as ARCH and CON specs when the architecture they constrain is built; those specs are what the code is checked against.
 
 ## Shape
 
