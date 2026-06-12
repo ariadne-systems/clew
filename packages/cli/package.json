@@ -10,18 +10,9 @@
     "url": "git+https://gitlab.com/ariadne-forge/ariadne-thread-cli.git",
     "directory": "packages/cli"
   },
-  "sideEffects": false,
   "bin": {
     "ariadne": "./dist/index.mjs"
   },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
-    }
-  },
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
   "files": [
     "dist"
   ],
