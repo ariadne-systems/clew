@@ -14,7 +14,7 @@
     "lint": "biome lint .",
     "format": "biome format --write .",
     "format:check": "biome format .",
-    "check:pkg": "pnpm -r exec publint && pnpm -r exec attw --pack . --profile esm-only",
+    "check:pkg": "pnpm -r exec publint && pnpm --filter @ariadne-thread/core --filter @ariadne-thread/gen-java --filter @ariadne-thread/gen-typescript exec attw --pack . --profile esm-only",
     "dev": "tsx packages/cli/src/index.ts"
   },
   "devDependencies": {
