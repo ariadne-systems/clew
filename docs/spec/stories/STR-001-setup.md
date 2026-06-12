@@ -10,7 +10,7 @@ The repository is empty.
 Before any traceability logic is written, the project needs a monorepo layout and a current Node toolchain.
 The tool is a language-neutral core with pluggable, per-language generators, distributed via npm under the `@ariadne-thread` scope.
 
-**Solution Approach (optional)**
+**Solution Approach**
 Use a pnpm workspace monorepo, TypeScript, ESM only.
 Node 22 LTS is the supported floor (engines `>=22`); develop against the current Node 24 LTS.
 Packages: `@ariadne-thread/core` (language-neutral), `@ariadne-thread/cli`, `@ariadne-thread/gen-java`, `@ariadne-thread/gen-typescript`.
@@ -60,5 +60,5 @@ Optional, if cheap
 
 **Out of scope**
 - No scanner, mint, resolver, index, or generator logic.
-- No architecture-boundary enforcement; the rule that keeps `core` free of language-specific generators is its own ticket, modeled as an ARCH requirement with its enforcement.
+- No architecture-boundary enforcement; the rule that keeps `core` free of language-specific generators is its own ticket, modeled as an ARCH spec with its enforcement.
 - No spec tokens or SRDD wiring; that comes in the next story.
