@@ -27,5 +27,8 @@
   },
   "scripts": {
     "build": "tsdown"
+  },
+  "dependencies": {
+    "proper-lockfile": "^4.1.2"
   }
 }
