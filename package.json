@@ -22,6 +22,7 @@
     "@biomejs/biome": "^2.4.16",
     "@changesets/cli": "^2.31.0",
     "@types/node": "^25.9.2",
+    "@types/proper-lockfile": "^4.1.4",
     "lefthook": "^2.1.9",
     "publint": "^0.3.21",
     "tsdown": "^0.22.2",
