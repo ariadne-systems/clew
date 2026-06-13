@@ -25,6 +25,12 @@ The core anchors ids language-neutrally.
 A language-specific generator materializes them as verifiable symbols.
 Existence is enforced by the target language's type-checker where one exists, and by a dedicated build check otherwise.
 
+## Code organization
+
+Domain entity types — the ENT elements of the domain model — live together in one module per package, `core/src/entities`, mirroring `domain-model.md`.
+Behaviour that operates on them (the store, services) lives in its own module and imports the entity types.
+This gives each domain entity one place in the code and a clear counterpart to anchor, and keeps behaviour separate from the shapes it works on.
+
 ## Runtime
 
 The scanner, generators, resolver, and CLI run on Node and ship via npm.
