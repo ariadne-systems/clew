@@ -4,6 +4,10 @@
     "pattern": "[A-Z]{2,4}-[0-9]{3}",
     "inlineForm": "[<ID>]"
   },
+  "idGeneration": {
+    "mode": "sequential",
+    "padding": 3
+  },
   "artifacts": [
     {
       "path": "docs/spec/architecture.md",
