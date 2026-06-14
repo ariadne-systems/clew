@@ -1,4 +1,16 @@
+export type {
+  IdGenerationConfig,
+  IdGenerationMode,
+} from "./config.js";
+export {
+  DEFAULT_CONFIG_FILE,
+  DEFAULT_PADDING,
+  readIdGenerationConfig,
+} from "./config.js";
 export type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
+export type { IdStrategy } from "./id-strategy.js";
+export type { MintOptions } from "./mint.js";
+export { mint } from "./mint.js";
 export type { WithStateOptions } from "./state.js";
 export { DEFAULT_STATE_FILE, withState } from "./state.js";
 
