@@ -6,3 +6,9 @@ coverage/
 
 # Editors
 .idea/
+
+# Claude Code (local, per-user)
+.claude/settings.local.json
+
+# Internal planning notes (not published)
+notes/
