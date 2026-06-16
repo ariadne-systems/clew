@@ -15,5 +15,5 @@ A temporary, opaque handle lets an agent draft and cross-reference artifacts wit
 **Verification Description**
 Minting type SW with a count of 3 in temporary mode yields three ids of the form `SW-TMP-<opaque>`.
 The three opaque suffixes within the call are all distinct.
-Each temporary id carries the reserved `-TMP-` marker and does not match the configured id token pattern.
+Each temporary id carries exactly one reserved `-TMP-` marker, which no bound id carries (CON-008), so it is never confused with a bound id.
 Cross-call uniqueness follows by construction from the crypto-random token; it is a property of the token, not asserted by drawing random tokens.
