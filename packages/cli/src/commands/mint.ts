@@ -7,7 +7,7 @@ import {
 import type { Command } from "commander";
 
 /**
- * Registers the `ariadne mint` command (STR-005).
+ * Registers the `ariadne mint` command surface (SW-008; STR-005, STR-007).
  * The action stays thin: it delegates allocation and validation to core's
  * `mint()` and prints each minted id on its own line to stdout (SW-003).
  * With `--tmp` it delegates to core's `mintTemporary()` for unbound ids that
