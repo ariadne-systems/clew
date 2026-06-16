@@ -11,6 +11,8 @@ export const ErrorCode = {
   INVALID_TYPE: "E_INVALID_TYPE",
   /** The state file could not be written. */
   STATE_WRITE_FAILED: "E_STATE_WRITE_FAILED",
+  /** The requested type uses the reserved temporary-id marker `TMP`. */
+  RESERVED_TYPE: "E_RESERVED_TYPE",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
