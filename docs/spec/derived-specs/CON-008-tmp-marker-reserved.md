@@ -1,24 +1,25 @@
 **Title**
-The `-TMP-` marker is reserved and the configured id token pattern must not admit it
+The `-TMP-` marker is reserved and a type may not use it
 
 **Type**: CON
 
 **Description**
-The `-TMP-` infix that separates a temporary id's prefix from its opaque suffix (`<TYPE>-TMP-<opaque>`) is a reserved marker.
-The configured id token pattern in `.ariadnerc.json` may never admit an id that carries this marker.
-The reservation is enforced when configuration is read: a pattern that would match a temporary id is rejected with an explicit error and a non-zero exit, before any id is minted.
-The reservation holds for every bound id scheme, sequential or opaque, present or future.
+`TMP` is a reserved marker: it is the infix that separates a temporary id's prefix from its opaque suffix (`<TYPE>-TMP-<opaque>`).
+A requested type may not equal the reserved marker, nor contain it as a hyphen-delimited segment.
+A type such as `TMP` or `MY-TMP` is rejected at mint time — in both the bound and the temporary path — with an explicit error and a non-zero exit, before any id is produced.
+A type that merely contains the letters, such as `TMPX`, is not reserved; only a whole `-`-delimited segment equal to the marker is.
+The reservation is on the type, not on the configured id token pattern; the pattern is the recognizer for ids in source and is left unrestricted.
 
 **Rationale**
-A temporary id's purpose is to be unmistakably *not* a bound id.
-If that distinction rested only on the default sequential pattern, a later opaque bound scheme — whose pattern would be widened to admit opaque suffixes — could silently start matching `<TYPE>-TMP-<opaque>`, and a temporary id would be mistaken for a bound one.
-Reserving the marker and forbidding any configured pattern from admitting it makes the distinction structural rather than contingent on the pattern in force, so it cannot be eroded by configuration.
-Rejecting the offending pattern at configuration-read time fails fast, before any id is produced under an unsafe pattern.
+A temporary id must be unmistakably *not* a bound id, in both directions.
+If a type could be `MY-TMP`, its bound id would be `MY-TMP-001` — which carries the `-TMP-` marker and would be misread as a temporary id; and its temporary id would be `MY-TMP-TMP-<opaque>`, which cannot be parsed back into prefix and suffix unambiguously.
+Reserving the marker on the type closes both: no bound id can ever carry the marker, and every temporary id carries exactly one, so the two are always distinguishable and a temporary id parses unambiguously.
+Enforcing this on the type — rather than by constraining the id token pattern — keeps the recognizer free to match every legitimate id, which is its purpose.
 
 **Verification Description**
-A configuration whose id token pattern would admit an id carrying the reserved `-TMP-` marker is rejected when configuration is read, with an explicit error and a non-zero exit, and no id is minted.
-A configuration whose pattern does not admit the marker is accepted, and minting proceeds normally.
-No temporary id matches an accepted configured pattern.
+Minting a type equal to the reserved marker (`TMP`), or one containing it as a segment (`MY-TMP`), is rejected with an explicit error and a non-zero exit, in both the bound and the temporary path, and no id is produced.
+A type that merely contains the letters but not as a whole segment (`TMPX`) is accepted.
+No bound id produced for an accepted type carries the `-TMP-` marker.
 
 ## Relations
 

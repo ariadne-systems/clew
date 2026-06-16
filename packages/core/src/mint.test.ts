@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, readFile, rmdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { ErrorCode, mint } from "./index.js";
+import { ErrorCode, mint, mintTemporary } from "./index.js";
 
 type Paths = { configFile: string; stateFile: string };
 
@@ -223,5 +223,123 @@ describe("type validation", () => {
     const ids = await mint("sw", 1, { configFile, stateFile });
 
     expect(ids).toEqual(["sw-001"]);
+  });
+});
+
+describe("temporary minting", () => {
+  test("mints N temporary ids of the form <TYPE>-TMP-<opaque>", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
+
+    const ids = await mintTemporary("SW", 3, { configFile, stateFile });
+
+    expect(ids).toHaveLength(3);
+    for (const id of ids) {
+      expect(id).toMatch(/^SW-TMP-[0-9a-f]+$/);
+    }
+  });
+
+  test("the opaque suffixes within a call are all distinct", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
+
+    const ids = await mintTemporary("SW", 5, { configFile, stateFile });
+
+    expect(new Set(ids).size).toBe(5);
+  });
+
+  test("temporary minting advances no sequence and writes no state file", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
+
+    await mintTemporary("SW", 3, { configFile, stateFile });
+
+    expect(existsSync(stateFile)).toBe(false);
+  });
+
+  test("temporary minting leaves an existing bound high-water mark unchanged", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
+    await mint("SW", 2, { configFile, stateFile });
+
+    await mintTemporary("SW", 3, { configFile, stateFile });
+
+    expect(await readHighWaterMark(stateFile, "SW")).toBe(2);
+    const next = await mint("SW", 1, { configFile, stateFile });
+    expect(next).toEqual(["SW-003"]);
+  });
+
+  test("a temporary id does not match the configured id token pattern", async () => {
+    const pattern = "[A-Z]{2,4}-[0-9]{3}";
+    const { configFile, stateFile } = await tempPaths({ padding: 3 }, pattern);
+
+    const ids = await mintTemporary("SW", 3, { configFile, stateFile });
+
+    const matcher = new RegExp(`^(?:${pattern})$`);
+    for (const id of ids) {
+      expect(matcher.test(id)).toBe(false);
+    }
+  });
+
+  test("a malformed type is rejected with code E_INVALID_TYPE and nothing is produced", async () => {
+    const { configFile, stateFile } = await tempPaths(
+      { padding: 3 },
+      "[A-Z]{2,4}-[0-9]{3}",
+    );
+
+    await expect(
+      mintTemporary("sw", 1, { configFile, stateFile }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.INVALID_TYPE,
+      message: expect.stringMatching(/not a valid id prefix/i),
+    });
+    expect(existsSync(stateFile)).toBe(false);
+  });
+
+  test("a non-positive count is rejected with code E_INVALID_COUNT", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
+
+    await expect(
+      mintTemporary("SW", 0, { configFile, stateFile }),
+    ).rejects.toMatchObject({ code: ErrorCode.INVALID_COUNT });
+  });
+});
+
+describe("reserved temporary marker", () => {
+  test("bound minting rejects a type equal to the reserved marker with code E_RESERVED_TYPE", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
+
+    await expect(
+      mint("TMP", 1, { configFile, stateFile }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.RESERVED_TYPE,
+      message: expect.stringMatching(/reserved/i),
+    });
+  });
+
+  test("temporary minting rejects a type equal to the reserved marker with code E_RESERVED_TYPE", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
+
+    await expect(
+      mintTemporary("TMP", 1, { configFile, stateFile }),
+    ).rejects.toMatchObject({ code: ErrorCode.RESERVED_TYPE });
+  });
+
+  test("a type containing the reserved marker as a segment is rejected", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
+
+    await expect(
+      mintTemporary("MY-TMP", 1, { configFile, stateFile }),
+    ).rejects.toMatchObject({ code: ErrorCode.RESERVED_TYPE });
+    await expect(
+      mint("MY-TMP", 1, { configFile, stateFile }),
+    ).rejects.toMatchObject({ code: ErrorCode.RESERVED_TYPE });
+  });
+
+  test("a type that merely contains the letters but not as a segment is accepted", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
+
+    const ids = await mintTemporary("TMPX", 2, { configFile, stateFile });
+
+    expect(ids).toHaveLength(2);
+    for (const id of ids) {
+      expect(id).toMatch(/^TMPX-TMP-[0-9a-f]+$/);
+    }
   });
 });
