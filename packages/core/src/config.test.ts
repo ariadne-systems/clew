@@ -1,8 +1,8 @@
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { expect, test } from "vitest";
-import { readIdGenerationConfig } from "./index.js";
+import { describe, expect, test } from "vitest";
+import { readIdGenerationConfig, readIdTokenPattern } from "./index.js";
 
 async function tempConfigFile(contents: unknown): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-config-"));
@@ -11,36 +11,58 @@ async function tempConfigFile(contents: unknown): Promise<string> {
   return file;
 }
 
-test("reads mode and padding from the idGeneration section", async () => {
-  const file = await tempConfigFile({
-    idGeneration: { mode: "sequential", padding: 4 },
+describe("readIdGenerationConfig", () => {
+  test("reads mode and padding from the idGeneration section", async () => {
+    const file = await tempConfigFile({
+      idGeneration: { mode: "sequential", padding: 4 },
+    });
+
+    const config = await readIdGenerationConfig(file);
+
+    expect(config).toEqual({ mode: "sequential", padding: 4 });
   });
 
-  const config = await readIdGenerationConfig(file);
+  test("recognises opaque mode", async () => {
+    const file = await tempConfigFile({ idGeneration: { mode: "opaque" } });
 
-  expect(config).toEqual({ mode: "sequential", padding: 4 });
+    const config = await readIdGenerationConfig(file);
+
+    expect(config.mode).toBe("opaque");
+  });
+
+  test("defaults to sequential mode and padding 3 when the section is absent", async () => {
+    const file = await tempConfigFile({ version: 1 });
+
+    const config = await readIdGenerationConfig(file);
+
+    expect(config).toEqual({ mode: "sequential", padding: 3 });
+  });
+
+  test("defaults a missing configuration file to sequential mode and padding 3", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "ariadne-config-"));
+
+    const config = await readIdGenerationConfig(join(dir, ".ariadnerc.json"));
+
+    expect(config).toEqual({ mode: "sequential", padding: 3 });
+  });
 });
 
-test("recognises opaque mode", async () => {
-  const file = await tempConfigFile({ idGeneration: { mode: "opaque" } });
+describe("readIdTokenPattern", () => {
+  test("reads the id token pattern from the idToken section", async () => {
+    const file = await tempConfigFile({
+      idToken: { pattern: "[A-Z]{2,4}-[0-9]{3}" },
+    });
 
-  const config = await readIdGenerationConfig(file);
+    const pattern = await readIdTokenPattern(file);
 
-  expect(config.mode).toBe("opaque");
-});
+    expect(pattern).toBe("[A-Z]{2,4}-[0-9]{3}");
+  });
 
-test("defaults to sequential mode and padding 3 when the section is absent", async () => {
-  const file = await tempConfigFile({ version: 1 });
+  test("returns undefined when no id token pattern is configured", async () => {
+    const file = await tempConfigFile({ version: 1 });
 
-  const config = await readIdGenerationConfig(file);
+    const pattern = await readIdTokenPattern(file);
 
-  expect(config).toEqual({ mode: "sequential", padding: 3 });
-});
-
-test("defaults a missing configuration file to sequential mode and padding 3", async () => {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-config-"));
-
-  const config = await readIdGenerationConfig(join(dir, ".ariadnerc.json"));
-
-  expect(config).toEqual({ mode: "sequential", padding: 3 });
+    expect(pattern).toBeUndefined();
+  });
 });
