@@ -6,6 +6,7 @@ export {
   DEFAULT_CONFIG_FILE,
   DEFAULT_PADDING,
   readIdGenerationConfig,
+  readIdTokenPattern,
 } from "./config.js";
 export type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
 export type { IdStrategy } from "./id-strategy.js";
