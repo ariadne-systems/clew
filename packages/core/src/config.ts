@@ -27,7 +27,7 @@ export type IdGenerationConfig = {
 export async function readIdGenerationConfig(
   file: string = DEFAULT_CONFIG_FILE,
 ): Promise<IdGenerationConfig> {
-  const idGeneration = await readIdGenerationSection(file);
+  const idGeneration = await readConfigSection(file, "idGeneration");
   const mode = idGeneration.mode === "opaque" ? "opaque" : DEFAULT_MODE;
   const padding =
     typeof idGeneration.padding === "number"
@@ -36,9 +36,21 @@ export async function readIdGenerationConfig(
   return { mode, padding };
 }
 
-async function readIdGenerationSection(
+/**
+ * Reads `idToken.pattern` from `.ariadnerc.json`, or `undefined` if no pattern
+ * is configured. Sourcing the pattern here keeps it out of the minting code (CON-005).
+ */
+export async function readIdTokenPattern(
+  file: string = DEFAULT_CONFIG_FILE,
+): Promise<string | undefined> {
+  const idToken = await readConfigSection(file, "idToken");
+  return typeof idToken.pattern === "string" ? idToken.pattern : undefined;
+}
+
+async function readConfigSection(
   file: string,
-): Promise<{ mode?: unknown; padding?: unknown }> {
+  section: string,
+): Promise<Record<string, unknown>> {
   let raw: string;
   try {
     raw = await readFile(file, "utf8");
@@ -49,8 +61,8 @@ async function readIdGenerationSection(
     throw error;
   }
   const parsed = JSON.parse(raw) as Record<string, unknown>;
-  const section = parsed.idGeneration;
-  return typeof section === "object" && section !== null
-    ? (section as { mode?: unknown; padding?: unknown })
+  const value = parsed[section];
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
     : {};
 }
