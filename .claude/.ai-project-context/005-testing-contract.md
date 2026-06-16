@@ -38,5 +38,6 @@ When it is, use Vitest's coverage with explicit thresholds; do not claim a gate 
 - No wall-clock time or randomness in assertions; control or inject them.
 - No uncontrolled network or environment access.
 - Test names describe expected behaviour, not internal calls.
+- Group related tests into `describe` suites by concern when feasible; name suites by behaviour, not by spec id (test-to-spec traceability is the annotation system's job).
 - Prefer observable behaviour over implementation details; avoid unnecessary mocking.
 - Relative imports in tests use the `.js` extension (NodeNext): `import { x } from "./x.js"`.
