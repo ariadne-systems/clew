@@ -2,6 +2,7 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import lockfile from "proper-lockfile";
 import type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
+import { AriadneError, ErrorCode } from "./errors.js";
 
 /** Default location of the committed state file. */
 export const DEFAULT_STATE_FILE = ".ariadne/state.json";
@@ -39,8 +40,16 @@ async function loadState(file: string): Promise<AriadneState> {
 
 async function saveState(file: string, state: AriadneState): Promise<void> {
   const tmp = `${file}.tmp`;
-  await writeFile(tmp, `${JSON.stringify(state, null, 2)}\n`, "utf8");
-  await rename(tmp, file);
+  try {
+    await writeFile(tmp, `${JSON.stringify(state, null, 2)}\n`, "utf8");
+    await rename(tmp, file);
+  } catch (error) {
+    throw new AriadneError(
+      ErrorCode.STATE_WRITE_FAILED,
+      `Failed to write the state file ${file}.`,
+      { cause: error },
+    );
+  }
 }
 
 /**

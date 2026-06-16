@@ -1,0 +1,14 @@
+<!-- Copyright © 2026 Ariadne Systems GmbH. All rights reserved. -->
+
+# Error codes
+
+`ariadne` reports a failure to standard error as `error[<CODE>]: <message>` and exits with a non-zero status (SW-004).
+
+The **code** is the stable identity of the failure (ARCH-002): automation should branch on the code, not on the message text.
+A released code is never reused for a different condition and never renamed (CON-006); the message may change between releases, the code does not.
+
+| Code | Meaning |
+| --- | --- |
+| `E_INVALID_COUNT` | The requested mint count is not a positive whole number. |
+| `E_INVALID_TYPE` | The requested type is not a valid id prefix under the configured id token pattern. |
+| `E_STATE_WRITE_FAILED` | The state file could not be written. |

@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, readFile, rmdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { mint } from "./index.js";
+import { ErrorCode, mint } from "./index.js";
 
 type Paths = { configFile: string; stateFile: string };
 
@@ -123,12 +123,15 @@ describe("strategy selection", () => {
 });
 
 describe("count validation", () => {
-  test("a non-positive count is rejected", async () => {
+  test("a non-positive count is rejected with code E_INVALID_COUNT", async () => {
     const { configFile, stateFile } = await tempPaths({ padding: 3 });
 
-    await expect(mint("SW", 0, { configFile, stateFile })).rejects.toThrow(
-      /positive integer/i,
-    );
+    await expect(
+      mint("SW", 0, { configFile, stateFile }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.INVALID_COUNT,
+      message: expect.stringMatching(/positive integer/i),
+    });
   });
 });
 
@@ -141,7 +144,9 @@ describe("persistence on save failure", () => {
     // cannot complete; the allocation advance is therefore never persisted.
     await mkdir(`${stateFile}.tmp`);
 
-    await expect(mint("SW", 3, { configFile, stateFile })).rejects.toThrow();
+    await expect(
+      mint("SW", 3, { configFile, stateFile }),
+    ).rejects.toMatchObject({ code: ErrorCode.STATE_WRITE_FAILED });
     expect(await readHighWaterMark(stateFile, "SW")).toBe(2);
   });
 
@@ -171,15 +176,18 @@ describe("type validation", () => {
     expect(ids).toEqual(["SW-001"]);
   });
 
-  test("a lowercase type is rejected and nothing is allocated", async () => {
+  test("a lowercase type is rejected with code E_INVALID_TYPE and nothing is allocated", async () => {
     const { configFile, stateFile } = await tempPaths(
       { padding: 3 },
       "[A-Z]{2,4}-[0-9]{3}",
     );
 
-    await expect(mint("sw", 1, { configFile, stateFile })).rejects.toThrow(
-      /not a valid id prefix/i,
-    );
+    await expect(
+      mint("sw", 1, { configFile, stateFile }),
+    ).rejects.toMatchObject({
+      code: ErrorCode.INVALID_TYPE,
+      message: expect.stringMatching(/not a valid id prefix/i),
+    });
     expect(existsSync(stateFile)).toBe(false);
   });
 
