@@ -1,4 +1,4 @@
-import { mint } from "@ariadne-thread/core";
+import { AriadneError, ErrorCode, mint } from "@ariadne-thread/core";
 import type { Command } from "commander";
 
 /**
@@ -17,7 +17,10 @@ export function registerMint(program: Command): void {
     .action(async (type: string, count: string) => {
       const requestedCount = Number(count);
       if (!Number.isInteger(requestedCount)) {
-        throw new Error(`count must be a whole number, got "${count}".`);
+        throw new AriadneError(
+          ErrorCode.INVALID_COUNT,
+          `count must be a whole number, got "${count}".`,
+        );
       }
       const ids = await mint(type, requestedCount);
       for (const id of ids) {
