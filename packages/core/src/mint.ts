@@ -1,5 +1,6 @@
 import type { IdGenerationConfig } from "./config.js";
 import { readIdGenerationConfig, readIdTokenPattern } from "./config.js";
+import { AriadneError, ErrorCode } from "./errors.js";
 import type { IdStrategy } from "./id-strategy.js";
 import { OpaqueIdStrategy } from "./opaque-id-strategy.js";
 import { SequentialIdStrategy } from "./sequential-id-strategy.js";
@@ -60,7 +61,8 @@ function assertTypeMatchesPattern(
   const candidate = `${type}-${String(1).padStart(padding, "0")}`;
   const matcher = new RegExp(`^(?:${tokenPattern})$`);
   if (!matcher.test(candidate)) {
-    throw new Error(
+    throw new AriadneError(
+      ErrorCode.INVALID_TYPE,
       `Type "${type}" is not a valid id prefix under the configured pattern ${tokenPattern}.`,
     );
   }
