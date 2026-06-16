@@ -9,6 +9,7 @@ export {
   readIdTokenPattern,
 } from "./config.js";
 export type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
+export { AriadneError, ErrorCode } from "./errors.js";
 export type { IdStrategy } from "./id-strategy.js";
 export type { MintOptions } from "./mint.js";
 export { mint } from "./mint.js";

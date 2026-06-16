@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import { buildProgram } from "./program.js";
+import { formatError } from "./report-error.js";
 
 buildProgram()
   .parseAsync(process.argv)
   .catch((error: unknown) => {
-    const message = error instanceof Error ? error.message : String(error);
-    process.stderr.write(`${message}\n`);
+    process.stderr.write(`${formatError(error)}\n`);
     process.exitCode = 1;
   });

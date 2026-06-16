@@ -1,3 +1,4 @@
+import { AriadneError, ErrorCode } from "./errors.js";
 import type { IdStrategy } from "./id-strategy.js";
 import { withState } from "./state.js";
 
@@ -23,7 +24,10 @@ export class SequentialIdStrategy implements IdStrategy {
 
   async mint(type: string, count: number): Promise<string[]> {
     if (!Number.isInteger(count) || count < 1) {
-      throw new Error(`Mint count must be a positive integer, got ${count}.`);
+      throw new AriadneError(
+        ErrorCode.INVALID_COUNT,
+        `Mint count must be a positive integer, got ${count}.`,
+      );
     }
     // Allocate inside the locked session; the high-water mark is persisted so a
     // number is never reused (SW-001, CON-002). withState saves before it

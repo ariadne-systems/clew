@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { ErrorCode } from "@ariadne-thread/core";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { buildProgram } from "../program.js";
 
@@ -65,31 +66,36 @@ describe("output", () => {
 });
 
 describe("invalid input", () => {
-  test("an invalid count fails and writes no id to stdout", async () => {
+  test("a non-positive count fails with code E_INVALID_COUNT and writes no id to stdout", async () => {
     await setupProjectDir();
     const stdout = captureStdout();
 
-    await expect(runAriadne("mint", "SW", "0")).rejects.toThrow();
+    await expect(runAriadne("mint", "SW", "0")).rejects.toMatchObject({
+      code: ErrorCode.INVALID_COUNT,
+    });
 
     expect(stdout()).toBe("");
   });
 
-  test("a non-numeric count is rejected with a specific error", async () => {
+  test("a non-numeric count is rejected with code E_INVALID_COUNT and a specific message", async () => {
     await setupProjectDir();
     const stdout = captureStdout();
 
-    await expect(runAriadne("mint", "SW", "abc")).rejects.toThrow(
-      /count must be a whole number/i,
-    );
+    await expect(runAriadne("mint", "SW", "abc")).rejects.toMatchObject({
+      code: ErrorCode.INVALID_COUNT,
+      message: expect.stringMatching(/count must be a whole number/i),
+    });
 
     expect(stdout()).toBe("");
   });
 
-  test("a malformed type is rejected and nothing is minted", async () => {
+  test("a malformed type is rejected with code E_INVALID_TYPE and nothing is minted", async () => {
     const dir = await setupProjectDir();
     const stdout = captureStdout();
 
-    await expect(runAriadne("mint", "sw")).rejects.toThrow();
+    await expect(runAriadne("mint", "sw")).rejects.toMatchObject({
+      code: ErrorCode.INVALID_TYPE,
+    });
 
     expect(stdout()).toBe("");
     expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
