@@ -1,7 +1,7 @@
 **Title**
 The mint command emits ids to stdout, one per line
 
-**Type**: SW
+**Lens**: SW
 
 **Description**
 When minting succeeds, the `ariadne mint` command writes each minted id on its own line to standard output, in allocation order, and writes nothing else to stdout.

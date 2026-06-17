@@ -1,7 +1,7 @@
 **Title**
 Ids are returned only after the allocation is persisted
 
-**Type**: CON
+**Lens**: CON
 
 **Description**
 A mint returns ids only after the advanced high-water mark has been durably saved.

@@ -1,7 +1,7 @@
 **Title**
 The tool exposes an `init` command that delegates to core
 
-**Type**: SW
+**Lens**: SW
 
 **Description**
 The tool exposes an `init` command, invoked as `ariadne init`, taking no positional arguments.

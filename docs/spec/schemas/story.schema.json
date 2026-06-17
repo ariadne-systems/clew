@@ -16,7 +16,7 @@
   "relations": {
     "section": "Relations",
     "types": {
-      "Realizes": { "required": false, "targets": ["STK", "SYS", "SW", "ARCH", "NF", "CON"] },
+      "Realizes": { "required": false },
       "Persists": { "required": false, "targets": ["ENT"] },
       "Reads": { "required": false, "targets": ["ENT"] }
     }

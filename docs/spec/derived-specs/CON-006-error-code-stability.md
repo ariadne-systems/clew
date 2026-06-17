@@ -1,7 +1,7 @@
 **Title**
 An error code is stable: never reused or renamed once released
 
-**Type**: CON
+**Lens**: CON
 
 **Description**
 Once an error code has been released it is never reused for a different condition and never renamed.

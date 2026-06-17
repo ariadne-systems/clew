@@ -1,7 +1,7 @@
 **Title**
 Errors are reported with their code
 
-**Type**: SW
+**Lens**: SW
 
 **Description**
 When a command fails, it writes the failure to standard error as `error[<CODE>]: <message>` and exits with a non-zero status.

@@ -1,7 +1,7 @@
 **Title**
 The tool reads project configuration from `.ariadnerc.json`
 
-**Type**: SW
+**Lens**: SW
 
 **Description**
 The tool reads its per-project configuration from a single file, `.ariadnerc.json`, at the project root.
