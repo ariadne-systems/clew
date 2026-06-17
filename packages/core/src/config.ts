@@ -1,4 +1,5 @@
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
+import { AriadneError, ErrorCode } from "./errors.js";
 
 /** Default location of the project configuration file. */
 export const DEFAULT_CONFIG_FILE = ".ariadnerc.json";
@@ -159,6 +160,38 @@ export async function readConfiguredPrefixes(
   prefixes.add(layout.stories.prefix);
   prefixes.add(layout.entities.prefix);
   return prefixes;
+}
+
+/** Whether a configuration file exists at `file`. */
+export async function configExists(
+  file: string = DEFAULT_CONFIG_FILE,
+): Promise<boolean> {
+  try {
+    await stat(file);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return false;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Asserts a project configuration is present (CON-011). When it is absent, fails
+ * with a stable code and directs the user to `ariadne setup`. This is the
+ * command-level precondition; the readers above still default an absent value
+ * within a present configuration.
+ */
+export async function requireConfig(
+  file: string = DEFAULT_CONFIG_FILE,
+): Promise<void> {
+  if (!(await configExists(file))) {
+    throw new AriadneError(
+      ErrorCode.NO_CONFIG,
+      `No configuration found at ${file}. Run \`ariadne setup\` to create one.`,
+    );
+  }
 }
 
 /** Reads and parses `.ariadnerc.json`; a missing file resolves to an empty config. */
