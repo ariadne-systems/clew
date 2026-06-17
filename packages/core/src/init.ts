@@ -1,13 +1,12 @@
+import type { Dirent } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
+import { readConfiguredPrefixes, readLayout } from "./config.js";
 import { withState } from "./state.js";
 
 export type InitOptions = {
-  /**
-   * Directory tree scanned for id-bearing artifact files (SW-006).
-   * Defaults to the current directory.
-   */
-  artifactsDir?: string;
+  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  configFile?: string;
   /** Path to the state file. Defaults to the StateStore default. */
   stateFile?: string;
 };
@@ -43,15 +42,18 @@ const IGNORED_DIRECTORIES = new Set([
 const BOUND_ID_IN_FILENAME = /^([A-Z]+)-(\d+)(?:[-.]|$)/;
 
 /**
- * Initializes the StateStore from existing artifacts (SW-006): discovers the
- * bound ids in the artifact tree, takes the highest number per prefix, and
- * reconciles those into the state's high-water marks. Reconciliation only ever
- * raises a mark, never lowers one (CON-009), so a number already allocated is
- * never handed out again, and re-initializing an unchanged project changes
- * nothing.
+ * Initializes the StateStore from existing artifacts (SW-006): scans the
+ * configured layout directories (ENT-002), takes the highest number per
+ * configured prefix, and reconciles those into the state's high-water marks.
+ * Only configured prefixes are counted, so non-lens files such as ADRs are
+ * ignored. Reconciliation only ever raises a mark, never lowers one (CON-009),
+ * so re-initializing an unchanged project changes nothing.
  */
 export async function init(options: InitOptions = {}): Promise<InitResult> {
-  const discovered = await discoverHighWaterMarks(options.artifactsDir ?? ".");
+  const layout = await readLayout(options.configFile);
+  const prefixes = await readConfiguredPrefixes(options.configFile);
+  const dirs = [layout.stories.dir, layout.derivedSpecs.dir];
+  const discovered = await discoverHighWaterMarks(dirs, prefixes);
   return withState((state) => reconcile(state.sequences, discovered), {
     file: options.stateFile,
   });
@@ -74,33 +76,50 @@ function reconcile(
   return { marks: { ...sequences }, raised };
 }
 
-/** Walks the artifact tree and returns the highest number seen per prefix (SW-006). */
+/**
+ * Walks the given artifact directories and returns the highest number seen per
+ * configured prefix (SW-006). A directory that does not exist is skipped, so a
+ * project missing one of its configured locations still initializes.
+ */
 async function discoverHighWaterMarks(
-  artifactsDir: string,
+  dirs: string[],
+  prefixes: Set<string>,
 ): Promise<Map<string, number>> {
   const maxByPrefix = new Map<string, number>();
-  await walkArtifacts(artifactsDir, maxByPrefix);
+  for (const dir of dirs) {
+    await walkArtifacts(dir, prefixes, maxByPrefix);
+  }
   return maxByPrefix;
 }
 
 async function walkArtifacts(
   dir: string,
+  prefixes: Set<string>,
   maxByPrefix: Map<string, number>,
 ): Promise<void> {
-  const entries = await readdir(dir, { withFileTypes: true });
+  let entries: Dirent[];
+  try {
+    entries = await readdir(dir, { withFileTypes: true });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return;
+    }
+    throw error;
+  }
   for (const entry of entries) {
     if (entry.isDirectory()) {
       if (!IGNORED_DIRECTORIES.has(entry.name)) {
-        await walkArtifacts(join(dir, entry.name), maxByPrefix);
+        await walkArtifacts(join(dir, entry.name), prefixes, maxByPrefix);
       }
     } else {
-      recordBoundId(entry.name, maxByPrefix);
+      recordBoundId(entry.name, prefixes, maxByPrefix);
     }
   }
 }
 
 function recordBoundId(
   filename: string,
+  prefixes: Set<string>,
   maxByPrefix: Map<string, number>,
 ): void {
   const match = BOUND_ID_IN_FILENAME.exec(filename);
@@ -108,7 +127,7 @@ function recordBoundId(
     return;
   }
   const [, prefix, digits] = match;
-  if (prefix === undefined || digits === undefined) {
+  if (prefix === undefined || digits === undefined || !prefixes.has(prefix)) {
     return;
   }
   const number = Number(digits);

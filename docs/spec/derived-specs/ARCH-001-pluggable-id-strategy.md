@@ -1,7 +1,7 @@
 **Title**
 Id generation is a config-selected, pluggable strategy
 
-**Type**: ARCH
+**Lens**: ARCH
 
 **Description**
 The scheme that generates an id's variable part is chosen by configuration and implemented behind a strategy interface.
@@ -16,3 +16,9 @@ Selecting by configuration, behind an interface, keeps the choice open and the c
 With sequential configured, minting yields sequential ids.
 Switching the configuration to opaque (once implemented) changes only the suffix scheme, with no change to the minting code.
 The minting code references no concrete strategy.
+
+## Relations
+
+**Concerns**
+
+- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)

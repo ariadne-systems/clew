@@ -1,7 +1,7 @@
 **Title**
 Errors are identified by a stable, typed code
 
-**Type**: ARCH
+**Lens**: ARCH
 
 **Description**
 A failure is represented by a typed error that carries a machine-readable code in addition to its human-readable message.

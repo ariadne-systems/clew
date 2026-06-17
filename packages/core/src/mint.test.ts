@@ -9,7 +9,7 @@ type Paths = { configFile: string; stateFile: string };
 
 async function tempPaths(
   idGeneration?: { mode?: string; padding?: number },
-  tokenPattern?: string,
+  lenses?: Array<{ id: string; description: string }>,
 ): Promise<Paths> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-mint-"));
   const configFile = join(dir, ".ariadnerc.json");
@@ -17,8 +17,8 @@ async function tempPaths(
   if (idGeneration) {
     config.idGeneration = idGeneration;
   }
-  if (tokenPattern !== undefined) {
-    config.idToken = { pattern: tokenPattern };
+  if (lenses !== undefined) {
+    config.lenses = lenses;
   }
   await writeFile(configFile, JSON.stringify(config), "utf8");
   return { configFile, stateFile: join(dir, "state.json") };
@@ -58,10 +58,10 @@ describe("sequential allocation", () => {
     const { configFile, stateFile } = await tempPaths({ padding: 3 });
 
     await mint("SW", 2, { configFile, stateFile });
-    const other = await mint("HW", 1, { configFile, stateFile });
+    const other = await mint("NF", 1, { configFile, stateFile });
 
-    expect(other).toEqual(["HW-001"]);
-    expect(await readHighWaterMark(stateFile, "HW")).toBe(1);
+    expect(other).toEqual(["NF-001"]);
+    expect(await readHighWaterMark(stateFile, "NF")).toBe(1);
   });
 
   test("a batch of N for a fresh prefix returns N consecutive ids", async () => {
@@ -164,49 +164,37 @@ describe("persistence on save failure", () => {
   });
 });
 
-describe("type validation", () => {
-  test("a type that is a valid prefix under the configured pattern mints", async () => {
-    const { configFile, stateFile } = await tempPaths(
-      { padding: 3 },
-      "[A-Z]{2,4}-[0-9]{3}",
-    );
+describe("prefix validation", () => {
+  test("a configured lens mints", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
 
     const ids = await mint("SW", 1, { configFile, stateFile });
 
     expect(ids).toEqual(["SW-001"]);
   });
 
-  test("a lowercase type is rejected with code E_INVALID_TYPE and nothing is allocated", async () => {
-    const { configFile, stateFile } = await tempPaths(
-      { padding: 3 },
-      "[A-Z]{2,4}-[0-9]{3}",
-    );
+  test("an unconfigured prefix is rejected with code E_INVALID_TYPE and nothing is allocated", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
 
     await expect(
       mint("sw", 1, { configFile, stateFile }),
     ).rejects.toMatchObject({
       code: ErrorCode.INVALID_TYPE,
-      message: expect.stringMatching(/not a valid id prefix/i),
+      message: expect.stringMatching(/not a configured prefix/i),
     });
     expect(existsSync(stateFile)).toBe(false);
   });
 
-  test("a type longer than the configured pattern allows is rejected", async () => {
-    const { configFile, stateFile } = await tempPaths(
-      { padding: 3 },
-      "[A-Z]{2,4}-[0-9]{3}",
-    );
+  test("a prefix outside the configured set is rejected", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
 
-    await expect(mint("TOOLONG", 1, { configFile, stateFile })).rejects.toThrow(
-      /not a valid id prefix/i,
+    await expect(mint("ZZZ", 1, { configFile, stateFile })).rejects.toThrow(
+      /not a configured prefix/i,
     );
   });
 
-  test("a rejected type leaves an existing high-water mark unchanged", async () => {
-    const { configFile, stateFile } = await tempPaths(
-      { padding: 3 },
-      "[A-Z]{2,4}-[0-9]{3}",
-    );
+  test("a rejected prefix leaves an existing high-water mark unchanged", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
     await mint("SW", 2, { configFile, stateFile });
 
     await expect(mint("sw", 1, { configFile, stateFile })).rejects.toThrow();
@@ -214,15 +202,14 @@ describe("type validation", () => {
     expect(await readHighWaterMark(stateFile, "SW")).toBe(2);
   });
 
-  test("changing the configured pattern changes which types are accepted", async () => {
-    const { configFile, stateFile } = await tempPaths(
-      { padding: 3 },
-      "[a-z]{2,4}-[0-9]{3}",
-    );
+  test("configuring a custom lens makes its prefix mintable", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 }, [
+      { id: "RISK", description: "A risk spec." },
+    ]);
 
-    const ids = await mint("sw", 1, { configFile, stateFile });
+    const ids = await mint("RISK", 1, { configFile, stateFile });
 
-    expect(ids).toEqual(["sw-001"]);
+    expect(ids).toEqual(["RISK-001"]);
   });
 });
 
@@ -265,29 +252,25 @@ describe("temporary minting", () => {
     expect(next).toEqual(["SW-003"]);
   });
 
-  test("a temporary id does not match the configured id token pattern", async () => {
-    const pattern = "[A-Z]{2,4}-[0-9]{3}";
-    const { configFile, stateFile } = await tempPaths({ padding: 3 }, pattern);
+  test("a temporary id carries the reserved marker and is not a bound-id form", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
 
     const ids = await mintTemporary("SW", 3, { configFile, stateFile });
 
-    const matcher = new RegExp(`^(?:${pattern})$`);
     for (const id of ids) {
-      expect(matcher.test(id)).toBe(false);
+      expect(id).toMatch(/^SW-TMP-[0-9a-f]+$/);
+      expect(id).not.toMatch(/^SW-\d+$/);
     }
   });
 
-  test("a malformed type is rejected with code E_INVALID_TYPE and nothing is produced", async () => {
-    const { configFile, stateFile } = await tempPaths(
-      { padding: 3 },
-      "[A-Z]{2,4}-[0-9]{3}",
-    );
+  test("an unconfigured prefix is rejected with code E_INVALID_TYPE and nothing is produced", async () => {
+    const { configFile, stateFile } = await tempPaths({ padding: 3 });
 
     await expect(
       mintTemporary("sw", 1, { configFile, stateFile }),
     ).rejects.toMatchObject({
       code: ErrorCode.INVALID_TYPE,
-      message: expect.stringMatching(/not a valid id prefix/i),
+      message: expect.stringMatching(/not a configured prefix/i),
     });
     expect(existsSync(stateFile)).toBe(false);
   });
@@ -333,7 +316,9 @@ describe("reserved temporary marker", () => {
   });
 
   test("a type that merely contains the letters but not as a segment is accepted", async () => {
-    const { configFile, stateFile } = await tempPaths({ padding: 3 });
+    const { configFile, stateFile } = await tempPaths({ padding: 3 }, [
+      { id: "TMPX", description: "A TMPX spec." },
+    ]);
 
     const ids = await mintTemporary("TMPX", 2, { configFile, stateFile });
 

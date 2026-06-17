@@ -1,7 +1,7 @@
 **Title**
 State access is mutually exclusive across processes
 
-**Type**: NF
+**Lens**: NF
 
 **Description**
 Only one process may hold an open state session at a time.
