@@ -19,7 +19,7 @@ Its shape grows only by adding new sections; existing sections are never changed
 | --- | --- | --- |
 | `sequences` | `Map<Prefix, Integer>` | The highest number already allocated for each id prefix. A prefix absent from the map has allocated nothing yet. |
 
-`Prefix` is a `String` id prefix (for example `STR`, `STK`) matching the configured id pattern.
+`Prefix` is a `String` id prefix (for example `STR`, `SW`) — a configured prefix: a lens id, or the story or entity prefix (ENT-002).
 
 ### ENT-002 Configuration
 

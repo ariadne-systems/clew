@@ -1,10 +1,10 @@
 **Title**
 Mint temporary, unbound ids
 
-**Type**: SW
+**Lens**: SW
 
 **Description**
-In temporary mode, minting a type produces ids of the form `<TYPE>-TMP-<opaque>`, where the opaque part is a crypto-random token.
+In temporary mode, minting for a prefix produces ids of the form `<PREFIX>-TMP-<opaque>`, where the opaque part is a crypto-random token.
 Minting a count of N yields N temporary ids.
 The opaque suffix makes each temporary id unique without any central coordination, so temporary ids generated independently do not collide.
 

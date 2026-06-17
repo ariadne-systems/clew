@@ -1,7 +1,7 @@
 **Title**
 The numeric padding is configured in `.ariadnerc.json`
 
-**Type**: CON
+**Lens**: CON
 
 **Description**
 The width to which sequential numbers are zero-padded is read from `.ariadnerc.json`.
@@ -16,3 +16,9 @@ The padding belongs in the project's configuration so that ids are consistent an
 With a configured width of 3, the number 7 renders as `007`.
 Changing the configured width changes the rendering accordingly.
 No padding width is hard-coded in the minting code.
+
+## Relations
+
+**Concerns**
+
+- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
