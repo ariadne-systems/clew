@@ -10,6 +10,7 @@ A released code is never reused for a different condition and never renamed (CON
 | Code | Meaning |
 | --- | --- |
 | `E_INVALID_COUNT` | The requested mint count is not a positive whole number. |
-| `E_INVALID_TYPE` | The requested type is not a valid id prefix under the configured id token pattern. |
+| `E_INVALID_TYPE` | The requested prefix is not a configured prefix (a lens id, or the story/entity prefix). |
 | `E_STATE_WRITE_FAILED` | The state file could not be written. |
 | `E_RESERVED_TYPE` | The requested type uses the reserved temporary-id marker `TMP` as a `-`-delimited segment. |
+| `E_NO_CONFIG` | No project configuration was found; run `ariadne setup` to create one. |

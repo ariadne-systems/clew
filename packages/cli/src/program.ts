@@ -2,6 +2,7 @@ import { Command } from "commander";
 import pkg from "../package.json" with { type: "json" };
 import { registerInit } from "./commands/init.js";
 import { registerMint } from "./commands/mint.js";
+import { registerSetup } from "./commands/setup.js";
 
 // Builds the root `ariadne` command. This is the single place where
 // subcommands are registered as they are added (STR-003+).
@@ -20,6 +21,7 @@ export function buildProgram(): Command {
       program.outputHelp();
     });
 
+  registerSetup(program);
   registerMint(program);
   registerInit(program);
 
