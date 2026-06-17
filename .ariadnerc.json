@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "idToken": {
+    "pattern": "[A-Z]{2,4}-[0-9]{3}",
+    "inlineForm": "[<ID>]"
+  },
+  "idGeneration": {
+    "mode": "sequential",
+    "padding": 3
+  },
+  "artifacts": [
+    {
+      "path": "docs/spec/architecture.md",
+      "traceableTypes": ["ARCH", "CON"]
+    },
+    {
+      "path": "docs/spec/domain-model.md",
+      "traceableTypes": ["ENT"]
+    },
+    {
+      "path": "docs/spec/derived-specs/*.md",
+      "traceableTypes": ["STK", "SYS", "SW", "ARCH", "NF", "CON"],
+      "schema": "docs/spec/schemas/derived-spec.schema.json"
+    },
+    {
+      "path": "docs/spec/stories/*.md",
+      "schema": "docs/spec/schemas/story.schema.json"
+    }
+  ],
+  "index": {
+    "path": "docs/spec/traceables.index.json"
+  },
+  "generators": ["typescript", "java"],
+  "jira": {
+    "referenceField": "Traceables",
+    "validateReferencesAgainstIndex": true
+  }
+}

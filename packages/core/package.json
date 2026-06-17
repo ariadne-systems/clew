@@ -1,0 +1,34 @@
+{
+  "name": "@ariadne-thread/core",
+  "version": "0.0.0",
+  "description": "Language-neutral core for ariadne-thread: traceables, ids, index, hashing, and resolution.",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "author": "Ariadne Systems GmbH",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/ariadne-forge/ariadne-thread-cli.git",
+    "directory": "packages/core"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "proper-lockfile": "^4.1.2"
+  }
+}

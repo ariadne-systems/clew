@@ -1,0 +1,25 @@
+{
+  "id": {
+    "pattern": "(?<id>(?<prefix>STR)-(?<number>\\d{3}))-.*\\.md",
+    "components": {
+      "prefix": { "enum": ["STR"] }
+    }
+  },
+  "fields": {
+    "Title": { "required": true },
+    "Business Value": { "required": true },
+    "Problem / Context": { "required": true },
+    "Solution Approach": { "required": false },
+    "Acceptance Criteria": { "required": true },
+    "Out of scope": { "required": false }
+  },
+  "relations": {
+    "section": "Relations",
+    "types": {
+      "Realizes": { "required": false, "targets": ["STK", "SYS", "SW", "ARCH", "NF", "CON"] },
+      "Persists": { "required": false, "targets": ["ENT"] },
+      "Reads": { "required": false, "targets": ["ENT"] }
+    }
+  },
+  "validation": { "onError": "fail" }
+}
