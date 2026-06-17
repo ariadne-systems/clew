@@ -8,6 +8,12 @@ description: Draft a story and the specs it needs in an ariadne project — choo
 Draft a story and the specs it needs, using ariadne to allocate ids, and write them as reviewable drafts.
 This is the authoring workflow: it produces drafts with **temporary** ids and stops for review; it binds real ids and moves drafts into the spec tree only when the user approves promotion.
 
+## What a lens is
+
+A **lens** is a kind of spec — a viewpoint the system is described through: a software behaviour (`SW`), a constraint (`CON`), an architecture decision (`ARCH`), and so on.
+A project declares its lenses in `.ariadnerc.json`, each with an `id` and a one-line `description`; the `id` is also the prefix of the ids minted for that kind (lens `SW` → `SW-001`, `SW-002`, …).
+Read the configured lenses and their descriptions to know what each means in this project.
+
 ## When to use
 
 - The user wants to draft or author a new story and its specs.
@@ -51,10 +57,10 @@ For each lens you intend to use, confirm you can derive it:
 ## Procedure
 
 1. **Understand the work item** — what the story is and why it matters. Ask the user where the description is unclear.
-2. **Choose the lenses** — decide which specs the story needs (for example an `SW` for a behaviour, a `CON` for an invariant, an `ENT` for a new domain shape). Use only configured lenses.
-3. **Temp-mint the ids** — run `ariadne mint --tmp <LENS>` for the story's own prefix and for each spec. Temporary ids are stateless, so order and repetition are safe.
-4. **Write the drafts** — into the configured drafts location, mirroring the spec tree (a stories area and a derived-specs area; an entity draft is a domain-model section, to be merged on promotion). Use the temporary ids, cross-reference specs by id, and follow the project's existing specs as the template (and any schema the project defines for the required fields).
-5. **Stop for review** — present the drafts and the ids used; do not promote or commit.
+2. **Draft the story first** — temp-mint the story id (`ariadne mint --tmp <story-prefix>`) and write the story draft (title, business value, problem/context, solution approach, acceptance criteria, out of scope) into the configured drafts location.
+3. **Build the context** — run the `ariadne-context` skill against the draft story. It maps the existing specs the story relates to, what it may affect or supersede, and the gaps it should fill, so the specs you write next are grounded in the corpus rather than invented in isolation.
+4. **Create the specs** — using that context, decide which specs the story needs (only configured lenses), temp-mint each (`ariadne mint --tmp <LENS>`), and write them into the drafts location, mirroring the spec tree (a derived-specs area; an entity draft is a domain-model section, to be merged on promotion). Cross-reference by id, wire the relations the context surfaced (what each realizes or concerns, and links to the related existing specs), and follow the project's existing specs as the template.
+5. **Stop for review** — present the drafts, the ids used, and the context findings (related specs, supersession/conflict candidates), so the user sees how the new work sits in the corpus. Do not promote or commit.
 
 ## Deriving through each lens
 
