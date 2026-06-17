@@ -7,7 +7,7 @@ The tool reads project configuration from `.ariadnerc.json`
 The tool reads its per-project configuration from a single file, `.ariadnerc.json`, at the project root.
 Every configurable value has a documented default; a missing file, a missing section, or a missing attribute resolves to that default.
 The sections are independent: an absent or malformed section does not affect the resolution of the others.
-No configurable value is hard-coded in the behaviour that consumes it — each is sourced from this file (the shape of the configuration is ENT-TMP-f0fdcb421a).
+No configurable value is hard-coded in the behaviour that consumes it — each is sourced from this file (the shape of the configuration is ENT-002).
 
 **Rationale**
 A single, version-controlled configuration file gives the team one place to set how the tool behaves, and keeps that choice out of the code.
@@ -22,4 +22,4 @@ A value absent from one section does not change another section's resolution.
 
 **Concerns**
 
-- ENT-TMP-f0fdcb421a — Configuration
+- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
