@@ -19,7 +19,7 @@
     "mint": "tsx packages/cli/src/index.ts mint",
     "changeset": "changeset",
     "changeset:version": "changeset version",
-    "release": "pnpm build && changeset publish"
+    "release": "pnpm build && changeset publish && changeset tag"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.3",
