@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import pkg from "../package.json" with { type: "json" };
+import { registerInit } from "./commands/init.js";
 import { registerMint } from "./commands/mint.js";
 
 // Builds the root `ariadne` command. This is the single place where
@@ -20,6 +21,7 @@ export function buildProgram(): Command {
     });
 
   registerMint(program);
+  registerInit(program);
 
   return program;
 }

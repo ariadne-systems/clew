@@ -11,6 +11,8 @@ export {
 export type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
 export { AriadneError, ErrorCode } from "./errors.js";
 export type { IdStrategy } from "./id-strategy.js";
+export type { InitOptions, InitResult, RaisedMark } from "./init.js";
+export { init } from "./init.js";
 export type { MintOptions } from "./mint.js";
 export { mint, mintTemporary } from "./mint.js";
 export type { WithStateOptions } from "./state.js";
