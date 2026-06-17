@@ -13,6 +13,8 @@ export const ErrorCode = {
   STATE_WRITE_FAILED: "E_STATE_WRITE_FAILED",
   /** The requested type uses the reserved temporary-id marker `TMP`. */
   RESERVED_TYPE: "E_RESERVED_TYPE",
+  /** No project configuration was found; the command directs the user to `setup`. */
+  NO_CONFIG: "E_NO_CONFIG",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

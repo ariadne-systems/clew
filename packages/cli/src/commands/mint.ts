@@ -3,6 +3,7 @@ import {
   ErrorCode,
   mint,
   mintTemporary,
+  requireConfig,
 } from "@ariadne-thread/core";
 import type { Command } from "commander";
 
@@ -23,6 +24,7 @@ export function registerMint(program: Command): void {
     .argument("[count]", "how many ids to mint", "1")
     .option("-t, --tmp", "mint temporary, unbound ids that touch no state")
     .action(async (type: string, count: string, options: { tmp?: boolean }) => {
+      await requireConfig();
       const requestedCount = Number(count);
       if (!Number.isInteger(requestedCount)) {
         throw new AriadneError(
