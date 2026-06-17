@@ -16,7 +16,10 @@
     "format:check": "biome format .",
     "check:pkg": "pnpm -r exec publint && pnpm --filter @ariadne-thread/core --filter @ariadne-thread/gen-java --filter @ariadne-thread/gen-typescript exec attw --pack . --profile esm-only",
     "dev": "tsx packages/cli/src/index.ts",
-    "mint": "tsx packages/cli/src/index.ts mint"
+    "mint": "tsx packages/cli/src/index.ts mint",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.3",

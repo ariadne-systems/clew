@@ -37,6 +37,7 @@ workflow:
 stages:
   - build
   - verify
+  - release
 
 build:
   stage: build
@@ -76,3 +77,32 @@ package-checks:
   needs: ["build"]
   script:
     - pnpm check:pkg
+
+# Publish changed packages to the GitLab Package Registry and push their git
+# tags, on main only.
+# Versions are bumped locally with `pnpm changeset:version` and committed; when
+# that lands on main this job runs `changeset publish` (publishes only the
+# versions not already on the registry — a no-op on commits that bumped nothing)
+# and creates one git tag per published package, which it then pushes back.
+# It has no `needs`, so it waits for the whole verify stage to pass first.
+#
+# Registry auth uses the CI job token. Pushing tags needs more: provide a
+# project (or group) access token with the `write_repository` scope as the
+# masked CI variable RELEASE_TOKEN, and ensure it may create tags (not blocked
+# by protected-tag rules).
+release:
+  stage: release
+  interruptible: false
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
+  script:
+    - |
+      {
+        echo "@ariadne-thread:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/"
+        echo "${CI_API_V4_URL#https:}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}"
+      } > .npmrc
+    - git config user.email "release-bot@ariadne-thread"
+    - git config user.name "ariadne release"
+    - git remote set-url origin "https://oauth2:${RELEASE_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+    - pnpm release
+    - git push origin --tags
