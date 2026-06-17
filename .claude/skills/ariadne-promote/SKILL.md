@@ -9,6 +9,11 @@ Promote reviewed drafts into the approved spec corpus.
 Promotion is two things, and the first is the important one: **integrate** the new story and specs into the existing body of specs, then **finalize** them with bound ids in the spec tree.
 Do not treat this as a file move — a new story can change what existing specs mean.
 
+## What a lens is
+
+A **lens** is a kind of spec — a viewpoint the system is described through: a software behaviour (`SW`), a constraint (`CON`), an architecture decision (`ARCH`), and so on.
+A project declares its lenses in `.ariadnerc.json`, each with an `id` and a one-line `description`; the `id` is also the prefix of the ids minted for that kind (lens `SW` → `SW-001`, `SW-002`, …).
+
 ## When to use
 
 - The user has reviewed drafts (see the `ariadne-draft` skill) and approves promoting them.
@@ -37,16 +42,15 @@ Confirm the invocation and command surface with `ariadne --help` and `ariadne <c
 Collect the drafts to promote — the pending drafts in the configured drafts location, or the specific ones the user named.
 Read the project's configuration for the layout (where stories, derived specs, and the domain model live) and the lenses, so you know where each draft belongs and which prefixes are valid.
 
-### 2. Integrate — reason about the corpus (the part only an agent can do)
+### 2. Integrate — reconcile with the corpus (the part only an agent can do)
 
-Read the existing specs and work out what the new story and specs mean for the whole:
+First, make sure the corpus context exists.
+If it was already built while drafting (the `ariadne-context` skill), reuse it; if not, build it now with `ariadne-context`.
+It maps what the new story and specs relate to, what they may supersede or make obsolete, what they may conflict with, and whether any draft merely duplicates an existing spec.
 
-- **Relations** — which existing specs the new ones relate to: what each new spec realizes or concerns, and which existing specs should now reference the new ones. Plan the cross-references in both directions.
-- **Supersession / obsolescence** — whether a new spec replaces or makes an existing one obsolete. Do not retire anything silently; propose it and confirm with the user.
-- **Conflicts** — whether a new spec contradicts an existing one. Stop and resolve the conflict with the user before promoting; do not promote a contradiction into the corpus.
-- **Duplication** — whether a draft restates something that already exists; if so, it may not need promoting at all.
-
-Present these findings and proposed edits (to the drafts and to any affected existing specs) and get the user's confirmation. This reconciliation is the point of promotion.
+Then act on that context: present the proposed relations and the supersession, conflict, and duplication candidates, with the edits they imply — to the drafts and to any affected existing specs — and get the user's confirmation.
+Do not retire or change an existing spec silently, and do not promote a contradiction or a duplicate into the corpus.
+This reconciliation is the point of promotion.
 
 ### 3. Finalize — bind and move (mechanical)
 
