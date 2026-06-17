@@ -5,6 +5,7 @@ export type {
   Lens,
 } from "./config.js";
 export {
+  configExists,
   DEFAULT_CONFIG_FILE,
   DEFAULT_LAYOUT,
   DEFAULT_LENSES,
@@ -13,6 +14,7 @@ export {
   readIdGenerationConfig,
   readLayout,
   readLenses,
+  requireConfig,
 } from "./config.js";
 export type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
 export { AriadneError, ErrorCode } from "./errors.js";
@@ -21,6 +23,8 @@ export type { InitOptions, InitResult, RaisedMark } from "./init.js";
 export { init } from "./init.js";
 export type { MintOptions } from "./mint.js";
 export { mint, mintTemporary } from "./mint.js";
+export type { SetupOptions, SetupResult } from "./setup.js";
+export { setup } from "./setup.js";
 export type { WithStateOptions } from "./state.js";
 export { DEFAULT_STATE_FILE, withState } from "./state.js";
 

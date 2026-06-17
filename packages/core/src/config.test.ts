@@ -4,10 +4,12 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import {
   DEFAULT_LENSES,
+  ErrorCode,
   readConfiguredPrefixes,
   readIdGenerationConfig,
   readLayout,
   readLenses,
+  requireConfig,
 } from "./index.js";
 
 async function tempConfigFile(contents: unknown): Promise<string> {
@@ -128,5 +130,22 @@ describe("readConfiguredPrefixes", () => {
     expect(prefixes.has("STR")).toBe(true);
     expect(prefixes.has("ENT")).toBe(true);
     expect(prefixes.has("HW")).toBe(false);
+  });
+});
+
+describe("requireConfig", () => {
+  test("throws E_NO_CONFIG and points to setup when no configuration exists", async () => {
+    await expect(
+      requireConfig(await missingConfigFile()),
+    ).rejects.toMatchObject({
+      code: ErrorCode.NO_CONFIG,
+      message: expect.stringMatching(/setup/i),
+    });
+  });
+
+  test("resolves when a configuration exists", async () => {
+    const file = await tempConfigFile({ version: 1 });
+
+    await expect(requireConfig(file)).resolves.toBeUndefined();
   });
 });

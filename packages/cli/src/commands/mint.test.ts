@@ -145,3 +145,17 @@ describe("temporary mode", () => {
     expect(stdout()).toBe("");
   });
 });
+
+describe("configuration required", () => {
+  test("mint fails with code E_NO_CONFIG when no configuration is present", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-mint-noconfig-"));
+    process.chdir(dir);
+    const stdout = captureStdout();
+
+    await expect(runAriadne("mint", "SW")).rejects.toMatchObject({
+      code: ErrorCode.NO_CONFIG,
+    });
+
+    expect(stdout()).toBe("");
+  });
+});
