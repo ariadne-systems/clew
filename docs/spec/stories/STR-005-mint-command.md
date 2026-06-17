@@ -45,5 +45,6 @@ This story adds `src/commands/mint.ts` and wires it in one line in `program.ts` 
 
 **Realizes**
 
+- [SW-008 — The tool exposes a `mint` command that delegates to core](../derived-specs/SW-008-mint-command.md)
 - [SW-003 — The mint command emits ids to stdout, one per line](../derived-specs/SW-003-mint-command-output.md)
 - [CON-005 — A minted id's prefix must match the configured id token pattern](../derived-specs/CON-005-id-matches-configured-pattern.md)

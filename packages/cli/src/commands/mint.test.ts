@@ -101,3 +101,47 @@ describe("invalid input", () => {
     expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
   });
 });
+
+describe("temporary mode", () => {
+  test("mint --tmp prints temporary ids, one per line", async () => {
+    await setupProjectDir();
+    const stdout = captureStdout();
+
+    await runAriadne("mint", "--tmp", "SW", "3");
+
+    const lines = stdout().trimEnd().split("\n");
+    expect(lines).toHaveLength(3);
+    for (const line of lines) {
+      expect(line).toMatch(/^SW-TMP-[0-9a-f]+$/);
+    }
+  });
+
+  test("the short form -t mints a temporary id", async () => {
+    await setupProjectDir();
+    const stdout = captureStdout();
+
+    await runAriadne("mint", "-t", "SW");
+
+    expect(stdout()).toMatch(/^SW-TMP-[0-9a-f]+\n$/);
+  });
+
+  test("temporary minting writes no state file", async () => {
+    const dir = await setupProjectDir();
+    captureStdout();
+
+    await runAriadne("mint", "-t", "SW", "2");
+
+    expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
+  });
+
+  test("a malformed type is rejected with code E_INVALID_TYPE in temporary mode and nothing is minted", async () => {
+    await setupProjectDir();
+    const stdout = captureStdout();
+
+    await expect(runAriadne("mint", "-t", "sw")).rejects.toMatchObject({
+      code: ErrorCode.INVALID_TYPE,
+    });
+
+    expect(stdout()).toBe("");
+  });
+});
