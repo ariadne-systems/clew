@@ -1,10 +1,10 @@
 **Title**
 Mint ids in sequential mode
 
-**Type**: SW
+**Lens**: SW
 
 **Description**
-In sequential mode, minting a type produces ids of the form `<PREFIX>-<number>`.
+In sequential mode, minting for a prefix produces ids of the form `<PREFIX>-<number>`.
 The numbers are obtained from the sequence allocator and rendered with the configured padding.
 Minting a count of N yields N ids for the prefix.
 
@@ -12,7 +12,7 @@ Minting a count of N yields N ids for the prefix.
 This is the readable sequential id scheme, suited to solo or low-contention repositories where a running number is preferable to an opaque suffix.
 
 **Verification Description**
-Minting type SW with a count of 3 from a fresh state yields SW-001, SW-002, SW-003 at the default padding of 3.
+Minting prefix SW with a count of 3 from a fresh state yields SW-001, SW-002, SW-003 at the default padding of 3.
 The underlying numbers come from the allocator and are never reused.
 
 ## Relations

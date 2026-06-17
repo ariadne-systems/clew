@@ -1,7 +1,7 @@
 **Title**
 The tool's state is a single version-controlled file
 
-**Type**: CON
+**Lens**: CON
 
 **Description**
 The tool keeps its persistent state in one JSON file inside the repository, committed to version control.
