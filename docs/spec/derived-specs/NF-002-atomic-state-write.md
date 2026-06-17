@@ -1,7 +1,7 @@
 **Title**
 A state write is atomic
 
-**Type**: NF
+**Lens**: NF
 
 **Description**
 Saving the state either fully succeeds or leaves the previous file intact.

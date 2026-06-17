@@ -1,7 +1,7 @@
 **Title**
 The tool exposes a `mint` command that delegates to core
 
-**Type**: SW
+**Lens**: SW
 
 **Description**
 The tool exposes a `mint` command, invoked as `ariadne mint <type> [count]`, where `count` is optional and defaults to 1.

@@ -1,13 +1,10 @@
 {
   "id": {
-    "pattern": "(?<id>(?<prefix>[A-Z]{2,4})-(?<number>\\d{3}))-.*\\.md",
-    "components": {
-      "prefix": { "enum": ["STK", "SYS", "SW", "ARCH", "NF", "CON"] }
-    }
+    "pattern": "(?<id>(?<prefix>[A-Z]{2,4})-(?<number>\\d{3}))-.*\\.md"
   },
   "fields": {
     "Title": { "required": true },
-    "Type": { "required": true, "enum": ["STK", "SYS", "SW", "ARCH", "NF", "CON"] },
+    "Lens": { "required": true },
     "Description": { "required": true },
     "Rationale": { "required": true },
     "Verification Description": { "required": true }

@@ -1,7 +1,7 @@
 **Title**
 A sequence number is never reused
 
-**Type**: CON
+**Lens**: CON
 
 **Description**
 Once a number has been allocated for a prefix it is never allocated again — across separate invocations, after a restart, and over the lifetime of the repository.
