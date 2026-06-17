@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { ErrorCode } from "@ariadne-thread/core";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { buildProgram } from "../program.js";
 
@@ -90,5 +91,16 @@ describe("init invalid invocation", () => {
     expect(() =>
       program.parse(["node", "ariadne", "init", "--bogus"]),
     ).toThrow();
+  });
+});
+
+describe("configuration required", () => {
+  test("init fails with code E_NO_CONFIG when no configuration is present", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-init-noconfig-"));
+    process.chdir(dir);
+
+    await expect(runAriadne("init")).rejects.toMatchObject({
+      code: ErrorCode.NO_CONFIG,
+    });
   });
 });

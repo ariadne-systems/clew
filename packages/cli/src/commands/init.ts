@@ -1,4 +1,4 @@
-import { init } from "@ariadne-thread/core";
+import { init, requireConfig } from "@ariadne-thread/core";
 import type { Command } from "commander";
 
 /**
@@ -14,6 +14,7 @@ export function registerInit(program: Command): void {
     .description("Initialize the StateStore from existing artifacts.")
     .allowExcessArguments(false)
     .action(async () => {
+      await requireConfig();
       const { raised } = await init();
       if (raised.length === 0) {
         process.stdout.write(
