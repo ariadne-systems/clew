@@ -45,6 +45,8 @@ The set of configured prefixes is the single source of truth for id validity, so
 | `layout.entities` | `{ file: String, prefix: String }` | The domain-model file and the entity prefix. Defaults to `{ "docs/spec/domain-model.md", "ENT" }`. |
 | `layout.drafts` | `{ dir: String }` | Where unapproved drafts live (mirrors the spec tree). Defaults to `docs/spec/drafts`. |
 | `layout.state` | `{ file: String }` | The StateStore file (CON-001). Defaults to `.ariadne/state.json`. |
+| `specSets` | `List<{ name: String, pattern: String }>` | Named spec sets, each matched by a regular expression over the spec id; one symbol set is generated per set (SW-015). Optional; with none configured, the default is one set per lens. One set may be marked the catch-all for otherwise-unmatched traceables (CON-013). |
+| `ignore` | `List<String>` | Regular expressions over the spec id; a matching traceable is excluded from every spec set and produces no symbol (CON-013). Optional. |
 
 ## View
 
