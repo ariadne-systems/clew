@@ -17,3 +17,5 @@ A released code is never reused for a different condition and never renamed (CON
 | `E_UNKNOWN_GENERATOR` | The configuration names a generator that is not registered; remove it from `generators` or install a generator that provides it. |
 | `E_SPEC_SET_OVERLAP` | A traceable matches more than one configured spec set; adjust the patterns so each spec matches exactly one set. |
 | `E_SPEC_SET_UNMATCHED` | A traceable matches no configured spec set; add a matching set, an `ignore` pattern, or a catch-all set. |
+| `E_DRAFT_NOT_FOUND` | A draft named for `promote` was not found among the pending drafts. |
+| `E_ENTITY_DRAFT_UNSUPPORTED` | An entity draft cannot be finalized by `promote`; merge it into the domain model by hand. |

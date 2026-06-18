@@ -33,6 +33,12 @@ export type { InitOptions, InitResult, RaisedMark } from "./init.js";
 export { init } from "./init.js";
 export type { MintOptions } from "./mint.js";
 export { mint, mintTemporary } from "./mint.js";
+export type {
+  PromotedDraft,
+  PromoteOptions,
+  PromoteResult,
+} from "./promote.js";
+export { promote } from "./promote.js";
 export type { ScanOptions } from "./scan.js";
 export { scan } from "./scan.js";
 export type { SetupOptions, SetupResult } from "./setup.js";
