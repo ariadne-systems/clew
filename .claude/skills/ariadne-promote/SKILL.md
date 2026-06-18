@@ -57,7 +57,7 @@ This reconciliation is the point of promotion.
 Once integration is confirmed:
 
 1. **Bind the ids** — `ariadne mint <LENS>` (without `--tmp`) for each draft; this allocates the real id and advances the state. The lens is the temporary id's prefix.
-2. **Substitute** every temporary id with its bound id everywhere it appears — the drafts' bodies, their cross-references, the agreed references in existing specs, and the filenames.
+2. **Substitute every resolved temporary id project-wide.** A temporary id is globally unique, so replace every occurrence of that exact id with its bound id across the *whole* project — the promoted drafts' bodies and filenames, references in already-promoted specs and the domain model, **and references in any other drafts that remain unpromoted**. This is what keeps a draft that references a promoted story (but is not promoted in the same batch) pointing at the resolved id rather than a dangling temporary one. Do not limit the replace to the drafts being promoted together.
 3. **Move** each draft into its place in the spec tree per the layout; merge an entity draft into the domain model as a section rather than a standalone file.
 4. **Apply** the confirmed edits to affected existing specs (new relations, supersession notes).
 
