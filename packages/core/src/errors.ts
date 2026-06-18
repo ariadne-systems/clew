@@ -21,6 +21,10 @@ export const ErrorCode = {
   SPEC_SET_OVERLAP: "E_SPEC_SET_OVERLAP",
   /** A traceable matches no configured spec set and no ignore pattern. */
   SPEC_SET_UNMATCHED: "E_SPEC_SET_UNMATCHED",
+  /** A named draft to promote was not found among the pending drafts. */
+  DRAFT_NOT_FOUND: "E_DRAFT_NOT_FOUND",
+  /** An entity draft cannot be finalized by `promote`; merge it into the domain model by hand. */
+  ENTITY_DRAFT_UNSUPPORTED: "E_ENTITY_DRAFT_UNSUPPORTED",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

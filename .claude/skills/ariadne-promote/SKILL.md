@@ -31,7 +31,7 @@ Confirm the invocation and command surface with `ariadne --help` and `ariadne <c
 
 ## What you must not do
 
-- Do not bind ids or move files until the integration below is settled — integration may reveal a draft should change or not be promoted, and temporary ids let that happen without burning real numbers.
+- Do not run `ariadne promote` (it binds ids and moves files) until the integration below is settled — integration may reveal a draft should change or not be promoted, and temporary ids let that happen without burning real numbers.
 - Do not silently rewrite, retire, or delete existing specs. Surface every proposed change and confirm it with the user.
 - Do not commit. Leave commits to the user, and tell them the state file advanced.
 
@@ -52,14 +52,20 @@ Then act on that context: present the proposed relations and the supersession, c
 Do not retire or change an existing spec silently, and do not promote a contradiction or a duplicate into the corpus.
 This reconciliation is the point of promotion.
 
-### 3. Finalize — bind and move (mechanical)
+### 3. Finalize — run `ariadne promote` (mechanical)
 
-Once integration is confirmed:
+Once integration is confirmed, run `ariadne promote` to finalize the drafts; it does the mechanical work deterministically, so you do not bind ids, substitute, or move files by hand:
 
-1. **Bind the ids** — `ariadne mint <LENS>` (without `--tmp`) for each draft; this allocates the real id and advances the state. The lens is the temporary id's prefix.
-2. **Substitute every resolved temporary id project-wide.** A temporary id is globally unique, so replace every occurrence of that exact id with its bound id across the *whole* project — the promoted drafts' bodies and filenames, references in already-promoted specs and the domain model, **and references in any other drafts that remain unpromoted**. This is what keeps a draft that references a promoted story (but is not promoted in the same batch) pointing at the resolved id rather than a dangling temporary one. Do not limit the replace to the drafts being promoted together.
-3. **Move** each draft into its place in the spec tree per the layout; merge an entity draft into the domain model as a section rather than a standalone file.
-4. **Apply** the confirmed edits to affected existing specs (new relations, supersession notes).
+- it **binds** a real id for each draft by minting the draft's lens — the temporary id's prefix — advancing the state;
+- it **substitutes** every resolved temporary id project-wide, across the spec tree and the drafts location, including references in already-promoted specs, the domain model, and any draft that remains unpromoted — so a draft that referenced a promoted one points at the resolved id rather than a dangling temporary one;
+- it **moves** each draft into its place in the spec tree per the layout, renamed to its bound id.
+
+Invoke it for the drafts you confirmed: `ariadne promote` finalizes all pending drafts, or `ariadne promote <id|path>…` only the named ones. It reports each temporary-id → bound-id mapping.
+
+Two things it does not do, which stay with you after it runs:
+
+1. **Apply** the confirmed integration edits to affected existing specs (new relations, supersession notes) — that is judgment, not mechanics.
+2. **Merge an entity draft** into the domain model — `promote` finalizes stories and derived specs (file moves); an entity draft is a content merge you make by hand, and `promote` refuses it rather than misplacing it.
 
 ### 4. Report
 

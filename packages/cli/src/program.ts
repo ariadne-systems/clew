@@ -2,6 +2,7 @@ import { Command } from "commander";
 import pkg from "../package.json" with { type: "json" };
 import { registerInit } from "./commands/init.js";
 import { registerMint } from "./commands/mint.js";
+import { registerPromote } from "./commands/promote.js";
 import { registerSetup } from "./commands/setup.js";
 import { registerSpec } from "./commands/spec.js";
 
@@ -26,6 +27,7 @@ export function buildProgram(): Command {
   registerMint(program);
   registerSetup(program);
   registerSpec(program);
+  registerPromote(program);
 
   return program;
 }
