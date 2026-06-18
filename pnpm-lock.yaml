@@ -47,6 +47,12 @@ importers:
       '@ariadne-thread/core':
         specifier: workspace:*
         version: link:../core
+      '@ariadne-thread/gen-java':
+        specifier: workspace:*
+        version: link:../gen-java
+      '@ariadne-thread/gen-typescript':
+        specifier: workspace:*
+        version: link:../gen-typescript
       commander:
         specifier: ^15.0.0
         version: 15.0.0

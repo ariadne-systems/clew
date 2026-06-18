@@ -14,3 +14,4 @@ A released code is never reused for a different condition and never renamed (CON
 | `E_STATE_WRITE_FAILED` | The state file could not be written. |
 | `E_RESERVED_TYPE` | The requested type uses the reserved temporary-id marker `TMP` as a `-`-delimited segment. |
 | `E_NO_CONFIG` | No project configuration was found; run `ariadne setup` to create one. |
+| `E_UNKNOWN_GENERATOR` | The configuration names a generator that is not registered; remove it from `generators` or install a generator that provides it. |

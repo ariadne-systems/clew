@@ -15,6 +15,8 @@ export const ErrorCode = {
   RESERVED_TYPE: "E_RESERVED_TYPE",
   /** No project configuration was found; the command directs the user to `setup`. */
   NO_CONFIG: "E_NO_CONFIG",
+  /** The configuration names a generator that is not registered. */
+  UNKNOWN_GENERATOR: "E_UNKNOWN_GENERATOR",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

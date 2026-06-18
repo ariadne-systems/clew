@@ -162,6 +162,22 @@ export async function readConfiguredPrefixes(
   return prefixes;
 }
 
+/**
+ * Reads the `generators` section: the language generators to run, by name
+ * (SW-014). Each name is resolved to a concrete generator outside the core, so
+ * the core never depends on a concrete generator (ARCH-003). A missing section
+ * yields an empty list — nothing to generate.
+ */
+export async function readGenerators(
+  file: string = DEFAULT_CONFIG_FILE,
+): Promise<string[]> {
+  const raw = (await readRawConfig(file)).generators;
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.filter((name): name is string => typeof name === "string");
+}
+
 /** Whether a configuration file exists at `file`. */
 export async function configExists(
   file: string = DEFAULT_CONFIG_FILE,
