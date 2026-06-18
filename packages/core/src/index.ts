@@ -11,6 +11,7 @@ export {
   DEFAULT_LENSES,
   DEFAULT_PADDING,
   readConfiguredPrefixes,
+  readGenerators,
   readIdGenerationConfig,
   readLayout,
   readLenses,
@@ -18,13 +19,25 @@ export {
 } from "./config.js";
 export type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
 export { AriadneError, ErrorCode } from "./errors.js";
+export type {
+  GeneratedFile,
+  Generator,
+  SpecSet,
+  Traceable,
+} from "./generator.js";
 export type { IdStrategy } from "./id-strategy.js";
 export type { InitOptions, InitResult, RaisedMark } from "./init.js";
 export { init } from "./init.js";
 export type { MintOptions } from "./mint.js";
 export { mint, mintTemporary } from "./mint.js";
+export type { ScanOptions } from "./scan.js";
+export { scan } from "./scan.js";
 export type { SetupOptions, SetupResult } from "./setup.js";
 export { setup } from "./setup.js";
+export type { GeneratorReport, SpecOptions, SpecResult } from "./spec.js";
+export { spec } from "./spec.js";
+export type { SpecSetMatcher } from "./spec-set.js";
+export { groupIntoSpecSets, lensMatchers } from "./spec-set.js";
 export type { WithStateOptions } from "./state.js";
 export { DEFAULT_STATE_FILE, withState } from "./state.js";
 
