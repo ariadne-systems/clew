@@ -56,6 +56,18 @@ export const DEFAULT_LENSES: readonly Lens[] = [
   },
 ];
 
+/**
+ * A configured spec set: a named grouping selected by a regular expression over
+ * a spec's filename (SW-015, ENT-002). One set may be flagged the `catchAll`,
+ * which collects traceables that match no other set's pattern (CON-013); a
+ * catch-all needs no pattern of its own.
+ */
+export type SpecSetMatcher = {
+  name: string;
+  pattern?: string;
+  catchAll?: boolean;
+};
+
 /** Where each kind of artifact lives, and the structural-kind prefixes (ENT-002). */
 export type Layout = {
   stories: { dir: string; prefix: string };
@@ -176,6 +188,46 @@ export async function readGenerators(
     return [];
   }
   return raw.filter((name): name is string => typeof name === "string");
+}
+
+/**
+ * Reads the `specSets` section: the configured spec-set matchers, in order
+ * (SW-015). Each entry carries a `name`, an optional `pattern` (a regex over the
+ * filename), and an optional `catchAll` flag. A missing or empty section yields
+ * an empty list, which the `spec` command reads as "group by lens" (the default).
+ */
+export async function readSpecSets(
+  file: string = DEFAULT_CONFIG_FILE,
+): Promise<SpecSetMatcher[]> {
+  const raw = (await readRawConfig(file)).specSets;
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw
+    .map(asObject)
+    .filter((set) => typeof set.name === "string")
+    .map((set) => ({
+      name: set.name as string,
+      ...(typeof set.pattern === "string" ? { pattern: set.pattern } : {}),
+      ...(set.catchAll === true ? { catchAll: true } : {}),
+    }));
+}
+
+/**
+ * Reads the `ignore` section: regular expressions over a spec's filename whose
+ * matching traceables are excluded from every spec set (CON-013). A missing
+ * section yields an empty list — nothing is excluded.
+ */
+export async function readIgnore(
+  file: string = DEFAULT_CONFIG_FILE,
+): Promise<string[]> {
+  const raw = (await readRawConfig(file)).ignore;
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.filter(
+    (pattern): pattern is string => typeof pattern === "string",
+  );
 }
 
 /** Whether a configuration file exists at `file`. */

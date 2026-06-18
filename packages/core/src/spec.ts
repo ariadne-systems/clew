@@ -1,6 +1,12 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { readGenerators, readLenses } from "./config.js";
+import type { SpecSetMatcher } from "./config.js";
+import {
+  readGenerators,
+  readIgnore,
+  readLenses,
+  readSpecSets,
+} from "./config.js";
 import { AriadneError, ErrorCode } from "./errors.js";
 import type { GeneratedFile, Generator } from "./generator.js";
 import { scan } from "./scan.js";
@@ -48,8 +54,9 @@ export type SpecResult = {
 export async function spec(options: SpecOptions): Promise<SpecResult> {
   const outputDir = options.outputDir ?? ".";
   const traceables = await scan({ configFile: options.configFile });
-  const lenses = await readLenses(options.configFile);
-  const specSets = groupIntoSpecSets(traceables, lensMatchers(lenses));
+  const matchers = await resolveMatchers(options.configFile);
+  const ignorePatterns = await readIgnore(options.configFile);
+  const specSets = groupIntoSpecSets(traceables, matchers, ignorePatterns);
   const generatorNames = await readGenerators(options.configFile);
 
   const reports: GeneratorReport[] = [];
@@ -67,6 +74,20 @@ export async function spec(options: SpecOptions): Promise<SpecResult> {
     specSetCount: specSets.length,
     generators: reports,
   };
+}
+
+/**
+ * Resolves the spec-set matchers: the configured `specSets` when a project
+ * declares them, otherwise the default one-set-per-lens matchers (SW-015).
+ */
+async function resolveMatchers(
+  configFile: string | undefined,
+): Promise<SpecSetMatcher[]> {
+  const configured = await readSpecSets(configFile);
+  if (configured.length > 0) {
+    return configured;
+  }
+  return lensMatchers(await readLenses(configFile));
 }
 
 /**
