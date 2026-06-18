@@ -43,14 +43,14 @@ This story builds the **skeleton** — the command, the scan, the generator inte
 - "Utility" is the **anchoring means**: the helpers, type-constrained to the generated traceables, that let code mark a type, value, or test against a spec id (the equivalent of annotations). The generator emits both the traceables and this utility.
 - The command is **`spec`** (short). It is the *declare* side — specs → traceables + utility; a separate, later command is the *check* side — it scans the code locations and builds coverage and drift. The two names stay distinct on purpose.
 - This story builds the **skeleton only**: the command, the scan, the generator interface, and the generators as skeleton implementations — no complete generator, and **no language-specific spec**.
-- The generated symbols are organized into **spec sets** — one symbol set (enum) per set, not a single flat union. A spec set is a *configured* grouping of traceables (a matcher over the spec id), with grouping by **lens** as the default. The frame here is kept set-aware: each traceable carries its id and lens, and the generator interface passes them grouped and emits one set per spec set. Defining the spec sets — the matchers, exclusion, and partition rules — is the follow-on story `STR-TMP-02ed64ae4e`; this story does not build that, but does not preclude it.
+- The generated symbols are organized into **spec sets** — one symbol set (enum) per set, not a single flat union. A spec set is a *configured* grouping of traceables (a matcher over the spec id), with grouping by **lens** as the default. The frame here is kept set-aware: each traceable carries its id and lens, and the generator interface passes them grouped and emits one set per spec set. Defining the spec sets — the matchers, exclusion, and partition rules — is the follow-on story `STR-012`; this story does not build that, but does not preclude it.
 
 **Out of scope**
 - The committed index (id → locator + content hash) and resolution — a related but separate capability (ADR-0001 D4).
 - The reverse-direction completeness check, implemented-but-not-declared (ADR-0001 D6) — its own concern.
 - Content-hash drift checking — depends on the index.
 - The full shape of each generator's Java/TypeScript output beyond the interface contract and a first working emission; generator-specific detail can be iterated.
-- Defining spec sets — the matchers, exclusion (ignore) patterns, and partition/completeness rules — is the follow-on story `STR-TMP-02ed64ae4e`. The frame here is set-aware (traceables carry their id and lens; the generator emits one set per spec set), so it is not precluded.
+- Defining spec sets — the matchers, exclusion (ignore) patterns, and partition/completeness rules — is the follow-on story `STR-012`. The frame here is set-aware (traceables carry their id and lens; the generator emits one set per spec set), so it is not precluded.
 
 ## Relations
 
