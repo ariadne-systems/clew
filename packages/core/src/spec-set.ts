@@ -1,22 +1,6 @@
-import type { Lens } from "./config.js";
+import type { Lens, SpecSetMatcher } from "./config.js";
+import { AriadneError, ErrorCode } from "./errors.js";
 import type { SpecSet, Traceable } from "./generator.js";
-
-/**
- * A named grouping of traceables, selected by a regular expression over the
- * spec id. Grouping by lens — the default — is just one matcher per lens (see
- * `lensMatchers`), so the same mechanism handles any grouping. The configurable
- * matchers, exclusion (`ignore`) patterns, and partition rules are the follow-on
- * story (STR-012) and are not built here.
- */
-export interface SpecSetMatcher {
-  readonly name: string;
-  /**
-   * Regular-expression source matched against the spec's filename. The filename
-   * carries the descriptive slug (e.g. `SW-012-command.md`), so a matcher can
-   * select on more than the lens prefix the id alone exposes.
-   */
-  readonly pattern: string;
-}
 
 /**
  * The default matchers: one per configured lens, each selecting that lens's
@@ -32,40 +16,92 @@ export function lensMatchers(lenses: readonly Lens[]): SpecSetMatcher[] {
   }));
 }
 
+type CompiledMatcher = {
+  name: string;
+  test: RegExp;
+};
+
 /**
- * Groups traceables into spec sets by matcher (SW-013): a traceable joins the
- * set of the first matcher whose pattern matches its filename. Empty sets are
- * dropped, and both the sets and their members are sorted, so the grouping is
- * deterministic and the generated output reproducible (CON-012). Overlap,
- * unmatched, and `ignore` rules are defined by the follow-on story (STR-012) and
- * are not enforced here; with the default lens matchers every scanned traceable
- * carries a lens and so matches exactly one set.
+ * Groups traceables into spec sets by matcher (SW-015): a traceable joins the
+ * set whose pattern matches its filename. The sets partition the traceables
+ * (CON-013):
+ *
+ * - a traceable matching an `ignore` pattern is excluded from every set;
+ * - a traceable matching more than one set is an overlap error;
+ * - a traceable matching no set joins the `catchAll` set if one is configured,
+ *   otherwise it is an unmatched error.
+ *
+ * Nothing is grouped into two sets or dropped silently. Empty sets are omitted,
+ * and both the sets and their members are sorted, so the output is deterministic
+ * and reproducible (CON-012). With the default lens matchers every scanned
+ * traceable carries a lens and so matches exactly one set.
  */
 export function groupIntoSpecSets(
   traceables: readonly Traceable[],
   matchers: readonly SpecSetMatcher[],
+  ignorePatterns: readonly string[] = [],
 ): SpecSet[] {
-  const compiled = matchers.map((matcher) => ({
-    name: matcher.name,
-    test: new RegExp(matcher.pattern),
-  }));
+  const ignore = ignorePatterns.map((pattern) => new RegExp(pattern));
+  const catchAllName = matchers.find((matcher) => matcher.catchAll)?.name;
+  const normal = compileNormalMatchers(matchers);
+
   const membersByName = new Map<string, Traceable[]>();
   for (const traceable of traceables) {
-    const matched = compiled.find((matcher) =>
-      matcher.test.test(traceable.filename),
-    );
-    if (matched !== undefined) {
-      appendMember(membersByName, matched.name, traceable);
+    if (!ignore.some((pattern) => pattern.test(traceable.filename))) {
+      appendMember(
+        membersByName,
+        resolveSet(traceable, normal, catchAllName),
+        traceable,
+      );
     }
   }
-  return [...membersByName.entries()]
-    .map(([name, members]) => ({
-      name,
-      traceables: members.sort((left, right) =>
-        left.id.localeCompare(right.id),
-      ),
-    }))
-    .sort((left, right) => left.name.localeCompare(right.name));
+  return toSortedSpecSets(membersByName);
+}
+
+/** Compiles the non-catch-all matchers; a catch-all needs no pattern (CON-013). */
+function compileNormalMatchers(
+  matchers: readonly SpecSetMatcher[],
+): CompiledMatcher[] {
+  const compiled: CompiledMatcher[] = [];
+  for (const matcher of matchers) {
+    if (!matcher.catchAll && matcher.pattern !== undefined) {
+      compiled.push({ name: matcher.name, test: new RegExp(matcher.pattern) });
+    }
+  }
+  return compiled;
+}
+
+/**
+ * Resolves the single set a traceable belongs to, enforcing the partition
+ * (CON-013): overlap and unmatched are explicit errors, and an unmatched
+ * traceable joins the catch-all set when one is configured.
+ */
+function resolveSet(
+  traceable: Traceable,
+  normal: readonly CompiledMatcher[],
+  catchAllName: string | undefined,
+): string {
+  const matched = normal.filter((matcher) =>
+    matcher.test.test(traceable.filename),
+  );
+  if (matched.length > 1) {
+    const names = matched.map((matcher) => matcher.name).join(", ");
+    throw new AriadneError(
+      ErrorCode.SPEC_SET_OVERLAP,
+      `Spec ${traceable.id} (${traceable.filename}) matches more than one spec set: ${names}. Adjust the patterns so each spec matches exactly one set.`,
+    );
+  }
+  const [single] = matched;
+  if (single !== undefined) {
+    return single.name;
+  }
+  if (catchAllName !== undefined) {
+    return catchAllName;
+  }
+  throw new AriadneError(
+    ErrorCode.SPEC_SET_UNMATCHED,
+    `Spec ${traceable.id} (${traceable.filename}) matches no spec set. Add a matching set, an \`ignore\` pattern, or a catch-all set.`,
+  );
 }
 
 function appendMember(
@@ -79,6 +115,18 @@ function appendMember(
   } else {
     members.push(traceable);
   }
+}
+
+/** Renders the grouped members as spec sets, sorted by name then id (CON-012). */
+function toSortedSpecSets(membersByName: Map<string, Traceable[]>): SpecSet[] {
+  return [...membersByName.entries()]
+    .map(([name, members]) => ({
+      name,
+      traceables: members.sort((left, right) =>
+        left.id.localeCompare(right.id),
+      ),
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name));
 }
 
 /** Escapes a literal string for safe use inside a regular expression. */

@@ -7,8 +7,10 @@ import {
   ErrorCode,
   readConfiguredPrefixes,
   readIdGenerationConfig,
+  readIgnore,
   readLayout,
   readLenses,
+  readSpecSets,
   requireConfig,
 } from "./index.js";
 
@@ -130,6 +132,40 @@ describe("readConfiguredPrefixes", () => {
     expect(prefixes.has("STR")).toBe(true);
     expect(prefixes.has("ENT")).toBe(true);
     expect(prefixes.has("HW")).toBe(false);
+  });
+});
+
+describe("readSpecSets", () => {
+  test("reads the configured spec sets in order, with patterns and catch-all", async () => {
+    const file = await tempConfigFile({
+      specSets: [
+        { name: "security", pattern: "secur" },
+        { name: "rest", catchAll: true },
+      ],
+    });
+
+    const specSets = await readSpecSets(file);
+
+    expect(specSets).toEqual([
+      { name: "security", pattern: "secur" },
+      { name: "rest", catchAll: true },
+    ]);
+  });
+
+  test("returns an empty list when no specSets are configured", async () => {
+    expect(await readSpecSets(await missingConfigFile())).toEqual([]);
+  });
+});
+
+describe("readIgnore", () => {
+  test("reads the configured ignore patterns", async () => {
+    const file = await tempConfigFile({ ignore: ["draft", "scratch"] });
+
+    expect(await readIgnore(file)).toEqual(["draft", "scratch"]);
+  });
+
+  test("returns an empty list when no ignore patterns are configured", async () => {
+    expect(await readIgnore(await missingConfigFile())).toEqual([]);
   });
 });
 

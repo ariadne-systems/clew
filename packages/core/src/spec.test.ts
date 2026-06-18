@@ -11,10 +11,12 @@ type Fixture = {
 };
 
 // Lays out a spec tree, a config pointing `layout` at it and listing
-// `generators`, and an output directory for the generated files.
+// `generators`, and an output directory for the generated files. Extra config
+// (such as `specSets` or `ignore`) can be merged in.
 async function fixture(
   idFilenames: string[],
   generators: string[],
+  extraConfig: Record<string, unknown> = {},
 ): Promise<Fixture> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-spec-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
@@ -34,6 +36,7 @@ async function fixture(
         derivedSpecs: { dir: derivedDir },
       },
       generators,
+      ...extraConfig,
     }),
     "utf8",
   );
@@ -161,5 +164,68 @@ describe("spec generation", () => {
     await expect(
       spec({ configFile, outputDir, resolveGenerator: () => undefined }),
     ).rejects.toMatchObject({ code: ErrorCode.UNKNOWN_GENERATOR });
+  });
+});
+
+describe("configured spec sets", () => {
+  test("groups by the configured specSets instead of by lens", async () => {
+    const { configFile, outputDir } = await fixture(
+      ["SW-012-command.md", "SW-013-scan.md", "CON-012-owned.md"],
+      ["fake"],
+      {
+        specSets: [
+          { name: "commands", pattern: "command" },
+          { name: "rest", catchAll: true },
+        ],
+      },
+    );
+    const { generator, received } = recordingGenerator("fake");
+
+    await spec({
+      configFile,
+      outputDir,
+      resolveGenerator: () => generator,
+    });
+
+    expect(received()?.map((specSet) => specSet.name)).toEqual([
+      "commands",
+      "rest",
+    ]);
+  });
+
+  test("an ignore pattern excludes matching specs from generation", async () => {
+    const { configFile, outputDir } = await fixture(
+      ["SW-012-a.md", "SW-013-draft.md"],
+      ["fake"],
+      { ignore: ["draft"] },
+    );
+    const { generator, received } = recordingGenerator("fake");
+
+    const result = await spec({
+      configFile,
+      outputDir,
+      resolveGenerator: () => generator,
+    });
+
+    expect(result.traceableCount).toBe(2);
+    expect(received()).toEqual([
+      {
+        name: "SW",
+        traceables: [{ id: "SW-012", lens: "SW", filename: "SW-012-a.md" }],
+      },
+    ]);
+  });
+
+  test("surfaces an unmatched traceable as E_SPEC_SET_UNMATCHED", async () => {
+    const { configFile, outputDir } = await fixture(
+      ["SW-012-a.md", "CON-012-b.md"],
+      ["fake"],
+      { specSets: [{ name: "sw", pattern: "^SW-" }] },
+    );
+    const { generator } = recordingGenerator("fake");
+
+    await expect(
+      spec({ configFile, outputDir, resolveGenerator: () => generator }),
+    ).rejects.toMatchObject({ code: ErrorCode.SPEC_SET_UNMATCHED });
   });
 });
