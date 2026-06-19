@@ -1,4 +1,5 @@
 export type {
+  GeneratorConfig,
   IdGenerationConfig,
   IdGenerationMode,
   Layout,
@@ -23,12 +24,15 @@ export {
 export type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
 export { AriadneError, ErrorCode } from "./errors.js";
 export type {
+  GenerateContext,
   GeneratedFile,
   Generator,
   SpecSet,
   Traceable,
 } from "./generator.js";
+export { GENERATED_MARKER, generatedHeader } from "./generator.js";
 export type { IdStrategy } from "./id-strategy.js";
+export { toIdentifier, toMemberName, toPascalCase } from "./identifiers.js";
 export type { InitOptions, InitResult, RaisedMark } from "./init.js";
 export { init } from "./init.js";
 export type { MintOptions } from "./mint.js";

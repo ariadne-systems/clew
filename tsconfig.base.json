@@ -6,6 +6,7 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strict": true,
+    "experimentalDecorators": true,
     "isolatedDeclarations": true,
     "verbatimModuleSyntax": true,
     "declaration": true,

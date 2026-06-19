@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import type { Generator, SpecSet } from "./index.js";
-import { ErrorCode, spec } from "./index.js";
+import { ErrorCode, GENERATED_MARKER, spec } from "./index.js";
 
 type Fixture = {
   configFile: string;
@@ -52,6 +52,7 @@ function recordingGenerator(name: string): {
   let received: SpecSet[] | undefined;
   const generator: Generator = {
     name,
+    defaultOutputDir: ".",
     generate(specSets) {
       received = specSets.map((specSet) => ({
         name: specSet.name,
@@ -98,7 +99,9 @@ describe("spec generation", () => {
     ]);
     expect(result.traceableCount).toBe(3);
     expect(result.specSetCount).toBe(2);
-    expect(result.generators).toEqual([{ name: "fake", files: ["fake.txt"] }]);
+    expect(result.generators).toEqual([
+      { name: "fake", outputDir: ".", files: ["fake.txt"] },
+    ]);
   });
 
   test("writes each generated file under the output root", async () => {
@@ -227,5 +230,31 @@ describe("configured spec sets", () => {
     await expect(
       spec({ configFile, outputDir, resolveGenerator: () => generator }),
     ).rejects.toMatchObject({ code: ErrorCode.SPEC_SET_UNMATCHED });
+  });
+});
+
+describe("pruning stale output", () => {
+  test("removes a previously-generated file that is no longer emitted, keeping non-generated files (CON-012)", async () => {
+    const { configFile, outputDir } = await fixture(["SW-012-a.md"], ["fake"]);
+    const { generator } = recordingGenerator("fake");
+    // The fake writes to the project root (defaultOutputDir "."); seed that dir.
+    await mkdir(outputDir, { recursive: true });
+    const stale = join(outputDir, "StaleTraceables.ts");
+    const handwritten = join(outputDir, "keep.ts");
+    await writeFile(
+      stale,
+      `/*\n * THIS FILE IS ${GENERATED_MARKER} - DO NOT EDIT MANUALLY\n */\nexport enum Stale {}\n`,
+      "utf8",
+    );
+    await writeFile(handwritten, "export const x = 1;\n", "utf8");
+
+    await spec({ configFile, outputDir, resolveGenerator: () => generator });
+
+    // The stale generated file is pruned; the hand-written file and the emitted file remain.
+    await expect(readFile(stale, "utf8")).rejects.toThrow();
+    expect(await readFile(handwritten, "utf8")).toContain("const x");
+    expect(await readFile(join(outputDir, "fake.txt"), "utf8")).toBe(
+      "SW: SW-012",
+    );
   });
 });

@@ -21,7 +21,6 @@ async function setupProjectDir(): Promise<string> {
   await writeFile(
     join(dir, ".ariadnerc.json"),
     JSON.stringify({
-      idToken: { pattern: "[A-Z]{2,4}-[0-9]{3}" },
       idGeneration: { mode: "sequential", padding: 3 },
     }),
     "utf8",

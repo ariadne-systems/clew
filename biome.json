@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!docs", "!**/dist"]
+    "includes": ["**", "!docs", "!**/dist", "!packages/trace/src"]
   },
   "formatter": {
     "enabled": true,
