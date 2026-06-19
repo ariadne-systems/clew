@@ -6,6 +6,7 @@ import {
   DEFAULT_LENSES,
   ErrorCode,
   readConfiguredPrefixes,
+  readGenerators,
   readIdGenerationConfig,
   readIgnore,
   readLayout,
@@ -154,6 +155,40 @@ describe("readSpecSets", () => {
 
   test("returns an empty list when no specSets are configured", async () => {
     expect(await readSpecSets(await missingConfigFile())).toEqual([]);
+  });
+});
+
+describe("readGenerators", () => {
+  test("reads each generator's type and output directory", async () => {
+    const file = await tempConfigFile({
+      generators: [
+        { type: "typescript", outputDir: "src/ts" },
+        { type: "java", outputDir: "src/main/java" },
+      ],
+    });
+
+    expect(await readGenerators(file)).toEqual([
+      { type: "typescript", outputDir: "src/ts" },
+      { type: "java", outputDir: "src/main/java" },
+    ]);
+  });
+
+  test("normalizes a bare type string to a generator with no output directory", async () => {
+    const file = await tempConfigFile({ generators: ["typescript"] });
+
+    expect(await readGenerators(file)).toEqual([{ type: "typescript" }]);
+  });
+
+  test("treats an empty outputDir as unset so the generator default applies", async () => {
+    const file = await tempConfigFile({
+      generators: [{ type: "typescript", outputDir: "" }],
+    });
+
+    expect(await readGenerators(file)).toEqual([{ type: "typescript" }]);
+  });
+
+  test("returns an empty list when none are configured", async () => {
+    expect(await readGenerators(await missingConfigFile())).toEqual([]);
   });
 });
 

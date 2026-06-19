@@ -30,10 +30,10 @@ export function registerSpec(program: Command): void {
         process.stdout.write("No generators configured; nothing emitted.\n");
         return;
       }
-      for (const { name, files } of result.generators) {
-        for (const file of files) {
-          process.stdout.write(`${name}: ${file}\n`);
-        }
+      for (const { name, outputDir, files } of result.generators) {
+        process.stdout.write(
+          `  ${name} -> ${outputDir}: ${files.join(", ")}\n`,
+        );
       }
     });
 }

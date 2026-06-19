@@ -1,0 +1,31 @@
+{
+  "name": "@ariadne-thread/trace",
+  "version": "0.1.0",
+  "description": "Generated traceables and anchoring utility for ariadne-thread; imported by the code under trace.",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "author": "Ariadne Systems GmbH",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/ariadne-forge/ariadne-thread-cli.git",
+    "directory": "packages/trace"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown"
+  }
+}

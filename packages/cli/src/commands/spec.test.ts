@@ -19,7 +19,12 @@ async function setupProjectDir(idFilenames: string[]): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-spec-"));
   await writeFile(
     join(dir, ".ariadnerc.json"),
-    JSON.stringify({ generators: ["typescript", "java"] }),
+    JSON.stringify({
+      generators: [
+        { type: "typescript", outputDir: "out-ts" },
+        { type: "java", outputDir: "out-java" },
+      ],
+    }),
     "utf8",
   );
   const specDir = join(dir, "docs", "spec", "derived-specs");
@@ -54,14 +59,13 @@ describe("spec output", () => {
     await runAriadne("spec");
 
     expect(stdout()).toContain("Scanned 2 traceables in 2 spec sets.");
-    const ts = await readFile(
-      join(dir, "ariadne", "generated", "traceables.ts"),
-      "utf8",
-    );
-    expect(ts).toContain('"SW-012"');
-    expect(ts).toContain("export type TraceableId");
+    const tsDir = join(dir, "out-ts");
+    const swSet = await readFile(join(tsDir, "SwTraceables.ts"), "utf8");
+    expect(swSet).toContain('"SW-012"');
+    const helper = await readFile(join(tsDir, "index.ts"), "utf8");
+    expect(helper).toContain("export type TraceableId");
     const java = await readFile(
-      join(dir, "ariadne", "generated", "Traceables.java"),
+      join(dir, "out-java", "Traceables.java"),
       "utf8",
     );
     expect(java).toContain("SW_012");
@@ -69,7 +73,7 @@ describe("spec output", () => {
 
   test("a second run on unchanged specs writes byte-identical output (CON-012)", async () => {
     const dir = await setupProjectDir(["SW-012-a.md"]);
-    const generated = join(dir, "ariadne", "generated", "traceables.ts");
+    const generated = join(dir, "out-ts", "index.ts");
 
     captureStdout();
     await runAriadne("spec");

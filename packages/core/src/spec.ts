@@ -1,4 +1,5 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import type { Dirent } from "node:fs";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { SpecSetMatcher } from "./config.js";
 import {
@@ -9,6 +10,7 @@ import {
 } from "./config.js";
 import { AriadneError, ErrorCode } from "./errors.js";
 import type { GeneratedFile, Generator } from "./generator.js";
+import { GENERATED_MARKER } from "./generator.js";
 import { scan } from "./scan.js";
 import { groupIntoSpecSets, lensMatchers } from "./spec-set.js";
 
@@ -21,14 +23,16 @@ export type SpecOptions = {
   resolveGenerator: (name: string) => Generator | undefined;
   /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
   configFile?: string;
-  /** Root the generated files are written under. Defaults to the process cwd. */
+  /** Project root the output directory is resolved against. Defaults to the process cwd. */
   outputDir?: string;
 };
 
 /** What a single generator produced this run. */
 export type GeneratorReport = {
   name: string;
-  /** The generated files, by their path relative to the output root. */
+  /** The directory this generator wrote into, relative to the project root. */
+  outputDir: string;
+  /** The generated files, by their name within the output directory. */
   files: string[];
 };
 
@@ -52,28 +56,84 @@ export type SpecResult = {
  * (CON-012).
  */
 export async function spec(options: SpecOptions): Promise<SpecResult> {
-  const outputDir = options.outputDir ?? ".";
-  const traceables = await scan({ configFile: options.configFile });
-  const matchers = await resolveMatchers(options.configFile);
-  const ignorePatterns = await readIgnore(options.configFile);
+  const { configFile } = options;
+  const projectRoot = options.outputDir ?? ".";
+  // These reads are independent; run them concurrently rather than serially.
+  const [traceables, matchers, ignorePatterns, generatorConfigs] =
+    await Promise.all([
+      scan({ configFile }),
+      resolveMatchers(configFile),
+      readIgnore(configFile),
+      readGenerators(configFile),
+    ]);
   const specSets = groupIntoSpecSets(traceables, matchers, ignorePatterns);
-  const generatorNames = await readGenerators(options.configFile);
 
   const reports: GeneratorReport[] = [];
-  for (const name of generatorNames) {
-    const generator = resolveOrThrow(name, options.resolveGenerator);
-    const files = await generator.generate(specSets);
+  // The set of files written under each write-root this run, so stale files can be pruned.
+  const writtenByRoot = new Map<string, Set<string>>();
+  for (const config of generatorConfigs) {
+    const generator = resolveOrThrow(config.type, options.resolveGenerator);
+    const outputDir = config.outputDir ?? generator.defaultOutputDir;
+    const writeRoot = join(projectRoot, outputDir);
+    const files = await generator.generate(specSets, { outputDir });
+    await Promise.all(files.map((file) => writeGeneratedFile(writeRoot, file)));
+
+    const written = writtenByRoot.get(writeRoot) ?? new Set<string>();
     for (const file of files) {
-      await writeGeneratedFile(outputDir, file);
+      written.add(file.path);
     }
-    reports.push({ name, files: files.map((file) => file.path) });
+    writtenByRoot.set(writeRoot, written);
+    reports.push({
+      name: config.type,
+      outputDir,
+      files: files.map((file) => file.path),
+    });
   }
+
+  // Remove files this tool generated in a previous run that are no longer emitted
+  // (e.g. a spec set that disappeared), so a removed id stops compiling (CON-012).
+  await Promise.all(
+    [...writtenByRoot].map(([writeRoot, written]) =>
+      pruneStaleGenerated(writeRoot, written),
+    ),
+  );
 
   return {
     traceableCount: traceables.length,
     specSetCount: specSets.length,
     generators: reports,
   };
+}
+
+/**
+ * Deletes files in `writeRoot` that carry the generated marker but were not
+ * written this run — the tool's own stale output from a prior run. A file the
+ * tool did not generate (no marker) is never touched.
+ */
+async function pruneStaleGenerated(
+  writeRoot: string,
+  written: ReadonlySet<string>,
+): Promise<void> {
+  let entries: Dirent[];
+  try {
+    entries = await readdir(writeRoot, { withFileTypes: true });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return;
+    }
+    throw error;
+  }
+  await Promise.all(
+    entries.map(async (entry) => {
+      if (entry.isFile() && !written.has(entry.name)) {
+        const path = join(writeRoot, entry.name);
+        const contents = await readFile(path, "utf8");
+        if (contents.includes(GENERATED_MARKER)) {
+          await rm(path);
+        }
+      }
+    }),
+  );
 }
 
 /**

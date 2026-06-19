@@ -10,6 +10,13 @@ export const DEFAULT_PADDING = 3;
 /** Default id-generation scheme when the configuration does not state one (ARCH-001). */
 export const DEFAULT_MODE: IdGenerationMode = "sequential";
 
+/** A configured generator: its target-language `type` and, optionally, where it writes (ENT-002, SW-014). */
+export type GeneratorConfig = {
+  type: string;
+  /** Directory it writes into, relative to the project root; defaults to the generator's own. */
+  outputDir?: string;
+};
+
 /** The id-generation scheme chosen by configuration (ARCH-001). */
 export type IdGenerationMode = "sequential" | "opaque";
 
@@ -175,19 +182,45 @@ export async function readConfiguredPrefixes(
 }
 
 /**
- * Reads the `generators` section: the language generators to run, by name
- * (SW-014). Each name is resolved to a concrete generator outside the core, so
- * the core never depends on a concrete generator (ARCH-003). A missing section
- * yields an empty list — nothing to generate.
+ * Reads the `generators` section: the language generators to run, each with its
+ * target-language `type` and an optional `outputDir` (SW-014). An entry may be a
+ * bare type string (shorthand for `{ type }`) or an object. Each type is resolved
+ * to a concrete generator outside the core, so the core never depends on a
+ * concrete generator (ARCH-003). A missing section yields an empty list — nothing
+ * to generate.
  */
 export async function readGenerators(
   file: string = DEFAULT_CONFIG_FILE,
-): Promise<string[]> {
+): Promise<GeneratorConfig[]> {
   const raw = (await readRawConfig(file)).generators;
   if (!Array.isArray(raw)) {
     return [];
   }
-  return raw.filter((name): name is string => typeof name === "string");
+  const generators: GeneratorConfig[] = [];
+  for (const entry of raw) {
+    const generator = toGeneratorConfig(entry);
+    if (generator !== undefined) {
+      generators.push(generator);
+    }
+  }
+  return generators;
+}
+
+/** Normalizes a `generators` entry — a bare type string or an object — to a `GeneratorConfig`. */
+function toGeneratorConfig(entry: unknown): GeneratorConfig | undefined {
+  if (typeof entry === "string") {
+    return { type: entry };
+  }
+  const object = asObject(entry);
+  if (typeof object.type !== "string") {
+    return undefined;
+  }
+  const generator: GeneratorConfig = { type: object.type };
+  // An empty string is treated as unset, so the generator's default applies.
+  if (typeof object.outputDir === "string" && object.outputDir.length > 0) {
+    generator.outputDir = object.outputDir;
+  }
+  return generator;
 }
 
 /**
