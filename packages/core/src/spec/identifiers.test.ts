@@ -1,6 +1,6 @@
 import { SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { toIdentifier, toMemberName, toPascalCase } from "./index.js";
+import { toIdentifier, toMemberName, toPascalCase } from "../index.js";
 
 describe("toPascalCase", () => {
   verifies(SwTraceables.SW_014_GENERATE_TRACEABLES, () => {

@@ -1,7 +1,7 @@
 import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import type { AriadneError, SpecSetMatcher, Traceable } from "./index.js";
-import { ErrorCode, groupIntoSpecSets, lensMatchers } from "./index.js";
+import type { AriadneError, SpecSetMatcher, Traceable } from "../index.js";
+import { ErrorCode, groupIntoSpecSets, lensMatchers } from "../index.js";
 
 const traceables: Traceable[] = [
   { id: "SW-013", lens: "SW", filename: "SW-013-scan.md" },

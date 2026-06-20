@@ -1,7 +1,7 @@
 import { realizes, SwTraceables } from "@ariadne-thread/trace";
-import { AriadneError, ErrorCode } from "./errors.js";
+import { AriadneError, ErrorCode } from "../errors.js";
+import { withState } from "../state/state.js";
 import type { IdStrategy } from "./id-strategy.js";
-import { withState } from "./state.js";
 
 export type SequentialIdStrategyOptions = {
   /** Width to which numbers are zero-padded; sourced from configuration. */

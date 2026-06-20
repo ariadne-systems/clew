@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { scan } from "./index.js";
+import { scan } from "../index.js";
 
 type Fixture = {
   storiesDir: string;

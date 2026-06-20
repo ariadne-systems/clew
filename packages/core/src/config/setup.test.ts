@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { mint, setup } from "./index.js";
+import { mint, setup } from "../index.js";
 
 async function tempDir(): Promise<string> {
   return mkdtemp(join(tmpdir(), "ariadne-setup-"));

@@ -2,7 +2,7 @@ import type { Dirent } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { realizes, SwTraceables } from "@ariadne-thread/trace";
-import { readLayout, readLenses } from "./config.js";
+import { readLayout, readLenses } from "../config/config.js";
 import type { Traceable } from "./generator.js";
 
 export type ScanOptions = {

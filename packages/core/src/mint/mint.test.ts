@@ -9,7 +9,7 @@ import {
   verifies,
 } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { ErrorCode, mint, mintTemporary } from "./index.js";
+import { ErrorCode, mint, mintTemporary } from "../index.js";
 
 type Paths = { configFile: string; stateFile: string };
 

@@ -5,7 +5,7 @@ export type {
   Layout,
   Lens,
   SpecSetMatcher,
-} from "./config.js";
+} from "./config/config.js";
 export {
   configExists,
   DEFAULT_CONFIG_FILE,
@@ -20,38 +20,42 @@ export {
   readLenses,
   readSpecSets,
   requireConfig,
-} from "./config.js";
+} from "./config/config.js";
+export type { SetupOptions, SetupResult } from "./config/setup.js";
+export { setup } from "./config/setup.js";
 export type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
 export { AriadneError, ErrorCode } from "./errors.js";
+export type { IdStrategy } from "./mint/id-strategy.js";
+export type { MintOptions } from "./mint/mint.js";
+export { mint, mintTemporary } from "./mint/mint.js";
+export type {
+  PromotedDraft,
+  PromoteOptions,
+  PromoteResult,
+} from "./promote/promote.js";
+export { promote } from "./promote/promote.js";
 export type {
   GenerateContext,
   GeneratedFile,
   Generator,
   SpecSet,
   Traceable,
-} from "./generator.js";
-export { GENERATED_MARKER, generatedHeader } from "./generator.js";
-export type { IdStrategy } from "./id-strategy.js";
-export { toIdentifier, toMemberName, toPascalCase } from "./identifiers.js";
-export type { InitOptions, InitResult, RaisedMark } from "./init.js";
-export { init } from "./init.js";
-export type { MintOptions } from "./mint.js";
-export { mint, mintTemporary } from "./mint.js";
-export type {
-  PromotedDraft,
-  PromoteOptions,
-  PromoteResult,
-} from "./promote.js";
-export { promote } from "./promote.js";
-export type { ScanOptions } from "./scan.js";
-export { scan } from "./scan.js";
-export type { SetupOptions, SetupResult } from "./setup.js";
-export { setup } from "./setup.js";
-export type { GeneratorReport, SpecOptions, SpecResult } from "./spec.js";
-export { spec } from "./spec.js";
-export { groupIntoSpecSets, lensMatchers } from "./spec-set.js";
-export type { WithStateOptions } from "./state.js";
-export { DEFAULT_STATE_FILE, withState } from "./state.js";
+} from "./spec/generator.js";
+export { GENERATED_MARKER, generatedHeader } from "./spec/generator.js";
+export {
+  toIdentifier,
+  toMemberName,
+  toPascalCase,
+} from "./spec/identifiers.js";
+export type { ScanOptions } from "./spec/scan.js";
+export { scan } from "./spec/scan.js";
+export type { GeneratorReport, SpecOptions, SpecResult } from "./spec/spec.js";
+export { spec } from "./spec/spec.js";
+export { groupIntoSpecSets, lensMatchers } from "./spec/spec-set.js";
+export type { InitOptions, InitResult, RaisedMark } from "./state/init.js";
+export { init } from "./state/init.js";
+export type { WithStateOptions } from "./state/state.js";
+export { DEFAULT_STATE_FILE, withState } from "./state/state.js";
 
 const CORE_VERSION = "0.0.0";
 

@@ -2,7 +2,7 @@ import type { Dirent } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
-import { readConfiguredPrefixes, readLayout } from "./config.js";
+import { readConfiguredPrefixes, readLayout } from "../config/config.js";
 import { withState } from "./state.js";
 
 export type InitOptions = {

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { ErrorCode, promote } from "./index.js";
+import { ErrorCode, promote } from "../index.js";
 
 type Project = {
   configFile: string;
