@@ -1,27 +1,39 @@
 import { readFile, stat } from "node:fs/promises";
-import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
+import {
+  ArchTraceables,
+  ConTraceables,
+  concerns,
+  SwTraceables,
+  traces,
+} from "@ariadne-thread/trace";
 import { AriadneError, ErrorCode } from "./errors.js";
 
 /** Default location of the project configuration file. */
 export const DEFAULT_CONFIG_FILE = ".ariadnerc.json";
 
-/** Default zero-padding width when the configuration does not state one (CON-003). */
-export const DEFAULT_PADDING = 3;
+/** Default zero-padding width when the configuration does not state one. */
+export const DEFAULT_PADDING: number = concerns(
+  ConTraceables.CON_003_PADDING_CONFIGURED,
+  3,
+);
 
-/** Default id-generation scheme when the configuration does not state one (ARCH-001). */
-export const DEFAULT_MODE: IdGenerationMode = "sequential";
+/** Default id-generation scheme when the configuration does not state one. */
+export const DEFAULT_MODE: IdGenerationMode = concerns(
+  ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY,
+  "sequential",
+);
 
-/** A configured generator: its target-language `type` and, optionally, where it writes (ENT-002, SW-014). */
+/** A configured generator: its target-language `type` and, optionally, where it writes (ENT-002). */
 export type GeneratorConfig = {
   type: string;
   /** Directory it writes into, relative to the project root; defaults to the generator's own. */
   outputDir?: string;
 };
 
-/** The id-generation scheme chosen by configuration (ARCH-001). */
+/** The id-generation scheme chosen by configuration. */
 export type IdGenerationMode = "sequential" | "opaque";
 
-/** The `idGeneration` section of `.ariadnerc.json` (CON-003, ARCH-001). */
+/** The `idGeneration` section of `.ariadnerc.json`. */
 export type IdGenerationConfig = {
   mode: IdGenerationMode;
   /** Width to which sequential numbers are zero-padded. */
@@ -66,8 +78,8 @@ export const DEFAULT_LENSES: readonly Lens[] = [
 
 /**
  * A configured spec set: a named grouping selected by a regular expression over
- * a spec's filename (SW-015, ENT-002). One set may be flagged the `catchAll`,
- * which collects traceables that match no other set's pattern (CON-013); a
+ * a spec's filename (ENT-002). One set may be flagged the `catchAll`,
+ * which collects traceables that match no other set's pattern; a
  * catch-all needs no pattern of its own.
  */
 export type SpecSetMatcher = {
@@ -95,8 +107,8 @@ export const DEFAULT_LAYOUT: Layout = {
 };
 
 /**
- * Reads the `idGeneration` section from `.ariadnerc.json` (CON-003, ARCH-001).
- * A missing file, section, or value falls back to the default (SW-009).
+ * Reads the `idGeneration` section from `.ariadnerc.json`.
+ * A missing file, section, or value falls back to the default.
  */
 export async function readIdGenerationConfig(
   file: string = DEFAULT_CONFIG_FILE,
@@ -112,7 +124,7 @@ export async function readIdGenerationConfig(
 
 /**
  * Reads the `lenses` section: the project's derived-spec kinds (ADR-0003).
- * A missing or empty section falls back to the default lens set (SW-009).
+ * A missing or empty section falls back to the default lens set.
  */
 export async function readLenses(
   file: string = DEFAULT_CONFIG_FILE,
@@ -136,7 +148,7 @@ export async function readLenses(
 
 /**
  * Reads the `layout` section: where each kind of artifact lives (ENT-002).
- * Each value falls back to its default independently (SW-009).
+ * Each value falls back to its default independently.
  */
 export async function readLayout(
   file: string = DEFAULT_CONFIG_FILE,
@@ -184,10 +196,10 @@ export async function readConfiguredPrefixes(
 
 /**
  * Reads the `generators` section: the language generators to run, each with its
- * target-language `type` and an optional `outputDir` (SW-014). An entry may be a
+ * target-language `type` and an optional `outputDir`. An entry may be a
  * bare type string (shorthand for `{ type }`) or an object. Each type is resolved
  * to a concrete generator outside the core, so the core never depends on a
- * concrete generator (ARCH-003). A missing section yields an empty list — nothing
+ * concrete generator. A missing section yields an empty list — nothing
  * to generate.
  */
 export async function readGenerators(
@@ -226,7 +238,7 @@ function toGeneratorConfig(entry: unknown): GeneratorConfig | undefined {
 
 /**
  * Reads the `specSets` section: the configured spec-set matchers, in order
- * (SW-015). Each entry carries a `name`, an optional `pattern` (a regex over the
+ * Each entry carries a `name`, an optional `pattern` (a regex over the
  * filename), and an optional `catchAll` flag. A missing or empty section yields
  * an empty list, which the `spec` command reads as "group by lens" (the default).
  */
@@ -249,7 +261,7 @@ export async function readSpecSets(
 
 /**
  * Reads the `ignore` section: regular expressions over a spec's filename whose
- * matching traceables are excluded from every spec set (CON-013). A missing
+ * matching traceables are excluded from every spec set. A missing
  * section yields an empty list — nothing is excluded.
  */
 export async function readIgnore(
@@ -280,7 +292,7 @@ export async function configExists(
 }
 
 /**
- * Asserts a project configuration is present (CON-011). When it is absent, fails
+ * Asserts a project configuration is present. When it is absent, fails
  * with a stable code and directs the user to `ariadne setup`. This is the
  * command-level precondition; the readers above still default an absent value
  * within a present configuration.
@@ -297,7 +309,7 @@ export const requireConfig: (file?: string) => Promise<void> = traces(
   },
 );
 
-/** Reads and parses `.ariadnerc.json`; a missing file resolves to an empty config (SW-009). */
+/** Reads and parses `.ariadnerc.json`; a missing file resolves to an empty config. */
 const readRawConfig = traces(
   SwTraceables.SW_009_READ_CONFIGURATION,
   async (file: string): Promise<Record<string, unknown>> => {

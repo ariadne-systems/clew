@@ -1,19 +1,24 @@
-import { ConTraceables, traces } from "@ariadne-thread/trace";
+import {
+  type ArchTraceables,
+  ConTraceables,
+  type Traces,
+  traces,
+} from "@ariadne-thread/trace";
 
 /**
- * The language emission seam (ARCH-003; STR-011).
+ * The language emission seam (STR-011).
  * Emitting the traceable symbols and the anchoring utility for a target language
  * is the job of a language-specific generator, chosen by configuration and
  * implemented behind this narrow interface. The core depends only on this
  * interface, never on a concrete generator — the boundary that must not erode
- * (ADR-0001 D9). It is the sibling of the id-generation seam (IdStrategy,
- * ARCH-001): same shape, but for language emission rather than the id's variable
+ * (ADR-0001 D9). It is the sibling of the id-generation seam (IdStrategy):
+ * same shape, but for language emission rather than the id's variable
  * part.
  */
 
 /**
  * A single scanned spec: its id, its lens (its prefix), and the filename it was
- * declared in (SW-013). The filename is what spec-set matchers match against, so
+ * declared in. The filename is what spec-set matchers match against, so
  * a grouping can select on the descriptive slug, not only the sparse id (whose
  * only matchable part is the lens prefix).
  */
@@ -24,8 +29,8 @@ export interface Traceable {
 }
 
 /**
- * A configured grouping of traceables a generator emits as one symbol set
- * (SW-013, ARCH-003). Grouping is by lens by default; the configurable grouping
+ * A configured grouping of traceables a generator emits as one symbol set.
+ * Grouping is by lens by default; the configurable grouping
  * rules are the follow-on story (STR-012) and are not built here.
  */
 export interface SpecSet {
@@ -38,7 +43,7 @@ export interface SpecSet {
  * A file a generator produces. The path is the file's name within the project's
  * configured output directory (ENT-002); the core joins it under that directory
  * and writes the bytes, so the generator decides filenames and the core decides
- * the location, and the core carries no language knowledge (SW-014).
+ * the location, and the core carries no language knowledge.
  */
 export interface GeneratedFile {
   readonly path: string;
@@ -51,14 +56,15 @@ export interface GenerateContext {
 }
 
 /**
- * A language-specific generator (ARCH-003). Given the traceables grouped into
+ * A language-specific generator. Given the traceables grouped into
  * spec sets, it produces the verifiable symbols — one symbol set per spec set,
  * not a single flat list — and the anchoring utility that lets code mark a type,
  * a value, or a test against a spec id, constrained to those symbols. It is told
  * where its files will land (the context) so it can emit correct internal
  * references, such as a Java package matching the output directory.
  */
-export interface Generator {
+export interface Generator
+  extends Traces<ArchTraceables.ARCH_003_GENERATOR_INTERFACE, unknown> {
   /** Stable name matched against a configured generator's `type`. */
   readonly name: string;
   /**
@@ -75,7 +81,7 @@ export interface Generator {
 }
 
 /**
- * The marker every generated file's banner carries (CON-012). The core uses it to
+ * The marker every generated file's banner carries. The core uses it to
  * recognize, and prune, files it generated in a previous run that are no longer
  * emitted — so a removed spec set's stale file does not linger.
  */
@@ -88,7 +94,7 @@ const HOMEPAGE = "https://ariadne-thread.io";
  * The generated-file banner shared by every generator: a do-not-edit warning
  * (carrying GENERATED_MARKER), a regenerate hint, and `@ariadne-thread` provenance
  * annotations. A per-set file also carries its spec set. The banner is static, so
- * regeneration stays byte-identical (CON-012). The lines are a `/* … *\/` block —
+ * regeneration stays byte-identical. The lines are a `/* … *\/` block —
  * valid in both TypeScript and Java — so all generators share one provenance
  * format. The caller wraps these lines in nothing further; it returns the full
  * comment.

@@ -125,7 +125,7 @@ describe("typescript generator output", () => {
         ]);
       });
 
-      test("is deterministic: the same spec sets produce byte-identical output (CON-012)", async () => {
+      test("is deterministic: the same spec sets produce byte-identical output", async () => {
         const first = await generate(specSets);
         const second = await generate(specSets);
 

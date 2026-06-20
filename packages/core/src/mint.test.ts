@@ -160,7 +160,7 @@ describe("persistence on save failure", () => {
       const { configFile, stateFile } = await tempPaths({ padding: 3 });
       await mint("SW", 2, { configFile, stateFile });
 
-      // Occupy the atomic-write temp path (NF-002) with a directory so the save
+      // Occupy the atomic-write temp path with a directory so the save
       // cannot complete; the allocation advance is therefore never persisted.
       await mkdir(`${stateFile}.tmp`);
 

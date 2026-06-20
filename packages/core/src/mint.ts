@@ -19,9 +19,9 @@ export type MintOptions = {
 };
 
 /**
- * Mints `count` ids for `type`, in the scheme selected by configuration (ARCH-001).
+ * Mints `count` ids for `type`, in the scheme selected by configuration.
  * Before any allocation, the type is rejected if it uses the reserved temporary
- * marker (CON-008) or is not a configured prefix (CON-005), so a bad prefix fails
+ * marker or is not a configured prefix, so a bad prefix fails
  * fast and nothing is allocated. The minting code depends only on the IdStrategy
  * interface; the concrete strategy is chosen by `createIdStrategy`.
  */
@@ -39,12 +39,12 @@ export async function mint(
 }
 
 /**
- * Mints `count` temporary, unbound ids for `type` (SW-005), each of the form
+ * Mints `count` temporary, unbound ids for `type`, each of the form
  * `<TYPE>-TMP-<opaque>`. Temporary minting is stateless: it reads configuration
  * to validate the prefix, but opens no StateStore session, takes no lock, and
- * advances no sequence, so nothing is bound (CON-007). The prefix is validated by
- * the same rules as the bound path: the reserved-marker rule (CON-008) and the
- * configured-prefix rule (CON-005), so every temporary id carries exactly one
+ * advances no sequence, so nothing is bound. The prefix is validated by
+ * the same rules as the bound path: the reserved-marker rule and the
+ * configured-prefix rule, so every temporary id carries exactly one
  * `-TMP-` marker and parses unambiguously.
  */
 export async function mintTemporary(
@@ -64,7 +64,7 @@ export async function mintTemporary(
   return Array.from({ length: count }, () => buildTemporaryId(type));
 }
 
-/** Selects the id strategy from configuration (ARCH-001). */
+/** Selects the id strategy from configuration. */
 const createIdStrategy = traces(
   ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY,
   (config: IdGenerationConfig, stateFile: string | undefined): IdStrategy => {
@@ -77,7 +77,7 @@ const createIdStrategy = traces(
 
 /**
  * Rejects a type whose prefix is not a configured prefix — a lens id, or the
- * story or entity prefix — before any allocation (CON-005). The configured
+ * story or entity prefix — before any allocation. The configured
  * prefixes are the single source of truth for id validity (ADR-0003); no id
  * pattern is consulted.
  */
@@ -94,7 +94,7 @@ const assertPrefixConfigured = traces(
 );
 
 /**
- * Rejects a type that uses the reserved temporary marker as a segment (CON-008),
+ * Rejects a type that uses the reserved temporary marker as a segment,
  * before any id is produced. This keeps `-TMP-` out of every bound id and leaves
  * each temporary id with exactly one marker, so the two are never confused and a
  * temporary id parses unambiguously.

@@ -97,7 +97,7 @@ describe("finalizing drafts", () => {
         await expect(readFile(from, "utf8")).rejects.toThrow();
       });
 
-      test("substitutes the temporary id in an already-promoted spec and an unpromoted draft (CON-014)", async () => {
+      test("substitutes the temporary id in an already-promoted spec and an unpromoted draft", async () => {
         const p = await project();
         await writeDraft(
           p.draftsDir,

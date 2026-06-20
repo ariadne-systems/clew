@@ -93,7 +93,7 @@ describe("grouping traceables into spec sets", () => {
         ]);
       });
 
-      test("a traceable matching more than one set is an overlap error (CON-013)", () => {
+      test("a traceable matching more than one set is an overlap error", () => {
         const matchers: SpecSetMatcher[] = [
           { name: "by-prefix", pattern: "^SW-" },
           { name: "by-slug", pattern: "command" },
@@ -107,7 +107,7 @@ describe("grouping traceables into spec sets", () => {
         );
       });
 
-      test("a traceable matching no set is an unmatched error (CON-013)", () => {
+      test("a traceable matching no set is an unmatched error", () => {
         const matchers: SpecSetMatcher[] = [{ name: "sw", pattern: "^SW-" }];
         const unmatched = [
           { id: "CON-012", lens: "CON", filename: "CON-012-owned.md" },

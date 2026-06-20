@@ -44,7 +44,7 @@ describe("setup", () => {
         expect(existsSync(join(dir, "docs", "spec", "drafts"))).toBe(true);
       });
 
-      test("never overwrites an existing configuration (CON-010)", async () => {
+      test("never overwrites an existing configuration", async () => {
         const dir = await tempDir();
         const configFile = join(dir, ".ariadnerc.json");
         await writeFile(configFile, '{"custom":true}', "utf8");

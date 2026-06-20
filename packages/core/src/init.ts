@@ -38,16 +38,16 @@ const IGNORED_DIRECTORIES = new Set([
  * A bound id at the start of an artifact filename: an uppercase prefix and a
  * number as a whole segment (e.g. `STR-007-...` or `SW-005.md`). The number must
  * close the segment, so a temporary id (`SW-TMP-...`) does not match — a
- * temporary id is unbound and must never advance a high-water mark (CON-007).
+ * temporary id is unbound and must never advance a high-water mark.
  */
 const BOUND_ID_IN_FILENAME = /^([A-Z]+)-(\d+)(?:[-.]|$)/;
 
 /**
- * Initializes the StateStore from existing artifacts (SW-006): scans the
+ * Initializes the StateStore from existing artifacts: scans the
  * configured layout directories (ENT-002), takes the highest number per
  * configured prefix, and reconciles those into the state's high-water marks.
  * Only configured prefixes are counted, so non-lens files such as ADRs are
- * ignored. Reconciliation only ever raises a mark, never lowers one (CON-009),
+ * ignored. Reconciliation only ever raises a mark, never lowers one,
  * so re-initializing an unchanged project changes nothing.
  */
 export async function init(options: InitOptions = {}): Promise<InitResult> {
@@ -60,7 +60,7 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
   });
 }
 
-/** Raises each prefix's mark to the discovered maximum, never lowering it (CON-009). */
+/** Raises each prefix's mark to the discovered maximum, never lowering it. */
 const reconcile = traces(
   ConTraceables.CON_009_RECONCILE_NEVER_LOWERS,
   (
@@ -82,7 +82,7 @@ const reconcile = traces(
 
 /**
  * Walks the given artifact directories and returns the highest number seen per
- * configured prefix (SW-006). A directory that does not exist is skipped, so a
+ * configured prefix. A directory that does not exist is skipped, so a
  * project missing one of its configured locations still initializes.
  */
 const discoverHighWaterMarks = traces(

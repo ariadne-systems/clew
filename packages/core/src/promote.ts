@@ -41,15 +41,15 @@ type DraftFile = {
   slug: string;
 };
 
-/** A draft filename begins with a temporary id: `<PREFIX>-TMP-<opaque>` (SW-005). */
+/** A draft filename begins with a temporary id: `<PREFIX>-TMP-<opaque>`. */
 const TEMPORARY_DRAFT_FILENAME = /^([A-Z]+)-TMP-[0-9a-f]+/;
 
 /**
- * Finalizes reviewed drafts into the spec tree (SW-017; STR-013): the mechanical
+ * Finalizes reviewed drafts into the spec tree (STR-013): the mechanical
  * half of promotion. For each draft — the pending drafts in the configured drafts
  * location, or the ones named — it binds a real id by minting the draft's lens
  * (its temporary id's prefix), substitutes that temporary id project-wide
- * (CON-014), and moves the draft into its configured location renamed to the
+ * and moves the draft into its configured location renamed to the
  * bound id. Ids are bound first, then the substitution runs, then the files move,
  * so a failure never leaves a half-substituted tree (STR-013). It performs no
  * integration reasoning and does not commit.
@@ -208,7 +208,7 @@ function parseDraft(path: string, fileName: string): DraftFile | undefined {
 /**
  * Replaces every temporary id with its bound id across the configured spec
  * locations and the drafts location — the only places a temporary id appears
- * (CON-014). A temporary id is globally unique, so a literal replace is exact.
+ * A temporary id is globally unique, so a literal replace is exact.
  */
 const substituteProjectWide = traces(
   ConTraceables.CON_014_EXHAUSTIVE_SUBSTITUTION,

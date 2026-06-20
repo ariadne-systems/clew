@@ -2,8 +2,8 @@ import { randomBytes } from "node:crypto";
 import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
 
 /**
- * The reserved infix that marks a temporary, unbound id (CON-008). It separates
- * the type prefix from the opaque suffix in `<TYPE>-TMP-<opaque>` (SW-005). No
+ * The reserved infix that marks a temporary, unbound id. It separates
+ * the type prefix from the opaque suffix in `<TYPE>-TMP-<opaque>`. No
  * configured id token pattern may admit it, so a temporary id is structurally
  * distinct from every bound id and can never be mistaken for one.
  */
@@ -13,7 +13,7 @@ export const TEMPORARY_MARKER = "TMP";
 const OPAQUE_BYTE_LENGTH = 5;
 
 /**
- * Builds a temporary id of the form `<TYPE>-TMP-<opaque>` (SW-005). The opaque
+ * Builds a temporary id of the form `<TYPE>-TMP-<opaque>`. The opaque
  * suffix is a crypto-random hex token, so temporary ids generated independently
  * do not collide without any central coordination.
  */
@@ -26,7 +26,7 @@ export const buildTemporaryId: (type: string) => string = traces(
 );
 
 /**
- * Whether `type` uses the reserved marker as a hyphen-delimited segment (CON-008).
+ * Whether `type` uses the reserved marker as a hyphen-delimited segment.
  * A type with such a segment is forbidden: its bound id would carry `-TMP-` and
  * be misread as temporary, and its temporary id would not parse unambiguously.
  * The check is segment-wise, so `TMPX` is allowed while `TMP` and `MY-TMP` are not.

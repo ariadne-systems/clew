@@ -3,9 +3,9 @@ import { SwTraceables, traces } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
- * Registers the `ariadne init` command surface (SW-007; STR-008).
+ * Registers the `ariadne init` command surface (STR-008).
  * The action stays thin: it delegates discovery and reconciliation to core's
- * `init()` (SW-006), which reads the artifact locations from configuration
+ * `init()`, which reads the artifact locations from configuration
  * (ENT-002), and reports what it recorded to stdout. Any error propagates to the
  * bin entry, which writes it to stderr and exits non-zero.
  */

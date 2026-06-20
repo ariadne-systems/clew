@@ -9,11 +9,11 @@ import { SwTraceables, traces } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
- * Registers the `ariadne mint` command surface (SW-008; STR-005, STR-007).
+ * Registers the `ariadne mint` command surface (STR-005, STR-007).
  * The action stays thin: it delegates allocation and validation to core's
- * `mint()` and prints each minted id on its own line to stdout (SW-003).
+ * `mint()` and prints each minted id on its own line to stdout.
  * With `--tmp` it delegates to core's `mintTemporary()` for unbound ids that
- * touch no state (SW-005, CON-007); the default bound behaviour is unchanged.
+ * touch no state; the default bound behaviour is unchanged.
  * Any error propagates to the bin entry, which writes it to stderr and exits
  * non-zero.
  */
