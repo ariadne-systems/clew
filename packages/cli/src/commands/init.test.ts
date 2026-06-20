@@ -2,6 +2,7 @@ import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ErrorCode } from "@ariadne-thread/core";
+import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { buildProgram } from "../program.js";
 
@@ -46,61 +47,69 @@ async function runAriadne(...args: string[]): Promise<void> {
 }
 
 describe("init output", () => {
-  test("records discovered marks and reports each raised prefix to stdout", async () => {
-    const dir = await setupProjectDir(["SW-005-a.md", "CON-008-b.md"]);
-    const stdout = captureStdout();
+  verifies(SwTraceables.SW_007_INIT_COMMAND, () => {
+    test("records discovered marks and reports each raised prefix to stdout", async () => {
+      const dir = await setupProjectDir(["SW-005-a.md", "CON-008-b.md"]);
+      const stdout = captureStdout();
 
-    await runAriadne("init");
+      await runAriadne("init");
 
-    expect(stdout()).toContain("CON: 0 -> 8");
-    expect(stdout()).toContain("SW: 0 -> 5");
-    const state = JSON.parse(
-      await readFile(join(dir, ".ariadne", "state.json"), "utf8"),
-    ) as { sequences: Record<string, number> };
-    expect(state.sequences).toEqual({ SW: 5, CON: 8 });
-  });
+      expect(stdout()).toContain("CON: 0 -> 8");
+      expect(stdout()).toContain("SW: 0 -> 5");
+      const state = JSON.parse(
+        await readFile(join(dir, ".ariadne", "state.json"), "utf8"),
+      ) as { sequences: Record<string, number> };
+      expect(state.sequences).toEqual({ SW: 5, CON: 8 });
+    });
 
-  test("a second run changes nothing and reports it", async () => {
-    const dir = await setupProjectDir(["SW-005-a.md"]);
-    const first = captureStdout();
-    await runAriadne("init");
-    expect(first()).toContain("SW: 0 -> 5");
+    test("a second run changes nothing and reports it", async () => {
+      const dir = await setupProjectDir(["SW-005-a.md"]);
+      const first = captureStdout();
+      await runAriadne("init");
+      expect(first()).toContain("SW: 0 -> 5");
 
-    vi.restoreAllMocks();
-    const second = captureStdout();
-    await runAriadne("init");
+      vi.restoreAllMocks();
+      const second = captureStdout();
+      await runAriadne("init");
 
-    expect(second()).toContain("nothing changed");
-    const state = JSON.parse(
-      await readFile(join(dir, ".ariadne", "state.json"), "utf8"),
-    ) as { sequences: Record<string, number> };
-    expect(state.sequences).toEqual({ SW: 5 });
+      expect(second()).toContain("nothing changed");
+      const state = JSON.parse(
+        await readFile(join(dir, ".ariadne", "state.json"), "utf8"),
+      ) as { sequences: Record<string, number> };
+      expect(state.sequences).toEqual({ SW: 5 });
+    });
   });
 });
 
 describe("init invalid invocation", () => {
-  test("an extra positional argument exits non-zero", () => {
-    const program = buildProgram().exitOverride();
+  verifies(SwTraceables.SW_007_INIT_COMMAND, () => {
+    test("an extra positional argument exits non-zero", () => {
+      const program = buildProgram().exitOverride();
 
-    expect(() => program.parse(["node", "ariadne", "init", "extra"])).toThrow();
-  });
+      expect(() =>
+        program.parse(["node", "ariadne", "init", "extra"]),
+      ).toThrow();
+    });
 
-  test("an unknown option exits non-zero", () => {
-    const program = buildProgram().exitOverride();
+    test("an unknown option exits non-zero", () => {
+      const program = buildProgram().exitOverride();
 
-    expect(() =>
-      program.parse(["node", "ariadne", "init", "--bogus"]),
-    ).toThrow();
+      expect(() =>
+        program.parse(["node", "ariadne", "init", "--bogus"]),
+      ).toThrow();
+    });
   });
 });
 
 describe("configuration required", () => {
-  test("init fails with code E_NO_CONFIG when no configuration is present", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-init-noconfig-"));
-    process.chdir(dir);
+  verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
+    test("init fails with code E_NO_CONFIG when no configuration is present", async () => {
+      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-init-noconfig-"));
+      process.chdir(dir);
 
-    await expect(runAriadne("init")).rejects.toMatchObject({
-      code: ErrorCode.NO_CONFIG,
+      await expect(runAriadne("init")).rejects.toMatchObject({
+        code: ErrorCode.NO_CONFIG,
+      });
     });
   });
 });

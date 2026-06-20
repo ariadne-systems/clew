@@ -1,4 +1,5 @@
 import { promote, requireConfig } from "@ariadne-thread/core";
+import { SwTraceables, traces } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
@@ -10,23 +11,26 @@ import type { Command } from "commander";
  * the bin entry, which writes it to stderr and exits non-zero. Integration
  * reasoning stays with the `ariadne-promote` skill, not here.
  */
-export function registerPromote(program: Command): void {
-  program
-    .command("promote")
-    .description("Finalize reviewed drafts into the spec tree.")
-    .argument(
-      "[drafts...]",
-      "drafts to finalize (temporary id or path); omit to finalize all pending",
-    )
-    .action(async (drafts: string[]) => {
-      await requireConfig();
-      const { promoted } = await promote({ drafts });
-      if (promoted.length === 0) {
-        process.stdout.write("No pending drafts to promote.\n");
-        return;
-      }
-      for (const { temporaryId, boundId, to } of promoted) {
-        process.stdout.write(`${temporaryId} -> ${boundId}  (${to})\n`);
-      }
-    });
-}
+export const registerPromote: (program: Command) => void = traces(
+  SwTraceables.SW_016_PROMOTE_COMMAND,
+  (program: Command): void => {
+    program
+      .command("promote")
+      .description("Finalize reviewed drafts into the spec tree.")
+      .argument(
+        "[drafts...]",
+        "drafts to finalize (temporary id or path); omit to finalize all pending",
+      )
+      .action(async (drafts: string[]) => {
+        await requireConfig();
+        const { promoted } = await promote({ drafts });
+        if (promoted.length === 0) {
+          process.stdout.write("No pending drafts to promote.\n");
+          return;
+        }
+        for (const { temporaryId, boundId, to } of promoted) {
+          process.stdout.write(`${temporaryId} -> ${boundId}  (${to})\n`);
+        }
+      });
+  },
+);

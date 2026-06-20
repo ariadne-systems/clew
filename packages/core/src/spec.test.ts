@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 import type { Generator, SpecSet } from "./index.js";
 import { ErrorCode, GENERATED_MARKER, spec } from "./index.js";
@@ -71,190 +72,213 @@ function recordingGenerator(name: string): {
 }
 
 describe("spec generation", () => {
-  test("drives the configured generator with the scanned traceables grouped into spec sets", async () => {
-    const { configFile, outputDir } = await fixture(
-      ["SW-012-a.md", "SW-013-b.md", "CON-012-c.md"],
-      ["fake"],
-    );
-    const { generator, received } = recordingGenerator("fake");
+  verifies(SwTraceables.SW_014_GENERATE_TRACEABLES, () => {
+    test("drives the configured generator with the scanned traceables grouped into spec sets", async () => {
+      const { configFile, outputDir } = await fixture(
+        ["SW-012-a.md", "SW-013-b.md", "CON-012-c.md"],
+        ["fake"],
+      );
+      const { generator, received } = recordingGenerator("fake");
 
-    const result = await spec({
-      configFile,
-      outputDir,
-      resolveGenerator: (name) => (name === "fake" ? generator : undefined),
+      const result = await spec({
+        configFile,
+        outputDir,
+        resolveGenerator: (name) => (name === "fake" ? generator : undefined),
+      });
+
+      expect(received()).toEqual([
+        {
+          name: "CON",
+          traceables: [
+            { id: "CON-012", lens: "CON", filename: "CON-012-c.md" },
+          ],
+        },
+        {
+          name: "SW",
+          traceables: [
+            { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
+            { id: "SW-013", lens: "SW", filename: "SW-013-b.md" },
+          ],
+        },
+      ]);
+      expect(result.traceableCount).toBe(3);
+      expect(result.specSetCount).toBe(2);
+      expect(result.generators).toEqual([
+        { name: "fake", outputDir: ".", files: ["fake.txt"] },
+      ]);
     });
 
-    expect(received()).toEqual([
-      {
-        name: "CON",
-        traceables: [{ id: "CON-012", lens: "CON", filename: "CON-012-c.md" }],
-      },
-      {
-        name: "SW",
-        traceables: [
-          { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-          { id: "SW-013", lens: "SW", filename: "SW-013-b.md" },
-        ],
-      },
-    ]);
-    expect(result.traceableCount).toBe(3);
-    expect(result.specSetCount).toBe(2);
-    expect(result.generators).toEqual([
-      { name: "fake", outputDir: ".", files: ["fake.txt"] },
-    ]);
-  });
+    test("writes each generated file under the output root", async () => {
+      const { configFile, outputDir } = await fixture(
+        ["SW-012-a.md"],
+        ["fake"],
+      );
+      const { generator } = recordingGenerator("fake");
 
-  test("writes each generated file under the output root", async () => {
-    const { configFile, outputDir } = await fixture(["SW-012-a.md"], ["fake"]);
-    const { generator } = recordingGenerator("fake");
+      await spec({
+        configFile,
+        outputDir,
+        resolveGenerator: () => generator,
+      });
 
-    await spec({
-      configFile,
-      outputDir,
-      resolveGenerator: () => generator,
+      const written = await readFile(join(outputDir, "fake.txt"), "utf8");
+      expect(written).toBe("SW: SW-012");
     });
 
-    const written = await readFile(join(outputDir, "fake.txt"), "utf8");
-    expect(written).toBe("SW: SW-012");
-  });
+    test("re-running on unchanged specs produces byte-identical output (CON-012)", async () => {
+      const { configFile, outputDir } = await fixture(
+        ["SW-012-a.md", "SW-013-b.md"],
+        ["fake"],
+      );
+      const { generator } = recordingGenerator("fake");
+      const run = (): Promise<unknown> =>
+        spec({ configFile, outputDir, resolveGenerator: () => generator });
 
-  test("re-running on unchanged specs produces byte-identical output (CON-012)", async () => {
-    const { configFile, outputDir } = await fixture(
-      ["SW-012-a.md", "SW-013-b.md"],
-      ["fake"],
-    );
-    const { generator } = recordingGenerator("fake");
-    const run = (): Promise<unknown> =>
-      spec({ configFile, outputDir, resolveGenerator: () => generator });
+      await run();
+      const first = await readFile(join(outputDir, "fake.txt"), "utf8");
+      await run();
+      const second = await readFile(join(outputDir, "fake.txt"), "utf8");
 
-    await run();
-    const first = await readFile(join(outputDir, "fake.txt"), "utf8");
-    await run();
-    const second = await readFile(join(outputDir, "fake.txt"), "utf8");
-
-    expect(second).toBe(first);
-  });
-
-  test("invokes every configured generator, in configured order", async () => {
-    const { configFile, outputDir } = await fixture(
-      ["SW-012-a.md"],
-      ["one", "two"],
-    );
-    const one = recordingGenerator("one");
-    const two = recordingGenerator("two");
-    const registry = new Map([
-      ["one", one.generator],
-      ["two", two.generator],
-    ]);
-
-    const result = await spec({
-      configFile,
-      outputDir,
-      resolveGenerator: (name) => registry.get(name),
+      expect(second).toBe(first);
     });
 
-    expect(result.generators.map((report) => report.name)).toEqual([
-      "one",
-      "two",
-    ]);
-    expect(one.received()).toBeDefined();
-    expect(two.received()).toBeDefined();
-  });
+    test("invokes every configured generator, in configured order", async () => {
+      const { configFile, outputDir } = await fixture(
+        ["SW-012-a.md"],
+        ["one", "two"],
+      );
+      const one = recordingGenerator("one");
+      const two = recordingGenerator("two");
+      const registry = new Map([
+        ["one", one.generator],
+        ["two", two.generator],
+      ]);
 
-  test("fails with E_UNKNOWN_GENERATOR when a configured generator is not registered", async () => {
-    const { configFile, outputDir } = await fixture(["SW-012-a.md"], ["ghost"]);
+      const result = await spec({
+        configFile,
+        outputDir,
+        resolveGenerator: (name) => registry.get(name),
+      });
 
-    await expect(
-      spec({ configFile, outputDir, resolveGenerator: () => undefined }),
-    ).rejects.toMatchObject({ code: ErrorCode.UNKNOWN_GENERATOR });
+      expect(result.generators.map((report) => report.name)).toEqual([
+        "one",
+        "two",
+      ]);
+      expect(one.received()).toBeDefined();
+      expect(two.received()).toBeDefined();
+    });
+
+    test("fails with E_UNKNOWN_GENERATOR when a configured generator is not registered", async () => {
+      const { configFile, outputDir } = await fixture(
+        ["SW-012-a.md"],
+        ["ghost"],
+      );
+
+      await expect(
+        spec({ configFile, outputDir, resolveGenerator: () => undefined }),
+      ).rejects.toMatchObject({ code: ErrorCode.UNKNOWN_GENERATOR });
+    });
   });
 });
 
 describe("configured spec sets", () => {
-  test("groups by the configured specSets instead of by lens", async () => {
-    const { configFile, outputDir } = await fixture(
-      ["SW-012-command.md", "SW-013-scan.md", "CON-012-owned.md"],
-      ["fake"],
-      {
-        specSets: [
-          { name: "commands", pattern: "command" },
-          { name: "rest", catchAll: true },
-        ],
-      },
-    );
-    const { generator, received } = recordingGenerator("fake");
+  verifies(
+    [
+      SwTraceables.SW_015_GROUP_TRACEABLES,
+      ConTraceables.CON_013_SPEC_SET_PARTITION,
+    ],
+    () => {
+      test("groups by the configured specSets instead of by lens", async () => {
+        const { configFile, outputDir } = await fixture(
+          ["SW-012-command.md", "SW-013-scan.md", "CON-012-owned.md"],
+          ["fake"],
+          {
+            specSets: [
+              { name: "commands", pattern: "command" },
+              { name: "rest", catchAll: true },
+            ],
+          },
+        );
+        const { generator, received } = recordingGenerator("fake");
 
-    await spec({
-      configFile,
-      outputDir,
-      resolveGenerator: () => generator,
-    });
+        await spec({
+          configFile,
+          outputDir,
+          resolveGenerator: () => generator,
+        });
 
-    expect(received()?.map((specSet) => specSet.name)).toEqual([
-      "commands",
-      "rest",
-    ]);
-  });
+        expect(received()?.map((specSet) => specSet.name)).toEqual([
+          "commands",
+          "rest",
+        ]);
+      });
 
-  test("an ignore pattern excludes matching specs from generation", async () => {
-    const { configFile, outputDir } = await fixture(
-      ["SW-012-a.md", "SW-013-draft.md"],
-      ["fake"],
-      { ignore: ["draft"] },
-    );
-    const { generator, received } = recordingGenerator("fake");
+      test("an ignore pattern excludes matching specs from generation", async () => {
+        const { configFile, outputDir } = await fixture(
+          ["SW-012-a.md", "SW-013-draft.md"],
+          ["fake"],
+          { ignore: ["draft"] },
+        );
+        const { generator, received } = recordingGenerator("fake");
 
-    const result = await spec({
-      configFile,
-      outputDir,
-      resolveGenerator: () => generator,
-    });
+        const result = await spec({
+          configFile,
+          outputDir,
+          resolveGenerator: () => generator,
+        });
 
-    expect(result.traceableCount).toBe(2);
-    expect(received()).toEqual([
-      {
-        name: "SW",
-        traceables: [{ id: "SW-012", lens: "SW", filename: "SW-012-a.md" }],
-      },
-    ]);
-  });
+        expect(result.traceableCount).toBe(2);
+        expect(received()).toEqual([
+          {
+            name: "SW",
+            traceables: [{ id: "SW-012", lens: "SW", filename: "SW-012-a.md" }],
+          },
+        ]);
+      });
 
-  test("surfaces an unmatched traceable as E_SPEC_SET_UNMATCHED", async () => {
-    const { configFile, outputDir } = await fixture(
-      ["SW-012-a.md", "CON-012-b.md"],
-      ["fake"],
-      { specSets: [{ name: "sw", pattern: "^SW-" }] },
-    );
-    const { generator } = recordingGenerator("fake");
+      test("surfaces an unmatched traceable as E_SPEC_SET_UNMATCHED", async () => {
+        const { configFile, outputDir } = await fixture(
+          ["SW-012-a.md", "CON-012-b.md"],
+          ["fake"],
+          { specSets: [{ name: "sw", pattern: "^SW-" }] },
+        );
+        const { generator } = recordingGenerator("fake");
 
-    await expect(
-      spec({ configFile, outputDir, resolveGenerator: () => generator }),
-    ).rejects.toMatchObject({ code: ErrorCode.SPEC_SET_UNMATCHED });
-  });
+        await expect(
+          spec({ configFile, outputDir, resolveGenerator: () => generator }),
+        ).rejects.toMatchObject({ code: ErrorCode.SPEC_SET_UNMATCHED });
+      });
+    },
+  );
 });
 
 describe("pruning stale output", () => {
-  test("removes a previously-generated file that is no longer emitted, keeping non-generated files (CON-012)", async () => {
-    const { configFile, outputDir } = await fixture(["SW-012-a.md"], ["fake"]);
-    const { generator } = recordingGenerator("fake");
-    // The fake writes to the project root (defaultOutputDir "."); seed that dir.
-    await mkdir(outputDir, { recursive: true });
-    const stale = join(outputDir, "StaleTraceables.ts");
-    const handwritten = join(outputDir, "keep.ts");
-    await writeFile(
-      stale,
-      `/*\n * THIS FILE IS ${GENERATED_MARKER} - DO NOT EDIT MANUALLY\n */\nexport enum Stale {}\n`,
-      "utf8",
-    );
-    await writeFile(handwritten, "export const x = 1;\n", "utf8");
+  verifies(ConTraceables.CON_012_GENERATED_FILES_TOOL_OWNED, () => {
+    test("removes a previously-generated file that is no longer emitted, keeping non-generated files (CON-012)", async () => {
+      const { configFile, outputDir } = await fixture(
+        ["SW-012-a.md"],
+        ["fake"],
+      );
+      const { generator } = recordingGenerator("fake");
+      // The fake writes to the project root (defaultOutputDir "."); seed that dir.
+      await mkdir(outputDir, { recursive: true });
+      const stale = join(outputDir, "StaleTraceables.ts");
+      const handwritten = join(outputDir, "keep.ts");
+      await writeFile(
+        stale,
+        `/*\n * THIS FILE IS ${GENERATED_MARKER} - DO NOT EDIT MANUALLY\n */\nexport enum Stale {}\n`,
+        "utf8",
+      );
+      await writeFile(handwritten, "export const x = 1;\n", "utf8");
 
-    await spec({ configFile, outputDir, resolveGenerator: () => generator });
+      await spec({ configFile, outputDir, resolveGenerator: () => generator });
 
-    // The stale generated file is pruned; the hand-written file and the emitted file remain.
-    await expect(readFile(stale, "utf8")).rejects.toThrow();
-    expect(await readFile(handwritten, "utf8")).toContain("const x");
-    expect(await readFile(join(outputDir, "fake.txt"), "utf8")).toBe(
-      "SW: SW-012",
-    );
+      // The stale generated file is pruned; the hand-written file and the emitted file remain.
+      await expect(readFile(stale, "utf8")).rejects.toThrow();
+      expect(await readFile(handwritten, "utf8")).toContain("const x");
+      expect(await readFile(join(outputDir, "fake.txt"), "utf8")).toBe(
+        "SW: SW-012",
+      );
+    });
   });
 });

@@ -53,6 +53,9 @@ importers:
       '@ariadne-thread/gen-typescript':
         specifier: workspace:*
         version: link:../gen-typescript
+      '@ariadne-thread/trace':
+        specifier: workspace:*
+        version: link:../trace
       commander:
         specifier: ^15.0.0
         version: 15.0.0
@@ -77,12 +80,18 @@ importers:
       '@ariadne-thread/core':
         specifier: workspace:*
         version: link:../core
+      '@ariadne-thread/trace':
+        specifier: workspace:*
+        version: link:../trace
 
   packages/gen-typescript:
     dependencies:
       '@ariadne-thread/core':
         specifier: workspace:*
         version: link:../core
+      '@ariadne-thread/trace':
+        specifier: workspace:*
+        version: link:../trace
 
   packages/trace: {}
 

@@ -1,6 +1,7 @@
 import type { Dirent } from "node:fs";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
 import type { SpecSetMatcher } from "./config.js";
 import {
   readGenerators,
@@ -55,86 +56,91 @@ export type SpecResult = {
  * yields byte-identical output, and a generated file is overwritten on each run
  * (CON-012).
  */
-export async function spec(options: SpecOptions): Promise<SpecResult> {
-  const { configFile } = options;
-  const projectRoot = options.outputDir ?? ".";
-  // These reads are independent; run them concurrently rather than serially.
-  const [traceables, matchers, ignorePatterns, generatorConfigs] =
-    await Promise.all([
-      scan({ configFile }),
-      resolveMatchers(configFile),
-      readIgnore(configFile),
-      readGenerators(configFile),
-    ]);
-  const specSets = groupIntoSpecSets(traceables, matchers, ignorePatterns);
+export const spec: (options: SpecOptions) => Promise<SpecResult> = traces(
+  SwTraceables.SW_014_GENERATE_TRACEABLES,
+  async (options: SpecOptions): Promise<SpecResult> => {
+    const { configFile } = options;
+    const projectRoot = options.outputDir ?? ".";
+    // These reads are independent; run them concurrently rather than serially.
+    const [traceables, matchers, ignorePatterns, generatorConfigs] =
+      await Promise.all([
+        scan({ configFile }),
+        resolveMatchers(configFile),
+        readIgnore(configFile),
+        readGenerators(configFile),
+      ]);
+    const specSets = groupIntoSpecSets(traceables, matchers, ignorePatterns);
 
-  const reports: GeneratorReport[] = [];
-  // The set of files written under each write-root this run, so stale files can be pruned.
-  const writtenByRoot = new Map<string, Set<string>>();
-  for (const config of generatorConfigs) {
-    const generator = resolveOrThrow(config.type, options.resolveGenerator);
-    const outputDir = config.outputDir ?? generator.defaultOutputDir;
-    const writeRoot = join(projectRoot, outputDir);
-    const files = await generator.generate(specSets, { outputDir });
-    await Promise.all(files.map((file) => writeGeneratedFile(writeRoot, file)));
+    const reports: GeneratorReport[] = [];
+    // The set of files written under each write-root this run, so stale files can be pruned.
+    const writtenByRoot = new Map<string, Set<string>>();
+    for (const config of generatorConfigs) {
+      const generator = resolveOrThrow(config.type, options.resolveGenerator);
+      const outputDir = config.outputDir ?? generator.defaultOutputDir;
+      const writeRoot = join(projectRoot, outputDir);
+      const files = await generator.generate(specSets, { outputDir });
+      await Promise.all(
+        files.map((file) => writeGeneratedFile(writeRoot, file)),
+      );
 
-    const written = writtenByRoot.get(writeRoot) ?? new Set<string>();
-    for (const file of files) {
-      written.add(file.path);
+      const written = writtenByRoot.get(writeRoot) ?? new Set<string>();
+      for (const file of files) {
+        written.add(file.path);
+      }
+      writtenByRoot.set(writeRoot, written);
+      reports.push({
+        name: config.type,
+        outputDir,
+        files: files.map((file) => file.path),
+      });
     }
-    writtenByRoot.set(writeRoot, written);
-    reports.push({
-      name: config.type,
-      outputDir,
-      files: files.map((file) => file.path),
-    });
-  }
 
-  // Remove files this tool generated in a previous run that are no longer emitted
-  // (e.g. a spec set that disappeared), so a removed id stops compiling (CON-012).
-  await Promise.all(
-    [...writtenByRoot].map(([writeRoot, written]) =>
-      pruneStaleGenerated(writeRoot, written),
-    ),
-  );
+    // Remove files this tool generated in a previous run that are no longer emitted
+    // (e.g. a spec set that disappeared), so a removed id stops compiling (CON-012).
+    await Promise.all(
+      [...writtenByRoot].map(([writeRoot, written]) =>
+        pruneStaleGenerated(writeRoot, written),
+      ),
+    );
 
-  return {
-    traceableCount: traceables.length,
-    specSetCount: specSets.length,
-    generators: reports,
-  };
-}
+    return {
+      traceableCount: traceables.length,
+      specSetCount: specSets.length,
+      generators: reports,
+    };
+  },
+);
 
 /**
  * Deletes files in `writeRoot` that carry the generated marker but were not
  * written this run — the tool's own stale output from a prior run. A file the
  * tool did not generate (no marker) is never touched.
  */
-async function pruneStaleGenerated(
-  writeRoot: string,
-  written: ReadonlySet<string>,
-): Promise<void> {
-  let entries: Dirent[];
-  try {
-    entries = await readdir(writeRoot, { withFileTypes: true });
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return;
-    }
-    throw error;
-  }
-  await Promise.all(
-    entries.map(async (entry) => {
-      if (entry.isFile() && !written.has(entry.name)) {
-        const path = join(writeRoot, entry.name);
-        const contents = await readFile(path, "utf8");
-        if (contents.includes(GENERATED_MARKER)) {
-          await rm(path);
-        }
+const pruneStaleGenerated = traces(
+  ConTraceables.CON_012_GENERATED_FILES_TOOL_OWNED,
+  async (writeRoot: string, written: ReadonlySet<string>): Promise<void> => {
+    let entries: Dirent[];
+    try {
+      entries = await readdir(writeRoot, { withFileTypes: true });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        return;
       }
-    }),
-  );
-}
+      throw error;
+    }
+    await Promise.all(
+      entries.map(async (entry) => {
+        if (entry.isFile() && !written.has(entry.name)) {
+          const path = join(writeRoot, entry.name);
+          const contents = await readFile(path, "utf8");
+          if (contents.includes(GENERATED_MARKER)) {
+            await rm(path);
+          }
+        }
+      }),
+    );
+  },
+);
 
 /**
  * Resolves the spec-set matchers: the configured `specSets` when a project

@@ -1,4 +1,5 @@
 import { requireConfig, spec } from "@ariadne-thread/core";
+import { SwTraceables, traces } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 import { createGeneratorRegistry } from "../generators.js";
 
@@ -12,28 +13,33 @@ import { createGeneratorRegistry } from "../generators.js";
  * produced to stdout. Any error propagates to the bin entry, which writes it to
  * stderr and exits non-zero.
  */
-export function registerSpec(program: Command): void {
-  program
-    .command("spec")
-    .description("Generate traceables and anchoring utilities from the specs.")
-    .allowExcessArguments(false)
-    .action(async () => {
-      await requireConfig();
-      const registry = createGeneratorRegistry();
-      const result = await spec({
-        resolveGenerator: (name) => registry.get(name),
-      });
-      process.stdout.write(
-        `Scanned ${result.traceableCount} traceables in ${result.specSetCount} spec sets.\n`,
-      );
-      if (result.generators.length === 0) {
-        process.stdout.write("No generators configured; nothing emitted.\n");
-        return;
-      }
-      for (const { name, outputDir, files } of result.generators) {
+export const registerSpec: (program: Command) => void = traces(
+  SwTraceables.SW_012_SPEC_COMMAND,
+  (program: Command): void => {
+    program
+      .command("spec")
+      .description(
+        "Generate traceables and anchoring utilities from the specs.",
+      )
+      .allowExcessArguments(false)
+      .action(async () => {
+        await requireConfig();
+        const registry = createGeneratorRegistry();
+        const result = await spec({
+          resolveGenerator: (name) => registry.get(name),
+        });
         process.stdout.write(
-          `  ${name} -> ${outputDir}: ${files.join(", ")}\n`,
+          `Scanned ${result.traceableCount} traceables in ${result.specSetCount} spec sets.\n`,
         );
-      }
-    });
-}
+        if (result.generators.length === 0) {
+          process.stdout.write("No generators configured; nothing emitted.\n");
+          return;
+        }
+        for (const { name, outputDir, files } of result.generators) {
+          process.stdout.write(
+            `  ${name} -> ${outputDir}: ${files.join(", ")}\n`,
+          );
+        }
+      });
+  },
+);

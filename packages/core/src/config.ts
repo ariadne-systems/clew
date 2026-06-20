@@ -1,4 +1,5 @@
 import { readFile, stat } from "node:fs/promises";
+import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
 import { AriadneError, ErrorCode } from "./errors.js";
 
 /** Default location of the project configuration file. */
@@ -284,30 +285,34 @@ export async function configExists(
  * command-level precondition; the readers above still default an absent value
  * within a present configuration.
  */
-export async function requireConfig(
-  file: string = DEFAULT_CONFIG_FILE,
-): Promise<void> {
-  if (!(await configExists(file))) {
-    throw new AriadneError(
-      ErrorCode.NO_CONFIG,
-      `No configuration found at ${file}. Run \`ariadne setup\` to create one.`,
-    );
-  }
-}
-
-/** Reads and parses `.ariadnerc.json`; a missing file resolves to an empty config. */
-async function readRawConfig(file: string): Promise<Record<string, unknown>> {
-  let raw: string;
-  try {
-    raw = await readFile(file, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return {};
+export const requireConfig: (file?: string) => Promise<void> = traces(
+  ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG,
+  async (file: string = DEFAULT_CONFIG_FILE): Promise<void> => {
+    if (!(await configExists(file))) {
+      throw new AriadneError(
+        ErrorCode.NO_CONFIG,
+        `No configuration found at ${file}. Run \`ariadne setup\` to create one.`,
+      );
     }
-    throw error;
-  }
-  return JSON.parse(raw) as Record<string, unknown>;
-}
+  },
+);
+
+/** Reads and parses `.ariadnerc.json`; a missing file resolves to an empty config (SW-009). */
+const readRawConfig = traces(
+  SwTraceables.SW_009_READ_CONFIGURATION,
+  async (file: string): Promise<Record<string, unknown>> => {
+    let raw: string;
+    try {
+      raw = await readFile(file, "utf8");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        return {};
+      }
+      throw error;
+    }
+    return JSON.parse(raw) as Record<string, unknown>;
+  },
+);
 
 function asObject(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)

@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 import { scan } from "./index.js";
 
@@ -39,96 +40,98 @@ async function fixture(idFilenames: string[]): Promise<Fixture> {
 }
 
 describe("scanning artifacts into traceables", () => {
-  test("yields each lens-bearing id with its lens and filename, sorted by id", async () => {
-    const { configFile } = await fixture([
-      "SW-013-scan.md",
-      "SW-012-command.md",
-      "CON-012-owned.md",
-      "STR-011-spec.md",
-    ]);
+  verifies(SwTraceables.SW_013_SCAN_TRACEABLES, () => {
+    test("yields each lens-bearing id with its lens and filename, sorted by id", async () => {
+      const { configFile } = await fixture([
+        "SW-013-scan.md",
+        "SW-012-command.md",
+        "CON-012-owned.md",
+        "STR-011-spec.md",
+      ]);
 
-    const traceables = await scan({ configFile });
+      const traceables = await scan({ configFile });
 
-    // STR-011 is a story, not a lens-bearing spec, so it is not a traceable.
-    expect(traceables).toEqual([
-      { id: "CON-012", lens: "CON", filename: "CON-012-owned.md" },
-      { id: "SW-012", lens: "SW", filename: "SW-012-command.md" },
-      { id: "SW-013", lens: "SW", filename: "SW-013-scan.md" },
-    ]);
-  });
+      // STR-011 is a story, not a lens-bearing spec, so it is not a traceable.
+      expect(traceables).toEqual([
+        { id: "CON-012", lens: "CON", filename: "CON-012-owned.md" },
+        { id: "SW-012", lens: "SW", filename: "SW-012-command.md" },
+        { id: "SW-013", lens: "SW", filename: "SW-013-scan.md" },
+      ]);
+    });
 
-  test("a non-lens id such as a story is not a traceable", async () => {
-    const { configFile } = await fixture(["SW-012-a.md", "STR-011-b.md"]);
+    test("a non-lens id such as a story is not a traceable", async () => {
+      const { configFile } = await fixture(["SW-012-a.md", "STR-011-b.md"]);
 
-    const traceables = await scan({ configFile });
+      const traceables = await scan({ configFile });
 
-    expect(traceables).toEqual([
-      { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-    ]);
-  });
+      expect(traceables).toEqual([
+        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
+      ]);
+    });
 
-  test("a non-markdown file with a lens prefix is not a traceable", async () => {
-    const { derivedDir, configFile } = await fixture(["SW-012-a.md"]);
-    await writeFile(join(derivedDir, "SW-099-notes.txt"), "x", "utf8");
+    test("a non-markdown file with a lens prefix is not a traceable", async () => {
+      const { derivedDir, configFile } = await fixture(["SW-012-a.md"]);
+      await writeFile(join(derivedDir, "SW-099-notes.txt"), "x", "utf8");
 
-    const traceables = await scan({ configFile });
+      const traceables = await scan({ configFile });
 
-    expect(traceables).toEqual([
-      { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-    ]);
-  });
+      expect(traceables).toEqual([
+        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
+      ]);
+    });
 
-  test("a file whose prefix is not configured contributes no traceable", async () => {
-    const { derivedDir, configFile } = await fixture(["SW-012-a.md"]);
-    await writeFile(join(derivedDir, "ADR-0002-x.md"), "x", "utf8");
+    test("a file whose prefix is not configured contributes no traceable", async () => {
+      const { derivedDir, configFile } = await fixture(["SW-012-a.md"]);
+      await writeFile(join(derivedDir, "ADR-0002-x.md"), "x", "utf8");
 
-    const traceables = await scan({ configFile });
+      const traceables = await scan({ configFile });
 
-    expect(traceables).toEqual([
-      { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-    ]);
-  });
+      expect(traceables).toEqual([
+        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
+      ]);
+    });
 
-  test("a temporary id is not a traceable", async () => {
-    const { configFile } = await fixture(["SW-012-a.md", "SW-TMP-abc123.md"]);
+    test("a temporary id is not a traceable", async () => {
+      const { configFile } = await fixture(["SW-012-a.md", "SW-TMP-abc123.md"]);
 
-    const traceables = await scan({ configFile });
+      const traceables = await scan({ configFile });
 
-    expect(traceables).toEqual([
-      { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-    ]);
-  });
+      expect(traceables).toEqual([
+        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
+      ]);
+    });
 
-  test("removing a spec removes its traceable; adding one adds it", async () => {
-    const { derivedDir, configFile } = await fixture(["SW-012-a.md"]);
+    test("removing a spec removes its traceable; adding one adds it", async () => {
+      const { derivedDir, configFile } = await fixture(["SW-012-a.md"]);
 
-    const before = await scan({ configFile });
-    expect(before).toEqual([
-      { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-    ]);
+      const before = await scan({ configFile });
+      expect(before).toEqual([
+        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
+      ]);
 
-    await writeFile(join(derivedDir, "SW-013-b.md"), "x", "utf8");
-    const added = await scan({ configFile });
-    expect(added).toEqual([
-      { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-      { id: "SW-013", lens: "SW", filename: "SW-013-b.md" },
-    ]);
+      await writeFile(join(derivedDir, "SW-013-b.md"), "x", "utf8");
+      const added = await scan({ configFile });
+      expect(added).toEqual([
+        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
+        { id: "SW-013", lens: "SW", filename: "SW-013-b.md" },
+      ]);
 
-    await rm(join(derivedDir, "SW-012-a.md"));
-    const removed = await scan({ configFile });
-    expect(removed).toEqual([
-      { id: "SW-013", lens: "SW", filename: "SW-013-b.md" },
-    ]);
-  });
+      await rm(join(derivedDir, "SW-012-a.md"));
+      const removed = await scan({ configFile });
+      expect(removed).toEqual([
+        { id: "SW-013", lens: "SW", filename: "SW-013-b.md" },
+      ]);
+    });
 
-  test("a missing configured location is skipped, not an error", async () => {
-    const { storiesDir, configFile } = await fixture(["SW-012-a.md"]);
-    await rm(storiesDir, { recursive: true });
+    test("a missing configured location is skipped, not an error", async () => {
+      const { storiesDir, configFile } = await fixture(["SW-012-a.md"]);
+      await rm(storiesDir, { recursive: true });
 
-    const traceables = await scan({ configFile });
+      const traceables = await scan({ configFile });
 
-    expect(traceables).toEqual([
-      { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-    ]);
+      expect(traceables).toEqual([
+        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
+      ]);
+    });
   });
 });

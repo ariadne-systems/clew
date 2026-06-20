@@ -1,3 +1,4 @@
+import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
 import type { Lens, SpecSetMatcher } from "./config.js";
 import { AriadneError, ErrorCode } from "./errors.js";
 import type { SpecSet, Traceable } from "./generator.js";
@@ -36,27 +37,34 @@ type CompiledMatcher = {
  * and reproducible (CON-012). With the default lens matchers every scanned
  * traceable carries a lens and so matches exactly one set.
  */
-export function groupIntoSpecSets(
+export const groupIntoSpecSets: (
   traceables: readonly Traceable[],
   matchers: readonly SpecSetMatcher[],
-  ignorePatterns: readonly string[] = [],
-): SpecSet[] {
-  const ignore = ignorePatterns.map((pattern) => new RegExp(pattern));
-  const catchAllName = matchers.find((matcher) => matcher.catchAll)?.name;
-  const normal = compileNormalMatchers(matchers);
+  ignorePatterns?: readonly string[],
+) => SpecSet[] = traces(
+  SwTraceables.SW_015_GROUP_TRACEABLES,
+  (
+    traceables: readonly Traceable[],
+    matchers: readonly SpecSetMatcher[],
+    ignorePatterns: readonly string[] = [],
+  ): SpecSet[] => {
+    const ignore = ignorePatterns.map((pattern) => new RegExp(pattern));
+    const catchAllName = matchers.find((matcher) => matcher.catchAll)?.name;
+    const normal = compileNormalMatchers(matchers);
 
-  const membersByName = new Map<string, Traceable[]>();
-  for (const traceable of traceables) {
-    if (!ignore.some((pattern) => pattern.test(traceable.filename))) {
-      appendMember(
-        membersByName,
-        resolveSet(traceable, normal, catchAllName),
-        traceable,
-      );
+    const membersByName = new Map<string, Traceable[]>();
+    for (const traceable of traceables) {
+      if (!ignore.some((pattern) => pattern.test(traceable.filename))) {
+        appendMember(
+          membersByName,
+          resolveSet(traceable, normal, catchAllName),
+          traceable,
+        );
+      }
     }
-  }
-  return toSortedSpecSets(membersByName);
-}
+    return toSortedSpecSets(membersByName);
+  },
+);
 
 /** Compiles the non-catch-all matchers; a catch-all needs no pattern (CON-013). */
 function compileNormalMatchers(
@@ -76,33 +84,36 @@ function compileNormalMatchers(
  * (CON-013): overlap and unmatched are explicit errors, and an unmatched
  * traceable joins the catch-all set when one is configured.
  */
-function resolveSet(
-  traceable: Traceable,
-  normal: readonly CompiledMatcher[],
-  catchAllName: string | undefined,
-): string {
-  const matched = normal.filter((matcher) =>
-    matcher.test.test(traceable.filename),
-  );
-  if (matched.length > 1) {
-    const names = matched.map((matcher) => matcher.name).join(", ");
-    throw new AriadneError(
-      ErrorCode.SPEC_SET_OVERLAP,
-      `Spec ${traceable.id} (${traceable.filename}) matches more than one spec set: ${names}. Adjust the patterns so each spec matches exactly one set.`,
+const resolveSet = traces(
+  ConTraceables.CON_013_SPEC_SET_PARTITION,
+  (
+    traceable: Traceable,
+    normal: readonly CompiledMatcher[],
+    catchAllName: string | undefined,
+  ): string => {
+    const matched = normal.filter((matcher) =>
+      matcher.test.test(traceable.filename),
     );
-  }
-  const [single] = matched;
-  if (single !== undefined) {
-    return single.name;
-  }
-  if (catchAllName !== undefined) {
-    return catchAllName;
-  }
-  throw new AriadneError(
-    ErrorCode.SPEC_SET_UNMATCHED,
-    `Spec ${traceable.id} (${traceable.filename}) matches no spec set. Add a matching set, an \`ignore\` pattern, or a catch-all set.`,
-  );
-}
+    if (matched.length > 1) {
+      const names = matched.map((matcher) => matcher.name).join(", ");
+      throw new AriadneError(
+        ErrorCode.SPEC_SET_OVERLAP,
+        `Spec ${traceable.id} (${traceable.filename}) matches more than one spec set: ${names}. Adjust the patterns so each spec matches exactly one set.`,
+      );
+    }
+    const [single] = matched;
+    if (single !== undefined) {
+      return single.name;
+    }
+    if (catchAllName !== undefined) {
+      return catchAllName;
+    }
+    throw new AriadneError(
+      ErrorCode.SPEC_SET_UNMATCHED,
+      `Spec ${traceable.id} (${traceable.filename}) matches no spec set. Add a matching set, an \`ignore\` pattern, or a catch-all set.`,
+    );
+  },
+);
 
 function appendMember(
   membersByName: Map<string, Traceable[]>,

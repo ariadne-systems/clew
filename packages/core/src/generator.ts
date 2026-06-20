@@ -1,3 +1,5 @@
+import { ConTraceables, traces } from "@ariadne-thread/trace";
+
 /**
  * The language emission seam (ARCH-003; STR-011).
  * Emitting the traceable symbols and the anchoring utility for a target language
@@ -91,23 +93,26 @@ const HOMEPAGE = "https://ariadne-thread.io";
  * format. The caller wraps these lines in nothing further; it returns the full
  * comment.
  */
-export function generatedHeader(
+export const generatedHeader: (
   generatorType: string,
   specSet?: string,
-): string[] {
-  const lines = [
-    "/*",
-    ` * THIS FILE IS ${GENERATED_MARKER} - DO NOT EDIT MANUALLY`,
-    " *",
-    " * Run `ariadne spec` to regenerate.",
-    " *",
-    ` * @ariadne-thread homepage: ${HOMEPAGE}`,
-    " * @ariadne-thread connector-type: req-as-code",
-    ` * @ariadne-thread generator-type: ${generatorType}`,
-  ];
-  if (specSet !== undefined) {
-    lines.push(` * @ariadne-thread spec-set: ${specSet}`);
-  }
-  lines.push(" */");
-  return lines;
-}
+) => string[] = traces(
+  ConTraceables.CON_012_GENERATED_FILES_TOOL_OWNED,
+  (generatorType: string, specSet?: string): string[] => {
+    const lines = [
+      "/*",
+      ` * THIS FILE IS ${GENERATED_MARKER} - DO NOT EDIT MANUALLY`,
+      " *",
+      " * Run `ariadne spec` to regenerate.",
+      " *",
+      ` * @ariadne-thread homepage: ${HOMEPAGE}`,
+      " * @ariadne-thread connector-type: req-as-code",
+      ` * @ariadne-thread generator-type: ${generatorType}`,
+    ];
+    if (specSet !== undefined) {
+      lines.push(` * @ariadne-thread spec-set: ${specSet}`);
+    }
+    lines.push(" */");
+    return lines;
+  },
+);

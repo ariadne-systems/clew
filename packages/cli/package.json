@@ -23,6 +23,7 @@
     "@ariadne-thread/core": "workspace:*",
     "@ariadne-thread/gen-java": "workspace:*",
     "@ariadne-thread/gen-typescript": "workspace:*",
+    "@ariadne-thread/trace": "workspace:*",
     "commander": "^15.0.0",
     "picocolors": "^1.1.1",
     "pino": "^10.3.1"

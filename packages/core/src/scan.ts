@@ -1,6 +1,7 @@
 import type { Dirent } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
+import { SwTraceables, traces } from "@ariadne-thread/trace";
 import { readLayout, readLenses } from "./config.js";
 import type { Traceable } from "./generator.js";
 
@@ -90,19 +91,22 @@ async function collectTraceables(
  * contributes no traceable. The filename is kept on the traceable so spec-set
  * matchers can select on it.
  */
-function recordTraceable(
-  filename: string,
-  lensIds: Set<string>,
-  byId: Map<string, Traceable>,
-): void {
-  const match = SPEC_FILENAME.exec(filename);
-  if (match === null) {
-    return;
-  }
-  const [, prefix, digits] = match;
-  if (prefix === undefined || digits === undefined || !lensIds.has(prefix)) {
-    return;
-  }
-  const id = `${prefix}-${digits}`;
-  byId.set(id, { id, lens: prefix, filename });
-}
+const recordTraceable = traces(
+  SwTraceables.SW_013_SCAN_TRACEABLES,
+  (
+    filename: string,
+    lensIds: Set<string>,
+    byId: Map<string, Traceable>,
+  ): void => {
+    const match = SPEC_FILENAME.exec(filename);
+    if (match === null) {
+      return;
+    }
+    const [, prefix, digits] = match;
+    if (prefix === undefined || digits === undefined || !lensIds.has(prefix)) {
+      return;
+    }
+    const id = `${prefix}-${digits}`;
+    byId.set(id, { id, lens: prefix, filename });
+  },
+);

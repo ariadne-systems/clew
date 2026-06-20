@@ -2,6 +2,7 @@ import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ErrorCode } from "@ariadne-thread/core";
+import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { buildProgram } from "../program.js";
 
@@ -44,49 +45,57 @@ async function runAriadne(...args: string[]): Promise<void> {
 }
 
 describe("promote output", () => {
-  test("finalizes a pending draft and reports the binding", async () => {
-    const dir = await setupProjectDir();
-    const stdout = captureStdout();
+  verifies(SwTraceables.SW_016_PROMOTE_COMMAND, () => {
+    test("finalizes a pending draft and reports the binding", async () => {
+      const dir = await setupProjectDir();
+      const stdout = captureStdout();
 
-    await runAriadne("promote");
+      await runAriadne("promote");
 
-    expect(stdout()).toContain("SW-TMP-deadbeef01 -> SW-001");
-    const moved = await readFile(
-      join(dir, "docs", "spec", "derived-specs", "SW-001-scan.md"),
-      "utf8",
-    );
-    expect(moved).toBe("Spec SW-001\n");
-  });
+      expect(stdout()).toContain("SW-TMP-deadbeef01 -> SW-001");
+      const moved = await readFile(
+        join(dir, "docs", "spec", "derived-specs", "SW-001-scan.md"),
+        "utf8",
+      );
+      expect(moved).toBe("Spec SW-001\n");
+    });
 
-  test("reports when there is nothing to promote", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-promote-empty-"));
-    await writeFile(join(dir, ".ariadnerc.json"), JSON.stringify({}), "utf8");
-    process.chdir(dir);
-    const stdout = captureStdout();
+    test("reports when there is nothing to promote", async () => {
+      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-promote-empty-"));
+      await writeFile(join(dir, ".ariadnerc.json"), JSON.stringify({}), "utf8");
+      process.chdir(dir);
+      const stdout = captureStdout();
 
-    await runAriadne("promote");
+      await runAriadne("promote");
 
-    expect(stdout()).toContain("No pending drafts to promote.");
+      expect(stdout()).toContain("No pending drafts to promote.");
+    });
   });
 });
 
 describe("promote invalid invocation", () => {
-  test("an unknown option exits non-zero", () => {
-    const program = buildProgram().exitOverride();
+  verifies(SwTraceables.SW_016_PROMOTE_COMMAND, () => {
+    test("an unknown option exits non-zero", () => {
+      const program = buildProgram().exitOverride();
 
-    expect(() =>
-      program.parse(["node", "ariadne", "promote", "--bogus"]),
-    ).toThrow();
+      expect(() =>
+        program.parse(["node", "ariadne", "promote", "--bogus"]),
+      ).toThrow();
+    });
   });
 });
 
 describe("configuration required", () => {
-  test("promote fails with code E_NO_CONFIG when no configuration is present", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-promote-noconfig-"));
-    process.chdir(dir);
+  verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
+    test("promote fails with code E_NO_CONFIG when no configuration is present", async () => {
+      const dir = await mkdtemp(
+        join(tmpdir(), "ariadne-cli-promote-noconfig-"),
+      );
+      process.chdir(dir);
 
-    await expect(runAriadne("promote")).rejects.toMatchObject({
-      code: ErrorCode.NO_CONFIG,
+      await expect(runAriadne("promote")).rejects.toMatchObject({
+        code: ErrorCode.NO_CONFIG,
+      });
     });
   });
 });

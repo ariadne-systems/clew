@@ -1,3 +1,4 @@
+import { SwTraceables, traces } from "@ariadne-thread/trace";
 import { AriadneError, ErrorCode } from "./errors.js";
 import type { IdStrategy } from "./id-strategy.js";
 import { withState } from "./state.js";
@@ -13,6 +14,7 @@ export type SequentialIdStrategyOptions = {
  * Sequential id scheme (SW-002): renders ids as `<PREFIX>-<zero-padded number>`,
  * with the numbers drawn from the per-prefix sequence allocator (SW-001).
  */
+@traces(SwTraceables.SW_002_MINT_SEQUENTIAL_IDS)
 export class SequentialIdStrategy implements IdStrategy {
   readonly #padding: number;
   readonly #stateFile: string | undefined;
@@ -49,16 +51,19 @@ export class SequentialIdStrategy implements IdStrategy {
  * Allocates `count` consecutive numbers for `prefix` and advances its
  * high-water mark (SW-001). A prefix used for the first time begins at 1.
  */
-function allocateConsecutive(
-  sequences: Record<string, number>,
-  prefix: string,
-  count: number,
-): number[] {
-  const highWaterMark = sequences[prefix] ?? 0;
-  const allocated = Array.from(
-    { length: count },
-    (_unused, offset) => highWaterMark + 1 + offset,
-  );
-  sequences[prefix] = highWaterMark + count;
-  return allocated;
-}
+const allocateConsecutive = traces(
+  SwTraceables.SW_001_ALLOCATE_SEQUENCE_NUMBERS,
+  (
+    sequences: Record<string, number>,
+    prefix: string,
+    count: number,
+  ): number[] => {
+    const highWaterMark = sequences[prefix] ?? 0;
+    const allocated = Array.from(
+      { length: count },
+      (_unused, offset) => highWaterMark + 1 + offset,
+    );
+    sequences[prefix] = highWaterMark + count;
+    return allocated;
+  },
+);

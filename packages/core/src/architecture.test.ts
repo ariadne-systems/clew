@@ -1,6 +1,7 @@
 import type { Dirent } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { ArchTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 
 // Collects the core's production sources (every `.ts` under src, excluding test
@@ -20,18 +21,20 @@ async function collectSourceFiles(dir: string): Promise<string[]> {
 }
 
 describe("core depends on no concrete generator (ARCH-003)", () => {
-  test("no core source imports a concrete generator package", async () => {
-    const sources = await collectSourceFiles(import.meta.dirname);
-    const forbidden = "@ariadne-thread/gen-";
+  verifies(ArchTraceables.ARCH_003_GENERATOR_INTERFACE, () => {
+    test("no core source imports a concrete generator package", async () => {
+      const sources = await collectSourceFiles(import.meta.dirname);
+      const forbidden = "@ariadne-thread/gen-";
 
-    const offenders: string[] = [];
-    for (const source of sources) {
-      const contents = await readFile(source, "utf8");
-      if (contents.includes(forbidden)) {
-        offenders.push(source);
+      const offenders: string[] = [];
+      for (const source of sources) {
+        const contents = await readFile(source, "utf8");
+        if (contents.includes(forbidden)) {
+          offenders.push(source);
+        }
       }
-    }
 
-    expect(offenders).toEqual([]);
+      expect(offenders).toEqual([]);
+    });
   });
 });

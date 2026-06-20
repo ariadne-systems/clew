@@ -1,4 +1,5 @@
 import { setup } from "@ariadne-thread/core";
+import { SwTraceables, traces } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
@@ -8,22 +9,26 @@ import type { Command } from "commander";
  * (CON-010). Any error propagates to the bin entry, which writes it to stderr
  * and exits non-zero.
  */
-export function registerSetup(program: Command): void {
-  program
-    .command("setup")
-    .description("Scaffold the default configuration and layout.")
-    .allowExcessArguments(false)
-    .action(async () => {
-      const result = await setup();
-      if (!result.created) {
+export const registerSetup: (program: Command) => void = traces(
+  SwTraceables.SW_010_SETUP_COMMAND,
+  (program: Command): void => {
+    program
+      .command("setup")
+      .description("Scaffold the default configuration and layout.")
+      .allowExcessArguments(false)
+      .action(async () => {
+        const result = await setup();
+        if (!result.created) {
+          process.stdout.write(
+            `Configuration already exists at ${result.configFile}; nothing changed.\n`,
+          );
+          return;
+        }
+        const dirs = result.directories
+          .map((dir) => `      ${dir}/`)
+          .join("\n");
         process.stdout.write(
-          `Configuration already exists at ${result.configFile}; nothing changed.\n`,
-        );
-        return;
-      }
-      const dirs = result.directories.map((dir) => `      ${dir}/`).join("\n");
-      process.stdout.write(
-        `Created ${result.configFile} with the default configuration.
+          `Created ${result.configFile} with the default configuration.
 
 Created the layout directories:
 ${dirs}
@@ -38,6 +43,7 @@ Next steps:
   2. Run \`ariadne mint <LENS>\` to allocate your first id (for example \`ariadne mint SW\`).
   3. Commit ${result.configFile} and .ariadne/state.json so the team shares them.
 `,
-      );
-    });
-}
+        );
+      });
+  },
+);

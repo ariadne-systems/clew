@@ -1,3 +1,5 @@
+import { ArchTraceables, traces } from "@ariadne-thread/trace";
+
 /**
  * Stable, mnemonic error codes (ARCH-002).
  * A released code is never reused for a different condition and never renamed
@@ -34,6 +36,7 @@ export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
  * human-readable message (ARCH-002). The code is the failure's identity and is
  * what consumers branch on; the message is for humans and may be reworded.
  */
+@traces(ArchTraceables.ARCH_002_STABLE_ERROR_CODES)
 export class AriadneError extends Error {
   readonly code: ErrorCode;
 

@@ -3,6 +3,7 @@
  * TypeScript and Java generators producing the same symbol for the same spec, and
  * the sanitization that guarantees a *valid* identifier in one place.
  */
+import { SwTraceables, traces } from "@ariadne-thread/trace";
 
 /** Renders a name such as `SW` or `commands` as a PascalCase identifier fragment. */
 export function toPascalCase(name: string): string {
@@ -32,7 +33,10 @@ export function toIdentifier(value: string): string {
  * generator names the same traceable identically (SW-014), e.g.
  * `SW-002-mint-ids.md` → `SW_002_MINT_IDS`.
  */
-export function toMemberName(filename: string): string {
-  const withoutExtension = filename.replace(/\.[^.]+$/, "");
-  return toIdentifier(withoutExtension).toUpperCase();
-}
+export const toMemberName: (filename: string) => string = traces(
+  SwTraceables.SW_014_GENERATE_TRACEABLES,
+  (filename: string): string => {
+    const withoutExtension = filename.replace(/\.[^.]+$/, "");
+    return toIdentifier(withoutExtension).toUpperCase();
+  },
+);

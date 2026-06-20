@@ -10,6 +10,7 @@ import {
   toMemberName,
   toPascalCase,
 } from "@ariadne-thread/core";
+import { ArchTraceables, traces } from "@ariadne-thread/trace";
 
 /** This generator's type — its name and the `generator-type` in the provenance header. */
 const GENERATOR_TYPE = "java";
@@ -25,18 +26,21 @@ const OUTPUT_PATH = "Traceables.java";
  * configured output directory so the file compiles where it lands. This is a
  * first working emission, not a complete generator.
  */
-export function createJavaGenerator(): Generator {
-  return {
-    name: GENERATOR_TYPE,
-    defaultOutputDir: "src/main/java/ariadne/traceables",
-    generate(
-      specSets: readonly SpecSet[],
-      context: GenerateContext,
-    ): Promise<readonly GeneratedFile[]> {
-      return Promise.resolve([renderTraceablesFile(specSets, context)]);
-    },
-  };
-}
+export const createJavaGenerator: () => Generator = traces(
+  ArchTraceables.ARCH_003_GENERATOR_INTERFACE,
+  (): Generator => {
+    return {
+      name: GENERATOR_TYPE,
+      defaultOutputDir: "src/main/java/ariadne/traceables",
+      generate(
+        specSets: readonly SpecSet[],
+        context: GenerateContext,
+      ): Promise<readonly GeneratedFile[]> {
+        return Promise.resolve([renderTraceablesFile(specSets, context)]);
+      },
+    };
+  },
+);
 
 function renderTraceablesFile(
   specSets: readonly SpecSet[],
