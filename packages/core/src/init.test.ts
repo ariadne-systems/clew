@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 import { init, mint } from "./index.js";
 
@@ -56,90 +57,104 @@ async function readMarks(stateFile: string): Promise<Record<string, number>> {
 }
 
 describe("deriving high-water marks", () => {
-  test("records the highest number per prefix from the artifact filenames", async () => {
-    const { configFile, stateFile } = await fixture([
-      "STR-001-a.md",
-      "STR-007-b.md",
-      "SW-003-c.md",
-      "SW-005-d.md",
-      "CON-008-e.md",
-      "ARCH-002-f.md",
-      "NF-002-g.md",
-    ]);
+  verifies(
+    [
+      SwTraceables.SW_006_DERIVE_HIGH_WATER_MARKS,
+      ConTraceables.CON_007_TEMPORARY_ID_UNBOUND,
+    ],
+    () => {
+      test("records the highest number per prefix from the artifact filenames", async () => {
+        const { configFile, stateFile } = await fixture([
+          "STR-001-a.md",
+          "STR-007-b.md",
+          "SW-003-c.md",
+          "SW-005-d.md",
+          "CON-008-e.md",
+          "ARCH-002-f.md",
+          "NF-002-g.md",
+        ]);
 
-    const result = await init({ configFile, stateFile });
+        const result = await init({ configFile, stateFile });
 
-    expect(result.marks).toEqual({ STR: 7, SW: 5, CON: 8, ARCH: 2, NF: 2 });
-  });
+        expect(result.marks).toEqual({ STR: 7, SW: 5, CON: 8, ARCH: 2, NF: 2 });
+      });
 
-  test("a prefix with no artifacts contributes no mark", async () => {
-    const { configFile, stateFile } = await fixture(["SW-002-a.md"]);
+      test("a prefix with no artifacts contributes no mark", async () => {
+        const { configFile, stateFile } = await fixture(["SW-002-a.md"]);
 
-    const result = await init({ configFile, stateFile });
+        const result = await init({ configFile, stateFile });
 
-    expect(result.marks).toEqual({ SW: 2 });
-    expect(result.marks.CON).toBeUndefined();
-  });
+        expect(result.marks).toEqual({ SW: 2 });
+        expect(result.marks.CON).toBeUndefined();
+      });
 
-  test("a temporary id filename does not advance a mark", async () => {
-    const { configFile, stateFile } = await fixture([
-      "SW-005-a.md",
-      "SW-TMP-abc123.md",
-    ]);
+      test("a temporary id filename does not advance a mark", async () => {
+        const { configFile, stateFile } = await fixture([
+          "SW-005-a.md",
+          "SW-TMP-abc123.md",
+        ]);
 
-    const result = await init({ configFile, stateFile });
+        const result = await init({ configFile, stateFile });
 
-    expect(result.marks.SW).toBe(5);
-  });
+        expect(result.marks.SW).toBe(5);
+      });
 
-  test("a file whose prefix is not configured is not counted", async () => {
-    const { derivedDir, configFile, stateFile } = await fixture([
-      "SW-005-a.md",
-    ]);
-    // A non-lens prefix (e.g. an ADR) sitting in a scanned directory.
-    await writeFile(join(derivedDir, "ADR-0002-x.md"), "x", "utf8");
-    await writeFile(join(derivedDir, "ZZZ-009-y.md"), "x", "utf8");
+      test("a file whose prefix is not configured is not counted", async () => {
+        const { derivedDir, configFile, stateFile } = await fixture([
+          "SW-005-a.md",
+        ]);
+        // A non-lens prefix (e.g. an ADR) sitting in a scanned directory.
+        await writeFile(join(derivedDir, "ADR-0002-x.md"), "x", "utf8");
+        await writeFile(join(derivedDir, "ZZZ-009-y.md"), "x", "utf8");
 
-    const result = await init({ configFile, stateFile });
+        const result = await init({ configFile, stateFile });
 
-    expect(result.marks).toEqual({ SW: 5 });
-    expect(result.marks.ADR).toBeUndefined();
-    expect(result.marks.ZZZ).toBeUndefined();
-  });
+        expect(result.marks).toEqual({ SW: 5 });
+        expect(result.marks.ADR).toBeUndefined();
+        expect(result.marks.ZZZ).toBeUndefined();
+      });
+    },
+  );
 });
 
 describe("reconciliation", () => {
-  test("raises a mark that is below the discovered max", async () => {
-    const { configFile, stateFile } = await fixture(["SW-005-a.md"], { SW: 3 });
+  verifies(ConTraceables.CON_009_RECONCILE_NEVER_LOWERS, () => {
+    test("raises a mark that is below the discovered max", async () => {
+      const { configFile, stateFile } = await fixture(["SW-005-a.md"], {
+        SW: 3,
+      });
 
-    const result = await init({ configFile, stateFile });
+      const result = await init({ configFile, stateFile });
 
-    expect(result.marks.SW).toBe(5);
-    expect(result.raised).toEqual([{ prefix: "SW", from: 3, to: 5 }]);
-    expect(await readMarks(stateFile)).toEqual({ SW: 5 });
-  });
+      expect(result.marks.SW).toBe(5);
+      expect(result.raised).toEqual([{ prefix: "SW", from: 3, to: 5 }]);
+      expect(await readMarks(stateFile)).toEqual({ SW: 5 });
+    });
 
-  test("never lowers an existing mark (CON-009)", async () => {
-    const { configFile, stateFile } = await fixture(["SW-005-a.md"], { SW: 9 });
+    test("never lowers an existing mark (CON-009)", async () => {
+      const { configFile, stateFile } = await fixture(["SW-005-a.md"], {
+        SW: 9,
+      });
 
-    const result = await init({ configFile, stateFile });
+      const result = await init({ configFile, stateFile });
 
-    expect(result.marks.SW).toBe(9);
-    expect(result.raised).toEqual([]);
-    expect(await readMarks(stateFile)).toEqual({ SW: 9 });
-  });
+      expect(result.marks.SW).toBe(9);
+      expect(result.raised).toEqual([]);
+      expect(await readMarks(stateFile)).toEqual({ SW: 9 });
+    });
 
-  test("is idempotent: a second run on an unchanged project changes nothing", async () => {
-    const { configFile, stateFile } = await fixture([
-      "SW-005-a.md",
-      "STR-007-b.md",
-    ]);
+    test("is idempotent: a second run on an unchanged project changes nothing", async () => {
+      const { configFile, stateFile } = await fixture([
+        "SW-005-a.md",
+        "STR-007-b.md",
+      ]);
 
-    await init({ configFile, stateFile });
-    const second = await init({ configFile, stateFile });
+      await init({ configFile, stateFile });
+      const second = await init({ configFile, stateFile });
 
-    expect(second.raised).toEqual([]);
-    expect(second.marks).toEqual({ SW: 5, STR: 7 });
+      expect(second.raised).toEqual([]);
+      expect(second.marks).toEqual({ SW: 5, STR: 7 });
+    });
   });
 });
 

@@ -1,6 +1,7 @@
 import type { Dirent } from "node:fs";
 import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
 import type { Layout } from "./config.js";
 import { readLayout, readLenses } from "./config.js";
 import { AriadneError, ErrorCode } from "./errors.js";
@@ -53,57 +54,59 @@ const TEMPORARY_DRAFT_FILENAME = /^([A-Z]+)-TMP-[0-9a-f]+/;
  * so a failure never leaves a half-substituted tree (STR-013). It performs no
  * integration reasoning and does not commit.
  */
-export async function promote(
-  options: PromoteOptions = {},
-): Promise<PromoteResult> {
-  const [layout, lenses] = await Promise.all([
-    readLayout(options.configFile),
-    readLenses(options.configFile),
-  ]);
-  const lensIds = new Set(lenses.map((lens) => lens.id));
+export const promote: (options?: PromoteOptions) => Promise<PromoteResult> =
+  traces(
+    SwTraceables.SW_017_FINALIZE_DRAFTS,
+    async (options: PromoteOptions = {}): Promise<PromoteResult> => {
+      const [layout, lenses] = await Promise.all([
+        readLayout(options.configFile),
+        readLenses(options.configFile),
+      ]);
+      const lensIds = new Set(lenses.map((lens) => lens.id));
 
-  const pending = await discoverDrafts(layout.drafts.dir);
-  const selected = selectDrafts(pending, options.drafts);
-  if (selected.length === 0) {
-    return { promoted: [] };
-  }
+      const pending = await discoverDrafts(layout.drafts.dir);
+      const selected = selectDrafts(pending, options.drafts);
+      if (selected.length === 0) {
+        return { promoted: [] };
+      }
 
-  // Resolve every target before binding any id, so nothing is spent on a draft
-  // that cannot be placed (STR-013).
-  const targets = selected.map((draft) => ({
-    draft,
-    targetDir: resolveTargetDir(draft.prefix, layout, lensIds),
-  }));
+      // Resolve every target before binding any id, so nothing is spent on a
+      // draft that cannot be placed (STR-013).
+      const targets = selected.map((draft) => ({
+        draft,
+        targetDir: resolveTargetDir(draft.prefix, layout, lensIds),
+      }));
 
-  const promoted: PromotedDraft[] = [];
-  const substitutions = new Map<string, string>();
-  for (const { draft, targetDir } of targets) {
-    const ids = await mint(draft.prefix, 1, {
-      configFile: options.configFile,
-      stateFile: options.stateFile,
-    });
-    const boundId = ids[0];
-    if (boundId === undefined) {
-      throw new Error(`Minting produced no id for ${draft.temporaryId}.`);
-    }
-    substitutions.set(draft.temporaryId, boundId);
-    promoted.push({
-      temporaryId: draft.temporaryId,
-      boundId,
-      from: draft.path,
-      to: join(targetDir, `${boundId}${draft.slug}`),
-    });
-  }
+      const promoted: PromotedDraft[] = [];
+      const substitutions = new Map<string, string>();
+      for (const { draft, targetDir } of targets) {
+        const ids = await mint(draft.prefix, 1, {
+          configFile: options.configFile,
+          stateFile: options.stateFile,
+        });
+        const boundId = ids[0];
+        if (boundId === undefined) {
+          throw new Error(`Minting produced no id for ${draft.temporaryId}.`);
+        }
+        substitutions.set(draft.temporaryId, boundId);
+        promoted.push({
+          temporaryId: draft.temporaryId,
+          boundId,
+          from: draft.path,
+          to: join(targetDir, `${boundId}${draft.slug}`),
+        });
+      }
 
-  await substituteProjectWide(layout, substitutions);
+      await substituteProjectWide(layout, substitutions);
 
-  for (const entry of promoted) {
-    await mkdir(dirname(entry.to), { recursive: true });
-    await rename(entry.from, entry.to);
-  }
+      for (const entry of promoted) {
+        await mkdir(dirname(entry.to), { recursive: true });
+        await rename(entry.from, entry.to);
+      }
 
-  return { promoted };
-}
+      return { promoted };
+    },
+  );
 
 /** Narrows the selection to the named drafts, or returns all when none are named. */
 function selectDrafts(
@@ -207,24 +210,27 @@ function parseDraft(path: string, fileName: string): DraftFile | undefined {
  * locations and the drafts location — the only places a temporary id appears
  * (CON-014). A temporary id is globally unique, so a literal replace is exact.
  */
-async function substituteProjectWide(
-  layout: Layout,
-  substitutions: ReadonlyMap<string, string>,
-): Promise<void> {
-  const files = await collectSpecFiles(layout);
-  for (const file of files) {
-    const original = await readFileOrNull(file);
-    if (original !== null) {
-      let updated = original;
-      for (const [temporaryId, boundId] of substitutions) {
-        updated = updated.replaceAll(temporaryId, boundId);
-      }
-      if (updated !== original) {
-        await writeFile(file, updated, "utf8");
+const substituteProjectWide = traces(
+  ConTraceables.CON_014_EXHAUSTIVE_SUBSTITUTION,
+  async (
+    layout: Layout,
+    substitutions: ReadonlyMap<string, string>,
+  ): Promise<void> => {
+    const files = await collectSpecFiles(layout);
+    for (const file of files) {
+      const original = await readFileOrNull(file);
+      if (original !== null) {
+        let updated = original;
+        for (const [temporaryId, boundId] of substitutions) {
+          updated = updated.replaceAll(temporaryId, boundId);
+        }
+        if (updated !== original) {
+          await writeFile(file, updated, "utf8");
+        }
       }
     }
-  }
-}
+  },
+);
 
 /** The markdown files a temporary id can appear in: the spec tree and the drafts. */
 async function collectSpecFiles(layout: Layout): Promise<string[]> {

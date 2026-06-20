@@ -1,6 +1,7 @@
 import type { Dirent } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
+import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
 import { readConfiguredPrefixes, readLayout } from "./config.js";
 import { withState } from "./state.js";
 
@@ -60,37 +61,43 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
 }
 
 /** Raises each prefix's mark to the discovered maximum, never lowering it (CON-009). */
-function reconcile(
-  sequences: Record<string, number>,
-  discovered: Map<string, number>,
-): InitResult {
-  const raised: RaisedMark[] = [];
-  for (const [prefix, discoveredMax] of discovered) {
-    const existing = sequences[prefix] ?? 0;
-    if (discoveredMax > existing) {
-      sequences[prefix] = discoveredMax;
-      raised.push({ prefix, from: existing, to: discoveredMax });
+const reconcile = traces(
+  ConTraceables.CON_009_RECONCILE_NEVER_LOWERS,
+  (
+    sequences: Record<string, number>,
+    discovered: Map<string, number>,
+  ): InitResult => {
+    const raised: RaisedMark[] = [];
+    for (const [prefix, discoveredMax] of discovered) {
+      const existing = sequences[prefix] ?? 0;
+      if (discoveredMax > existing) {
+        sequences[prefix] = discoveredMax;
+        raised.push({ prefix, from: existing, to: discoveredMax });
+      }
     }
-  }
-  raised.sort((left, right) => left.prefix.localeCompare(right.prefix));
-  return { marks: { ...sequences }, raised };
-}
+    raised.sort((left, right) => left.prefix.localeCompare(right.prefix));
+    return { marks: { ...sequences }, raised };
+  },
+);
 
 /**
  * Walks the given artifact directories and returns the highest number seen per
  * configured prefix (SW-006). A directory that does not exist is skipped, so a
  * project missing one of its configured locations still initializes.
  */
-async function discoverHighWaterMarks(
-  dirs: string[],
-  prefixes: Set<string>,
-): Promise<Map<string, number>> {
-  const maxByPrefix = new Map<string, number>();
-  for (const dir of dirs) {
-    await walkArtifacts(dir, prefixes, maxByPrefix);
-  }
-  return maxByPrefix;
-}
+const discoverHighWaterMarks = traces(
+  SwTraceables.SW_006_DERIVE_HIGH_WATER_MARKS,
+  async (
+    dirs: string[],
+    prefixes: Set<string>,
+  ): Promise<Map<string, number>> => {
+    const maxByPrefix = new Map<string, number>();
+    for (const dir of dirs) {
+      await walkArtifacts(dir, prefixes, maxByPrefix);
+    }
+    return maxByPrefix;
+  },
+);
 
 async function walkArtifacts(
   dir: string,

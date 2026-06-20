@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
 
 /**
  * The reserved infix that marks a temporary, unbound id (CON-008). It separates
@@ -16,10 +17,13 @@ const OPAQUE_BYTE_LENGTH = 5;
  * suffix is a crypto-random hex token, so temporary ids generated independently
  * do not collide without any central coordination.
  */
-export function buildTemporaryId(type: string): string {
-  const opaque = randomBytes(OPAQUE_BYTE_LENGTH).toString("hex");
-  return `${type}-${TEMPORARY_MARKER}-${opaque}`;
-}
+export const buildTemporaryId: (type: string) => string = traces(
+  SwTraceables.SW_005_MINT_TEMPORARY_IDS,
+  (type: string): string => {
+    const opaque = randomBytes(OPAQUE_BYTE_LENGTH).toString("hex");
+    return `${type}-${TEMPORARY_MARKER}-${opaque}`;
+  },
+);
 
 /**
  * Whether `type` uses the reserved marker as a hyphen-delimited segment (CON-008).
@@ -27,6 +31,7 @@ export function buildTemporaryId(type: string): string {
  * be misread as temporary, and its temporary id would not parse unambiguously.
  * The check is segment-wise, so `TMPX` is allowed while `TMP` and `MY-TMP` are not.
  */
-export function typeUsesReservedMarker(type: string): boolean {
-  return type.split("-").includes(TEMPORARY_MARKER);
-}
+export const typeUsesReservedMarker: (type: string) => boolean = traces(
+  ConTraceables.CON_008_TMP_MARKER_RESERVED,
+  (type: string): boolean => type.split("-").includes(TEMPORARY_MARKER),
+);

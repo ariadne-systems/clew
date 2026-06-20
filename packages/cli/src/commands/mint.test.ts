@@ -3,6 +3,7 @@ import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ErrorCode } from "@ariadne-thread/core";
+import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { buildProgram } from "../program.js";
 
@@ -45,116 +46,133 @@ async function runAriadne(...args: string[]): Promise<void> {
 }
 
 describe("output", () => {
-  test("mint with no count prints one id to stdout", async () => {
-    await setupProjectDir();
-    const stdout = captureStdout();
+  verifies(
+    [SwTraceables.SW_008_MINT_COMMAND, SwTraceables.SW_003_MINT_COMMAND_OUTPUT],
+    () => {
+      test("mint with no count prints one id to stdout", async () => {
+        await setupProjectDir();
+        const stdout = captureStdout();
 
-    await runAriadne("mint", "SW");
+        await runAriadne("mint", "SW");
 
-    expect(stdout()).toBe("SW-001\n");
-  });
+        expect(stdout()).toBe("SW-001\n");
+      });
 
-  test("mint with a count prints that many ids, one per line, in order", async () => {
-    await setupProjectDir();
-    const stdout = captureStdout();
+      test("mint with a count prints that many ids, one per line, in order", async () => {
+        await setupProjectDir();
+        const stdout = captureStdout();
 
-    await runAriadne("mint", "SW", "3");
+        await runAriadne("mint", "SW", "3");
 
-    expect(stdout()).toBe("SW-001\nSW-002\nSW-003\n");
-  });
+        expect(stdout()).toBe("SW-001\nSW-002\nSW-003\n");
+      });
+    },
+  );
 });
 
 describe("invalid input", () => {
-  test("a non-positive count fails with code E_INVALID_COUNT and writes no id to stdout", async () => {
-    await setupProjectDir();
-    const stdout = captureStdout();
+  verifies(SwTraceables.SW_008_MINT_COMMAND, () => {
+    test("a non-positive count fails with code E_INVALID_COUNT and writes no id to stdout", async () => {
+      await setupProjectDir();
+      const stdout = captureStdout();
 
-    await expect(runAriadne("mint", "SW", "0")).rejects.toMatchObject({
-      code: ErrorCode.INVALID_COUNT,
+      await expect(runAriadne("mint", "SW", "0")).rejects.toMatchObject({
+        code: ErrorCode.INVALID_COUNT,
+      });
+
+      expect(stdout()).toBe("");
     });
 
-    expect(stdout()).toBe("");
-  });
+    test("a non-numeric count is rejected with code E_INVALID_COUNT and a specific message", async () => {
+      await setupProjectDir();
+      const stdout = captureStdout();
 
-  test("a non-numeric count is rejected with code E_INVALID_COUNT and a specific message", async () => {
-    await setupProjectDir();
-    const stdout = captureStdout();
+      await expect(runAriadne("mint", "SW", "abc")).rejects.toMatchObject({
+        code: ErrorCode.INVALID_COUNT,
+        message: expect.stringMatching(/count must be a whole number/i),
+      });
 
-    await expect(runAriadne("mint", "SW", "abc")).rejects.toMatchObject({
-      code: ErrorCode.INVALID_COUNT,
-      message: expect.stringMatching(/count must be a whole number/i),
+      expect(stdout()).toBe("");
     });
 
-    expect(stdout()).toBe("");
-  });
+    test("a malformed type is rejected with code E_INVALID_TYPE and nothing is minted", async () => {
+      const dir = await setupProjectDir();
+      const stdout = captureStdout();
 
-  test("a malformed type is rejected with code E_INVALID_TYPE and nothing is minted", async () => {
-    const dir = await setupProjectDir();
-    const stdout = captureStdout();
+      await expect(runAriadne("mint", "sw")).rejects.toMatchObject({
+        code: ErrorCode.INVALID_TYPE,
+      });
 
-    await expect(runAriadne("mint", "sw")).rejects.toMatchObject({
-      code: ErrorCode.INVALID_TYPE,
+      expect(stdout()).toBe("");
+      expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
     });
-
-    expect(stdout()).toBe("");
-    expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
   });
 });
 
 describe("temporary mode", () => {
-  test("mint --tmp prints temporary ids, one per line", async () => {
-    await setupProjectDir();
-    const stdout = captureStdout();
+  verifies(
+    [
+      SwTraceables.SW_005_MINT_TEMPORARY_IDS,
+      ConTraceables.CON_007_TEMPORARY_ID_UNBOUND,
+    ],
+    () => {
+      test("mint --tmp prints temporary ids, one per line", async () => {
+        await setupProjectDir();
+        const stdout = captureStdout();
 
-    await runAriadne("mint", "--tmp", "SW", "3");
+        await runAriadne("mint", "--tmp", "SW", "3");
 
-    const lines = stdout().trimEnd().split("\n");
-    expect(lines).toHaveLength(3);
-    for (const line of lines) {
-      expect(line).toMatch(/^SW-TMP-[0-9a-f]+$/);
-    }
-  });
+        const lines = stdout().trimEnd().split("\n");
+        expect(lines).toHaveLength(3);
+        for (const line of lines) {
+          expect(line).toMatch(/^SW-TMP-[0-9a-f]+$/);
+        }
+      });
 
-  test("the short form -t mints a temporary id", async () => {
-    await setupProjectDir();
-    const stdout = captureStdout();
+      test("the short form -t mints a temporary id", async () => {
+        await setupProjectDir();
+        const stdout = captureStdout();
 
-    await runAriadne("mint", "-t", "SW");
+        await runAriadne("mint", "-t", "SW");
 
-    expect(stdout()).toMatch(/^SW-TMP-[0-9a-f]+\n$/);
-  });
+        expect(stdout()).toMatch(/^SW-TMP-[0-9a-f]+\n$/);
+      });
 
-  test("temporary minting writes no state file", async () => {
-    const dir = await setupProjectDir();
-    captureStdout();
+      test("temporary minting writes no state file", async () => {
+        const dir = await setupProjectDir();
+        captureStdout();
 
-    await runAriadne("mint", "-t", "SW", "2");
+        await runAriadne("mint", "-t", "SW", "2");
 
-    expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
-  });
+        expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
+      });
 
-  test("a malformed type is rejected with code E_INVALID_TYPE in temporary mode and nothing is minted", async () => {
-    await setupProjectDir();
-    const stdout = captureStdout();
+      test("a malformed type is rejected with code E_INVALID_TYPE in temporary mode and nothing is minted", async () => {
+        await setupProjectDir();
+        const stdout = captureStdout();
 
-    await expect(runAriadne("mint", "-t", "sw")).rejects.toMatchObject({
-      code: ErrorCode.INVALID_TYPE,
-    });
+        await expect(runAriadne("mint", "-t", "sw")).rejects.toMatchObject({
+          code: ErrorCode.INVALID_TYPE,
+        });
 
-    expect(stdout()).toBe("");
-  });
+        expect(stdout()).toBe("");
+      });
+    },
+  );
 });
 
 describe("configuration required", () => {
-  test("mint fails with code E_NO_CONFIG when no configuration is present", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-mint-noconfig-"));
-    process.chdir(dir);
-    const stdout = captureStdout();
+  verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
+    test("mint fails with code E_NO_CONFIG when no configuration is present", async () => {
+      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-mint-noconfig-"));
+      process.chdir(dir);
+      const stdout = captureStdout();
 
-    await expect(runAriadne("mint", "SW")).rejects.toMatchObject({
-      code: ErrorCode.NO_CONFIG,
+      await expect(runAriadne("mint", "SW")).rejects.toMatchObject({
+        code: ErrorCode.NO_CONFIG,
+      });
+
+      expect(stdout()).toBe("");
     });
-
-    expect(stdout()).toBe("");
   });
 });

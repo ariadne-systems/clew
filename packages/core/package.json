@@ -29,6 +29,7 @@
     "build": "tsdown"
   },
   "dependencies": {
+    "@ariadne-thread/trace": "workspace:*",
     "proper-lockfile": "^4.1.2"
   }
 }

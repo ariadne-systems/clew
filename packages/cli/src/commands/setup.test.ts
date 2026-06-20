@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { SwTraceables, verifies } from "@ariadne-thread/trace";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { buildProgram } from "../program.js";
 
@@ -28,46 +29,50 @@ async function runAriadne(...args: string[]): Promise<void> {
 }
 
 describe("setup output", () => {
-  test("scaffolds the config and layout, and reports what it created", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-setup-"));
-    process.chdir(dir);
-    const stdout = captureStdout();
+  verifies(SwTraceables.SW_010_SETUP_COMMAND, () => {
+    test("scaffolds the config and layout, and reports what it created", async () => {
+      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-setup-"));
+      process.chdir(dir);
+      const stdout = captureStdout();
 
-    await runAriadne("setup");
+      await runAriadne("setup");
 
-    expect(existsSync(join(dir, ".ariadnerc.json"))).toBe(true);
-    expect(existsSync(join(dir, "docs", "spec", "stories"))).toBe(true);
-    expect(stdout()).toMatch(/Created .*\.ariadnerc\.json/);
-  });
+      expect(existsSync(join(dir, ".ariadnerc.json"))).toBe(true);
+      expect(existsSync(join(dir, "docs", "spec", "stories"))).toBe(true);
+      expect(stdout()).toMatch(/Created .*\.ariadnerc\.json/);
+    });
 
-  test("a second run reports the configuration already exists and changes nothing", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-setup-"));
-    process.chdir(dir);
-    const stdout = captureStdout();
+    test("a second run reports the configuration already exists and changes nothing", async () => {
+      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-setup-"));
+      process.chdir(dir);
+      const stdout = captureStdout();
 
-    await runAriadne("setup");
-    await runAriadne("setup");
+      await runAriadne("setup");
+      await runAriadne("setup");
 
-    const out = stdout();
-    expect(out).toMatch(/Created/);
-    expect(out).toMatch(/already exists/);
+      const out = stdout();
+      expect(out).toMatch(/Created/);
+      expect(out).toMatch(/already exists/);
+    });
   });
 });
 
 describe("setup invalid invocation", () => {
-  test("an extra positional argument exits non-zero", () => {
-    const program = buildProgram().exitOverride();
+  verifies(SwTraceables.SW_010_SETUP_COMMAND, () => {
+    test("an extra positional argument exits non-zero", () => {
+      const program = buildProgram().exitOverride();
 
-    expect(() =>
-      program.parse(["node", "ariadne", "setup", "extra"]),
-    ).toThrow();
-  });
+      expect(() =>
+        program.parse(["node", "ariadne", "setup", "extra"]),
+      ).toThrow();
+    });
 
-  test("an unknown option exits non-zero", () => {
-    const program = buildProgram().exitOverride();
+    test("an unknown option exits non-zero", () => {
+      const program = buildProgram().exitOverride();
 
-    expect(() =>
-      program.parse(["node", "ariadne", "setup", "--bogus"]),
-    ).toThrow();
+      expect(() =>
+        program.parse(["node", "ariadne", "setup", "--bogus"]),
+      ).toThrow();
+    });
   });
 });

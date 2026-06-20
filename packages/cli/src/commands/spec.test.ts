@@ -2,6 +2,7 @@ import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ErrorCode } from "@ariadne-thread/core";
+import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { buildProgram } from "../program.js";
 
@@ -52,65 +53,79 @@ async function runAriadne(...args: string[]): Promise<void> {
 }
 
 describe("spec output", () => {
-  test("scans the specs and writes a generated file per configured generator", async () => {
-    const dir = await setupProjectDir(["SW-012-a.md", "CON-012-b.md"]);
-    const stdout = captureStdout();
+  verifies(
+    [
+      SwTraceables.SW_012_SPEC_COMMAND,
+      ConTraceables.CON_012_GENERATED_FILES_TOOL_OWNED,
+    ],
+    () => {
+      test("scans the specs and writes a generated file per configured generator", async () => {
+        const dir = await setupProjectDir(["SW-012-a.md", "CON-012-b.md"]);
+        const stdout = captureStdout();
 
-    await runAriadne("spec");
+        await runAriadne("spec");
 
-    expect(stdout()).toContain("Scanned 2 traceables in 2 spec sets.");
-    const tsDir = join(dir, "out-ts");
-    const swSet = await readFile(join(tsDir, "SwTraceables.ts"), "utf8");
-    expect(swSet).toContain('"SW-012"');
-    const helper = await readFile(join(tsDir, "index.ts"), "utf8");
-    expect(helper).toContain("export type TraceableId");
-    const java = await readFile(
-      join(dir, "out-java", "Traceables.java"),
-      "utf8",
-    );
-    expect(java).toContain("SW_012");
-  });
+        expect(stdout()).toContain("Scanned 2 traceables in 2 spec sets.");
+        const tsDir = join(dir, "out-ts");
+        const swSet = await readFile(join(tsDir, "SwTraceables.ts"), "utf8");
+        expect(swSet).toContain('"SW-012"');
+        const helper = await readFile(join(tsDir, "index.ts"), "utf8");
+        expect(helper).toContain("export type TraceableId");
+        const java = await readFile(
+          join(dir, "out-java", "Traceables.java"),
+          "utf8",
+        );
+        expect(java).toContain("SW_012");
+      });
 
-  test("a second run on unchanged specs writes byte-identical output (CON-012)", async () => {
-    const dir = await setupProjectDir(["SW-012-a.md"]);
-    const generated = join(dir, "out-ts", "index.ts");
+      test("a second run on unchanged specs writes byte-identical output (CON-012)", async () => {
+        const dir = await setupProjectDir(["SW-012-a.md"]);
+        const generated = join(dir, "out-ts", "index.ts");
 
-    captureStdout();
-    await runAriadne("spec");
-    const first = await readFile(generated, "utf8");
+        captureStdout();
+        await runAriadne("spec");
+        const first = await readFile(generated, "utf8");
 
-    vi.restoreAllMocks();
-    captureStdout();
-    await runAriadne("spec");
-    const second = await readFile(generated, "utf8");
+        vi.restoreAllMocks();
+        captureStdout();
+        await runAriadne("spec");
+        const second = await readFile(generated, "utf8");
 
-    expect(second).toBe(first);
-  });
+        expect(second).toBe(first);
+      });
+    },
+  );
 });
 
 describe("spec invalid invocation", () => {
-  test("an extra positional argument exits non-zero", () => {
-    const program = buildProgram().exitOverride();
+  verifies(SwTraceables.SW_012_SPEC_COMMAND, () => {
+    test("an extra positional argument exits non-zero", () => {
+      const program = buildProgram().exitOverride();
 
-    expect(() => program.parse(["node", "ariadne", "spec", "extra"])).toThrow();
-  });
+      expect(() =>
+        program.parse(["node", "ariadne", "spec", "extra"]),
+      ).toThrow();
+    });
 
-  test("an unknown option exits non-zero", () => {
-    const program = buildProgram().exitOverride();
+    test("an unknown option exits non-zero", () => {
+      const program = buildProgram().exitOverride();
 
-    expect(() =>
-      program.parse(["node", "ariadne", "spec", "--bogus"]),
-    ).toThrow();
+      expect(() =>
+        program.parse(["node", "ariadne", "spec", "--bogus"]),
+      ).toThrow();
+    });
   });
 });
 
 describe("configuration required", () => {
-  test("spec fails with code E_NO_CONFIG when no configuration is present", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-spec-noconfig-"));
-    process.chdir(dir);
+  verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
+    test("spec fails with code E_NO_CONFIG when no configuration is present", async () => {
+      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-spec-noconfig-"));
+      process.chdir(dir);
 
-    await expect(runAriadne("spec")).rejects.toMatchObject({
-      code: ErrorCode.NO_CONFIG,
+      await expect(runAriadne("spec")).rejects.toMatchObject({
+        code: ErrorCode.NO_CONFIG,
+      });
     });
   });
 });

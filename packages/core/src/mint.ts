@@ -1,3 +1,4 @@
+import { ArchTraceables, ConTraceables, traces } from "@ariadne-thread/trace";
 import type { IdGenerationConfig } from "./config.js";
 import { readConfiguredPrefixes, readIdGenerationConfig } from "./config.js";
 import { AriadneError, ErrorCode } from "./errors.js";
@@ -64,15 +65,15 @@ export async function mintTemporary(
 }
 
 /** Selects the id strategy from configuration (ARCH-001). */
-function createIdStrategy(
-  config: IdGenerationConfig,
-  stateFile: string | undefined,
-): IdStrategy {
-  if (config.mode === "opaque") {
-    return new OpaqueIdStrategy();
-  }
-  return new SequentialIdStrategy({ padding: config.padding, stateFile });
-}
+const createIdStrategy = traces(
+  ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY,
+  (config: IdGenerationConfig, stateFile: string | undefined): IdStrategy => {
+    if (config.mode === "opaque") {
+      return new OpaqueIdStrategy();
+    }
+    return new SequentialIdStrategy({ padding: config.padding, stateFile });
+  },
+);
 
 /**
  * Rejects a type whose prefix is not a configured prefix — a lens id, or the
@@ -80,14 +81,17 @@ function createIdStrategy(
  * prefixes are the single source of truth for id validity (ADR-0003); no id
  * pattern is consulted.
  */
-function assertPrefixConfigured(type: string, prefixes: Set<string>): void {
-  if (!prefixes.has(type)) {
-    throw new AriadneError(
-      ErrorCode.INVALID_TYPE,
-      `Type "${type}" is not a configured prefix; declare it as a lens (or a layout prefix) in .ariadnerc.json.`,
-    );
-  }
-}
+const assertPrefixConfigured = traces(
+  ConTraceables.CON_005_ID_MATCHES_CONFIGURED_PATTERN,
+  (type: string, prefixes: Set<string>): void => {
+    if (!prefixes.has(type)) {
+      throw new AriadneError(
+        ErrorCode.INVALID_TYPE,
+        `Type "${type}" is not a configured prefix; declare it as a lens (or a layout prefix) in .ariadnerc.json.`,
+      );
+    }
+  },
+);
 
 /**
  * Rejects a type that uses the reserved temporary marker as a segment (CON-008),

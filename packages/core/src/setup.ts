@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
 import {
   configExists,
   DEFAULT_CONFIG_FILE,
@@ -32,30 +33,36 @@ export type SetupResult = {
  * An existing configuration is never overwritten (CON-010), so setup is safe to
  * re-run.
  */
-export async function setup(options: SetupOptions = {}): Promise<SetupResult> {
-  const configFile = options.configFile ?? DEFAULT_CONFIG_FILE;
-  if (await configExists(configFile)) {
-    return { created: false, configFile, directories: [], lenses: [] };
-  }
-  const config = {
-    idGeneration: { mode: DEFAULT_MODE, padding: DEFAULT_PADDING },
-    lenses: DEFAULT_LENSES,
-    layout: DEFAULT_LAYOUT,
-  };
-  await writeFile(configFile, `${JSON.stringify(config, null, 2)}\n`, "utf8");
-  const root = dirname(configFile);
-  const directories = [
-    DEFAULT_LAYOUT.stories.dir,
-    DEFAULT_LAYOUT.derivedSpecs.dir,
-    DEFAULT_LAYOUT.drafts.dir,
-  ];
-  for (const dir of directories) {
-    await mkdir(join(root, dir), { recursive: true });
-  }
-  return {
-    created: true,
-    configFile,
-    directories,
-    lenses: DEFAULT_LENSES.map((lens) => lens.id),
-  };
-}
+export const setup: (options?: SetupOptions) => Promise<SetupResult> = traces(
+  [
+    SwTraceables.SW_011_SCAFFOLD_DEFAULT_CONFIG,
+    ConTraceables.CON_010_SETUP_NEVER_OVERWRITES,
+  ],
+  async (options: SetupOptions = {}): Promise<SetupResult> => {
+    const configFile = options.configFile ?? DEFAULT_CONFIG_FILE;
+    if (await configExists(configFile)) {
+      return { created: false, configFile, directories: [], lenses: [] };
+    }
+    const config = {
+      idGeneration: { mode: DEFAULT_MODE, padding: DEFAULT_PADDING },
+      lenses: DEFAULT_LENSES,
+      layout: DEFAULT_LAYOUT,
+    };
+    await writeFile(configFile, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+    const root = dirname(configFile);
+    const directories = [
+      DEFAULT_LAYOUT.stories.dir,
+      DEFAULT_LAYOUT.derivedSpecs.dir,
+      DEFAULT_LAYOUT.drafts.dir,
+    ];
+    for (const dir of directories) {
+      await mkdir(join(root, dir), { recursive: true });
+    }
+    return {
+      created: true,
+      configFile,
+      directories,
+      lenses: DEFAULT_LENSES.map((lens) => lens.id),
+    };
+  },
+);
