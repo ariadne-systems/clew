@@ -1,7 +1,7 @@
 import type { Dirent } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { SwTraceables, traces } from "@ariadne-thread/trace";
+import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import { readLayout, readLenses } from "./config.js";
 import type { Traceable } from "./generator.js";
 
@@ -90,7 +90,7 @@ async function collectTraceables(
  * contributes no traceable. The filename is kept on the traceable so spec-set
  * matchers can select on it.
  */
-const recordTraceable = traces(
+const recordTraceable = realizes(
   SwTraceables.SW_013_SCAN_TRACEABLES,
   (
     filename: string,

@@ -1,4 +1,4 @@
-import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
+import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Lens, SpecSetMatcher } from "./config.js";
 import { AriadneError, ErrorCode } from "./errors.js";
 import type { SpecSet, Traceable } from "./generator.js";
@@ -40,7 +40,7 @@ export const groupIntoSpecSets: (
   traceables: readonly Traceable[],
   matchers: readonly SpecSetMatcher[],
   ignorePatterns?: readonly string[],
-) => SpecSet[] = traces(
+) => SpecSet[] = realizes(
   SwTraceables.SW_015_GROUP_TRACEABLES,
   (
     traceables: readonly Traceable[],
@@ -83,7 +83,7 @@ function compileNormalMatchers(
  * overlap and unmatched are explicit errors, and an unmatched
  * traceable joins the catch-all set when one is configured.
  */
-const resolveSet = traces(
+const resolveSet = realizes(
   ConTraceables.CON_013_SPEC_SET_PARTITION,
   (
     traceable: Traceable,

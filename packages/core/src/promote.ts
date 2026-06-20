@@ -1,7 +1,7 @@
 import type { Dirent } from "node:fs";
 import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
+import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Layout } from "./config.js";
 import { readLayout, readLenses } from "./config.js";
 import { AriadneError, ErrorCode } from "./errors.js";
@@ -55,7 +55,7 @@ const TEMPORARY_DRAFT_FILENAME = /^([A-Z]+)-TMP-[0-9a-f]+/;
  * integration reasoning and does not commit.
  */
 export const promote: (options?: PromoteOptions) => Promise<PromoteResult> =
-  traces(
+  realizes(
     SwTraceables.SW_017_FINALIZE_DRAFTS,
     async (options: PromoteOptions = {}): Promise<PromoteResult> => {
       const [layout, lenses] = await Promise.all([
@@ -210,7 +210,7 @@ function parseDraft(path: string, fileName: string): DraftFile | undefined {
  * locations and the drafts location — the only places a temporary id appears
  * A temporary id is globally unique, so a literal replace is exact.
  */
-const substituteProjectWide = traces(
+const substituteProjectWide = realizes(
   ConTraceables.CON_014_EXHAUSTIVE_SUBSTITUTION,
   async (
     layout: Layout,

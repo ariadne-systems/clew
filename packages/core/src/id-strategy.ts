@@ -1,4 +1,4 @@
-import type { ArchTraceables, Traces } from "@ariadne-thread/trace";
+import type { ArchTraceables, Realizes } from "@ariadne-thread/trace";
 
 /**
  * The seam for generating an id's variable part.
@@ -7,7 +7,7 @@ import type { ArchTraceables, Traces } from "@ariadne-thread/trace";
  * depends on this interface, never on a concrete strategy.
  */
 export interface IdStrategy
-  extends Traces<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, unknown> {
+  extends Realizes<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, unknown> {
   /** Mints `count` ids for the given type/prefix. */
   mint(type: string, count: number): Promise<string[]>;
 }

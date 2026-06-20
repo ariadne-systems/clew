@@ -1,5 +1,5 @@
 import { requireConfig, spec } from "@ariadne-thread/core";
-import { SwTraceables, traces } from "@ariadne-thread/trace";
+import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 import { createGeneratorRegistry } from "../generators.js";
 
@@ -13,7 +13,7 @@ import { createGeneratorRegistry } from "../generators.js";
  * produced to stdout. Any error propagates to the bin entry, which writes it to
  * stderr and exits non-zero.
  */
-export const registerSpec: (program: Command) => void = traces(
+export const registerSpec: (program: Command) => void = realizes(
   SwTraceables.SW_012_SPEC_COMMAND,
   (program: Command): void => {
     program

@@ -1,4 +1,4 @@
-import { ArchTraceables, ConTraceables, traces } from "@ariadne-thread/trace";
+import { ArchTraceables, ConTraceables, realizes } from "@ariadne-thread/trace";
 import type { IdGenerationConfig } from "./config.js";
 import { readConfiguredPrefixes, readIdGenerationConfig } from "./config.js";
 import { AriadneError, ErrorCode } from "./errors.js";
@@ -65,7 +65,7 @@ export async function mintTemporary(
 }
 
 /** Selects the id strategy from configuration. */
-const createIdStrategy = traces(
+const createIdStrategy = realizes(
   ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY,
   (config: IdGenerationConfig, stateFile: string | undefined): IdStrategy => {
     if (config.mode === "opaque") {
@@ -81,7 +81,7 @@ const createIdStrategy = traces(
  * prefixes are the single source of truth for id validity (ADR-0003); no id
  * pattern is consulted.
  */
-const assertPrefixConfigured = traces(
+const assertPrefixConfigured = realizes(
   ConTraceables.CON_005_ID_MATCHES_CONFIGURED_PATTERN,
   (type: string, prefixes: Set<string>): void => {
     if (!prefixes.has(type)) {

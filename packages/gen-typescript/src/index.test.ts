@@ -91,7 +91,7 @@ describe("typescript generator output", () => {
           "export type TraceableIds = TraceableId | readonly [TraceableId, ...TraceableId[]];",
         );
         expect(helper?.contents).toContain(
-          "export function traces<Value>(ids: TraceableIds, value: Value): Value;",
+          "export function realizes<Value>(ids: TraceableIds, value: Value): Value;",
         );
         // The decorator overload: ids only, returning a no-op class/method decorator.
         expect(helper?.contents).toContain(
@@ -108,7 +108,7 @@ describe("typescript generator output", () => {
           "export type Concerns<Id extends TraceableIds, T> = T & { readonly __concerns?: Id };",
         );
         expect(helper?.contents).toContain(
-          "export type Traces<Id extends TraceableIds, T> = T & { readonly __traces?: Id };",
+          "export type Realizes<Id extends TraceableIds, T> = T & { readonly __realizes?: Id };",
         );
         // The JSDoc examples use a real member drawn from the first traceable.
         expect(helper?.contents).toContain("@example");

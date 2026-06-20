@@ -16,9 +16,9 @@ The helpers are *emitted*, not shipped: nothing lives in the tool's codebase as 
 The mechanism is a generated string enum per set plus type-constrained helpers, checked by `tsc` — not decorators:
 
 - Per spec set, the generator emits one file with a "generated — do not edit" header carrying its provenance, declaring a string enum whose members are the set's traceables — the member name derived from the spec's filename (so it carries the id and slug, readable at the anchor site), the value the spec id — for example `SW_002_MINT_SEQUENTIAL_IDS = "SW-002"` (a plain enum, not a `const enum`, and one enum per set, not a flat list).
-- A generated helper module re-exports the per-set enums, unions them into a combined `TraceableId`, and exports the anchoring utility: `Traces<Id, T>` marks a type, `traces(ids, value)` marks a value or function, and `verifies(ids, run)` marks a test — each constrained to `TraceableId` and taking one member or a list.
+- A generated helper module re-exports the per-set enums, unions them into a combined `TraceableId`, and exports the anchoring utility: `Realizes<Id, T>` marks a type, `realizes(ids, value)` marks a value or function, and `verifies(ids, run)` marks a test — each constrained to `TraceableId` and taking one member or a list.
 - Because the markers are constrained to that union, deleting a spec and regenerating drops its enum member, so every reference to it fails `tsc` (ADR-0001 D1) — existence is enforced by the type-checker, with no decorators and no custom compiler.
-- The verbs mirror the relation vocabulary the specs use: production code `traces` an element; a test `verifies` it.
+- The verbs mirror the relation vocabulary the specs use: production code `realizes` an element; a test `verifies` it.
 - The whole folder is deterministic and tool-owned (CON-012): re-running on unchanged specs is byte-identical, and a hand edit is overwritten.
 
 This implements, for the TypeScript target, the generator contract the core depends on (ARCH-003); the Java generator does the same job with real annotations and an enum.
@@ -30,7 +30,7 @@ This implements, for the TypeScript target, the generator contract the core depe
 
 **Acceptance Criteria**
 - For each spec set, the generator emits one TypeScript file with a generated-do-not-edit header naming the spec set, declaring a string enum of that set's traceables (member name from the filename, value the id).
-- The generated folder also contains a helper module that re-exports the per-set enums into a combined `TraceableId` and exports `Traces<Id, T>`, `traces(ids, value)`, and `verifies(ids, run)`, each constrained to `TraceableId` and taking one member or a list; the helpers are generated, not a hand-written dependency.
+- The generated folder also contains a helper module that re-exports the per-set enums into a combined `TraceableId` and exports `Realizes<Id, T>`, `realizes(ids, value)`, and `verifies(ids, run)`, each constrained to `TraceableId` and taking one member or a list; the helpers are generated, not a hand-written dependency.
 - An anchor to a member not in any enum fails to type-check; removing a spec and regenerating breaks every anchor to it.
 - Re-running on unchanged specs produces byte-identical output.
 - Vitest covers: the per-set enum files; the helper module and combined union; that an anchor to a removed member is a type error; idempotency.
@@ -38,7 +38,7 @@ This implements, for the TypeScript target, the generator contract the core depe
 **Decisions** (resolved)
 - **Spec strategy** — add a focused `SW` spec for the TypeScript output contract; `STR-011`'s "no language-specific spec" is scoped to the skeleton.
 - **Helper location** — emitted into the generated folder in the consuming project, not shipped as a package and not placed in `core`. The helpers are TypeScript-specific consumer code and only need to be generated; the generator owns them exactly like the enum files (CON-012).
-- **Helper shape** — one shared `traces`/`verifies`/`Traces` over a combined `TraceableId` (the union of the per-set enums), each taking one member or a list, with the per-set enums emitted as their own files.
+- **Helper shape** — one shared `realizes`/`verifies`/`Realizes` over a combined `TraceableId` (the union of the per-set enums), each taking one member or a list, with the per-set enums emitted as their own files.
 - **Symbol form** (revised) — the per-set symbols are a plain string **enum**, not a string-literal union. The enum makes anchors self-documenting at the call site (the member name carries the id and slug) and gives semantic go-to-definition and find-references, at the cost of an anchor breaking when a spec is renamed — a deliberate prompt to re-validate. A plain (non-`const`) enum is used so the output survives per-file transpilers and bundlers (tsx, esbuild, tsdown). This supersedes the earlier "a union, not a `const enum`" choice.
 
 **Out of scope**
