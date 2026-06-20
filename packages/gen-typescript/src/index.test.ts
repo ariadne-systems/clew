@@ -115,14 +115,24 @@ describe("typescript generator output", () => {
         expect(helper?.contents).toContain("ConTraceables.CON_012_OWNED");
       });
 
-      test("emits one file per set plus the helper module", async () => {
+      test("emits one file per set, the helper module, and a README", async () => {
         const files = await generate(specSets);
 
         expect(files.map((file) => file.path)).toEqual([
           "ConTraceables.ts",
           "SwTraceables.ts",
           "index.ts",
+          "README.md",
         ]);
+      });
+
+      test("emits a README documenting the markers", async () => {
+        const files = await generate(specSets);
+
+        const readme = fileAt(files, "README.md");
+        expect(readme?.contents).toContain("# Traceables");
+        expect(readme?.contents).toContain("concerns");
+        expect(readme?.contents).toContain("ConTraceables.CON_012_OWNED");
       });
 
       test("is deterministic: the same spec sets produce byte-identical output", async () => {

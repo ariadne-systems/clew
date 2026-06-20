@@ -11,6 +11,7 @@ The markers express the three relations of the taxonomy (ADR-0004): `traces` mar
 The type markers `Traces<Id, T>` and `Concerns<Id, T>` express realizes and concerns on a type, and anchor an interface through an `extends` clause (`interface I extends Traces<ids, {}>`) or a sibling alias (ADR-0004 D5).
 A code element may anchor to more than one spec: every marker takes a single member or a list, and members from different sets mix freely; at the type level several ids go in one list, never in stacked `extends` clauses.
 The helpers are generated, not a hand-written dependency.
+It also emits a `README.md` into the same folder documenting the markers and the form of each by the kind of element anchored, naming the relations but leaving their meaning to ADR-0004, so an author or agent can read how to anchor from beside the generated symbols rather than from a separate, driftable copy; the per-symbol documentation lives in the helper module as well.
 
 **Rationale**
 TypeScript's decorators apply only to classes and class members, so they cannot mark a type, a free function, or a test call; anchoring is therefore done with a generated string enum and type-constrained helpers, and `traces` and `concerns` are each additionally exposed as a decorator for the class and method case where decorators do apply.
@@ -20,6 +21,6 @@ A plain (non-`const`) enum is used so the output survives per-file transpilers a
 Emitting one enum per spec set (SW-015) keeps each symbol set small and mirrors how the Java target groups its enums.
 
 **Verification Description**
-Given grouped spec sets, the generator produces one string-enum file per set, each carrying a generated-do-not-edit header, and one helper module that re-exports the enums and exports `Traces` and `Concerns` (the type markers), `traces` and `concerns` (each as both a value wrapper and a class/method decorator), and `verifies` over a combined `TraceableId`.
+Given grouped spec sets, the generator produces one string-enum file per set, each carrying a generated-do-not-edit header, one helper module that re-exports the enums and exports `Traces` and `Concerns` (the type markers), `traces` and `concerns` (each as both a value wrapper and a class/method decorator), and `verifies` over a combined `TraceableId`, and a `README.md` documenting those markers.
 An anchor through any relation to an existing member type-checks; an anchor to a member not in any enum — including any one of a list — is a type error, and removing a spec and regenerating drops its member, breaking every anchor to it.
 Re-running on unchanged spec sets produces byte-identical files (CON-012).
