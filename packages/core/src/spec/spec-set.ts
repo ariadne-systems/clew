@@ -1,6 +1,6 @@
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
-import type { Lens, SpecSetMatcher } from "./config.js";
-import { AriadneError, ErrorCode } from "./errors.js";
+import type { Lens, SpecSetMatcher } from "../config/config.js";
+import { AriadneError, ErrorCode } from "../errors.js";
 import type { SpecSet, Traceable } from "./generator.js";
 
 /**

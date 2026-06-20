@@ -3,8 +3,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import type { Generator, SpecSet } from "./index.js";
-import { ErrorCode, GENERATED_MARKER, spec } from "./index.js";
+import type { Generator, SpecSet } from "../index.js";
+import { ErrorCode, GENERATED_MARKER, spec } from "../index.js";
 
 type Fixture = {
   configFile: string;

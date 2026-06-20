@@ -1,7 +1,10 @@
 import { ArchTraceables, ConTraceables, realizes } from "@ariadne-thread/trace";
-import type { IdGenerationConfig } from "./config.js";
-import { readConfiguredPrefixes, readIdGenerationConfig } from "./config.js";
-import { AriadneError, ErrorCode } from "./errors.js";
+import type { IdGenerationConfig } from "../config/config.js";
+import {
+  readConfiguredPrefixes,
+  readIdGenerationConfig,
+} from "../config/config.js";
+import { AriadneError, ErrorCode } from "../errors.js";
 import type { IdStrategy } from "./id-strategy.js";
 import { OpaqueIdStrategy } from "./opaque-id-strategy.js";
 import { SequentialIdStrategy } from "./sequential-id-strategy.js";

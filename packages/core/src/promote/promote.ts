@@ -2,10 +2,10 @@ import type { Dirent } from "node:fs";
 import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
-import type { Layout } from "./config.js";
-import { readLayout, readLenses } from "./config.js";
-import { AriadneError, ErrorCode } from "./errors.js";
-import { mint } from "./mint.js";
+import type { Layout } from "../config/config.js";
+import { readLayout, readLenses } from "../config/config.js";
+import { AriadneError, ErrorCode } from "../errors.js";
+import { mint } from "../mint/mint.js";
 
 export type PromoteOptions = {
   /** Path to `.ariadnerc.json`. Defaults to the configuration default. */

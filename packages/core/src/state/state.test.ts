@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ConTraceables, NfTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { withState } from "./index.js";
+import { withState } from "../index.js";
 
 async function tempStateFile(): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-state-"));

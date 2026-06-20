@@ -2,14 +2,14 @@ import type { Dirent } from "node:fs";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
-import type { SpecSetMatcher } from "./config.js";
+import type { SpecSetMatcher } from "../config/config.js";
 import {
   readGenerators,
   readIgnore,
   readLenses,
   readSpecSets,
-} from "./config.js";
-import { AriadneError, ErrorCode } from "./errors.js";
+} from "../config/config.js";
+import { AriadneError, ErrorCode } from "../errors.js";
 import type { GeneratedFile, Generator } from "./generator.js";
 import { GENERATED_MARKER } from "./generator.js";
 import { scan } from "./scan.js";

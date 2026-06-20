@@ -2,8 +2,8 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { ConTraceables, NfTraceables, realizes } from "@ariadne-thread/trace";
 import lockfile from "proper-lockfile";
-import type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
-import { AriadneError, ErrorCode } from "./errors.js";
+import type { AriadneState, SequenceMap } from "../entities/ariadne-state.js";
+import { AriadneError, ErrorCode } from "../errors.js";
 
 /** Default location of the committed state file. */
 export const DEFAULT_STATE_FILE = ".ariadne/state.json";

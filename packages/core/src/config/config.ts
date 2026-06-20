@@ -6,7 +6,7 @@ import {
   realizes,
   SwTraceables,
 } from "@ariadne-thread/trace";
-import { AriadneError, ErrorCode } from "./errors.js";
+import { AriadneError, ErrorCode } from "../errors.js";
 
 /** Default location of the project configuration file. */
 export const DEFAULT_CONFIG_FILE = ".ariadnerc.json";

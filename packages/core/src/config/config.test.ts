@@ -14,7 +14,7 @@ import {
   readLenses,
   readSpecSets,
   requireConfig,
-} from "./index.js";
+} from "../index.js";
 
 async function tempConfigFile(contents: unknown): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-config-"));
