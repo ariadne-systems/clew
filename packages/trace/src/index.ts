@@ -20,32 +20,8 @@ export type TraceableId = ArchTraceables | ConTraceables | NfTraceables | SwTrac
 /** A single id, or a non-empty list of ids — an anchor must name at least one spec. */
 export type TraceableIds = TraceableId | readonly [TraceableId, ...TraceableId[]];
 
-/*
- * Anchoring utility (ADR-0004). Three relations bind code to a spec id, each
- * existence-checked by the compiler — delete the spec, regenerate, and every
- * anchor that named it stops compiling:
- *
- *   realizes  the code is the spec's implementation     traces / Traces
- *   verifies  a test exercises the spec                 verifies
- *   concerns  the code is coupled to the spec without
- *             realizing or verifying it                 concerns / Concerns
- *
- * Pick the marker by what you anchor:
- *   value / function   traces(ids, value)       concerns(ids, value)
- *   class / method     @traces(ids)             @concerns(ids)
- *   test               verifies(ids, run)
- *   type alias         Traces<ids, T>           Concerns<ids, T>
- *   interface          extends Traces<ids, {}>  extends Concerns<ids, {}>
- *                      or a sibling: type _ = Traces<ids, TheInterface>
- *
- * `ids` is one member or a non-empty list: traces([A, B], value), Traces<[A, B], T>.
- * On an interface, combine several ids into ONE list — two separate
- * `extends Traces<...>` clauses collide on the marker property and fail to compile.
- *
- * `concerns` is existence-checked only; nothing exercises it, so it is weaker
- * than `verifies`. Use it for a coupling that is not already implied by a call;
- * a coupling on the call path is recovered from the graph and needs no anchor.
- */
+// The three relations and every marker form are documented in the README.md
+// in this folder (ADR-0004).
 
 /**
  * Marks a type or interface as **realizing** one or more spec ids; the type is unchanged.

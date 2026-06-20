@@ -5,6 +5,7 @@ import type {
   SpecSet,
 } from "@ariadne-thread/core";
 import {
+  GENERATED_MARKER,
   generatedHeader,
   toIdentifier,
   toMemberName,
@@ -28,7 +29,8 @@ const GENERATOR_TYPE = "typescript";
  * decorator, and the `Traces`/`Concerns` type markers anchor a type or interface;
  * each takes one member or a non-empty list, constrained to that union, so a
  * reference to a removed member fails to type-check (ADR-0001 D1). A plain (non-`const`) enum is used so the output survives per-file
- * transpilers and bundlers. The output is deterministic and tool-owned;
+ * transpilers and bundlers, and a `README.md` documents the markers for an author
+ * (or agent) anchoring code. The output is deterministic and tool-owned;
  * the helpers are emitted, not shipped. File names are relative to the project's
  * configured output directory, which the core resolves (ENT-002).
  */
@@ -47,6 +49,7 @@ export const createTypeScriptGenerator: () => Generator = traces(
       ): Promise<readonly GeneratedFile[]> {
         const files = specSets.map(renderSetFile);
         files.push(renderHelperModule(specSets));
+        files.push(renderReadme(specSets));
         return Promise.resolve(files);
       },
     };
@@ -95,32 +98,8 @@ function renderHelperModule(specSets: readonly SpecSet[]): GeneratedFile {
     "/** A single id, or a non-empty list of ids — an anchor must name at least one spec. */",
     "export type TraceableIds = TraceableId | readonly [TraceableId, ...TraceableId[]];",
     "",
-    "/*",
-    " * Anchoring utility (ADR-0004). Three relations bind code to a spec id, each",
-    " * existence-checked by the compiler — delete the spec, regenerate, and every",
-    " * anchor that named it stops compiling:",
-    " *",
-    " *   realizes  the code is the spec's implementation     traces / Traces",
-    " *   verifies  a test exercises the spec                 verifies",
-    " *   concerns  the code is coupled to the spec without",
-    " *             realizing or verifying it                 concerns / Concerns",
-    " *",
-    " * Pick the marker by what you anchor:",
-    " *   value / function   traces(ids, value)       concerns(ids, value)",
-    " *   class / method     @traces(ids)             @concerns(ids)",
-    " *   test               verifies(ids, run)",
-    " *   type alias         Traces<ids, T>           Concerns<ids, T>",
-    " *   interface          extends Traces<ids, {}>  extends Concerns<ids, {}>",
-    " *                      or a sibling: type _ = Traces<ids, TheInterface>",
-    " *",
-    " * `ids` is one member or a non-empty list: traces([A, B], value), Traces<[A, B], T>.",
-    " * On an interface, combine several ids into ONE list — two separate",
-    " * `extends Traces<...>` clauses collide on the marker property and fail to compile.",
-    " *",
-    " * `concerns` is existence-checked only; nothing exercises it, so it is weaker",
-    " * than `verifies`. Use it for a coupling that is not already implied by a call;",
-    " * a coupling on the call path is recovered from the graph and needs no anchor.",
-    " */",
+    "// The three relations and every marker form are documented in the README.md",
+    "// in this folder (ADR-0004).",
     "",
     "/**",
     " * Marks a type or interface as **realizing** one or more spec ids; the type is unchanged.",
@@ -203,6 +182,74 @@ function renderHelperModule(specSets: readonly SpecSet[]): GeneratedFile {
     "",
   );
   return { path: "index.ts", contents: lines.join("\n") };
+}
+
+/**
+ * Emits the README documenting the markers for the TypeScript target (CON-012).
+ * The marker API is the same every run, so the file is deterministic; an example
+ * uses a real member when one exists.
+ */
+function renderReadme(specSets: readonly SpecSet[]): GeneratedFile {
+  const example = exampleMember(specSets) ?? "YourTraceables.YOUR_SPEC_ID";
+  const lines = [
+    `<!-- THIS FILE IS ${GENERATED_MARKER} - DO NOT EDIT MANUALLY. Run \`ariadne spec\` to regenerate. -->`,
+    "",
+    "# Traceables",
+    "",
+    "Generated anchoring markers for TypeScript. Referencing a marker binds code to",
+    "a spec id and `tsc` checks it: remove a spec, regenerate, and every anchor that",
+    "named it stops compiling. Do not edit by hand.",
+    "",
+    "The markers express three relations — **realizes** (`traces` / `Traces`),",
+    "**verifies** (`verifies`), and **concerns** (`concerns` / `Concerns`) — defined",
+    "in ADR-0004. For which relation to add when, see the `ariadne-anchor` workflow.",
+    "",
+    "## By what you anchor",
+    "",
+    "| element | realizes | verifies | concerns |",
+    "| --- | --- | --- | --- |",
+    "| value / function | `traces(ids, value)` | — | `concerns(ids, value)` |",
+    "| class / method | `@traces(ids)` | — | `@concerns(ids)` |",
+    "| test | — | `verifies(ids, run)` | — |",
+    "| type | `Traces<ids, T>` | — | `Concerns<ids, T>` |",
+    "| interface | `extends Traces<ids, unknown>` | — | `extends Concerns<ids, unknown>` |",
+    "",
+    "`ids` is a single member or a non-empty list — `traces([A, B], value)`,",
+    "`Traces<[A, B], T>`. Import the markers and the `*Traceables` enums from this",
+    "folder's module.",
+    "",
+    "## Examples",
+    "",
+    "```ts",
+    "// realizes — a function",
+    `export const mint = traces(${example}, (count: number): string[] => []);`,
+    "",
+    "// realizes — a class",
+    `@traces(${example})`,
+    "export class Minter {}",
+    "",
+    "// realizes — an interface (combine several ids into ONE list)",
+    `export interface Strategy extends Traces<${example}, unknown> {`,
+    "  run(): void;",
+    "}",
+    "",
+    "// verifies — a test",
+    `verifies(${example}, () => {`,
+    '  test("holds", () => {});',
+    "});",
+    "",
+    "// concerns — a value coupled to a spec it does not implement",
+    `export const DEFAULT = concerns(${example}, 3);`,
+    "```",
+    "",
+    "## Notes",
+    "",
+    "- On an interface, combine several ids into one list — two separate",
+    "  `extends Traces<...>` clauses collide on the marker property and fail to compile.",
+    "- The available ids are the enum members in the `*Traceables.ts` files here.",
+    "",
+  ];
+  return { path: "README.md", contents: lines.join("\n") };
 }
 
 /** The enum and file symbol name for a spec set, e.g. set `SW` → `SwTraceables`; always a valid identifier. */
