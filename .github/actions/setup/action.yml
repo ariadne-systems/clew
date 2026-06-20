@@ -1,0 +1,20 @@
+# Shared setup: install the pinned pnpm, the requested Node, and dependencies.
+# Mirrors the `before_script` in the former .gitlab-ci.yml. pnpm/action-setup
+# reads the version from the root package.json `packageManager` field, and
+# setup-node caches the pnpm store keyed on the lockfile (the GitLab cache).
+name: Setup
+description: Install pnpm, Node.js, and project dependencies (frozen lockfile).
+inputs:
+  node-version:
+    description: Node.js version to install.
+    default: "24"
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+      shell: bash
