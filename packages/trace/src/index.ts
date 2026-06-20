@@ -20,21 +20,59 @@ export type TraceableId = ArchTraceables | ConTraceables | NfTraceables | SwTrac
 /** A single id, or a non-empty list of ids — an anchor must name at least one spec. */
 export type TraceableIds = TraceableId | readonly [TraceableId, ...TraceableId[]];
 
+/*
+ * Anchoring utility (ADR-0004). Three relations bind code to a spec id, each
+ * existence-checked by the compiler — delete the spec, regenerate, and every
+ * anchor that named it stops compiling:
+ *
+ *   realizes  the code is the spec's implementation     traces / Traces
+ *   verifies  a test exercises the spec                 verifies
+ *   concerns  the code is coupled to the spec without
+ *             realizing or verifying it                 concerns / Concerns
+ *
+ * Pick the marker by what you anchor:
+ *   value / function   traces(ids, value)       concerns(ids, value)
+ *   class / method     @traces(ids)             @concerns(ids)
+ *   test               verifies(ids, run)
+ *   type alias         Traces<ids, T>           Concerns<ids, T>
+ *   interface          extends Traces<ids, {}>  extends Concerns<ids, {}>
+ *                      or a sibling: type _ = Traces<ids, TheInterface>
+ *
+ * `ids` is one member or a non-empty list: traces([A, B], value), Traces<[A, B], T>.
+ * On an interface, combine several ids into ONE list — two separate
+ * `extends Traces<...>` clauses collide on the marker property and fail to compile.
+ *
+ * `concerns` is existence-checked only; nothing exercises it, so it is weaker
+ * than `verifies`. Use it for a coupling that is not already implied by a call;
+ * a coupling on the call path is recovered from the graph and needs no anchor.
+ */
+
 /**
- * Marks a type as tracing one or more spec ids; the type is unchanged.
+ * Marks a type or interface as **realizing** one or more spec ids; the type is unchanged.
  *
  * @example
  * type AnchoredState = Traces<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, { sequences: number[] }>;
+ *
+ * @example
+ * interface IdStrategy extends Traces<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, {}> { mint(): void; }
  */
-export type Traces<Id extends TraceableId, T> = T & { readonly __traces?: Id };
+export type Traces<Id extends TraceableIds, T> = T & { readonly __traces?: Id };
 
 /**
- * Anchors code to one or more spec ids; a removed id fails to compile.
+ * Marks a type or interface as **concerning** one or more spec ids — coupled to
+ * the spec without realizing it; the type is unchanged.
+ *
+ * @example
+ * interface IdStrategy extends Concerns<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, {}> { mint(): void; }
+ */
+export type Concerns<Id extends TraceableIds, T> = T & { readonly __concerns?: Id };
+
+/**
+ * Anchors code that **realizes** one or more spec ids; a removed id fails to compile.
  *
  * Called with a value it returns the value unchanged (wrap a function or
  * constant). Called with only the ids it returns a no-op decorator (annotate a
- * class or method). Either way the ids are referenced, so deleting a spec
- * breaks the anchor.
+ * class or method).
  *
  * @example
  * export const mint = traces(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, (type: string, count: number): string[] => []);
@@ -54,7 +92,32 @@ export function traces(_ids: TraceableIds, ...rest: unknown[]): unknown {
 }
 
 /**
- * Anchors a test to one or more spec ids and runs it unchanged.
+ * Anchors code that **concerns** one or more spec ids — coupled to the spec
+ * without realizing or verifying it; a removed id fails to compile.
+ *
+ * Same two forms as `traces`: a value or function wrapper, or — called with
+ * only the ids — a no-op class/method decorator. The anchor is existence-checked
+ * only; nothing exercises it (ADR-0004).
+ *
+ * @example
+ * export const render = concerns(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, (n: number): string => String(n));
+ *
+ * @example
+ * class Minter { @concerns(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY) render() {} }
+ */
+export function concerns<Value>(ids: TraceableIds, value: Value): Value;
+export function concerns(
+  ids: TraceableIds,
+): (target: unknown, propertyKey?: unknown, descriptor?: unknown) => void;
+export function concerns(_ids: TraceableIds, ...rest: unknown[]): unknown {
+  if (rest.length === 1) {
+    return rest[0];
+  }
+  return () => {};
+}
+
+/**
+ * Anchors a test that **verifies** one or more spec ids and runs it unchanged.
  *
  * @example
  * verifies(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, () => { test("holds", () => {}); });
