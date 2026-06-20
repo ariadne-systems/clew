@@ -27,12 +27,12 @@ export type TraceableIds = TraceableId | readonly [TraceableId, ...TraceableId[]
  * Marks a type or interface as **realizing** one or more spec ids; the type is unchanged.
  *
  * @example
- * type AnchoredState = Traces<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, { sequences: number[] }>;
+ * type AnchoredState = Realizes<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, { sequences: number[] }>;
  *
  * @example
- * interface IdStrategy extends Traces<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, {}> { mint(): void; }
+ * interface IdStrategy extends Realizes<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, {}> { mint(): void; }
  */
-export type Traces<Id extends TraceableIds, T> = T & { readonly __traces?: Id };
+export type Realizes<Id extends TraceableIds, T> = T & { readonly __realizes?: Id };
 
 /**
  * Marks a type or interface as **concerning** one or more spec ids — coupled to
@@ -51,16 +51,16 @@ export type Concerns<Id extends TraceableIds, T> = T & { readonly __concerns?: I
  * class or method).
  *
  * @example
- * export const mint = traces(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, (type: string, count: number): string[] => []);
+ * export const mint = realizes(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, (type: string, count: number): string[] => []);
  *
  * @example
- * class Minter { @traces(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY) mint() {} }
+ * class Minter { @realizes(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY) mint() {} }
  */
-export function traces<Value>(ids: TraceableIds, value: Value): Value;
-export function traces(
+export function realizes<Value>(ids: TraceableIds, value: Value): Value;
+export function realizes(
   ids: TraceableIds,
 ): (target: unknown, propertyKey?: unknown, descriptor?: unknown) => void;
-export function traces(_ids: TraceableIds, ...rest: unknown[]): unknown {
+export function realizes(_ids: TraceableIds, ...rest: unknown[]): unknown {
   if (rest.length === 1) {
     return rest[0];
   }
@@ -71,7 +71,7 @@ export function traces(_ids: TraceableIds, ...rest: unknown[]): unknown {
  * Anchors code that **concerns** one or more spec ids — coupled to the spec
  * without realizing or verifying it; a removed id fails to compile.
  *
- * Same two forms as `traces`: a value or function wrapper, or — called with
+ * Same two forms as `realizes`: a value or function wrapper, or — called with
  * only the ids — a no-op class/method decorator. The anchor is existence-checked
  * only; nothing exercises it (ADR-0004).
  *

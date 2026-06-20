@@ -1,6 +1,6 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { ConTraceables, NfTraceables, traces } from "@ariadne-thread/trace";
+import { ConTraceables, NfTraceables, realizes } from "@ariadne-thread/trace";
 import lockfile from "proper-lockfile";
 import type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
 import { AriadneError, ErrorCode } from "./errors.js";
@@ -18,7 +18,7 @@ const LOCK_OPTIONS = {
   retries: { retries: 50, factor: 1.2, minTimeout: 5, maxTimeout: 100 },
 };
 
-const loadState = traces(
+const loadState = realizes(
   ConTraceables.CON_001_STATE_FILE_VERSION_CONTROLLED,
   async (file: string): Promise<AriadneState> => {
     let raw: string;
@@ -42,7 +42,7 @@ const loadState = traces(
   },
 );
 
-const saveState = traces(
+const saveState = realizes(
   NfTraceables.NF_002_ATOMIC_STATE_WRITE,
   async (file: string, state: AriadneState): Promise<void> => {
     const tmp = `${file}.tmp`;
@@ -68,7 +68,7 @@ const saveState = traces(
 export const withState: <T>(
   run: (state: AriadneState) => T | Promise<T>,
   options?: WithStateOptions,
-) => Promise<T> = traces(
+) => Promise<T> = realizes(
   NfTraceables.NF_001_STATE_ACCESS_MUTUALLY_EXCLUSIVE,
   async <T>(
     run: (state: AriadneState) => T | Promise<T>,

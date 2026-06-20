@@ -5,7 +5,7 @@ import {
   mintTemporary,
   requireConfig,
 } from "@ariadne-thread/core";
-import { SwTraceables, traces } from "@ariadne-thread/trace";
+import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
@@ -17,7 +17,7 @@ import type { Command } from "commander";
  * Any error propagates to the bin entry, which writes it to stderr and exits
  * non-zero.
  */
-export const registerMint: (program: Command) => void = traces(
+export const registerMint: (program: Command) => void = realizes(
   [SwTraceables.SW_008_MINT_COMMAND, SwTraceables.SW_003_MINT_COMMAND_OUTPUT],
   (program: Command): void => {
     program

@@ -6,7 +6,7 @@ Generated anchoring markers for TypeScript. Referencing a marker binds code to
 a spec id and `tsc` checks it: remove a spec, regenerate, and every anchor that
 named it stops compiling. Do not edit by hand.
 
-The markers express three relations — **realizes** (`traces` / `Traces`),
+The markers express three relations — **realizes** (`realizes` / `Realizes`),
 **verifies** (`verifies`), and **concerns** (`concerns` / `Concerns`) — defined
 in ADR-0004. For which relation to add when, see the `ariadne-anchor` workflow.
 
@@ -14,28 +14,28 @@ in ADR-0004. For which relation to add when, see the `ariadne-anchor` workflow.
 
 | element | realizes | verifies | concerns |
 | --- | --- | --- | --- |
-| value / function | `traces(ids, value)` | — | `concerns(ids, value)` |
-| class / method | `@traces(ids)` | — | `@concerns(ids)` |
+| value / function | `realizes(ids, value)` | — | `concerns(ids, value)` |
+| class / method | `@realizes(ids)` | — | `@concerns(ids)` |
 | test | — | `verifies(ids, run)` | — |
-| type | `Traces<ids, T>` | — | `Concerns<ids, T>` |
-| interface | `extends Traces<ids, unknown>` | — | `extends Concerns<ids, unknown>` |
+| type | `Realizes<ids, T>` | — | `Concerns<ids, T>` |
+| interface | `extends Realizes<ids, unknown>` | — | `extends Concerns<ids, unknown>` |
 
-`ids` is a single member or a non-empty list — `traces([A, B], value)`,
-`Traces<[A, B], T>`. Import the markers and the `*Traceables` enums from this
+`ids` is a single member or a non-empty list — `realizes([A, B], value)`,
+`Realizes<[A, B], T>`. Import the markers and the `*Traceables` enums from this
 folder's module.
 
 ## Examples
 
 ```ts
 // realizes — a function
-export const mint = traces(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, (count: number): string[] => []);
+export const mint = realizes(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, (count: number): string[] => []);
 
 // realizes — a class
-@traces(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY)
+@realizes(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY)
 export class Minter {}
 
 // realizes — an interface (combine several ids into ONE list)
-export interface Strategy extends Traces<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, unknown> {
+export interface Strategy extends Realizes<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, unknown> {
   run(): void;
 }
 
@@ -51,5 +51,5 @@ export const DEFAULT = concerns(ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, 3
 ## Notes
 
 - On an interface, combine several ids into one list — two separate
-  `extends Traces<...>` clauses collide on the marker property and fail to compile.
+  `extends Realizes<...>` clauses collide on the marker property and fail to compile.
 - The available ids are the enum members in the `*Traceables.ts` files here.

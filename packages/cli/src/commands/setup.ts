@@ -1,5 +1,5 @@
 import { setup } from "@ariadne-thread/core";
-import { SwTraceables, traces } from "@ariadne-thread/trace";
+import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
@@ -9,7 +9,7 @@ import type { Command } from "commander";
  * Any error propagates to the bin entry, which writes it to stderr
  * and exits non-zero.
  */
-export const registerSetup: (program: Command) => void = traces(
+export const registerSetup: (program: Command) => void = realizes(
   SwTraceables.SW_010_SETUP_COMMAND,
   (program: Command): void => {
     program

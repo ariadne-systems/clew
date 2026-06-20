@@ -10,7 +10,7 @@
 ADR-0001 D1 establishes that a trace lives in the code and references a stable spec id, with existence enforced by the target language's type-checker.
 It speaks of "a trace" generically and does not enumerate *kinds* of relation.
 
-In practice two relations emerged in the generated anchoring utility: `traces`, for the code that implements a spec, and `verifies`, for the test that checks it.
+In practice two relations emerged in the generated anchoring utility: `realizes`, for the code that implements a spec, and `verifies`, for the test that checks it.
 These cover realization and verification.
 
 A third relationship recurs and has no home: code that is *coupled to* a spec without implementing or testing it — a class that depends on a behaviour anchored elsewhere, a function whose correctness rests on a constraint it does not itself enforce.
@@ -26,11 +26,11 @@ The question is whether such relations should be left in comments, derived from 
 
 The anchoring vocabulary is fixed at three relation kinds, each a generated marker constrained to `TraceableId`, emitted in the forms its targets require:
 
-- **realizes** — `traces(id, value)` for a value or function, `@traces(id)` for a class or method: the code element is the spec's implementation.
+- **realizes** — `realizes(id, value)` for a value or function, `@realizes(id)` for a class or method: the code element is the spec's implementation.
 - **verifies** — `verifies(id, run)`: the test exercises the spec's behaviour.
 - **concerns** — `concerns(id, value)` for a value or function, `@concerns(id)` for a class or method: the code element is coupled to the spec — depends on it, is constrained by it — without realizing or verifying it.
 
-The type-level markers `Traces<Id, T>` and `Concerns<Id, T>` express the realizes and concerns relations on a type.
+The type-level markers `Realizes<Id, T>` and `Concerns<Id, T>` express the realizes and concerns relations on a type.
 The vocabulary is deliberately closed; a new relation kind requires its own decision recorded here.
 
 Rationale.
@@ -77,14 +77,14 @@ Keeping comments out of the trace is what lets the graph be trusted as a whole, 
 Each marker is emitted in the forms its target requires, so every kind of element can be anchored in source.
 The anchor needs only to exist for the type-checker; it never needs a runtime form.
 
-- a value or function — `traces(ids, value)` / `concerns(ids, value)`;
-- a class or method — the decorator `@traces(ids)` / `@concerns(ids)`;
+- a value or function — `realizes(ids, value)` / `concerns(ids, value)`;
+- a class or method — the decorator `@realizes(ids)` / `@concerns(ids)`;
 - a test — `verifies(ids, run)`;
-- a type — `Traces<ids, T>` / `Concerns<ids, T>` on the alias;
-- an interface — the same type marker through an `extends` clause (`interface I extends Traces<ids, {}> { … }`) or a sibling alias (`type _ = Traces<ids, I>`).
+- a type — `Realizes<ids, T>` / `Concerns<ids, T>` on the alias;
+- an interface — the same type marker through an `extends` clause (`interface I extends Realizes<ids, {}> { … }`) or a sibling alias (`type _ = Realizes<ids, I>`).
 
 `ids` is a single member or a non-empty list.
-At the type level several ids go in one list in one marker; two separate `extends Traces<…>` clauses are rejected because they collide on the marker property, so ids are combined, never stacked.
+At the type level several ids go in one list in one marker; two separate `extends Realizes<…>` clauses are rejected because they collide on the marker property, so ids are combined, never stacked.
 
 An interface therefore does not depend on being anchored only through its implementations: it can carry its own checked anchor.
 Anchoring a seam through its implementations and tests remains available, and is often enough when the spec is already anchored there.
@@ -105,7 +105,7 @@ When the index and resolver are built (ADR-0001 D4) they surface the three relat
 
 ## Consequences
 
-The generated anchoring utility gains the third relation: `concerns` (in the same value-and-decorator forms as `traces`) and the `Concerns<Id, T>` type marker (alongside `Traces<Id, T>`).
+The generated anchoring utility gains the third relation: `concerns` (in the same value-and-decorator forms as `realizes`) and the `Concerns<Id, T>` type marker (alongside `Realizes<Id, T>`).
 SW-018 is amended for the TypeScript generator; the Java generator gains the analogous emission.
 
 Prose `(SPEC-ID)` references in code become non-authoritative.

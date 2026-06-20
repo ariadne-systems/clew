@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
+import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import {
   configExists,
   DEFAULT_CONFIG_FILE,
@@ -33,7 +33,7 @@ export type SetupResult = {
  * An existing configuration is never overwritten, so setup is safe to
  * re-run.
  */
-export const setup: (options?: SetupOptions) => Promise<SetupResult> = traces(
+export const setup: (options?: SetupOptions) => Promise<SetupResult> = realizes(
   [
     SwTraceables.SW_011_SCAFFOLD_DEFAULT_CONFIG,
     ConTraceables.CON_010_SETUP_NEVER_OVERWRITES,

@@ -11,7 +11,7 @@ import {
   toMemberName,
   toPascalCase,
 } from "@ariadne-thread/core";
-import { ArchTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
+import { ArchTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 
 /** This generator's type — its name and the `generator-type` in the provenance header. */
 const GENERATOR_TYPE = "typescript";
@@ -23,10 +23,10 @@ const GENERATOR_TYPE = "typescript";
  * readable at the anchor site) and the value is the spec id — with a
  * generated-do-not-edit header naming the set. It also emits a helper module that
  * re-exports the enums, unions them into a combined `TraceableId`, and exports the
- * anchoring utility for the three relations of the taxonomy (ADR-0004): `traces`
- * and `Traces` (realizes), `verifies` (verifies), and `concerns` and `Concerns`
- * (concerns). The function markers wrap a value or apply as a class/method
- * decorator, and the `Traces`/`Concerns` type markers anchor a type or interface;
+ * anchoring utility for the three relations of the taxonomy (ADR-0004):
+ * `realizes` / `Realizes`, `verifies`, and `concerns` / `Concerns`. The function
+ * markers wrap a value or apply as a class/method
+ * decorator, and the `Realizes`/`Concerns` type markers anchor a type or interface;
  * each takes one member or a non-empty list, constrained to that union, so a
  * reference to a removed member fails to type-check (ADR-0001 D1). A plain (non-`const`) enum is used so the output survives per-file
  * transpilers and bundlers, and a `README.md` documents the markers for an author
@@ -34,7 +34,7 @@ const GENERATOR_TYPE = "typescript";
  * the helpers are emitted, not shipped. File names are relative to the project's
  * configured output directory, which the core resolves (ENT-002).
  */
-export const createTypeScriptGenerator: () => Generator = traces(
+export const createTypeScriptGenerator: () => Generator = realizes(
   [
     SwTraceables.SW_018_TYPESCRIPT_OUTPUT,
     ArchTraceables.ARCH_003_GENERATOR_INTERFACE,
@@ -105,12 +105,12 @@ function renderHelperModule(specSets: readonly SpecSet[]): GeneratedFile {
     " * Marks a type or interface as **realizing** one or more spec ids; the type is unchanged.",
     " *",
     " * @example",
-    ` * type AnchoredState = Traces<${example}, { sequences: number[] }>;`,
+    ` * type AnchoredState = Realizes<${example}, { sequences: number[] }>;`,
     " *",
     " * @example",
-    ` * interface IdStrategy extends Traces<${example}, {}> { mint(): void; }`,
+    ` * interface IdStrategy extends Realizes<${example}, {}> { mint(): void; }`,
     " */",
-    "export type Traces<Id extends TraceableIds, T> = T & { readonly __traces?: Id };",
+    "export type Realizes<Id extends TraceableIds, T> = T & { readonly __realizes?: Id };",
     "",
     "/**",
     " * Marks a type or interface as **concerning** one or more spec ids — coupled to",
@@ -129,16 +129,16 @@ function renderHelperModule(specSets: readonly SpecSet[]): GeneratedFile {
     " * class or method).",
     " *",
     " * @example",
-    ` * export const mint = traces(${example}, (type: string, count: number): string[] => []);`,
+    ` * export const mint = realizes(${example}, (type: string, count: number): string[] => []);`,
     " *",
     " * @example",
-    ` * class Minter { @traces(${example}) mint() {} }`,
+    ` * class Minter { @realizes(${example}) mint() {} }`,
     " */",
-    "export function traces<Value>(ids: TraceableIds, value: Value): Value;",
-    "export function traces(",
+    "export function realizes<Value>(ids: TraceableIds, value: Value): Value;",
+    "export function realizes(",
     "  ids: TraceableIds,",
     "): (target: unknown, propertyKey?: unknown, descriptor?: unknown) => void;",
-    "export function traces(_ids: TraceableIds, ...rest: unknown[]): unknown {",
+    "export function realizes(_ids: TraceableIds, ...rest: unknown[]): unknown {",
     "  if (rest.length === 1) {",
     "    return rest[0];",
     "  }",
@@ -149,7 +149,7 @@ function renderHelperModule(specSets: readonly SpecSet[]): GeneratedFile {
     " * Anchors code that **concerns** one or more spec ids — coupled to the spec",
     " * without realizing or verifying it; a removed id fails to compile.",
     " *",
-    " * Same two forms as `traces`: a value or function wrapper, or — called with",
+    " * Same two forms as `realizes`: a value or function wrapper, or — called with",
     " * only the ids — a no-op class/method decorator. The anchor is existence-checked",
     " * only; nothing exercises it (ADR-0004).",
     " *",
@@ -200,7 +200,7 @@ function renderReadme(specSets: readonly SpecSet[]): GeneratedFile {
     "a spec id and `tsc` checks it: remove a spec, regenerate, and every anchor that",
     "named it stops compiling. Do not edit by hand.",
     "",
-    "The markers express three relations — **realizes** (`traces` / `Traces`),",
+    "The markers express three relations — **realizes** (`realizes` / `Realizes`),",
     "**verifies** (`verifies`), and **concerns** (`concerns` / `Concerns`) — defined",
     "in ADR-0004. For which relation to add when, see the `ariadne-anchor` workflow.",
     "",
@@ -208,28 +208,28 @@ function renderReadme(specSets: readonly SpecSet[]): GeneratedFile {
     "",
     "| element | realizes | verifies | concerns |",
     "| --- | --- | --- | --- |",
-    "| value / function | `traces(ids, value)` | — | `concerns(ids, value)` |",
-    "| class / method | `@traces(ids)` | — | `@concerns(ids)` |",
+    "| value / function | `realizes(ids, value)` | — | `concerns(ids, value)` |",
+    "| class / method | `@realizes(ids)` | — | `@concerns(ids)` |",
     "| test | — | `verifies(ids, run)` | — |",
-    "| type | `Traces<ids, T>` | — | `Concerns<ids, T>` |",
-    "| interface | `extends Traces<ids, unknown>` | — | `extends Concerns<ids, unknown>` |",
+    "| type | `Realizes<ids, T>` | — | `Concerns<ids, T>` |",
+    "| interface | `extends Realizes<ids, unknown>` | — | `extends Concerns<ids, unknown>` |",
     "",
-    "`ids` is a single member or a non-empty list — `traces([A, B], value)`,",
-    "`Traces<[A, B], T>`. Import the markers and the `*Traceables` enums from this",
+    "`ids` is a single member or a non-empty list — `realizes([A, B], value)`,",
+    "`Realizes<[A, B], T>`. Import the markers and the `*Traceables` enums from this",
     "folder's module.",
     "",
     "## Examples",
     "",
     "```ts",
     "// realizes — a function",
-    `export const mint = traces(${example}, (count: number): string[] => []);`,
+    `export const mint = realizes(${example}, (count: number): string[] => []);`,
     "",
     "// realizes — a class",
-    `@traces(${example})`,
+    `@realizes(${example})`,
     "export class Minter {}",
     "",
     "// realizes — an interface (combine several ids into ONE list)",
-    `export interface Strategy extends Traces<${example}, unknown> {`,
+    `export interface Strategy extends Realizes<${example}, unknown> {`,
     "  run(): void;",
     "}",
     "",
@@ -245,7 +245,7 @@ function renderReadme(specSets: readonly SpecSet[]): GeneratedFile {
     "## Notes",
     "",
     "- On an interface, combine several ids into one list — two separate",
-    "  `extends Traces<...>` clauses collide on the marker property and fail to compile.",
+    "  `extends Realizes<...>` clauses collide on the marker property and fail to compile.",
     "- The available ids are the enum members in the `*Traceables.ts` files here.",
     "",
   ];

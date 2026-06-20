@@ -1,7 +1,7 @@
 import type { Dirent } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
+import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import { readConfiguredPrefixes, readLayout } from "./config.js";
 import { withState } from "./state.js";
 
@@ -61,7 +61,7 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
 }
 
 /** Raises each prefix's mark to the discovered maximum, never lowering it. */
-const reconcile = traces(
+const reconcile = realizes(
   ConTraceables.CON_009_RECONCILE_NEVER_LOWERS,
   (
     sequences: Record<string, number>,
@@ -85,7 +85,7 @@ const reconcile = traces(
  * configured prefix. A directory that does not exist is skipped, so a
  * project missing one of its configured locations still initializes.
  */
-const discoverHighWaterMarks = traces(
+const discoverHighWaterMarks = realizes(
   SwTraceables.SW_006_DERIVE_HIGH_WATER_MARKS,
   async (
     dirs: string[],

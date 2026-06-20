@@ -1,7 +1,7 @@
 import type { Dirent } from "node:fs";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { ConTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
+import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { SpecSetMatcher } from "./config.js";
 import {
   readGenerators,
@@ -55,7 +55,7 @@ export type SpecResult = {
  * deterministic: the scan and grouping are sorted, so an unchanged spec set
  * yields byte-identical output, and a generated file is overwritten on each run.
  */
-export const spec: (options: SpecOptions) => Promise<SpecResult> = traces(
+export const spec: (options: SpecOptions) => Promise<SpecResult> = realizes(
   SwTraceables.SW_014_GENERATE_TRACEABLES,
   async (options: SpecOptions): Promise<SpecResult> => {
     const { configFile } = options;
@@ -115,7 +115,7 @@ export const spec: (options: SpecOptions) => Promise<SpecResult> = traces(
  * written this run — the tool's own stale output from a prior run. A file the
  * tool did not generate (no marker) is never touched.
  */
-const pruneStaleGenerated = traces(
+const pruneStaleGenerated = realizes(
   ConTraceables.CON_012_GENERATED_FILES_TOOL_OWNED,
   async (writeRoot: string, written: ReadonlySet<string>): Promise<void> => {
     let entries: Dirent[];

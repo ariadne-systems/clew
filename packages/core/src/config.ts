@@ -3,8 +3,8 @@ import {
   ArchTraceables,
   ConTraceables,
   concerns,
+  realizes,
   SwTraceables,
-  traces,
 } from "@ariadne-thread/trace";
 import { AriadneError, ErrorCode } from "./errors.js";
 
@@ -297,7 +297,7 @@ export async function configExists(
  * command-level precondition; the readers above still default an absent value
  * within a present configuration.
  */
-export const requireConfig: (file?: string) => Promise<void> = traces(
+export const requireConfig: (file?: string) => Promise<void> = realizes(
   ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG,
   async (file: string = DEFAULT_CONFIG_FILE): Promise<void> => {
     if (!(await configExists(file))) {
@@ -310,7 +310,7 @@ export const requireConfig: (file?: string) => Promise<void> = traces(
 );
 
 /** Reads and parses `.ariadnerc.json`; a missing file resolves to an empty config. */
-const readRawConfig = traces(
+const readRawConfig = realizes(
   SwTraceables.SW_009_READ_CONFIGURATION,
   async (file: string): Promise<Record<string, unknown>> => {
     let raw: string;

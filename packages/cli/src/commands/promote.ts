@@ -1,5 +1,5 @@
 import { promote, requireConfig } from "@ariadne-thread/core";
-import { SwTraceables, traces } from "@ariadne-thread/trace";
+import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
@@ -11,7 +11,7 @@ import type { Command } from "commander";
  * the bin entry, which writes it to stderr and exits non-zero. Integration
  * reasoning stays with the `ariadne-promote` skill, not here.
  */
-export const registerPromote: (program: Command) => void = traces(
+export const registerPromote: (program: Command) => void = realizes(
   SwTraceables.SW_016_PROMOTE_COMMAND,
   (program: Command): void => {
     program

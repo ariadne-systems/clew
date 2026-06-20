@@ -1,8 +1,8 @@
 import {
   type ArchTraceables,
   ConTraceables,
-  type Traces,
-  traces,
+  type Realizes,
+  realizes,
 } from "@ariadne-thread/trace";
 
 /**
@@ -64,7 +64,7 @@ export interface GenerateContext {
  * references, such as a Java package matching the output directory.
  */
 export interface Generator
-  extends Traces<ArchTraceables.ARCH_003_GENERATOR_INTERFACE, unknown> {
+  extends Realizes<ArchTraceables.ARCH_003_GENERATOR_INTERFACE, unknown> {
   /** Stable name matched against a configured generator's `type`. */
   readonly name: string;
   /**
@@ -102,7 +102,7 @@ const HOMEPAGE = "https://ariadne-thread.io";
 export const generatedHeader: (
   generatorType: string,
   specSet?: string,
-) => string[] = traces(
+) => string[] = realizes(
   ConTraceables.CON_012_GENERATED_FILES_TOOL_OWNED,
   (generatorType: string, specSet?: string): string[] => {
     const lines = [
