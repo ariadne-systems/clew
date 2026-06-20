@@ -1,0 +1,133 @@
+# CI for the ariadne-thread pnpm monorepo. Migrated from .gitlab-ci.yml.
+#
+# Build runs first and the other jobs depend on it: the CLI's type-check and
+# tests resolve `@ariadne-thread/core` from its built `dist`, so core must be
+# built before they run. `pnpm -r build` builds in topological order, so core
+# is built before the cli. Downstream jobs download the `dist` artifact instead
+# of rebuilding.
+name: CI
+
+# GitLab ran on merge-request events and on branch pushes, but never twice for
+# the same commit. The idiomatic GitHub equivalent: run on every pull request
+# and on pushes to main. Feature branches receive CI once a PR is open (no
+# duplicate push + pull_request runs for the same commit).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Trust the runner's system CA store in addition to Node's bundled CAs, so
+# `pnpm install` works behind a corporate TLS proxy. Additive and harmless on
+# runners that reach the public registry. Requires Node >= 22.15.
+env:
+  NODE_OPTIONS: --use-system-ca
+
+# Cancel superseded runs (GitLab `interruptible: true`), but never cancel main —
+# the release job must run to completion (GitLab `interruptible: false`).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: pnpm build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: packages/*/dist
+          retention-days: 7
+
+  lint:
+    # Biome lints source; no build artifacts required.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: pnpm lint
+      - run: pnpm format:check
+
+  typecheck:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: packages
+      - run: pnpm typecheck
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    # Guard the supported Node floor (engines: ">=22") and the dev version.
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["22", "24"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          node-version: ${{ matrix.node-version }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: packages
+      - run: pnpm test
+
+  package-checks:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: packages
+      - run: pnpm check:pkg
+
+  # Publish changed packages and push their git tags, on main only.
+  # Versions are bumped locally with `pnpm changeset:version` and committed; when
+  # that lands on main this job runs `changeset publish` (publishes only the
+  # versions not already on the registry — a no-op on commits that bumped nothing)
+  # and creates one git tag per published package, which it then pushes back.
+  # `needs` lists the whole verify stage, so it waits for it to pass first.
+  #
+  # Registry auth uses the built-in GITHUB_TOKEN against GitHub Packages, and the
+  # same token (via the checkout credentials) pushes the tags. Both require the
+  # `permissions` below. NOTE: GitHub Packages requires the npm scope to match the
+  # repository owner. If `@ariadne-thread` is not the GitHub org/user, change the
+  # registry to npmjs.org and provide an NPM_TOKEN secret instead.
+  release:
+    needs: [lint, typecheck, test, package-checks]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push git tags
+      packages: write # publish to GitHub Packages
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Configure npm auth for GitHub Packages
+        run: |
+          {
+            echo "@ariadne-thread:registry=https://npm.pkg.github.com"
+            echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}"
+          } > .npmrc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish and tag
+        run: |
+          git config user.email "release-bot@ariadne-thread"
+          git config user.name "ariadne release"
+          pnpm release
+          git push origin --tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
