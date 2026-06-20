@@ -78,7 +78,7 @@ describe("spec output", () => {
         expect(java).toContain("SW_012");
       });
 
-      test("a second run on unchanged specs writes byte-identical output (CON-012)", async () => {
+      test("a second run on unchanged specs writes byte-identical output", async () => {
         const dir = await setupProjectDir(["SW-012-a.md"]);
         const generated = join(dir, "out-ts", "index.ts");
 

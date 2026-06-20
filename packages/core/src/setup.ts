@@ -27,10 +27,10 @@ export type SetupResult = {
 };
 
 /**
- * Scaffolds the default configuration and layout (SW-011): writes
+ * Scaffolds the default configuration and layout: writes
  * `.ariadnerc.json` with the default lenses and layout (ENT-002) and creates the
  * configured layout directories, relative to the configuration's directory.
- * An existing configuration is never overwritten (CON-010), so setup is safe to
+ * An existing configuration is never overwritten, so setup is safe to
  * re-run.
  */
 export const setup: (options?: SetupOptions) => Promise<SetupResult> = traces(

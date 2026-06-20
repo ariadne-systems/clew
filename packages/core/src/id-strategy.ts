@@ -1,10 +1,13 @@
+import type { ArchTraceables, Traces } from "@ariadne-thread/trace";
+
 /**
- * The seam for generating an id's variable part (ARCH-001).
+ * The seam for generating an id's variable part.
  * The scheme — sequential, opaque, or another later — is chosen by
  * configuration and implemented behind this interface. The minting code
  * depends on this interface, never on a concrete strategy.
  */
-export interface IdStrategy {
+export interface IdStrategy
+  extends Traces<ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY, unknown> {
   /** Mints `count` ids for the given type/prefix. */
   mint(type: string, count: number): Promise<string[]>;
 }

@@ -125,7 +125,7 @@ describe("spec generation", () => {
       expect(written).toBe("SW: SW-012");
     });
 
-    test("re-running on unchanged specs produces byte-identical output (CON-012)", async () => {
+    test("re-running on unchanged specs produces byte-identical output", async () => {
       const { configFile, outputDir } = await fixture(
         ["SW-012-a.md", "SW-013-b.md"],
         ["fake"],
@@ -254,7 +254,7 @@ describe("configured spec sets", () => {
 
 describe("pruning stale output", () => {
   verifies(ConTraceables.CON_012_GENERATED_FILES_TOOL_OWNED, () => {
-    test("removes a previously-generated file that is no longer emitted, keeping non-generated files (CON-012)", async () => {
+    test("removes a previously-generated file that is no longer emitted, keeping non-generated files", async () => {
       const { configFile, outputDir } = await fixture(
         ["SW-012-a.md"],
         ["fake"],

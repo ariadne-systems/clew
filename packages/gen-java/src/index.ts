@@ -19,7 +19,7 @@ const GENERATOR_TYPE = "java";
 const OUTPUT_PATH = "Traceables.java";
 
 /**
- * The Java generator (ARCH-003; STR-011 skeleton). It emits one `Traceables`
+ * The Java generator (STR-011 skeleton). It emits one `Traceables`
  * class holding, per spec set, a nested enum whose constants are that set's
  * traceables — the constant name derived from the spec's filename (matching the
  * TypeScript generator), the value the id. The package is derived from the

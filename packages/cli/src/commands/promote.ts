@@ -3,10 +3,10 @@ import { SwTraceables, traces } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
- * Registers the `ariadne promote` command surface (SW-016; STR-013).
- * The action stays thin: it requires a configuration (CON-011) and delegates the
+ * Registers the `ariadne promote` command surface (STR-013).
+ * The action stays thin: it requires a configuration and delegates the
  * mechanical finalize — bind each draft's id, substitute its temporary id
- * project-wide, move it into the layout — to core's `promote()` (SW-017). It then
+ * project-wide, move it into the layout — to core's `promote()`. It then
  * reports each temporary-id → bound-id mapping to stdout. Any error propagates to
  * the bin entry, which writes it to stderr and exits non-zero. Integration
  * reasoning stays with the `ariadne-promote` skill, not here.

@@ -16,7 +16,7 @@ import { ArchTraceables, SwTraceables, traces } from "@ariadne-thread/trace";
 const GENERATOR_TYPE = "typescript";
 
 /**
- * The TypeScript generator (SW-018; ARCH-003). For each spec set it emits a file
+ * The TypeScript generator. For each spec set it emits a file
  * declaring a string enum whose members are that set's traceables — the member
  * name is derived from the spec's filename (so it carries the id and slug,
  * readable at the anchor site) and the value is the spec id — with a
@@ -28,7 +28,7 @@ const GENERATOR_TYPE = "typescript";
  * decorator, and the `Traces`/`Concerns` type markers anchor a type or interface;
  * each takes one member or a non-empty list, constrained to that union, so a
  * reference to a removed member fails to type-check (ADR-0001 D1). A plain (non-`const`) enum is used so the output survives per-file
- * transpilers and bundlers. The output is deterministic and tool-owned (CON-012);
+ * transpilers and bundlers. The output is deterministic and tool-owned;
  * the helpers are emitted, not shipped. File names are relative to the project's
  * configured output directory, which the core resolves (ENT-002).
  */

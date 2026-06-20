@@ -20,7 +20,7 @@ async function collectSourceFiles(dir: string): Promise<string[]> {
   return files;
 }
 
-describe("core depends on no concrete generator (ARCH-003)", () => {
+describe("core depends on no concrete generator", () => {
   verifies(ArchTraceables.ARCH_003_GENERATOR_INTERFACE, () => {
     test("no core source imports a concrete generator package", async () => {
       const sources = await collectSourceFiles(import.meta.dirname);

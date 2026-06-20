@@ -4,15 +4,15 @@ import type { IdStrategy } from "./id-strategy.js";
 import { withState } from "./state.js";
 
 export type SequentialIdStrategyOptions = {
-  /** Width to which numbers are zero-padded; sourced from configuration (CON-003). */
+  /** Width to which numbers are zero-padded; sourced from configuration. */
   padding: number;
   /** Path to the state file. Defaults to the StateStore default. */
   stateFile?: string;
 };
 
 /**
- * Sequential id scheme (SW-002): renders ids as `<PREFIX>-<zero-padded number>`,
- * with the numbers drawn from the per-prefix sequence allocator (SW-001).
+ * Sequential id scheme: renders ids as `<PREFIX>-<zero-padded number>`,
+ * with the numbers drawn from the per-prefix sequence allocator.
  */
 @traces(SwTraceables.SW_002_MINT_SEQUENTIAL_IDS)
 export class SequentialIdStrategy implements IdStrategy {
@@ -32,9 +32,9 @@ export class SequentialIdStrategy implements IdStrategy {
       );
     }
     // Allocate inside the locked session; the high-water mark is persisted so a
-    // number is never reused (SW-001, CON-002). withState saves before it
+    // number is never reused. withState saves before it
     // resolves, so the numbers are only formatted and returned once the advance
-    // is durably persisted (CON-004).
+    // is durably persisted.
     const numbers = await withState(
       (state) => allocateConsecutive(state.sequences, type, count),
       { file: this.#stateFile },
@@ -49,7 +49,7 @@ export class SequentialIdStrategy implements IdStrategy {
 
 /**
  * Allocates `count` consecutive numbers for `prefix` and advances its
- * high-water mark (SW-001). A prefix used for the first time begins at 1.
+ * high-water mark. A prefix used for the first time begins at 1.
  */
 const allocateConsecutive = traces(
   SwTraceables.SW_001_ALLOCATE_SEQUENCE_NUMBERS,

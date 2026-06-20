@@ -1,5 +1,5 @@
 /**
- * Shared identifier helpers for generators (SW-014). Centralizing them keeps the
+ * Shared identifier helpers for generators. Centralizing them keeps the
  * TypeScript and Java generators producing the same symbol for the same spec, and
  * the sanitization that guarantees a *valid* identifier in one place.
  */
@@ -30,7 +30,7 @@ export function toIdentifier(value: string): string {
 
 /**
  * Derives an UPPER_SNAKE enum-member name from a spec's filename, so every
- * generator names the same traceable identically (SW-014), e.g.
+ * generator names the same traceable identically, e.g.
  * `SW-002-mint-ids.md` → `SW_002_MINT_IDS`.
  */
 export const toMemberName: (filename: string) => string = traces(

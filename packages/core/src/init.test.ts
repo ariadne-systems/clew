@@ -131,7 +131,7 @@ describe("reconciliation", () => {
       expect(await readMarks(stateFile)).toEqual({ SW: 5 });
     });
 
-    test("never lowers an existing mark (CON-009)", async () => {
+    test("never lowers an existing mark", async () => {
       const { configFile, stateFile } = await fixture(["SW-005-a.md"], {
         SW: 9,
       });

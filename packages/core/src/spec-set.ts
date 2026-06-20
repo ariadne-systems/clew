@@ -23,9 +23,8 @@ type CompiledMatcher = {
 };
 
 /**
- * Groups traceables into spec sets by matcher (SW-015): a traceable joins the
- * set whose pattern matches its filename. The sets partition the traceables
- * (CON-013):
+ * Groups traceables into spec sets by matcher: a traceable joins the
+ * set whose pattern matches its filename. The sets partition the traceables:
  *
  * - a traceable matching an `ignore` pattern is excluded from every set;
  * - a traceable matching more than one set is an overlap error;
@@ -34,7 +33,7 @@ type CompiledMatcher = {
  *
  * Nothing is grouped into two sets or dropped silently. Empty sets are omitted,
  * and both the sets and their members are sorted, so the output is deterministic
- * and reproducible (CON-012). With the default lens matchers every scanned
+ * and reproducible. With the default lens matchers every scanned
  * traceable carries a lens and so matches exactly one set.
  */
 export const groupIntoSpecSets: (
@@ -66,7 +65,7 @@ export const groupIntoSpecSets: (
   },
 );
 
-/** Compiles the non-catch-all matchers; a catch-all needs no pattern (CON-013). */
+/** Compiles the non-catch-all matchers; a catch-all needs no pattern. */
 function compileNormalMatchers(
   matchers: readonly SpecSetMatcher[],
 ): CompiledMatcher[] {
@@ -81,7 +80,7 @@ function compileNormalMatchers(
 
 /**
  * Resolves the single set a traceable belongs to, enforcing the partition
- * (CON-013): overlap and unmatched are explicit errors, and an unmatched
+ * overlap and unmatched are explicit errors, and an unmatched
  * traceable joins the catch-all set when one is configured.
  */
 const resolveSet = traces(
@@ -128,7 +127,7 @@ function appendMember(
   }
 }
 
-/** Renders the grouped members as spec sets, sorted by name then id (CON-012). */
+/** Renders the grouped members as spec sets, sorted by name then id. */
 function toSortedSpecSets(membersByName: Map<string, Traceable[]>): SpecSet[] {
   return [...membersByName.entries()]
     .map(([name, members]) => ({

@@ -19,7 +19,7 @@ export type SpecOptions = {
   /**
    * Resolves a configured generator name to its implementation. The concrete
    * generators live in their own packages; injecting their resolution keeps the
-   * core free of any dependency on a concrete generator (ARCH-003, ADR-0001 D9).
+   * core free of any dependency on a concrete generator (ADR-0001 D9).
    */
   resolveGenerator: (name: string) => Generator | undefined;
   /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
@@ -47,14 +47,13 @@ export type SpecResult = {
 };
 
 /**
- * Generates the traceables and anchoring utilities from the specs (SW-014; STR-011).
- * It scans the configured artifacts into the traceable set (SW-013), groups them
+ * Generates the traceables and anchoring utilities from the specs (STR-011).
+ * It scans the configured artifacts into the traceable set, groups them
  * into spec sets (by lens, the default), and drives each configured generator
  * through the generator interface only — the core performs no language-specific
- * emission and references no concrete generator (ARCH-003). Generation is
+ * emission and references no concrete generator. Generation is
  * deterministic: the scan and grouping are sorted, so an unchanged spec set
- * yields byte-identical output, and a generated file is overwritten on each run
- * (CON-012).
+ * yields byte-identical output, and a generated file is overwritten on each run.
  */
 export const spec: (options: SpecOptions) => Promise<SpecResult> = traces(
   SwTraceables.SW_014_GENERATE_TRACEABLES,
@@ -96,7 +95,7 @@ export const spec: (options: SpecOptions) => Promise<SpecResult> = traces(
     }
 
     // Remove files this tool generated in a previous run that are no longer emitted
-    // (e.g. a spec set that disappeared), so a removed id stops compiling (CON-012).
+    // (e.g. a spec set that disappeared), so a removed id stops compiling.
     await Promise.all(
       [...writtenByRoot].map(([writeRoot, written]) =>
         pruneStaleGenerated(writeRoot, written),
@@ -144,7 +143,7 @@ const pruneStaleGenerated = traces(
 
 /**
  * Resolves the spec-set matchers: the configured `specSets` when a project
- * declares them, otherwise the default one-set-per-lens matchers (SW-015).
+ * declares them, otherwise the default one-set-per-lens matchers.
  */
 async function resolveMatchers(
   configFile: string | undefined,
@@ -159,7 +158,7 @@ async function resolveMatchers(
 /**
  * Resolves a configured generator name to its implementation, failing fast with
  * a stable code when the configuration names a generator that is not registered
- * (ARCH-002). Nothing is generated until every configured generator resolves.
+ * Nothing is generated until every configured generator resolves.
  */
 function resolveOrThrow(
   name: string,
@@ -175,7 +174,7 @@ function resolveOrThrow(
   return generator;
 }
 
-/** Writes a generated file under the output root, overwriting any prior content (CON-012). */
+/** Writes a generated file under the output root, overwriting any prior content. */
 async function writeGeneratedFile(
   outputDir: string,
   file: GeneratedFile,

@@ -29,15 +29,14 @@ const IGNORED_DIRECTORIES = new Set([
 const SPEC_FILENAME = /^([A-Z]+)-(\d+)(?:-.*)?\.md$/;
 
 /**
- * Scans the configured artifact locations into the set of traceables (SW-013).
+ * Scans the configured artifact locations into the set of traceables.
  * A traceable is a lens-bearing spec id — its prefix is a configured lens
  * (ADR-0003) — tagged with that lens, so the set can be grouped into spec sets
  * for generation. A non-lens id such as a story (`STR`) or entity (`ENT`) is not
  * a traceable and is not scanned. The scan is language-neutral: it reads only the
  * configured layout (ENT-002) and lenses, and knows nothing of any target
  * language. An id added to the specs appears in the set; an id removed disappears
- * from it. The result is sorted by id so generation downstream is deterministic
- * (CON-012).
+ * from it. The result is sorted by id so generation downstream is deterministic.
  */
 export async function scan(options: ScanOptions = {}): Promise<Traceable[]> {
   const [layout, lenses] = await Promise.all([
