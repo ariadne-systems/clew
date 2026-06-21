@@ -5,7 +5,7 @@ description: "Anchor code to the specs it realizes, verifies, or concerns, using
 
 # clew-anchor
 
-When you change code that implements a spec, tests it, or is coupled to it, bind the code to the spec with the generated trace markers, so the link is enforced by the target language's tooling instead of asserted in a comment that rots (ADR-0001, ADR-0004).
+When you change code that implements a spec, tests it, or is coupled to it, bind the code to the spec with the generated trace markers, so the link is enforced by the target language's tooling instead of asserted in a comment that rots.
 
 This skill adds markers for spec ids that **already exist**.
 It does not author or promote specs — that is `clew-draft` and `clew-promote` — and it never invents an id.
@@ -19,11 +19,6 @@ The relations are language-neutral; the exact marker syntax is the generator's, 
 - You wrote code coupled to a spec it does not implement or test — and the coupling is not already a call into the realizing code → add a **concerns** anchor.
 
 Skip a relation the code does not actually hold; do not anchor for the sake of anchoring.
-
-## Invoking the CLI
-
-This skill writes commands as `clew <command>`; resolve how the CLI actually runs before acting — `clew` on PATH, the package manager's local binary (`pnpm exec clew` / `npx clew`), or the repository's dev runner (`pnpm dev …`) — and confirm with `clew --help`.
-Never assume a global binary.
 
 ## What you must not do
 
@@ -56,12 +51,12 @@ Resolve how code references a symbol the way the codebase already does: find an 
 A marker references a generated symbol, which exists only after the spec has been generated.
 
 - If the id you need is missing from the generated symbols, its spec has not been generated yet: a spec must be promoted (bound id) and the generator run before its symbol exists.
-- Regenerate with the project's spec command (`clew spec`), resolved as above.
+- Regenerate with the project's spec command (`clew spec`).
 - Reference only symbols that exist; do not invent an id.
 
 ### 4. Choose the relation, then the form the generator documents
 
-Three relations, the same in every language (ADR-0004):
+Three relations, the same in every language:
 
 - **realizes** — the code is the spec's implementation.
 - **verifies** — a test exercises the spec.

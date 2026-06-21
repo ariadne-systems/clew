@@ -19,11 +19,6 @@ A project declares its lenses in `.ariadnerc.json`, each with an `id` and a one-
 - The user has reviewed drafts (see the `clew-draft` skill) and approves promoting them.
 - The user asks to promote, approve, or finalize a story and its specs.
 
-## Invoking the CLI
-
-This skill writes commands as `clew <command>`; resolve how the CLI actually runs before acting — `clew` on PATH, the package manager's local binary (`pnpm exec clew` / `npx clew`), or the repository's dev runner (`pnpm dev …`) — and confirm with `clew --help`.
-Never assume a global binary.
-
 ## What you must not do
 
 - Do not run `clew promote` (it binds ids and moves files) until the integration below is settled — integration may reveal a draft should change or not be promoted, and temporary ids let that happen without burning real numbers.
