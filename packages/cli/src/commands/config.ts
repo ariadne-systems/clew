@@ -5,7 +5,7 @@ import type { Command } from "commander";
 import { createGeneratorRegistry } from "../generators.js";
 
 /**
- * Registers the `ariadne config` command surface (STR-015).
+ * Registers the `clew config` command surface (STR-015).
  * The action stays thin: it requires a configuration, builds the generator
  * registry — so a generator's default output directory can be resolved — and
  * delegates to core's `resolveConfiguration()`, which assembles the resolved

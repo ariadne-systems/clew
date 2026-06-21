@@ -3,7 +3,7 @@ import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
- * Registers the `ariadne setup` command surface (STR-010).
+ * Registers the `clew setup` command surface (STR-010).
  * The action stays thin: it delegates scaffolding to core's `setup()`
  * and reports what it wrote. An existing configuration is left untouched.
  * Any error propagates to the bin entry, which writes it to stderr

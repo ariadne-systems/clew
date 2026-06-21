@@ -109,7 +109,7 @@ export const generatedHeader: (
       "/*",
       ` * THIS FILE IS ${GENERATED_MARKER} - DO NOT EDIT MANUALLY`,
       " *",
-      " * Run `ariadne spec` to regenerate.",
+      " * Run `clew spec` to regenerate.",
       " *",
       ` * @ariadne-thread homepage: ${HOMEPAGE}`,
       " * @ariadne-thread connector-type: req-as-code",

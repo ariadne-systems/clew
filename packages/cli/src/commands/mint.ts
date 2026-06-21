@@ -9,7 +9,7 @@ import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
- * Registers the `ariadne mint` command surface (STR-005, STR-007).
+ * Registers the `clew mint` command surface (STR-005, STR-007).
  * The action stays thin: it delegates allocation and validation to core's
  * `mint()` and prints each minted id on its own line to stdout.
  * With `--tmp` it delegates to core's `mintTemporary()` for unbound ids that
