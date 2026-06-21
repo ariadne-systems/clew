@@ -8,6 +8,7 @@ Load the governance contract before working, in numerical order:
 @.claude/.ai-project-context/003-developer-guidelines.md
 @.claude/.ai-project-context/004-technology-contract.md
 @.claude/.ai-project-context/005-testing-contract.md
+@.claude/.ai-project-context/006-spec-conventions.md
 
 The contract is general; the task enters per session.
 For this project the task is a story in `docs/spec/stories/` and its linked specs in `docs/spec/derived-specs/`.

@@ -1,9 +1,9 @@
 ---
-name: ariadne-promote
+name: clew-promote
 description: Promote reviewed draft stories and specs into the approved spec corpus — reason about how they fit the existing specs (relations, supersession, conflicts), reconcile, then finalize them with bound ids in the spec tree. Use when the user approves drafts and wants to promote, approve, or finalize a story and its specs.
 ---
 
-# ariadne-promote
+# clew-promote
 
 Promote reviewed drafts into the approved spec corpus.
 Promotion is two things, and the first is the important one: **integrate** the new story and specs into the existing body of specs, then **finalize** them with bound ids in the spec tree.
@@ -16,22 +16,22 @@ A project declares its lenses in `.ariadnerc.json`, each with an `id` and a one-
 
 ## When to use
 
-- The user has reviewed drafts (see the `ariadne-draft` skill) and approves promoting them.
+- The user has reviewed drafts (see the `clew-draft` skill) and approves promoting them.
 - The user asks to promote, approve, or finalize a story and its specs.
 
 ## Invoking the CLI
 
-This skill writes commands as `ariadne <command>`, but how the CLI actually runs varies by project — resolve it before running anything:
+This skill writes commands as `clew <command>`, but how the CLI actually runs varies by project — resolve it before running anything:
 
-- If `ariadne` is on the PATH, use it directly.
-- If `@ariadne-thread/cli` is a project dependency, invoke the local binary through the project's package manager — for example `pnpm exec ariadne …` or `npx ariadne …`.
+- If `clew` is on the PATH, use it directly.
+- If `@ariadne-thread/cli` is a project dependency, invoke the local binary through the project's package manager — for example `pnpm exec clew …` or `npx clew …`.
 - Inside the tool's own source repository, use its dev runner (for example a `pnpm dev …` / `pnpm mint …` script).
 
-Confirm the invocation and command surface with `ariadne --help` and `ariadne <command> --help` before acting.
+Confirm the invocation and command surface with `clew --help` and `clew <command> --help` before acting.
 
 ## What you must not do
 
-- Do not run `ariadne promote` (it binds ids and moves files) until the integration below is settled — integration may reveal a draft should change or not be promoted, and temporary ids let that happen without burning real numbers.
+- Do not run `clew promote` (it binds ids and moves files) until the integration below is settled — integration may reveal a draft should change or not be promoted, and temporary ids let that happen without burning real numbers.
 - Do not silently rewrite, retire, or delete existing specs. Surface every proposed change and confirm it with the user.
 - Do not commit. Leave commits to the user, and tell them the state file advanced.
 
@@ -45,22 +45,22 @@ Read the project's configuration for the layout (where stories, derived specs, a
 ### 2. Integrate — reconcile with the corpus (the part only an agent can do)
 
 First, make sure the corpus context exists.
-If it was already built while drafting (the `ariadne-context` skill), reuse it; if not, build it now with `ariadne-context`.
+If it was already built while drafting (the `clew-context` skill), reuse it; if not, build it now with `clew-context`.
 It maps what the new story and specs relate to, what they may supersede or make obsolete, what they may conflict with, and whether any draft merely duplicates an existing spec.
 
 Then act on that context: present the proposed relations and the supersession, conflict, and duplication candidates, with the edits they imply — to the drafts and to any affected existing specs — and get the user's confirmation.
 Do not retire or change an existing spec silently, and do not promote a contradiction or a duplicate into the corpus.
 This reconciliation is the point of promotion.
 
-### 3. Finalize — run `ariadne promote` (mechanical)
+### 3. Finalize — run `clew promote` (mechanical)
 
-Once integration is confirmed, run `ariadne promote` to finalize the drafts; it does the mechanical work deterministically, so you do not bind ids, substitute, or move files by hand:
+Once integration is confirmed, run `clew promote` to finalize the drafts; it does the mechanical work deterministically, so you do not bind ids, substitute, or move files by hand:
 
 - it **binds** a real id for each draft by minting the draft's lens — the temporary id's prefix — advancing the state;
 - it **substitutes** every resolved temporary id project-wide, across the spec tree and the drafts location, including references in already-promoted specs, the domain model, and any draft that remains unpromoted — so a draft that referenced a promoted one points at the resolved id rather than a dangling temporary one;
 - it **moves** each draft into its place in the spec tree per the layout, renamed to its bound id.
 
-Invoke it for the drafts you confirmed: `ariadne promote` finalizes all pending drafts, or `ariadne promote <id|path>…` only the named ones. It reports each temporary-id → bound-id mapping.
+Invoke it for the drafts you confirmed: `clew promote` finalizes all pending drafts, or `clew promote <id|path>…` only the named ones. It reports each temporary-id → bound-id mapping.
 
 Two things it does not do, which stay with you after it runs:
 

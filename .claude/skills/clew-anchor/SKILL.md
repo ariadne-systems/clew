@@ -1,14 +1,14 @@
 ---
-name: ariadne-anchor
+name: clew-anchor
 description: Anchor code to the specs it realizes, verifies, or concerns, using the generated trace markers, so the spec-to-code link is checked by the build instead of left in a comment. Use after writing or changing code, a test, or a type that implements, exercises, or is coupled to a spec. Resolves the traceables folder from the project configuration and follows the generator's own documentation for the target language.
 ---
 
-# ariadne-anchor
+# clew-anchor
 
 When you change code that implements a spec, tests it, or is coupled to it, bind the code to the spec with the generated trace markers, so the link is enforced by the target language's tooling instead of asserted in a comment that rots (ADR-0001, ADR-0004).
 
 This skill adds markers for spec ids that **already exist**.
-It does not author or promote specs — that is `ariadne-draft` and `ariadne-promote` — and it never invents an id.
+It does not author or promote specs — that is `clew-draft` and `clew-promote` — and it never invents an id.
 
 The relations are language-neutral; the exact marker syntax is the generator's, one per target language. So this skill resolves *where* and *how* from the project, never from a fixed assumption.
 
@@ -41,7 +41,7 @@ Resolve how code references a symbol the way the codebase already does: find an 
 A marker references a generated symbol, which exists only after the spec has been generated.
 
 - If the id you need is missing from the generated symbols, its spec has not been generated yet: a spec must be promoted (bound id) and the generator run before its symbol exists.
-- Regenerate with the project's spec command. Resolve how the CLI runs — `ariadne` on PATH, the package manager's local binary (for example `pnpm exec ariadne` or `npx ariadne`), or the repository's dev runner (for example `pnpm dev spec`) — and confirm with `ariadne --help`. Never assume a global binary.
+- Regenerate with the project's spec command. Resolve how the CLI runs — `clew` on PATH, the package manager's local binary (for example `pnpm exec clew` or `npx clew`), or the repository's dev runner (for example `pnpm dev spec`) — and confirm with `clew --help`. Never assume a global binary.
 - Reference only symbols that exist; do not invent an id.
 
 ## 4. Choose the relation, then the form the generator documents

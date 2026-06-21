@@ -4,10 +4,10 @@ Add an `ariadne promote` command that finalizes reviewed drafts into the spec tr
 **Business Value**
 Promotion has two halves: integrating a draft into the corpus (judgment) and finalizing it (mechanics — bind a real id, replace its temporary id everywhere, move it into place).
 The finalize half is done today by the agent with ad-hoc shell scripting, which is slow, unverifiable, and easy to get wrong: a single missed occurrence of a temporary id leaves a dangling reference in an already-promoted spec or another draft.
-A command makes finalize deterministic, testable, and fast, and lets the `ariadne-promote` skill keep only the part that genuinely needs an agent — reasoning about how the new specs fit the existing ones.
+A command makes finalize deterministic, testable, and fast, and lets the `clew-promote` skill keep only the part that genuinely needs an agent — reasoning about how the new specs fit the existing ones.
 
 **Problem / Context**
-The `ariadne-promote` skill splits promotion into *integrate* (reason about relations, supersession, conflicts, duplication) and *finalize* (bind ids, substitute temporary ids project-wide, move drafts per the layout).
+The `clew-promote` skill splits promotion into *integrate* (reason about relations, supersession, conflicts, duplication) and *finalize* (bind ids, substitute temporary ids project-wide, move drafts per the layout).
 There is no command for finalize, so the agent performs it by hand each time: minting a bound id per draft, running a project-wide find/replace for every temporary id, and moving files into the spec tree.
 This is mechanical and deterministic, yet it is re-derived ad hoc every promotion and is the step most likely to break — for example forgetting that a temporary id is also referenced from a spec promoted earlier, or from a draft not promoted in the same batch.
 
@@ -20,14 +20,14 @@ Given the drafts to finalize — the pending drafts in the configured drafts loc
 
 It reports each temporary-id → bound-id mapping and that the state advanced.
 It requires a configuration (CON-011), like every command, and it does not commit.
-The command does only the mechanical finalize; the integration reasoning and any edits it implies stay in the `ariadne-promote` skill and with the user.
+The command does only the mechanical finalize; the integration reasoning and any edits it implies stay in the `clew-promote` skill and with the user.
 
 **Affected specs and artifacts**
 - New `SW` spec — the `promote` command surface (thin; delegates to core).
 - New `SW` spec — finalize in core: bind each draft's id, substitute its temporary id project-wide, and move it into the layout.
 - New `CON` spec — after a successful promote, no occurrence of a promoted draft's temporary id remains anywhere in the project (the substitution is exhaustive).
 - Reuses and updates `CON-011` — a command requires a configuration; its enumeration (today `mint`, `init`) is generalized to also cover `spec` (which already requires config) and `promote`, so it stops being a stale list.
-- Updates the `ariadne-promote` skill — its Finalize section delegates the mechanical steps to `ariadne promote` instead of describing them as manual edits; the Integrate section is unchanged.
+- Updates the `clew-promote` skill — its Finalize section delegates the mechanical steps to `ariadne promote` instead of describing them as manual edits; the Integrate section is unchanged.
 
 **Acceptance Criteria**
 - `ariadne promote` binds a real id for each named (or pending) draft by minting the draft's lens — the temporary id's prefix — advancing the state.
@@ -39,7 +39,7 @@ The command does only the mechanical finalize; the integration reasoning and any
 - Vitest covers: binding and filename rename; project-wide substitution reaching both an already-promoted spec and an unpromoted draft; moving each draft to the right directory; and that no temporary id is left behind.
 
 **Out of scope**
-- The *integrate* half of promotion — relations, supersession, conflict, and duplication reasoning — stays in the `ariadne-promote` skill; the command never decides what a draft means for the corpus.
+- The *integrate* half of promotion — relations, supersession, conflict, and duplication reasoning — stays in the `clew-promote` skill; the command never decides what a draft means for the corpus.
 - Applying the confirmed integration edits to affected existing specs (new relations, supersession notes) — judgment, stays with the agent.
 - Merging an entity draft into the domain model — a content merge, not a file move; the first cut finalizes file-based drafts (stories and derived specs), and entity-draft promotion stays manual (a possible follow-on).
 - Committing — left to the user, as everywhere.
@@ -58,4 +58,9 @@ The command does only the mechanical finalize; the integration reasoning and any
 - [SW-017 — Finalize reviewed drafts into the spec tree](../derived-specs/SW-017-finalize-drafts.md)
 - [CON-014 — Promotion substitutes a draft's temporary id exhaustively](../derived-specs/CON-014-exhaustive-substitution.md)
 
-This story depends on the existing `mint` allocation (STR-004) and the configured layout (ENT-002), and revises the `ariadne-promote` skill.
+This story depends on the existing `mint` allocation (STR-004) and the configured layout (ENT-002), and revises the `clew-promote` skill.
+
+## Changes
+
+- **2026-06-21** — Renamed skill references `ariadne-promote` → `clew-promote` to match the CLI's rename to `clew`.
+Names only; the spec's meaning is unchanged.

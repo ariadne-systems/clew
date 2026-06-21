@@ -202,7 +202,7 @@ function renderReadme(specSets: readonly SpecSet[]): GeneratedFile {
     "",
     "The markers express three relations — **realizes** (`realizes` / `Realizes`),",
     "**verifies** (`verifies`), and **concerns** (`concerns` / `Concerns`) — defined",
-    "in ADR-0004. For which relation to add when, see the `ariadne-anchor` workflow.",
+    "in ADR-0004. For which relation to add when, see the `clew-anchor` workflow.",
     "",
     "## By what you anchor",
     "",
