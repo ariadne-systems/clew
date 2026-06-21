@@ -7,7 +7,7 @@ The scan excludes tool-owned and non-source locations by default
 The code scan never reports anchors from tool-owned or non-source locations.
 By default it skips dependency and build directories (for example `node_modules` and build output) and the generated traceables directory — the `outputDir` of each configured generator (ENT-002), which holds the markers' definitions, not their uses (CON-012).
 In this story the built-in exclusions are the whole exclusion behaviour: there is no configuration to add to or override them, so they always apply.
-The later story adds the configurable `exclude` / `unexclude` layer on top, where `unexclude` may re-include a built-in-excluded path; the built-ins are the base of that precedence, not an immovable floor (ADR-0005 D6).
+STR-017 adds the configurable `exclude` / `unexclude` layer on top: there the built-in defaults become root-relative globs (CON-018) and the lowest precedence layer, which a user `exclude` or an `unexclude` can override (CON-017); the built-ins are the base of that precedence, not an immovable floor (ADR-0005 D6).
 
 **Rationale**
 The generated traceables directory declares the markers (`export function realizes(...)`, the enum members); scanning it as if it were user code would invent anchors that no one wrote, polluting every downstream consumer (ADR-0005 D1).

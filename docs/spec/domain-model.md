@@ -48,6 +48,8 @@ The set of configured prefixes is the single source of truth for id validity, so
 | `generators` | `List<{ type: String, outputDir?: String }>` | The language generators to run; each declares its target-language `type` and the directory it writes into, relative to the project root (SW-014). A generator's `outputDir` defaults to that generator's idiomatic location (for example `src/ariadne/traceables` for TypeScript). Optional; with none configured, nothing is generated. |
 | `specSets` | `List<{ name: String, pattern?: String, catchAll?: Boolean }>` | Named spec sets, each matched by a regular expression over the spec's filename; one symbol set is generated per set (SW-015). Optional; with none configured, the default is one set per lens. One set may set `catchAll` to collect otherwise-unmatched traceables, in which case it needs no pattern (CON-013). |
 | `ignore` | `List<String>` | Regular expressions over the spec's filename; a matching traceable is excluded from every spec set and produces no symbol (CON-013). Optional. |
+| `exclude` | `List<String>` | Repository-root-relative globs (CON-018); a matching path is excluded from the code scan and produces no anchor (SW-024, SW-025). A user `exclude` is absolute in the exclusion precedence (CON-017). Optional. |
+| `unexclude` | `List<String>` | Repository-root-relative globs (CON-018) that re-include a path a built-in default (CON-016) would exclude; never overrides a user `exclude` (CON-017). Optional. |
 
 ## View
 
