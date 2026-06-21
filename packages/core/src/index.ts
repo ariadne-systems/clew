@@ -4,6 +4,9 @@ export type {
   IdGenerationMode,
   Layout,
   Lens,
+  ResolveConfigurationOptions,
+  ResolvedConfiguration,
+  ResolvedGenerator,
   SpecSetMatcher,
 } from "./config/config.js";
 export {
@@ -20,6 +23,7 @@ export {
   readLenses,
   readSpecSets,
   requireConfig,
+  resolveConfiguration,
 } from "./config/config.js";
 export type { SetupOptions, SetupResult } from "./config/setup.js";
 export { setup } from "./config/setup.js";

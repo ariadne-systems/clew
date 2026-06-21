@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
+import type { Generator } from "../index.js";
 import {
   DEFAULT_LENSES,
   ErrorCode,
@@ -14,7 +15,17 @@ import {
   readLenses,
   readSpecSets,
   requireConfig,
+  resolveConfiguration,
 } from "../index.js";
+
+/** A generator stub whose only relevant behaviour is the directory it defaults to. */
+function fakeGenerator(name: string, defaultOutputDir: string): Generator {
+  return {
+    name,
+    defaultOutputDir,
+    generate: async () => [],
+  };
+}
 
 async function tempConfigFile(contents: unknown): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-config-"));
@@ -237,6 +248,64 @@ describe("requireConfig", () => {
       const file = await tempConfigFile({ version: 1 });
 
       await expect(requireConfig(file)).resolves.toBeUndefined();
+    });
+  });
+});
+
+describe("resolveConfiguration", () => {
+  verifies(SwTraceables.SW_019_RESOLVE_CONFIGURATION, () => {
+    test("resolves the defaulted lenses, derived prefixes, and layout for an absent-section configuration", async () => {
+      const file = await tempConfigFile({ version: 1 });
+
+      const resolved = await resolveConfiguration({
+        resolveGenerator: () => undefined,
+        configFile: file,
+      });
+
+      expect(resolved.lenses).toEqual([...DEFAULT_LENSES]);
+      expect(resolved.prefixes).toEqual(
+        expect.arrayContaining(["SW", "CON", "STR", "ENT"]),
+      );
+      expect(resolved.layout.stories.dir).toBe("docs/spec/stories");
+      expect(resolved.generators).toEqual([]);
+    });
+
+    test("resolves a generator's output directory to its default when none is configured", async () => {
+      const file = await tempConfigFile({ generators: [{ type: "ts" }] });
+
+      const resolved = await resolveConfiguration({
+        resolveGenerator: (name) =>
+          name === "ts" ? fakeGenerator("ts", "gen/ts") : undefined,
+        configFile: file,
+      });
+
+      expect(resolved.generators).toEqual([
+        { type: "ts", outputDir: "gen/ts" },
+      ]);
+    });
+
+    test("keeps a generator's configured output directory without consulting the generator", async () => {
+      const file = await tempConfigFile({
+        generators: [{ type: "ts", outputDir: "custom/out" }],
+      });
+
+      const resolved = await resolveConfiguration({
+        resolveGenerator: () => undefined,
+        configFile: file,
+      });
+
+      expect(resolved.generators).toEqual([
+        { type: "ts", outputDir: "custom/out" },
+      ]);
+    });
+
+    test("fails with E_UNKNOWN_GENERATOR when a generator needs its default but is not registered", async () => {
+      const file = await tempConfigFile({ generators: [{ type: "ghost" }] });
+      const resolveGenerator = () => undefined;
+
+      await expect(
+        resolveConfiguration({ resolveGenerator, configFile: file }),
+      ).rejects.toMatchObject({ code: ErrorCode.UNKNOWN_GENERATOR });
     });
   });
 });
