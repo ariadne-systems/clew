@@ -41,7 +41,7 @@ This story builds the **skeleton** — the command, the scan, the generator inte
 
 **Decisions** (resolved)
 - "Utility" is the **anchoring means**: the helpers, type-constrained to the generated traceables, that let code mark a type, value, or test against a spec id (the equivalent of annotations). The generator emits both the traceables and this utility.
-- The command is **`spec`** (short). It is the *declare* side — specs → traceables + utility; a separate, later command is the *check* side — it scans the code locations and builds coverage and drift. The two names stay distinct on purpose.
+- The command is **`spec`** (short). It is the *declare* side — specs → traceables + utility; a separate, later command is the *check* side — it scans the code locations and builds coverage and drift. The two names stay distinct on purpose. (That check-side scan is `STR-016`; coverage and drift follow it.)
 - This story builds the **skeleton only**: the command, the scan, the generator interface, and the generators as skeleton implementations — no complete generator, and **no language-specific spec**.
 - The generated symbols are organized into **spec sets** — one symbol set (enum) per set, not a single flat union. A spec set is a *configured* grouping of traceables (a matcher over the spec's filename), with grouping by **lens** as the default. The frame here is kept set-aware: each traceable carries its id, its lens, and the filename it was declared in, and the generator interface passes them grouped and emits one set per spec set. Defining the spec sets — the matchers, exclusion, and partition rules — is the follow-on story `STR-012`; this story does not build that, but does not preclude it.
 
