@@ -13,7 +13,7 @@ export function buildProgram(): Command {
   const program = new Command();
 
   program
-    .name("ariadne")
+    .name("clew")
     .description(
       "Compile-checked, id-anchored traceability for specs and code.",
     )
