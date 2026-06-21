@@ -27,6 +27,8 @@ export const ErrorCode = {
   DRAFT_NOT_FOUND: "E_DRAFT_NOT_FOUND",
   /** An entity draft cannot be finalized by `promote`; merge it into the domain model by hand. */
   ENTITY_DRAFT_UNSUPPORTED: "E_ENTITY_DRAFT_UNSUPPORTED",
+  /** A configured `exclude` or `unexclude` glob could not be compiled. */
+  INVALID_EXCLUSION_PATTERN: "E_INVALID_EXCLUSION_PATTERN",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

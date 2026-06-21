@@ -36,10 +36,11 @@ function contentGenerator(outputDir: string): Generator {
 async function project(
   files: Record<string, string>,
   generators: unknown,
+  extra: Record<string, unknown> = {},
 ): Promise<{ root: string; configFile: string }> {
   const root = await mkdtemp(join(tmpdir(), "ariadne-scan-"));
   const configFile = join(root, ".ariadnerc.json");
-  await writeFile(configFile, JSON.stringify({ generators }), "utf8");
+  await writeFile(configFile, JSON.stringify({ generators, ...extra }), "utf8");
   for (const [relative, contents] of Object.entries(files)) {
     const absolute = join(root, relative);
     await mkdir(dirname(absolute), { recursive: true });
@@ -117,6 +118,45 @@ describe("code scan", () => {
       });
 
       expect(result.anchors.map((anchor) => anchor.id)).toEqual(["SW-100"]);
+    });
+  });
+
+  verifies(SwTraceables.SW_024_EXCLUDE_MATCHING_PATHS, () => {
+    test("a configured exclude removes a matching file from the scan", async () => {
+      const generator = contentGenerator("gen/out");
+      const { root, configFile } = await project(
+        { "src/a.ts": "SW-100", "src/a.fixture.ts": "SW-200" },
+        [{ type: "fake", outputDir: "gen/out" }],
+        { exclude: ["**/*.fixture.ts"] },
+      );
+
+      const result = await scanCode({
+        resolveGenerator: resolveFake(generator),
+        configFile,
+        projectRoot: root,
+      });
+
+      expect(result.anchors.map((anchor) => anchor.id)).toEqual(["SW-100"]);
+    });
+
+    test("unexclude re-includes a file under a built-in-excluded directory", async () => {
+      const generator = contentGenerator("gen/out");
+      const { root, configFile } = await project(
+        { "src/a.ts": "SW-100", "node_modules/keep/b.ts": "SW-300" },
+        [{ type: "fake", outputDir: "gen/out" }],
+        { unexclude: ["node_modules/keep/**"] },
+      );
+
+      const result = await scanCode({
+        resolveGenerator: resolveFake(generator),
+        configFile,
+        projectRoot: root,
+      });
+
+      expect([...result.anchors.map((anchor) => anchor.id)].sort()).toEqual([
+        "SW-100",
+        "SW-300",
+      ]);
     });
   });
 

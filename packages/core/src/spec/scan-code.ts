@@ -1,9 +1,19 @@
 import type { Dirent } from "node:fs";
 import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, extname, join } from "node:path";
-import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
-import { readGenerators } from "../config/config.js";
+import { realizes, SwTraceables } from "@ariadne-thread/trace";
+import {
+  readExclude,
+  readGenerators,
+  readUnexclude,
+} from "../config/config.js";
 import { AriadneError, ErrorCode } from "../errors.js";
+import type { ExclusionRules } from "./exclusions.js";
+import {
+  compileExclusionRules,
+  fileExcluded,
+  shouldDescend,
+} from "./exclusions.js";
 import type { AnchorLocation, Generator, SourceFile } from "./generator.js";
 
 export type ScanCodeOptions = {
@@ -25,34 +35,26 @@ export type ScanCodeResult = {
 };
 
 /**
- * Directory names never descended into: dependency, build, and tool-internal
- * locations that are not the project's own source (CON-016). The configured
- * generators' output directories are excluded in addition (resolved per scan).
- */
-const BUILT_IN_EXCLUDED_DIRS = new Set([
-  ".git",
-  ".ariadne",
-  "node_modules",
-  "dist",
-  "build",
-  "coverage",
-]);
-
-/**
  * Scans the project's code into the set of anchor locations (SW-022).
  * It drives each configured generator's discover over the source — the dual of
  * generation — and aggregates the results. The core is language-neutral: it
  * selects the source files (by each generator's extensions) and applies the
- * built-in exclusions, and the generators read their own marker grammar back out.
- * The same id may appear at many locations; every one is recorded. The result is
- * sorted so a run is deterministic.
+ * exclusions — the built-in defaults and the project's configured `exclude` /
+ * `unexclude` (STR-017) — and the generators read their own marker grammar back
+ * out. The same id may appear at many locations; every one is recorded. The
+ * result is sorted so a run is deterministic.
  */
 export const scanCode: (options: ScanCodeOptions) => Promise<ScanCodeResult> =
   realizes(
     SwTraceables.SW_022_SCAN_CODE_INTO_ANCHOR_LOCATIONS,
     async (options: ScanCodeOptions): Promise<ScanCodeResult> => {
       const projectRoot = options.projectRoot ?? ".";
-      const generatorConfigs = await readGenerators(options.configFile);
+      // These reads are independent; run them concurrently rather than serially.
+      const [generatorConfigs, exclude, unexclude] = await Promise.all([
+        readGenerators(options.configFile),
+        readExclude(options.configFile),
+        readUnexclude(options.configFile),
+      ]);
       const generators = generatorConfigs.map((config) => {
         const generator = resolveOrThrow(config.type, options.resolveGenerator);
         return {
@@ -61,15 +63,15 @@ export const scanCode: (options: ScanCodeOptions) => Promise<ScanCodeResult> =
         };
       });
 
-      const excludedDirs = resolveExcludedOutputDirs(generators);
+      const rules = compileExclusionRules({
+        exclude,
+        unexclude,
+        outputDirs: generators.map(({ outputDir }) => outputDir),
+      });
       const extensions = new Set(
         generators.flatMap(({ generator }) => generator.sourceExtensions),
       );
-      const sources = await collectSources(
-        projectRoot,
-        extensions,
-        excludedDirs,
-      );
+      const sources = await collectSources(projectRoot, extensions, rules);
 
       const anchors: AnchorLocation[] = [];
       for (const { generator } of generators) {
@@ -84,70 +86,62 @@ export const scanCode: (options: ScanCodeOptions) => Promise<ScanCodeResult> =
   );
 
 /**
- * The output directories excluded from the scan: each configured generator's
- * resolved output directory holds the markers' definitions, not their uses, so
- * scanning it would invent anchors no one wrote (CON-016). Resolution needs no
- * lookup there — an id is derived from the member name — so excluding it is safe.
- */
-const resolveExcludedOutputDirs = realizes(
-  ConTraceables.CON_016_SCAN_BUILTIN_EXCLUSIONS,
-  (
-    generators: readonly { readonly outputDir: string }[],
-  ): ReadonlySet<string> => {
-    return new Set(
-      generators.map(({ outputDir }) => normalizeRelative(outputDir)),
-    );
-  },
-);
-
-/**
  * Walks the project tree collecting the source files whose extension a generator
- * scans. A built-in excluded directory, or a generator output directory, is not
- * descended into. A directory that does not exist is skipped. Paths are recorded
- * relative to the project root with forward slashes, so they are stable across
- * platforms.
+ * scans, applying the exclusions before discovery (SW-024): an excluded file is
+ * not read, and an excluded directory is not descended into — unless an
+ * `unexclude` re-includes a path beneath it. A directory that does not exist is
+ * skipped. Paths are recorded relative to the project root with forward slashes,
+ * so they are stable across platforms.
  */
-async function collectSources(
+const collectSources: (
   projectRoot: string,
   extensions: ReadonlySet<string>,
-  excludedDirs: ReadonlySet<string>,
-): Promise<SourceFile[]> {
-  const sources: SourceFile[] = [];
-  await walk("");
-  return sources;
+  rules: ExclusionRules,
+) => Promise<SourceFile[]> = realizes(
+  SwTraceables.SW_024_EXCLUDE_MATCHING_PATHS,
+  async (
+    projectRoot: string,
+    extensions: ReadonlySet<string>,
+    rules: ExclusionRules,
+  ): Promise<SourceFile[]> => {
+    const sources: SourceFile[] = [];
+    await walk("");
+    return sources;
 
-  async function walk(relativeDir: string): Promise<void> {
-    const absoluteDir =
-      relativeDir === "" ? projectRoot : join(projectRoot, relativeDir);
-    let entries: Dirent[];
-    try {
-      entries = await readdir(absoluteDir, { withFileTypes: true });
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        return;
-      }
-      throw error;
-    }
-    for (const entry of entries) {
-      const relativeChild =
-        relativeDir === "" ? entry.name : `${relativeDir}/${entry.name}`;
-      if (entry.isDirectory()) {
-        const excluded =
-          BUILT_IN_EXCLUDED_DIRS.has(entry.name) ||
-          excludedDirs.has(relativeChild);
-        if (!excluded) {
-          await walk(relativeChild);
+    async function walk(relativeDir: string): Promise<void> {
+      const absoluteDir =
+        relativeDir === "" ? projectRoot : join(projectRoot, relativeDir);
+      let entries: Dirent[];
+      try {
+        entries = await readdir(absoluteDir, { withFileTypes: true });
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+          return;
         }
-      } else if (entry.isFile() && extensions.has(extname(entry.name))) {
-        const contents = await readFile(
-          join(projectRoot, relativeChild),
-          "utf8",
-        );
-        sources.push({ path: relativeChild, contents });
+        throw error;
+      }
+      for (const entry of entries) {
+        const relativeChild =
+          relativeDir === "" ? entry.name : `${relativeDir}/${entry.name}`;
+        if (entry.isDirectory()) {
+          if (shouldDescend(relativeChild, rules)) {
+            await walk(relativeChild);
+          }
+        } else if (
+          entry.isFile() &&
+          extensions.has(extname(entry.name)) &&
+          !fileExcluded(relativeChild, rules)
+        ) {
+          const contents = await readFile(
+            join(projectRoot, relativeChild),
+            "utf8",
+          );
+          sources.push({ path: relativeChild, contents });
+        }
       }
     }
-  }
-}
+  },
+);
 
 /** Default location of the written locations index. */
 export const DEFAULT_LOCATIONS_FILE = ".ariadne/locations.json";
@@ -181,11 +175,6 @@ export const writeLocationsIndex: (
     return file;
   },
 );
-
-/** Normalizes a configured directory to a root-relative, forward-slash path for comparison. */
-function normalizeRelative(dir: string): string {
-  return dir.replaceAll("\\", "/").replace(/^\.\//, "").replace(/\/+$/, "");
-}
 
 /** Orders anchors deterministically: by file, then line, then relation, then id. */
 function sortAnchors(anchors: AnchorLocation[]): void {
