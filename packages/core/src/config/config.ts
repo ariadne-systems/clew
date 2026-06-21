@@ -363,6 +363,40 @@ export async function readIgnore(
   );
 }
 
+/** Reads a section that is a list of glob strings; a missing section yields an empty list. */
+async function readGlobList(
+  file: string,
+  section: "exclude" | "unexclude",
+): Promise<string[]> {
+  const raw = (await readRawConfig(file))[section];
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.filter(
+    (pattern): pattern is string => typeof pattern === "string",
+  );
+}
+
+/**
+ * Reads the `exclude` section: the project's scan exclusion globs (SW-025).
+ * A missing section yields an empty list — no configured exclusions.
+ */
+export async function readExclude(
+  file: string = DEFAULT_CONFIG_FILE,
+): Promise<string[]> {
+  return readGlobList(file, "exclude");
+}
+
+/**
+ * Reads the `unexclude` section: globs that re-include paths a built-in default
+ * would exclude (SW-025). A missing section yields an empty list.
+ */
+export async function readUnexclude(
+  file: string = DEFAULT_CONFIG_FILE,
+): Promise<string[]> {
+  return readGlobList(file, "unexclude");
+}
+
 /** Whether a configuration file exists at `file`. */
 export async function configExists(
   file: string = DEFAULT_CONFIG_FILE,

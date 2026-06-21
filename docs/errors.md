@@ -19,3 +19,4 @@ A released code is never reused for a different condition and never renamed (CON
 | `E_SPEC_SET_UNMATCHED` | A traceable matches no configured spec set; add a matching set, an `ignore` pattern, or a catch-all set. |
 | `E_DRAFT_NOT_FOUND` | A draft named for `promote` was not found among the pending drafts. |
 | `E_ENTITY_DRAFT_UNSUPPORTED` | An entity draft cannot be finalized by `promote`; merge it into the domain model by hand. |
+| `E_INVALID_EXCLUSION_PATTERN` | A configured `exclude` or `unexclude` glob could not be compiled; fix the named pattern. |
