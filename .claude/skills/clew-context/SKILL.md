@@ -1,6 +1,6 @@
 ---
 name: clew-context
-description: Build the context around a story being drafted or promoted — the specs it relates to (directly, and via the code's call graph), candidate supersession or obsolescence, conflicts, cross-relations ranked by code distance, and gaps — so specs are authored and integrated with full awareness of what already exists. Use after a draft story is created and before its specs are written, and at promotion when the context has not already been built.
+description: "Build the context around a story being drafted or promoted — the specs it relates to (directly, and via the code's call graph), candidate supersession or obsolescence, conflicts, cross-relations ranked by code distance, and gaps — so specs are authored and integrated with full awareness of what already exists. Use after a draft story is created and before its specs are written, and at promotion when the context has not already been built. Read-only analysis; it does not author specs (see clew-draft) or finalize them (see clew-promote)."
 ---
 
 # clew-context
@@ -16,7 +16,6 @@ If you already built this context for these drafts earlier in the session, reuse
 
 A **lens** is a kind of spec — a viewpoint the system is described through: a software behaviour (`SW`), a constraint (`CON`), an architecture decision (`ARCH`), and so on.
 A project declares its lenses in `.ariadnerc.json`, each with an `id` and a one-line `description`; the `id` is also the prefix of the ids minted for that kind (lens `SW` → `SW-001`, `SW-002`, …).
-Read the configured lenses and their descriptions to know what each means in this project.
 
 ## When to use
 
@@ -97,3 +96,9 @@ Present the context map:
 - the gaps.
 
 This summary is what the drafting step authors against and the promotion step integrates with.
+
+## Done when
+
+- The context map is presented: `linked` vs `path` specs (with where each `path` spec was found), supersession/obsolescence and conflict candidates, cross-relations ranked by code distance, and the gaps.
+- Obsolete or superseded specs found on the call path are called out, never silently dropped.
+- Nothing is written, moved, or committed — the analysis stays read-only.

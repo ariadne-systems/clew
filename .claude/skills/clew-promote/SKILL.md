@@ -1,6 +1,6 @@
 ---
 name: clew-promote
-description: Promote reviewed draft stories and specs into the approved spec corpus — reason about how they fit the existing specs (relations, supersession, conflicts), reconcile, then finalize them with bound ids in the spec tree. Use when the user approves drafts and wants to promote, approve, or finalize a story and its specs.
+description: "Promote reviewed draft stories and specs into the approved spec corpus — reason about how they fit the existing specs (relations, supersession, conflicts), reconcile, then finalize them with bound ids in the spec tree. Use when the user approves drafts and wants to 'promote', 'approve', or 'finalize' a story and its specs. Authoring is clew-draft; corpus analysis is clew-context."
 ---
 
 # clew-promote
@@ -21,13 +21,8 @@ A project declares its lenses in `.ariadnerc.json`, each with an `id` and a one-
 
 ## Invoking the CLI
 
-This skill writes commands as `clew <command>`, but how the CLI actually runs varies by project — resolve it before running anything:
-
-- If `clew` is on the PATH, use it directly.
-- If `@ariadne-thread/cli` is a project dependency, invoke the local binary through the project's package manager — for example `pnpm exec clew …` or `npx clew …`.
-- Inside the tool's own source repository, use its dev runner (for example a `pnpm dev …` / `pnpm mint …` script).
-
-Confirm the invocation and command surface with `clew --help` and `clew <command> --help` before acting.
+This skill writes commands as `clew <command>`; resolve how the CLI actually runs before acting — `clew` on PATH, the package manager's local binary (`pnpm exec clew` / `npx clew`), or the repository's dev runner (`pnpm dev …`) — and confirm with `clew --help`.
+Never assume a global binary.
 
 ## What you must not do
 
@@ -71,3 +66,10 @@ Two things it does not do, which stay with you after it runs:
 
 Summarize what was promoted (temp id → bound id), the relations added, and any existing specs changed.
 Leave committing to the user, and remind them the state file advanced so it is committed alongside the promoted specs.
+
+## Done when
+
+- The integration is reconciled with the user: relations, supersession, conflict, and duplication candidates presented and confirmed; no existing spec changed silently.
+- `clew promote` has finalized the confirmed drafts — each temporary id bound and reported (temp → bound), references substituted project-wide, files moved into the spec tree.
+- The confirmed integration edits to existing specs are applied, and any entity draft is merged into the domain model by hand.
+- The user is reminded that the state file advanced and that committing is theirs.
