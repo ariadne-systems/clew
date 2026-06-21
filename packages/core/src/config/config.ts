@@ -380,7 +380,7 @@ export async function configExists(
 
 /**
  * Asserts a project configuration is present. When it is absent, fails
- * with a stable code and directs the user to `ariadne setup`. This is the
+ * with a stable code and directs the user to `clew setup`. This is the
  * command-level precondition; the readers above still default an absent value
  * within a present configuration.
  */
@@ -390,7 +390,7 @@ export const requireConfig: (file?: string) => Promise<void> = realizes(
     if (!(await configExists(file))) {
       throw new AriadneError(
         ErrorCode.NO_CONFIG,
-        `No configuration found at ${file}. Run \`ariadne setup\` to create one.`,
+        `No configuration found at ${file}. Run \`clew setup\` to create one.`,
       );
     }
   },

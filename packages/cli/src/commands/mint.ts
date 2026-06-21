@@ -22,7 +22,7 @@ export const registerMint: (program: Command) => void = realizes(
   (program: Command): void => {
     program
       .command("mint")
-      .description("Mint ids for a type, e.g. `ariadne mint SW 3`.")
+      .description("Mint ids for a type, e.g. `clew mint SW 3`.")
       .argument("<type>", "id prefix to mint for (e.g. SW)")
       .argument("[count]", "how many ids to mint", "1")
       .option("-t, --tmp", "mint temporary, unbound ids that touch no state")

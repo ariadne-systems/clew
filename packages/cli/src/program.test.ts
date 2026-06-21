@@ -3,7 +3,7 @@ import { buildProgram } from "./program.js";
 
 test("help output names the program", () => {
   const help = buildProgram().helpInformation();
-  expect(help).toContain("ariadne");
+  expect(help).toContain("clew");
 });
 
 test("an unknown option exits non-zero", () => {
