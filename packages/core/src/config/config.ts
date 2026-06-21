@@ -7,6 +7,7 @@ import {
   SwTraceables,
 } from "@ariadne-thread/trace";
 import { AriadneError, ErrorCode } from "../errors.js";
+import type { Generator } from "../spec/generator.js";
 
 /** Default location of the project configuration file. */
 export const DEFAULT_CONFIG_FILE = ".ariadnerc.json";
@@ -192,6 +193,92 @@ export async function readConfiguredPrefixes(
   prefixes.add(layout.stories.prefix);
   prefixes.add(layout.entities.prefix);
   return prefixes;
+}
+
+/** A configured generator with its output directory resolved (ENT-002). */
+export type ResolvedGenerator = {
+  type: string;
+  /** Where it writes, relative to the project root: the configured `outputDir` or the generator's own default. */
+  outputDir: string;
+};
+
+/**
+ * The project's configuration, fully resolved: every default applied and every
+ * derivation computed, so a caller reads the answer without knowing a default.
+ */
+export type ResolvedConfiguration = {
+  lenses: Lens[];
+  /** The valid id prefixes: the lens ids plus the story and entity prefixes (ADR-0003). */
+  prefixes: string[];
+  layout: Layout;
+  generators: ResolvedGenerator[];
+};
+
+export type ResolveConfigurationOptions = {
+  /**
+   * Resolves a configured generator name to its implementation, so a generator's
+   * default output directory can be read through the generator interface
+   * (ARCH-003). Injecting it keeps the core free of any concrete generator
+   * (ADR-0001 D9).
+   */
+  resolveGenerator: (name: string) => Generator | undefined;
+  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  configFile?: string;
+};
+
+/**
+ * Resolves the project configuration into a single view (SW-019).
+ * It composes the independently-defaulted section readers — the lenses, the
+ * layout, and the derived prefixes (ADR-0003) — with each configured generator's
+ * resolved output directory: the configured `outputDir`, or, when absent, the
+ * generator's own default read through the generator interface (ARCH-003). The
+ * generators are injected, so the core resolves the view without depending on
+ * any concrete generator.
+ */
+export const resolveConfiguration: (
+  options: ResolveConfigurationOptions,
+) => Promise<ResolvedConfiguration> = realizes(
+  SwTraceables.SW_019_RESOLVE_CONFIGURATION,
+  async (
+    options: ResolveConfigurationOptions,
+  ): Promise<ResolvedConfiguration> => {
+    const { configFile, resolveGenerator } = options;
+    const [lenses, prefixes, layout, generatorConfigs] = await Promise.all([
+      readLenses(configFile),
+      readConfiguredPrefixes(configFile),
+      readLayout(configFile),
+      readGenerators(configFile),
+    ]);
+    const generators = generatorConfigs.map((config) => ({
+      type: config.type,
+      outputDir: resolveOutputDir(config, resolveGenerator),
+    }));
+    return { lenses, prefixes: [...prefixes], layout, generators };
+  },
+);
+
+/**
+ * Resolves a configured generator's output directory: the configured `outputDir`
+ * when set, otherwise the generator's own default — the same rule the `spec`
+ * command applies (SW-014). The generator is only consulted when no directory is
+ * configured; a configured generator that resolves to nothing fails fast with a
+ * stable code.
+ */
+function resolveOutputDir(
+  config: GeneratorConfig,
+  resolveGenerator: (name: string) => Generator | undefined,
+): string {
+  if (config.outputDir !== undefined) {
+    return config.outputDir;
+  }
+  const generator = resolveGenerator(config.type);
+  if (generator === undefined) {
+    throw new AriadneError(
+      ErrorCode.UNKNOWN_GENERATOR,
+      `Configured generator "${config.type}" is not registered; remove it from \`generators\` or install a generator that provides it.`,
+    );
+  }
+  return generator.defaultOutputDir;
 }
 
 /**
