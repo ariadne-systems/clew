@@ -16,11 +16,6 @@ Do not hand-write what the command scaffolds.
 - A command failed with `error[E_NO_CONFIG]` (the tool says to run `clew setup`).
 - The user asks to set up, initialize, or configure clew, or to change the lenses or layout.
 
-## Invoking the CLI
-
-This skill writes commands as `clew <command>`; resolve how the CLI actually runs before acting — `clew` on PATH, the package manager's local binary (`pnpm exec clew` / `npx clew`), or the repository's dev runner (`pnpm dev …`) — and confirm with `clew --help`.
-Never assume a global binary.
-
 ## What you must not do
 
 - Do not author spec content or per-lens derivation guidance — that is the companion `clew-draft` skill's job. This skill only establishes the configuration and orients.

@@ -20,11 +20,6 @@ A project declares its lenses in `.ariadnerc.json`, each with an `id` and a one-
 
 If the project has no configuration yet (`error[E_NO_CONFIG]`), use the `clew-setup` skill first; drafting needs the project's lenses and layout.
 
-## Invoking the CLI
-
-This skill writes commands as `clew <command>`; resolve how the CLI actually runs before acting — `clew` on PATH, the package manager's local binary (`pnpm exec clew` / `npx clew`), or the repository's dev runner (`pnpm dev …`) — and confirm with `clew --help`.
-Never assume a global binary.
-
 ## What you must not do
 
 - Do not allocate bound ids while drafting. Use temporary ids (`clew mint --tmp <LENS>`); they touch no state, so unapproved drafts never consume real id numbers.
