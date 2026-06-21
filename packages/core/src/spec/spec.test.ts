@@ -54,6 +54,8 @@ function recordingGenerator(name: string): {
   const generator: Generator = {
     name,
     defaultOutputDir: ".",
+    sourceExtensions: [],
+    discover: () => [],
     generate(specSets) {
       received = specSets.map((specSet) => ({
         name: specSet.name,

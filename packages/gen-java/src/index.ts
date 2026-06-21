@@ -32,12 +32,16 @@ export const createJavaGenerator: () => Generator = realizes(
     return {
       name: GENERATOR_TYPE,
       defaultOutputDir: "src/main/java/ariadne/traceables",
+      sourceExtensions: [".java"],
       generate(
         specSets: readonly SpecSet[],
         context: GenerateContext,
       ): Promise<readonly GeneratedFile[]> {
         return Promise.resolve([renderTraceablesFile(specSets, context)]);
       },
+      // Skeleton, like `generate` (STR-011): Java discovery follows the same
+      // contract (ARCH-004) but is not implemented in the TypeScript scan story.
+      discover: () => [],
     };
   },
 );

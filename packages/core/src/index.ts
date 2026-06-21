@@ -39,9 +39,12 @@ export type {
 } from "./promote/promote.js";
 export { promote } from "./promote/promote.js";
 export type {
+  AnchorLocation,
   GenerateContext,
   GeneratedFile,
   Generator,
+  Relation,
+  SourceFile,
   SpecSet,
   Traceable,
 } from "./spec/generator.js";
@@ -53,6 +56,12 @@ export {
 } from "./spec/identifiers.js";
 export type { ScanOptions } from "./spec/scan.js";
 export { scan } from "./spec/scan.js";
+export type { ScanCodeOptions, ScanCodeResult } from "./spec/scan-code.js";
+export {
+  DEFAULT_LOCATIONS_FILE,
+  scanCode,
+  writeLocationsIndex,
+} from "./spec/scan-code.js";
 export type { GeneratorReport, SpecOptions, SpecResult } from "./spec/spec.js";
 export { spec } from "./spec/spec.js";
 export { groupIntoSpecSets, lensMatchers } from "./spec/spec-set.js";

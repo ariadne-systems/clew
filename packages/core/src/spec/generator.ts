@@ -55,6 +55,28 @@ export interface GenerateContext {
   readonly outputDir: string;
 }
 
+/** The relation a marker expresses (ADR-0004): the code realizes, verifies, or is concerned with a spec. */
+export type Relation = "realizes" | "verifies" | "concerns";
+
+/** A source file handed to a generator's discover: its project-root-relative path and its text. */
+export interface SourceFile {
+  readonly path: string;
+  readonly contents: string;
+}
+
+/**
+ * A located anchor the scan found: the spec id, the relation it was anchored
+ * with, and where — a project-root-relative file path and a 1-based line number.
+ * There is no column: the location is file-and-line, matching the shared
+ * locations shape (ADR-0005 D6). The same id may occur at many locations.
+ */
+export interface AnchorLocation {
+  readonly id: string;
+  readonly relation: Relation;
+  readonly file: string;
+  readonly line: number;
+}
+
 /**
  * A language-specific generator. Given the traceables grouped into
  * spec sets, it produces the verifiable symbols — one symbol set per spec set,
@@ -64,7 +86,13 @@ export interface GenerateContext {
  * references, such as a Java package matching the output directory.
  */
 export interface Generator
-  extends Realizes<ArchTraceables.ARCH_003_GENERATOR_INTERFACE, unknown> {
+  extends Realizes<
+    [
+      ArchTraceables.ARCH_003_GENERATOR_INTERFACE,
+      ArchTraceables.ARCH_004_GENERATOR_DISCOVERS_MARKERS,
+    ],
+    unknown
+  > {
   /** Stable name matched against a configured generator's `type`. */
   readonly name: string;
   /**
@@ -73,11 +101,25 @@ export interface Generator
    * for the target language. The core reads it as an opaque path.
    */
   readonly defaultOutputDir: string;
+  /**
+   * The file extensions (each with a leading dot) whose files this generator
+   * scans for anchors. The core reads only files matching some generator's
+   * extensions, and hands each generator its own (ARCH-004).
+   */
+  readonly sourceExtensions: readonly string[];
   /** Emits the traceable symbols and the anchoring utility for the spec sets. */
   generate(
     specSets: readonly SpecSet[],
     context: GenerateContext,
   ): Promise<readonly GeneratedFile[]>;
+  /**
+   * Discovers the anchors this generator's markers declare in the given sources —
+   * the dual of generate (ARCH-004). The core selects the files and applies
+   * exclusions; the generator reads its own marker grammar back out, returning a
+   * located anchor per marker. Generation and discovery name the same ids: the
+   * markers a generator emits round-trip through its discover (ADR-0005 D2).
+   */
+  discover(sources: readonly SourceFile[]): readonly AnchorLocation[];
 }
 
 /**

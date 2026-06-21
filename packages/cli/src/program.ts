@@ -4,6 +4,7 @@ import { registerConfig } from "./commands/config.js";
 import { registerInit } from "./commands/init.js";
 import { registerMint } from "./commands/mint.js";
 import { registerPromote } from "./commands/promote.js";
+import { registerScan } from "./commands/scan.js";
 import { registerSetup } from "./commands/setup.js";
 import { registerSpec } from "./commands/spec.js";
 
@@ -28,6 +29,7 @@ export function buildProgram(): Command {
   registerMint(program);
   registerSetup(program);
   registerSpec(program);
+  registerScan(program);
   registerConfig(program);
   registerPromote(program);
 
