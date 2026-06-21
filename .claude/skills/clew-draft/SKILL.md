@@ -1,6 +1,6 @@
 ---
 name: clew-draft
-description: Draft a story and the specs it needs in a clew project — choose the lenses, temp-mint ids, and write the drafts into the configured drafts location, ready for review and (on approval) promotion. Use when the user wants to draft or author a new story or spec, or prepare specs before approval.
+description: "Draft a story and the specs it needs in a clew project — choose the lenses, temp-mint ids, and write the drafts into the configured drafts location, ready for review and (on approval) promotion. Use when the user wants to draft or author a new story or spec, or prepare specs before approval — e.g. 'draft a story', 'write the specs for', 'author a spec'. Not promotion (see clew-promote) or code anchoring (see clew-anchor)."
 ---
 
 # clew-draft
@@ -12,7 +12,6 @@ This is the authoring workflow: it produces drafts with **temporary** ids and st
 
 A **lens** is a kind of spec — a viewpoint the system is described through: a software behaviour (`SW`), a constraint (`CON`), an architecture decision (`ARCH`), and so on.
 A project declares its lenses in `.ariadnerc.json`, each with an `id` and a one-line `description`; the `id` is also the prefix of the ids minted for that kind (lens `SW` → `SW-001`, `SW-002`, …).
-Read the configured lenses and their descriptions to know what each means in this project.
 
 ## When to use
 
@@ -23,13 +22,8 @@ If the project has no configuration yet (`error[E_NO_CONFIG]`), use the `clew-se
 
 ## Invoking the CLI
 
-This skill writes commands as `clew <command>`, but how the CLI actually runs varies by project — resolve it before running anything:
-
-- If `clew` is on the PATH (a global install), use it directly.
-- If `@ariadne-thread/cli` is a project dependency, invoke the local binary through the project's package manager — for example `pnpm exec clew …` or `npx clew …`.
-- Inside the tool's own source repository, use its dev runner (for example a `pnpm dev …` / `pnpm mint …` script).
-
-Confirm the invocation and the exact command surface with `clew --help` and `clew <command> --help` before acting; read the help rather than assuming a command's arguments or flags.
+This skill writes commands as `clew <command>`; resolve how the CLI actually runs before acting — `clew` on PATH, the package manager's local binary (`pnpm exec clew` / `npx clew`), or the repository's dev runner (`pnpm dev …`) — and confirm with `clew --help`.
+Never assume a global binary.
 
 ## What you must not do
 
@@ -79,3 +73,10 @@ The configured `description` says what a lens means in this project; the notes b
 Drafting stops at review.
 When the user approves the drafts, use the `clew-promote` skill to promote them — it reasons about how the new story and specs fit the existing corpus (relations, supersession, conflicts) and then finalizes them with bound ids in the spec tree.
 Promotion is its own step because that integration is judgment over the whole spec graph, not a file move.
+
+## Done when
+
+- A story draft and its spec drafts exist in the configured drafts location, each with a **temporary** id.
+- Every draft uses only configured lenses and cross-references the related specs the context surfaced.
+- The drafts, the ids used, and the context findings are presented to the user for review.
+- Nothing is promoted, no bound id is minted, and nothing is committed.

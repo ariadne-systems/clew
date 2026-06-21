@@ -1,6 +1,6 @@
 ---
 name: clew-setup
-description: Set up a project for clew — establish .ariadnerc.json, help the user choose the project's lenses (spec kinds) and layout, and orient them toward their first ids. Use when starting clew in a project, when a command reports no configuration (error[E_NO_CONFIG]), or when the user asks to set up, initialize, or configure clew.
+description: "Set up a project for clew — establish .ariadnerc.json, help the user choose the project's lenses (spec kinds) and layout, and orient them toward their first ids. Use when starting clew in a project, when a command reports no configuration (error[E_NO_CONFIG]), or when the user asks to 'set up', 'initialize', or 'configure' clew. Not spec authoring (see clew-draft)."
 ---
 
 # clew-setup
@@ -18,14 +18,8 @@ Do not hand-write what the command scaffolds.
 
 ## Invoking the CLI
 
-This skill writes commands as `clew <command>`, but how the CLI actually runs varies by project — resolve it before running anything:
-
-- If `clew` is on the PATH (a global install), use it directly.
-- If `@ariadne-thread/cli` is a project dependency, invoke the local binary through the project's package manager — for example `pnpm exec clew …` or `npx clew …`.
-- Inside the tool's own source repository, use its dev runner (for example a `pnpm dev …` / `pnpm mint …` script) — there is no installed binary there.
-
-Then confirm the invocation and the exact command surface with `clew --help` and `clew <command> --help` before acting.
-The CLI is self-documenting, so read its help rather than assuming a command's arguments or flags; that also keeps this skill correct as the CLI evolves.
+This skill writes commands as `clew <command>`; resolve how the CLI actually runs before acting — `clew` on PATH, the package manager's local binary (`pnpm exec clew` / `npx clew`), or the repository's dev runner (`pnpm dev …`) — and confirm with `clew --help`.
+Never assume a global binary.
 
 ## What you must not do
 
@@ -74,3 +68,10 @@ Remind them to commit `.ariadnerc.json` and the state file so the team shares th
 
 - The configured lenses are the single source of truth for which prefixes the tool will mint; an unconfigured prefix is rejected.
 - A project with no configuration cannot mint or initialize — the commands direct the user here first — so setup is always the deliberate first step.
+
+## Done when
+
+- `.ariadnerc.json` exists with the project's chosen lenses and layout, and the layout directories are created.
+- For an adopted project, the state is seeded (`clew init`) so minting continues past the ids already in use.
+- The user knows their next step (`clew mint <LENS>`, then the `clew-draft` skill) and what to commit.
+- No existing configuration was overwritten, and nothing is committed.
