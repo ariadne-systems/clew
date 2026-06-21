@@ -23,6 +23,8 @@ function fakeGenerator(name: string, defaultOutputDir: string): Generator {
   return {
     name,
     defaultOutputDir,
+    sourceExtensions: [],
+    discover: () => [],
     generate: async () => [],
   };
 }

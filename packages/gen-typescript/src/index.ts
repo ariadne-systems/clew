@@ -12,6 +12,7 @@ import {
   toPascalCase,
 } from "@ariadne-thread/core";
 import { ArchTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
+import { discoverAnchors, SOURCE_EXTENSIONS } from "./discover.js";
 
 /** This generator's type — its name and the `generator-type` in the provenance header. */
 const GENERATOR_TYPE = "typescript";
@@ -43,6 +44,7 @@ export const createTypeScriptGenerator: () => Generator = realizes(
     return {
       name: GENERATOR_TYPE,
       defaultOutputDir: "src/ariadne/traceables",
+      sourceExtensions: SOURCE_EXTENSIONS,
       generate(
         specSets: readonly SpecSet[],
         _context: GenerateContext,
@@ -52,6 +54,7 @@ export const createTypeScriptGenerator: () => Generator = realizes(
         files.push(renderReadme(specSets));
         return Promise.resolve(files);
       },
+      discover: discoverAnchors,
     };
   },
 );
