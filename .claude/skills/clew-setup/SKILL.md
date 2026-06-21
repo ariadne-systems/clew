@@ -1,35 +1,35 @@
 ---
-name: ariadne-setup
-description: Set up a project for ariadne — establish .ariadnerc.json, help the user choose the project's lenses (spec kinds) and layout, and orient them toward their first ids. Use when starting ariadne in a project, when a command reports no configuration (error[E_NO_CONFIG]), or when the user asks to set up, initialize, or configure ariadne.
+name: clew-setup
+description: Set up a project for clew — establish .ariadnerc.json, help the user choose the project's lenses (spec kinds) and layout, and orient them toward their first ids. Use when starting clew in a project, when a command reports no configuration (error[E_NO_CONFIG]), or when the user asks to set up, initialize, or configure clew.
 ---
 
-# ariadne-setup
+# clew-setup
 
-Guide a user through setting up ariadne in their project: establish the configuration, choose the project's lenses and layout deliberately, and orient them toward their first ids.
+Guide a user through setting up clew in their project: establish the configuration, choose the project's lenses and layout deliberately, and orient them toward their first ids.
 
-The mechanical write is done by the `ariadne setup` command; this skill is the interactive layer around it — explaining the choices, helping the user customize, and handling the greenfield-versus-adoption split.
+The mechanical write is done by the `clew setup` command; this skill is the interactive layer around it — explaining the choices, helping the user customize, and handling the greenfield-versus-adoption split.
 Do not hand-write what the command scaffolds.
 
 ## When to use
 
-- The user is starting ariadne in a new or existing project.
-- A command failed with `error[E_NO_CONFIG]` (the tool says to run `ariadne setup`).
-- The user asks to set up, initialize, or configure ariadne, or to change the lenses or layout.
+- The user is starting clew in a new or existing project.
+- A command failed with `error[E_NO_CONFIG]` (the tool says to run `clew setup`).
+- The user asks to set up, initialize, or configure clew, or to change the lenses or layout.
 
 ## Invoking the CLI
 
-This skill writes commands as `ariadne <command>`, but how the CLI actually runs varies by project — resolve it before running anything:
+This skill writes commands as `clew <command>`, but how the CLI actually runs varies by project — resolve it before running anything:
 
-- If `ariadne` is on the PATH (a global install), use it directly.
-- If `@ariadne-thread/cli` is a project dependency, invoke the local binary through the project's package manager — for example `pnpm exec ariadne …` or `npx ariadne …`.
+- If `clew` is on the PATH (a global install), use it directly.
+- If `@ariadne-thread/cli` is a project dependency, invoke the local binary through the project's package manager — for example `pnpm exec clew …` or `npx clew …`.
 - Inside the tool's own source repository, use its dev runner (for example a `pnpm dev …` / `pnpm mint …` script) — there is no installed binary there.
 
-Then confirm the invocation and the exact command surface with `ariadne --help` and `ariadne <command> --help` before acting.
+Then confirm the invocation and the exact command surface with `clew --help` and `clew <command> --help` before acting.
 The CLI is self-documenting, so read its help rather than assuming a command's arguments or flags; that also keeps this skill correct as the CLI evolves.
 
 ## What you must not do
 
-- Do not author spec content or per-lens derivation guidance — that is the companion `ariadne-draft` skill's job. This skill only establishes the configuration and orients.
+- Do not author spec content or per-lens derivation guidance — that is the companion `clew-draft` skill's job. This skill only establishes the configuration and orients.
 - Do not regenerate or overwrite an existing configuration. If the user wants changes, edit `.ariadnerc.json`; do not recreate it.
 - Do not commit. Leave commits to the user, and remind them what to commit.
 
@@ -56,18 +56,18 @@ For example, a safety- or compliance-driven project may want a dedicated verific
 ### 3. Scaffold
 
 **3a. Greenfield.**
-Run `ariadne setup`.
+Run `clew setup`.
 It writes `.ariadnerc.json` with the default lenses and layout and creates the layout directories.
 If the user chose to customize, edit the `lenses` and `layout` sections of `.ariadnerc.json` to match — before any id is minted.
 
 **3b. Adoption (existing artifacts).**
-Run `ariadne setup` to write the configuration, then edit its `lenses` to match the prefixes the existing artifacts already use, and its `layout` to point at where those artifacts live.
-Then run `ariadne init` to seed the state from the existing artifacts, so minting continues after the ids already in use rather than colliding with them.
+Run `clew setup` to write the configuration, then edit its `lenses` to match the prefixes the existing artifacts already use, and its `layout` to point at where those artifacts live.
+Then run `clew init` to seed the state from the existing artifacts, so minting continues after the ids already in use rather than colliding with them.
 
 ### 4. Orient
 
 Confirm what was created or found.
-Point the user to their next step: `ariadne mint <LENS>` to allocate an id (for example `ariadne mint SW`), and the companion `ariadne-draft` skill to draft a story and its specs.
+Point the user to their next step: `clew mint <LENS>` to allocate an id (for example `clew mint SW`), and the companion `clew-draft` skill to draft a story and its specs.
 Remind them to commit `.ariadnerc.json` and the state file so the team shares the same configuration and id allocations.
 
 ## Notes

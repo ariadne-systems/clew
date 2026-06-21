@@ -13,7 +13,7 @@ An enforced `setup` makes the first interaction a deliberate moment: the standar
 Add `ariadne setup`: it writes `.ariadnerc.json` with the default lenses and layout (ENT-002), creates the configured layout directories, and prints a short confirmation and next steps.
 Make a configuration required: `mint` and `init` fail when no `.ariadnerc.json` is present, directing the user to run `ariadne setup` first (CON-011).
 `setup` never overwrites an existing configuration (CON-010), so it is safe to re-run — and an adopter runs it, edits the lenses to match their existing prefixes, then `init`.
-The requirement is a command-level precondition; the core config readers still default an absent value within a present configuration (SW-009 unchanged). The action is thin and delegates the write to core (SW-011); rich, interactive guidance is the `ariadne-setup` skill's job, not the command's (ADR-0003).
+The requirement is a command-level precondition; the core config readers still default an absent value within a present configuration (SW-009 unchanged). The action is thin and delegates the write to core (SW-011); rich, interactive guidance is the `clew-setup` skill's job, not the command's (ADR-0003).
 
 **Affected specs and artifacts**
 - New: `SW-010` (setup command surface), `SW-011` (scaffold the default configuration and layout), `CON-010` (setup never overwrites an existing configuration), `CON-011` (a command requires a configuration).
@@ -34,7 +34,7 @@ The requirement is a command-level precondition; the core config readers still d
 - Whether `setup` also seeds the StateStore, or leaves that to `init` (lean: leave it to `init` — keep the two commands single-purpose).
 
 **Out of scope**
-- Interactive customization of lenses or layout — the `ariadne-setup` skill (ADR-0003).
+- Interactive customization of lenses or layout — the `clew-setup` skill (ADR-0003).
 - Rich onboarding or tutorial output — skill and documentation, not the command.
 - Reconciling the StateStore from existing artifacts — that is `init` (STR-008).
 
@@ -46,3 +46,8 @@ The requirement is a command-level precondition; the core config readers still d
 - [SW-011 — Scaffold the default configuration and layout](../derived-specs/SW-011-scaffold-default-config.md)
 - [CON-010 — Setup never overwrites an existing configuration](../derived-specs/CON-010-setup-never-overwrites.md)
 - [CON-011 — A command requires a project configuration and directs the user to setup](../derived-specs/CON-011-command-requires-config.md)
+
+## Changes
+
+- **2026-06-21** — Renamed skill references `ariadne-setup` → `clew-setup` to match the CLI's rename to `clew`.
+Names only; the spec's meaning is unchanged.

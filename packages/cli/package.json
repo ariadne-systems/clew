@@ -11,6 +11,7 @@
     "directory": "packages/cli"
   },
   "bin": {
+    "clew": "./dist/index.mjs",
     "ariadne": "./dist/index.mjs"
   },
   "files": [

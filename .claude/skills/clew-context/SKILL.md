@@ -1,9 +1,9 @@
 ---
-name: ariadne-context
+name: clew-context
 description: Build the context around a story being drafted or promoted — the specs it relates to (directly, and via the code's call graph), candidate supersession or obsolescence, conflicts, cross-relations ranked by code distance, and gaps — so specs are authored and integrated with full awareness of what already exists. Use after a draft story is created and before its specs are written, and at promotion when the context has not already been built.
 ---
 
-# ariadne-context
+# clew-context
 
 Build the context for a story being drafted or promoted, so the work is grounded in what already exists rather than created in a vacuum.
 This is read-only analysis — it produces understanding; it does not write or change specs or code.
@@ -20,14 +20,14 @@ Read the configured lenses and their descriptions to know what each means in thi
 
 ## When to use
 
-- During drafting (`ariadne-draft`): **after the draft story exists but before its specs are written**, so spec creation is grounded in the corpus.
-- During promotion (`ariadne-promote`): **only if this context has not already been built** for these drafts.
+- During drafting (`clew-draft`): **after the draft story exists but before its specs are written**, so spec creation is grounded in the corpus.
+- During promotion (`clew-promote`): **only if this context has not already been built** for these drafts.
 
 ## Reading the project
 
 - Read `.ariadnerc.json` for the `layout` (where stories, derived specs, and the domain model live) and the `lenses`.
 - Find how the project binds code to specs — its **trace markers** (for example `realizes`, `verifies`, and `concerns` in the code, or the project's equivalent). Infer the convention from existing code; do not assume a language.
-- Prefer the tool's index or resolver if it exists (`ariadne --help`) for "what relates to this id" — that is the intended, faster path. Until it exists, read the spec files and grep the code directly.
+- Prefer the tool's index or resolver if it exists (`clew --help`) for "what relates to this id" — that is the intended, faster path. Until it exists, read the spec files and grep the code directly.
 
 ## What you must not do
 

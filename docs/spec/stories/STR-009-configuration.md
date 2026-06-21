@@ -50,7 +50,7 @@ Complete the rename ADR-0003 calls for in the same change: `Type` becomes `Lens`
 - Whether the schemas fully drop the enum and validate against config at runtime, or keep a generated/derived enum for offline validation.
 
 **Out of scope**
-- The per-lens derivation guidance and the paired `ariadne-setup` / `ariadne-draft` skills (skill concern, ADR-0003).
+- The per-lens derivation guidance and the paired `clew-setup` / `clew-draft` skills (skill concern, ADR-0003).
 - Code-side lenses (SVC/UTL) and the opaque id format.
 - A user-facing configuration reference document (a peer of `docs/errors.md`).
 
@@ -60,3 +60,8 @@ Complete the rename ADR-0003 calls for in the same change: `Type` becomes `Lens`
 
 - [SW-009 — The tool reads project configuration from `.ariadnerc.json`](../derived-specs/SW-009-read-configuration.md)
 - [CON-005 — A minted id's prefix must match the configured id token pattern](../derived-specs/CON-005-id-matches-configured-pattern.md) (rewritten: a minted id's prefix must be a configured prefix)
+
+## Changes
+
+- **2026-06-21** — Renamed skill references `ariadne-setup` / `ariadne-draft` → `clew-setup` / `clew-draft` to match the CLI's rename to `clew`.
+Names only; the spec's meaning is unchanged.
