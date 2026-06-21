@@ -46,6 +46,7 @@ A single, open `relatesTo` / `related` marker: vague relations proliferate and t
 A `concerns` anchor guarantees only that the referenced spec exists and stays live: remove the spec, regenerate, and the anchor stops compiling (ADR-0001 D1).
 It does not guarantee the coupling still holds — nothing exercises a "concern" the way a `verifies` test exercises a behaviour.
 It is therefore strictly weaker than `verifies` and must not be read as verification.
+For the same reason it does not count toward coverage: a spec that is only `concerns`-anchored is uncovered (ADR-0005 D4); `concerns` supplies context and impact, not coverage.
 
 Rationale.
 Naming the weaker guarantee explicitly stops `concerns` from being mistaken for a test.

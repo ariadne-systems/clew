@@ -192,7 +192,7 @@ function renderHelperModule(specSets: readonly SpecSet[]): GeneratedFile {
 function renderReadme(specSets: readonly SpecSet[]): GeneratedFile {
   const example = exampleMember(specSets) ?? "YourTraceables.YOUR_SPEC_ID";
   const lines = [
-    `<!-- THIS FILE IS ${GENERATED_MARKER} - DO NOT EDIT MANUALLY. Run \`ariadne spec\` to regenerate. -->`,
+    `<!-- THIS FILE IS ${GENERATED_MARKER} - DO NOT EDIT MANUALLY. Run \`clew spec\` to regenerate. -->`,
     "",
     "# Traceables",
     "",

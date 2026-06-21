@@ -4,7 +4,7 @@ import type { Command } from "commander";
 import { createGeneratorRegistry } from "../generators.js";
 
 /**
- * Registers the `ariadne spec` command surface (STR-011).
+ * Registers the `clew spec` command surface (STR-011).
  * The action stays thin: it requires a configuration, builds the
  * generator registry — the CLI is the composition root that maps configured
  * generator names to their implementations — and delegates scanning

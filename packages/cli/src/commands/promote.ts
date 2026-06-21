@@ -3,7 +3,7 @@ import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
- * Registers the `ariadne promote` command surface (STR-013).
+ * Registers the `clew promote` command surface (STR-013).
  * The action stays thin: it requires a configuration and delegates the
  * mechanical finalize — bind each draft's id, substitute its temporary id
  * project-wide, move it into the layout — to core's `promote()`. It then
