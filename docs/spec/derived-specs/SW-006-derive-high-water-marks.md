@@ -23,3 +23,7 @@ A subsequent mint for SW yields SW-006.
 
 - [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+
+**Realizes**
+
+- [SYS-003 — Stable spec identity](SYS-003-stable-spec-identity.md)

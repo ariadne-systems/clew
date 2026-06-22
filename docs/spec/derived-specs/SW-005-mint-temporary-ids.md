@@ -17,3 +17,9 @@ Minting type SW with a count of 3 in temporary mode yields three ids of the form
 The three opaque suffixes within the call are all distinct.
 Each temporary id carries exactly one reserved `-TMP-` marker, which no bound id carries (CON-008), so it is never confused with a bound id.
 Cross-call uniqueness follows by construction from the crypto-random token; it is a property of the token, not asserted by drawing random tokens.
+
+## Relations
+
+**Realizes**
+
+- [SYS-003 — Stable spec identity](SYS-003-stable-spec-identity.md)

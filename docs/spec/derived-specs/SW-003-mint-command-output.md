@@ -14,3 +14,9 @@ A line-oriented, stdout-only success output is trivially captured and split, and
 **Verification Description**
 Minting N ids prints exactly N lines to stdout, one id per line, in allocation order.
 On failure nothing is written to stdout and the error is written to stderr.
+
+## Relations
+
+**Realizes**
+
+- [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)

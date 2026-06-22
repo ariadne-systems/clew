@@ -17,3 +17,9 @@ Keeping the code on a typed error, owned by the core, gives one source of truth 
 **Verification Description**
 A failing operation produces a typed error whose code identifies the cause.
 Rewording the message does not change the code.
+
+## Relations
+
+**Realizes**
+
+- [SYS-006 — Diagnostic clarity](SYS-006-diagnostic-clarity.md)

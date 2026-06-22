@@ -26,3 +26,7 @@ Binding follows the same persistence guarantee as minting: an id is reported onl
 **Concerns**
 
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+
+**Realizes**
+
+- [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)

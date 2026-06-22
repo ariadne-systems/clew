@@ -22,3 +22,7 @@ The minting code references no concrete strategy.
 **Concerns**
 
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+
+**Realizes**
+
+- [SYS-003 — Stable spec identity](SYS-003-stable-spec-identity.md)

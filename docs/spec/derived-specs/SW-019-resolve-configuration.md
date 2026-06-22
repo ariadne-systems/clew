@@ -23,3 +23,8 @@ The resolution names no concrete generator; the generators are injected.
 **Concerns**
 
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+
+**Realizes**
+
+- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-010 — Configurable lenses](SYS-010-configurable-lenses.md)

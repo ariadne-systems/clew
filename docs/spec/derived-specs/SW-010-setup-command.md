@@ -17,3 +17,9 @@ Anchoring the `setup` command's shape as its own spec gives that contract a stab
 `ariadne setup` is a registered subcommand and runs with no positional arguments.
 An unknown option or an extra argument is rejected with a non-zero exit.
 The command performs no scaffolding itself; it delegates to core and surfaces the result and any error through the standard streams.
+
+## Relations
+
+**Realizes**
+
+- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)

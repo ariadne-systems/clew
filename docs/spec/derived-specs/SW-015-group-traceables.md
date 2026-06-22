@@ -24,3 +24,7 @@ With no `specSets` configured, the traceables group one set per lens.
 **Concerns**
 
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+
+**Realizes**
+
+- [SYS-001 — Compile-checked anchoring](SYS-001-compile-checked-anchoring.md)

@@ -16,3 +16,9 @@ A coded, stderr-only, non-zero-exit contract is the machine-facing counterpart t
 A failing command writes a line containing the failure's code to standard error and exits non-zero.
 Nothing is written to standard output.
 The reported code matches the code carried by the typed error that caused the failure.
+
+## Relations
+
+**Realizes**
+
+- [SYS-006 — Diagnostic clarity](SYS-006-diagnostic-clarity.md)

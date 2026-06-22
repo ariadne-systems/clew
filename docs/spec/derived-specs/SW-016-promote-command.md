@@ -17,3 +17,9 @@ Anchoring the `promote` command's shape as its own spec gives that contract a st
 `ariadne promote` is a registered subcommand, invoked with zero or more draft arguments.
 An unknown option is rejected with a non-zero exit.
 The command performs no binding, substitution, or move itself; it delegates to core and surfaces the result and any error through the standard streams.
+
+## Relations
+
+**Realizes**
+
+- [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)

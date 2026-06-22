@@ -25,3 +25,7 @@ An unknown option or an extra argument is rejected with a non-zero exit.
 **Concerns**
 
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+
+**Realizes**
+
+- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)

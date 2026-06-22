@@ -15,3 +15,9 @@ Writing them out makes the standards visible and editable, and gives the project
 **Verification Description**
 Scaffolding into a project with no configuration writes `.ariadnerc.json` containing the default lenses and layout, and the configured layout directories exist afterward.
 The written configuration is valid: minting a default lens against it succeeds, and reading the layout from it yields the configured directories.
+
+## Relations
+
+**Realizes**
+
+- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)

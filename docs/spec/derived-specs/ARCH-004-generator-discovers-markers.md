@@ -24,3 +24,8 @@ Discovery is lossless with respect to generation: a generator's emitted markers 
 **Concerns**
 
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+
+**Realizes**
+
+- [SYS-002 — Reverse-traceability scan](SYS-002-reverse-traceability-coverage.md)
+- [SYS-008 — Language-neutral extensibility](SYS-008-language-neutral-extensibility.md)
