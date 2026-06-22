@@ -24,3 +24,9 @@ Emitting one enum per spec set (SW-015) keeps each symbol set small and mirrors 
 Given grouped spec sets, the generator produces one string-enum file per set, each carrying a generated-do-not-edit header, one helper module that re-exports the enums and exports `Realizes` and `Concerns` (the type markers), `realizes` and `concerns` (each as both a value wrapper and a class/method decorator), and `verifies` over a combined `TraceableId`, and a `README.md` documenting those markers.
 An anchor through any relation to an existing member type-checks; an anchor to a member not in any enum — including any one of a list — is a type error, and removing a spec and regenerating drops its member, breaking every anchor to it.
 Re-running on unchanged spec sets produces byte-identical files (CON-012).
+
+## Relations
+
+**Realizes**
+
+- [SYS-001 — Compile-checked anchoring](SYS-001-compile-checked-anchoring.md)

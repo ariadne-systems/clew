@@ -17,3 +17,9 @@ Anchoring the `init` command's shape as its own spec gives that contract a stabl
 `ariadne init` is a registered subcommand and runs with no positional arguments.
 An unknown option or an extra argument is rejected with a non-zero exit.
 The command performs no reconciliation itself; it delegates to core and surfaces the result and any error through the standard streams.
+
+## Relations
+
+**Realizes**
+
+- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)

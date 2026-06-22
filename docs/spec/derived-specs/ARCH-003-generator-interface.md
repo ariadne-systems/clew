@@ -24,3 +24,7 @@ Adding a target language is a new generator implementing the contract, with no c
 **Concerns**
 
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+
+**Realizes**
+
+- [SYS-008 — Language-neutral extensibility](SYS-008-language-neutral-extensibility.md)

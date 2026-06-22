@@ -24,3 +24,10 @@ Over a fixture, every marker form is discovered with the right relation, id(s), 
 A single member and a `[…]` list both resolve correctly; a wrapped value containing nested parentheses or commas is ignored, not mis-parsed.
 A marker placed in a comment, in commented-out code, in a quoted string, in a **template literal**, or in a **regex literal** yields no anchor.
 The ids the generator emits for a set of example markers are exactly the ids its discover recovers from them (the round-trip; ADR-0005 D2).
+
+## Relations
+
+**Realizes**
+
+- [SYS-002 — Reverse-traceability scan](SYS-002-reverse-traceability-coverage.md)
+- [SYS-011 — Named anchor relations](SYS-011-named-anchor-relations.md)

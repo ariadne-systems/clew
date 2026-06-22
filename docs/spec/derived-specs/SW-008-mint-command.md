@@ -19,3 +19,9 @@ Anchoring the `mint` command's shape as its own spec gives that contract a stabl
 `-t` and `--tmp` are accepted and select temporary minting; without them, minting is bound.
 The command performs no allocation or validation itself; it delegates to core and surfaces results and errors through the standard streams.
 A missing `type`, an extra argument, or an unknown option is rejected with a non-zero exit.
+
+## Relations
+
+**Realizes**
+
+- [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)

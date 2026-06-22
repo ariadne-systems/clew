@@ -25,3 +25,7 @@ With no configuration present, it directs the user to `setup` rather than failin
 **Concerns**
 
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+
+**Realizes**
+
+- [SYS-002 — Reverse-traceability scan](SYS-002-reverse-traceability-coverage.md)

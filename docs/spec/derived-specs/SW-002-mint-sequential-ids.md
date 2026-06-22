@@ -20,3 +20,7 @@ The underlying numbers come from the allocator and are never reused.
 **Concerns**
 
 - [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
+
+**Realizes**
+
+- [SYS-003 — Stable spec identity](SYS-003-stable-spec-identity.md)
