@@ -80,7 +80,7 @@ A spec is covered when code **realizes** it and/or a test **verifies** it; the *
 A spec that is only concerned by code is uncovered and reported as a gap.
 The scan still collects `concerns` anchors — they feed context and impact (the resolution direction), not the coverage number.
 Which relations are *eligible* to count is the easy half, and it is settled here.
-The hard half — the pass condition per spec and per lens (does a `SYS` need realize, verify, or both; what counts a `SW` as covered) — is the actual audit semantics, and this ADR does **not** settle it: it is a first-class decision the coverage story must own, together with transitive coverage (see Scope), not something to inherit as already-closed.
+The hard half — the pass condition per spec and per lens (what counts a `SW` as covered: realize, verify, or both) — is the actual audit semantics, and this ADR does **not** settle it: it is a first-class decision the coverage story must own, not something to inherit as already-closed.
 
 Rationale.
 Coverage must mean "implemented and tested", the property an audit cares about; letting a mere coupling satisfy it would let coverage be gamed by *mentioning* a spec.
@@ -107,10 +107,10 @@ Per-lens "required relations" rules — more rigid and less auditable than defau
 Note.
 A waiver should distinguish a permanent, structural gap from a deferred one — a reason category — so temporary gaps can be challenged rather than forgotten; a detail for the coverage story.
 
-Note (the list is an asset only if coverage is transitive).
+Note (the waiver list holds genuine gaps because the universe is the anchored lenses).
 The list's value rests on it holding *genuine* gaps.
-If every transitively-covered `SYS` or `STK` had to be waived by hand, it would fill with mechanical noise and stop being an audit asset.
-So the coverage policy must count a spec covered through its descendants as covered (computed transitive coverage; deferred with D4), leaving the waiver list for specs that are genuinely untraced — this dependency is what decides whether the list is an asset or a swamp.
+The coverage universe is the directly-anchorable lenses (`SW` / `CON` / `ARCH` / `NF`; see Scope), so every spec in it is one that code *can* anchor — an uncovered one is a real gap, not an artefact of altitude.
+`STK` and `SYS` are left out of the universe rather than covered transitively, so the list never fills with mechanical waivers for high-level specs that nothing anchors directly.
 
 ### D6 — The configuration and outputs are a stable shared contract
 
@@ -136,9 +136,11 @@ clew defines its own config keys and output shapes — it forks the ecosystem in
 Two consumers stand on the scan: **coverage** (the priority here) and **resolution / traceback** (the reverse "what anchors X" queries and the agent-context fast path, a later concern).
 Both read the same locations index.
 
-The coverage universe is the **lens-bearing traceables** — the spec ids that get enum members.
+The coverage universe is the **directly-anchorable lens-bearing traceables** — `SW`, `CON`, `ARCH`, `NF` — the specs that code anchors directly.
 `ENT` and `STR` are not traceables and are out of scope.
-`STK` and `SYS` are traceables realized **transitively** through the software specs beneath them; the coverage policy must compute that transitive coverage — a spec covered through its descendants counts as covered, not waived — so these do not collapse into mechanical waivers (see D5).
+`STK` and `SYS`, though lens-bearing, are **not** coverage targets: nothing anchors a stakeholder need or a system capability in code, and clew does not build the spec→spec relation graph a transitive roll-up would need.
+The `STK → SYS → SW` chain is kept as documentation — prose and links that record the full model — not as something the coverage check computes over.
+This keeps the tool's automation at the code↔spec level it is built for, rather than extending it into a higher-level coverage the tool is not made to maintain.
 
 Left to the stories, not this ADR: the exclusion glob mechanics (root-relative globs, the `exclude` / `unexclude` precedence), the CLI command surfaces, and the `locations.json` / `coverage.json` schemas.
 
@@ -159,3 +161,9 @@ ADR-0004 D2 is amended to record that `concerns` does not count toward coverage.
 The scan is policy-light: it makes no judgment about relevance or depth — that stays agentic, in the skills — and instead enumerates completely and deterministically, which is exactly what coverage and resolution need.
 
 A other tooling converges onto clew's vocabulary and shares its configuration and output shapes, so the open tool and that pipeline interoperate over a single repository.
+
+## Changes
+
+- **2026-06-22** — Narrowed the coverage universe to the directly-anchorable lenses (`SW` / `CON` / `ARCH` / `NF`) and dropped the transitive-coverage mandate (D4, the D5 note, and Scope).
+`STK` and `SYS` are kept as a documented chain rather than coverage targets: computing coverage over the spec→spec graph would require every relation maintained perfectly and reads as ceremony to the tool's audience, which comes mostly from no specs at all.
+clew's automation stays at the code↔spec level it is built for.
