@@ -25,3 +25,5 @@ A spec covered only by `concerns` is reported uncovered; an uncovered, unwaived 
 - **2026-06-22** — Removed transitive coverage from the policy.
 The coverage universe is now the directly-anchorable lenses only; `STK` and `SYS` are documentation, not coverage targets, so a roll-up through the specs that realize a spec is no longer part of the system's definition of coverage (ADR-0005, narrowed the same day).
 - **2026-06-23** — Dropped "directly-anchorable specs": `STK` and `SYS` are anchored in code at file/module altitude (ADR-0006) and covered like any other spec, so the universe is every spec the `spec` command produces. The no-transitive-coverage decision from the previous entry is unchanged.
+- **2026-06-23** — Narrowed what a waiver may accept: a gap is admitted only as a missing *test* — a waiver waives the `verify` requirement, matched by id or pattern, and a spec missing its realizing code is never waivable (STR-019; SW-030, CON-021).
+The "committed waiver carrying a reason" is unchanged; this bounds what that reason can excuse.

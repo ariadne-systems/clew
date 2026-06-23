@@ -14,14 +14,15 @@ afterEach(() => {
 });
 
 // An isolated project: a configured generator, two spec files (the universe), a
-// source file that realizes one of them, and a waiver for the other.
+// source file that realizes one of them, and a waiver accepting that realized
+// spec's missing test; the other spec, anchored nowhere, stays a genuine gap.
 async function setupProjectDir(): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-coverage-"));
   await writeFile(
     join(dir, ".ariadnerc.json"),
     JSON.stringify({
       generators: [{ type: "typescript", outputDir: "out-ts" }],
-      waivers: [{ id: "SW-002", reason: "no code site" }],
+      waivers: [{ id: "SW-001", reason: "verified by acceptance" }],
     }),
     "utf8",
   );
@@ -66,17 +67,22 @@ describe("coverage command", () => {
       expect(out).toContain(
         "0 covered, 1 realized, 0 verified, 1 none (2 specs)",
       );
-      expect(out).toContain("SW-001  realized");
+      expect(out).toContain("SW-002  none");
       expect(out).toContain("Waived (1):");
-      expect(out).toContain("SW-002  none — no code site");
+      expect(out).toContain("SW-001  realized — verified by acceptance");
 
       const result = JSON.parse(
         await readFile(join(dir, ".ariadne", "coverage.json"), "utf8"),
       );
       expect(result).toEqual({
         specs: [
-          { id: "SW-001", lens: "SW", status: "realized" },
-          { id: "SW-002", lens: "SW", status: "none", reason: "no code site" },
+          {
+            id: "SW-001",
+            lens: "SW",
+            status: "realized",
+            reason: "verified by acceptance",
+          },
+          { id: "SW-002", lens: "SW", status: "none" },
         ],
         staleWaivers: [],
       });

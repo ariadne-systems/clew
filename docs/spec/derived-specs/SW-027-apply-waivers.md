@@ -4,16 +4,15 @@ Reconcile uncovered specs against the committed waiver list
 **Lens**: SW
 
 **Description**
-A spec that is not Covered but appears in the committed **waiver list** — each entry an id and a reason — is reported as **waived** rather than as an open gap, so the open-gap list converges as gaps are covered or accepted.
-A waiver for a Covered spec, or for an unknown id, is reported as a **stale waiver**.
+Reconciles the computed coverage against the committed **waiver list**: a spec that some waiver waives (SW-030) is reported as **waived** rather than as an open gap, so the open-gap list converges as gaps are covered or accepted.
+A waiver that waives nothing — it matches no spec it can waive (SW-030) — is reported as a **stale waiver**.
 
 **Rationale**
 The waiver list is an asset only if it holds genuine gaps: accepting a spec only when it is waived turns the rest into a reviewed inventory of what is not traced and why.
 Surfacing stale waivers keeps that inventory honest.
 
 **Verification Description**
-A not-Covered spec with a matching waiver is reported waived, not as an open gap; without one it is an open gap.
-A waiver for a Covered spec, or an unknown id, is reported as stale.
+A spec a waiver waives is reported waived, not as an open gap; a spec no waiver waives is an open gap; a stale waiver is reported separately.
 
 ## Relations
 
@@ -24,3 +23,8 @@ A waiver for a Covered spec, or an unknown id, is reported as stale.
 **Realizes**
 
 - [SYS-012 — Coverage policy and waivers](SYS-012-coverage-policy-and-waivers.md)
+
+## Changes
+
+- **2026-06-23** — Narrowed to consume the match rule now defined by SW-030 (STR-019): a waiver matches by id or pattern and waives only a missing test, so what counts as *waived* — and as a *stale waiver* — is SW-030's, no longer "any not-Covered id with a matching entry".
+Reconcile and the waived/stale reporting are unchanged in intent; only the match they apply moved out.

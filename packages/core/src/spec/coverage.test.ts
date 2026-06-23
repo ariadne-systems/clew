@@ -100,9 +100,10 @@ describe("computeCoverage", () => {
 
 describe("reconcileWaivers", () => {
   const coverage: SpecCoverage[] = [
+    { id: "STK-001", lens: "STK", status: "realized" },
+    { id: "STK-002", lens: "STK", status: "realized" },
+    { id: "STK-005", lens: "STK", status: "none" },
     { id: "SW-1", lens: "SW", status: "covered" },
-    { id: "SW-2", lens: "SW", status: "none" },
-    { id: "SW-3", lens: "SW", status: "none" },
   ];
 
   verifies(
@@ -111,23 +112,21 @@ describe("reconcileWaivers", () => {
       SysTraceables.SYS_012_COVERAGE_POLICY_AND_WAIVERS,
     ],
     () => {
-      test("a not-Covered spec with a matching waiver is waived, not an open gap", () => {
+      test("a Realized spec a waiver names is waived, not an open gap", () => {
         const result = reconcileWaivers(coverage, [
-          { id: "SW-2", reason: "no code site" },
+          { id: "STK-001", reason: "verified by acceptance" },
         ]);
 
-        expect(result.specs.find((spec) => spec.id === "SW-2")?.waiver).toEqual(
-          {
-            reason: "no code site",
-          },
-        );
         expect(
-          result.specs.find((spec) => spec.id === "SW-3")?.waiver,
+          result.specs.find((spec) => spec.id === "STK-001")?.waiver,
+        ).toEqual({ reason: "verified by acceptance" });
+        expect(
+          result.specs.find((spec) => spec.id === "STK-002")?.waiver,
         ).toBeUndefined();
         expect(result.staleWaivers).toEqual([]);
       });
 
-      test("a waiver for a Covered spec or an unknown id is stale", () => {
+      test("a waiver for a Covered spec or an unknown id waives nothing and is stale", () => {
         const result = reconcileWaivers(coverage, [
           { id: "SW-999", reason: "typo" },
           { id: "SW-1", reason: "already done" },
@@ -141,8 +140,51 @@ describe("reconcileWaivers", () => {
           result.specs.find((spec) => spec.id === "SW-1")?.waiver,
         ).toBeUndefined();
       });
+
+      test("a waiver matching no spec it can waive is stale", () => {
+        const result = reconcileWaivers(coverage, [
+          { pattern: "ARCH-*", reason: "nothing here" },
+        ]);
+
+        expect(result.staleWaivers).toEqual([
+          { pattern: "ARCH-*", reason: "nothing here" },
+        ]);
+      });
     },
   );
+
+  verifies(SwTraceables.SW_030_WAIVER_MATCH_BY_ID_OR_PATTERN, () => {
+    test("a glob pattern waives every Realized spec it matches", () => {
+      const result = reconcileWaivers(coverage, [
+        { pattern: "STK-*", reason: "verified by acceptance" },
+      ]);
+
+      expect(
+        result.specs.find((spec) => spec.id === "STK-001")?.waiver,
+      ).toEqual({ reason: "verified by acceptance" });
+      expect(
+        result.specs.find((spec) => spec.id === "STK-002")?.waiver,
+      ).toEqual({ reason: "verified by acceptance" });
+      expect(result.staleWaivers).toEqual([]);
+    });
+  });
+
+  verifies(ConTraceables.CON_021_MISSING_REALIZE_NEVER_WAIVABLE, () => {
+    test("a None spec is never waived — by id or by pattern — and stays an open gap", () => {
+      const byId = reconcileWaivers(coverage, [{ id: "STK-005", reason: "x" }]);
+      expect(
+        byId.specs.find((spec) => spec.id === "STK-005")?.waiver,
+      ).toBeUndefined();
+      expect(byId.staleWaivers).toEqual([{ id: "STK-005", reason: "x" }]);
+
+      const byPattern = reconcileWaivers(coverage, [
+        { pattern: "STK-*", reason: "y" },
+      ]);
+      expect(
+        byPattern.specs.find((spec) => spec.id === "STK-005")?.waiver,
+      ).toBeUndefined();
+    });
+  });
 });
 
 describe("coverage result output", () => {
@@ -152,12 +194,13 @@ describe("coverage result output", () => {
       {
         id: "SW-2",
         lens: "SW",
-        status: "none",
-        waiver: { reason: "no code site" },
+        status: "realized",
+        waiver: { reason: "verified by acceptance" },
       },
       { id: "SW-3", lens: "SW", status: "realized" },
+      { id: "SW-4", lens: "SW", status: "none" },
     ],
-    staleWaivers: [{ id: "SW-9", reason: "typo" }],
+    staleWaivers: [{ pattern: "ARCH-*", reason: "nothing here" }],
   };
 
   verifies(
@@ -173,10 +216,16 @@ describe("coverage result output", () => {
         expect(JSON.parse(await readFile(file, "utf8"))).toEqual({
           specs: [
             { id: "SW-1", lens: "SW", status: "covered" },
-            { id: "SW-2", lens: "SW", status: "none", reason: "no code site" },
+            {
+              id: "SW-2",
+              lens: "SW",
+              status: "realized",
+              reason: "verified by acceptance",
+            },
             { id: "SW-3", lens: "SW", status: "realized" },
+            { id: "SW-4", lens: "SW", status: "none" },
           ],
-          staleWaivers: [{ id: "SW-9", reason: "typo" }],
+          staleWaivers: [{ pattern: "ARCH-*", reason: "nothing here" }],
         });
 
         await writeCoverageResult(
@@ -196,14 +245,15 @@ describe("coverage result output", () => {
         const report = formatCoverageReport(result);
 
         expect(report).toContain(
-          "1 covered, 1 realized, 0 verified, 1 none (3 specs)",
+          "1 covered, 2 realized, 0 verified, 1 none (4 specs)",
         );
-        expect(report).toContain("Open gaps (1):");
+        expect(report).toContain("Open gaps (2):");
         expect(report).toContain("SW-3  realized");
+        expect(report).toContain("SW-4  none");
         expect(report).toContain("Waived (1):");
-        expect(report).toContain("SW-2  none — no code site");
+        expect(report).toContain("SW-2  realized — verified by acceptance");
         expect(report).toContain("Stale waivers (1):");
-        expect(report).toContain("SW-9 — typo");
+        expect(report).toContain("ARCH-* — nothing here");
       });
     },
   );
