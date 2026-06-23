@@ -14,6 +14,7 @@ export type {
   ResolvedConfiguration,
   ResolvedGenerator,
   SpecSetMatcher,
+  Waiver,
 } from "./config/config.js";
 export {
   configExists,
@@ -30,6 +31,7 @@ export {
   readLenses,
   readSpecSets,
   readUnexclude,
+  readWaivers,
   requireConfig,
   resolveConfiguration,
 } from "./config/config.js";
@@ -46,6 +48,20 @@ export type {
   PromoteResult,
 } from "./promote/promote.js";
 export { promote } from "./promote/promote.js";
+export type {
+  CoverageEntry,
+  CoverageResult,
+  CoverageStatus,
+  SpecCoverage,
+  StaleWaiver,
+} from "./spec/coverage.js";
+export {
+  computeCoverage,
+  DEFAULT_COVERAGE_FILE,
+  formatCoverageReport,
+  reconcileWaivers,
+  writeCoverageResult,
+} from "./spec/coverage.js";
 export type {
   AnchorLocation,
   GenerateContext,

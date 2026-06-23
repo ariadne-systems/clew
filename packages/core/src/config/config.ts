@@ -397,6 +397,30 @@ export async function readUnexclude(
   return readGlobList(file, "unexclude");
 }
 
+/** A committed coverage waiver — a spec id paired with a reason (ENT-002). */
+export type Waiver = { id: string; reason: string };
+
+/**
+ * Reads the `waivers` section: the committed coverage waiver list (ENT-002),
+ * each entry a spec id and a reason. A missing or malformed section yields an
+ * empty list — nothing is waived.
+ */
+export async function readWaivers(
+  file: string = DEFAULT_CONFIG_FILE,
+): Promise<Waiver[]> {
+  const raw = (await readRawConfig(file)).waivers;
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw
+    .map(asObject)
+    .flatMap((entry) =>
+      typeof entry.id === "string" && typeof entry.reason === "string"
+        ? [{ id: entry.id, reason: entry.reason }]
+        : [],
+    );
+}
+
 /** Whether a configuration file exists at `file`. */
 export async function configExists(
   file: string = DEFAULT_CONFIG_FILE,
