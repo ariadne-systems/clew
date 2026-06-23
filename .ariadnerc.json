@@ -8,5 +8,15 @@
       "type": "typescript",
       "outputDir": "packages/trace/src"
     }
+  ],
+  "waivers": [
+    {
+      "pattern": "STK-*",
+      "reason": "stakeholder needs are verified by acceptance, not by an automated test"
+    },
+    {
+      "id": "SYS-001",
+      "reason": "compile-checked anchoring is enforced by tsc, not by a unit test"
+    }
   ]
 }

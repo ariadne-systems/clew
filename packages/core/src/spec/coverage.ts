@@ -27,8 +27,8 @@ export type CoverageEntry = SpecCoverage & {
   waiver?: { reason: string };
 };
 
-/** A waiver that did not apply — for a Covered spec, or for an unknown id. */
-export type StaleWaiver = { id: string; reason: string };
+/** A waiver that waived nothing — it matched no Realized spec. */
+export type StaleWaiver = { id?: string; pattern?: string; reason: string };
 
 /** The reconciled coverage of the whole universe. */
 export type CoverageResult = {
@@ -98,49 +98,80 @@ function statusOf(realized: boolean, verified: boolean): CoverageStatus {
   return "none";
 }
 
+/** Compiles a spec-id glob — `*` matches any run of characters — to an anchored RegExp. */
+function patternToRegExp(pattern: string): RegExp {
+  const body = pattern
+    .split("*")
+    .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, "\\$&"))
+    .join(".*");
+  return new RegExp(`^${body}$`);
+}
+
+/** A waiver's target string, for display and ordering — its id or its pattern. */
+function waiverTarget(waiver: { id?: string; pattern?: string }): string {
+  return waiver.id ?? waiver.pattern ?? "";
+}
+
+/** Whether a waiver applies to a spec id — by exact id or by glob pattern (SW-030). */
+const waiverMatches: (waiver: Waiver, id: string) => boolean = realizes(
+  SwTraceables.SW_030_WAIVER_MATCH_BY_ID_OR_PATTERN,
+  (waiver: Waiver, id: string): boolean => {
+    if (waiver.id !== undefined) {
+      return waiver.id === id;
+    }
+    if (waiver.pattern !== undefined) {
+      return patternToRegExp(waiver.pattern).test(id);
+    }
+    return false;
+  },
+);
+
 /**
  * Reconciles the computed coverage against the committed waiver list (SW-027). A
- * spec that is not Covered and appears in the list is reported **waived** —
- * carrying its reason — rather than as an open gap. A waiver for a spec that is
- * Covered, or for an id not in the universe, does not apply and is reported as a
- * **stale waiver**. The stale waivers are sorted by id.
+ * spec that a waiver waives is reported **waived** — carrying its reason — rather
+ * than as an open gap. A waiver waives only a missing test: it applies to a spec
+ * that is Realized (implemented, not verified) and matches it by id or pattern
+ * (SW-030); a spec missing its realizing code — None or verify-only — is never
+ * waived (CON-021). A waiver that waives nothing — it matches no Realized spec —
+ * is reported as a **stale waiver**. The stale waivers are sorted by target.
  */
 export const reconcileWaivers: (
   coverage: readonly SpecCoverage[],
   waivers: readonly Waiver[],
 ) => CoverageResult = realizes(
-  SwTraceables.SW_027_APPLY_WAIVERS,
+  [
+    SwTraceables.SW_027_APPLY_WAIVERS,
+    ConTraceables.CON_021_MISSING_REALIZE_NEVER_WAIVABLE,
+  ],
   (
     coverage: readonly SpecCoverage[],
     waivers: readonly Waiver[],
   ): CoverageResult => {
-    const statusById = new Map(coverage.map((spec) => [spec.id, spec.status]));
-    const reasonById = new Map(
-      waivers.map((waiver) => [waiver.id, waiver.reason]),
-    );
-
-    const staleWaivers: StaleWaiver[] = [];
-    for (const waiver of waivers) {
-      const status = statusById.get(waiver.id);
-      if (status === undefined || status === "covered") {
-        staleWaivers.push({ id: waiver.id, reason: waiver.reason });
-      }
-    }
-
     const specs: CoverageEntry[] = coverage.map((spec) => {
-      const reason = reasonById.get(spec.id);
-      if (reason !== undefined && spec.status !== "covered") {
-        return { ...spec, waiver: { reason } };
+      // Only a Realized spec — implemented but untested — is waivable; a spec
+      // missing its realizing code is never waived (CON-021).
+      if (spec.status !== "realized") {
+        return spec;
       }
-      return spec;
+      const waiver = waivers.find((candidate) =>
+        waiverMatches(candidate, spec.id),
+      );
+      return waiver !== undefined
+        ? { ...spec, waiver: { reason: waiver.reason } }
+        : spec;
     });
 
-    return {
-      specs,
-      staleWaivers: staleWaivers.sort((left, right) =>
-        left.id.localeCompare(right.id),
-      ),
-    };
+    const realizedIds = coverage
+      .filter((spec) => spec.status === "realized")
+      .map((spec) => spec.id);
+    const staleWaivers: StaleWaiver[] = waivers
+      .filter((waiver) => !realizedIds.some((id) => waiverMatches(waiver, id)))
+      .map((waiver) => ({ ...waiver }))
+      .sort((left, right) =>
+        waiverTarget(left).localeCompare(waiverTarget(right)),
+      );
+
+    return { specs, staleWaivers };
   },
 );
 
@@ -242,7 +273,7 @@ export const formatCoverageReport: (result: CoverageResult) => string =
         lines,
         `Stale waivers (${result.staleWaivers.length})`,
         result.staleWaivers,
-        (waiver) => `  ${waiver.id} — ${waiver.reason}`,
+        (waiver) => `  ${waiver.id ?? waiver.pattern} — ${waiver.reason}`,
       );
       return `${lines.join("\n")}\n`;
     },

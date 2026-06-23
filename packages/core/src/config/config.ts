@@ -397,13 +397,13 @@ export async function readUnexclude(
   return readGlobList(file, "unexclude");
 }
 
-/** A committed coverage waiver — a spec id paired with a reason (ENT-002). */
-export type Waiver = { id: string; reason: string };
+/** A committed coverage waiver — a spec `id` or a glob `pattern`, with a reason (ENT-002). */
+export type Waiver = { id?: string; pattern?: string; reason: string };
 
 /**
  * Reads the `waivers` section: the committed coverage waiver list (ENT-002),
- * each entry a spec id and a reason. A missing or malformed section yields an
- * empty list — nothing is waived.
+ * each entry a spec `id` or a glob `pattern` with a reason. A missing or
+ * malformed section yields an empty list — nothing is waived.
  */
 export async function readWaivers(
   file: string = DEFAULT_CONFIG_FILE,
@@ -412,13 +412,18 @@ export async function readWaivers(
   if (!Array.isArray(raw)) {
     return [];
   }
-  return raw
-    .map(asObject)
-    .flatMap((entry) =>
-      typeof entry.id === "string" && typeof entry.reason === "string"
-        ? [{ id: entry.id, reason: entry.reason }]
-        : [],
-    );
+  return raw.map(asObject).flatMap((entry): Waiver[] => {
+    if (typeof entry.reason !== "string") {
+      return [];
+    }
+    if (typeof entry.id === "string") {
+      return [{ id: entry.id, reason: entry.reason }];
+    }
+    if (typeof entry.pattern === "string") {
+      return [{ pattern: entry.pattern, reason: entry.reason }];
+    }
+    return [];
+  });
 }
 
 /** Whether a configuration file exists at `file`. */
