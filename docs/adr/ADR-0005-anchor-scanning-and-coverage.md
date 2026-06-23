@@ -107,10 +107,10 @@ Per-lens "required relations" rules — more rigid and less auditable than defau
 Note.
 A waiver should distinguish a permanent, structural gap from a deferred one — a reason category — so temporary gaps can be challenged rather than forgotten; a detail for the coverage story.
 
-Note (the waiver list holds genuine gaps because the universe is the anchored lenses).
+Note (the waiver list holds genuine gaps because every spec is anchorable).
 The list's value rests on it holding *genuine* gaps.
-The coverage universe is the directly-anchorable lenses (`SW` / `CON` / `ARCH` / `NF`; see Scope), so every spec in it is one that code *can* anchor — an uncovered one is a real gap, not an artefact of altitude.
-`STK` and `SYS` are left out of the universe rather than covered transitively, so the list never fills with mechanical waivers for high-level specs that nothing anchors directly.
+Every spec in the universe is one that code *can* anchor — at the granularity that matches its altitude (ADR-0006): a behaviour at its symbol, a high-level need or capability at the file or module that serves it.
+So an uncovered spec is a real gap, not an artefact of altitude, and the list does not fill with mechanical waivers — a spec with no honest anchor is dropped, not waived (ADR-0006).
 
 ### D6 — The configuration and outputs are a stable shared contract
 
@@ -136,11 +136,10 @@ clew defines its own config keys and output shapes — it forks the ecosystem in
 Two consumers stand on the scan: **coverage** (the priority here) and **resolution / traceback** (the reverse "what anchors X" queries and the agent-context fast path, a later concern).
 Both read the same locations index.
 
-The coverage universe is the **directly-anchorable lens-bearing traceables** — `SW`, `CON`, `ARCH`, `NF` — the specs that code anchors directly.
+The coverage universe is exactly the **lens-bearing traceables the `spec` command produces** — every spec it generates a symbol for, with no per-lens distinction.
 `ENT` and `STR` are not traceables and are out of scope.
-`STK` and `SYS`, though lens-bearing, are **not** coverage targets: nothing anchors a stakeholder need or a system capability in code, and clew does not build the spec→spec relation graph a transitive roll-up would need.
-The `STK → SYS → SW` chain is kept as documentation — prose and links that record the full model — not as something the coverage check computes over.
-This keeps the tool's automation at the code↔spec level it is built for, rather than extending it into a higher-level coverage the tool is not made to maintain.
+`STK` and `SYS` **are** in the universe: they are anchored in code at the granularity that matches their altitude — the file or module that serves them (ADR-0006) — and covered like any other spec.
+What clew does **not** build is the spec→spec relation graph a transitive roll-up would need; coverage stays the flat code↔spec check, and a high-level spec is covered by its own file/module anchor, never transitively through the specs beneath it.
 
 Left to the stories, not this ADR: the exclusion glob mechanics (root-relative globs, the `exclude` / `unexclude` precedence), the CLI command surfaces, and the `locations.json` / `coverage.json` schemas.
 
@@ -167,3 +166,6 @@ A other tooling converges onto clew's vocabulary and shares its configuration an
 - **2026-06-22** — Narrowed the coverage universe to the directly-anchorable lenses (`SW` / `CON` / `ARCH` / `NF`) and dropped the transitive-coverage mandate (D4, the D5 note, and Scope).
 `STK` and `SYS` are kept as a documented chain rather than coverage targets: computing coverage over the spec→spec graph would require every relation maintained perfectly and reads as ceremony to the tool's audience, which comes mostly from no specs at all.
 clew's automation stays at the code↔spec level it is built for.
+- **2026-06-23** — Reversed the STK/SYS exclusion from the previous entry.
+STK and SYS are not documentation-only: they are anchored in code at file/module altitude (ADR-0006) and covered like any other spec, so the universe is every traceable the `spec` command produces, with no directly-anchorable-lens restriction (Scope, the D5 note).
+The flat code↔spec check and the no-transitive-coverage decision stand; only the earlier claim that nothing anchors STK/SYS was wrong.
