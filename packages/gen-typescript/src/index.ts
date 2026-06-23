@@ -11,8 +11,19 @@ import {
   toMemberName,
   toPascalCase,
 } from "@ariadne-thread/core";
+import type {
+  Realizes,
+  StkTraceables,
+  SysTraceables,
+} from "@ariadne-thread/trace";
 import { ArchTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import { discoverAnchors, SOURCE_EXTENSIONS } from "./discover.js";
+
+// Module-level anchors — a concrete language generator behind the neutral
+// interface is what makes the tool language-neutral and polyglot in practice.
+type _Anchors =
+  | Realizes<SysTraceables.SYS_008_LANGUAGE_NEUTRAL_EXTENSIBILITY, unknown>
+  | Realizes<StkTraceables.STK_008_POLYGLOT_APPLICABILITY, unknown>;
 
 /** This generator's type — its name and the `generator-type` in the provenance header. */
 const GENERATOR_TYPE = "typescript";

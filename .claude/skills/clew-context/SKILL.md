@@ -1,6 +1,6 @@
 ---
 name: clew-context
-description: "Build the context around a story being drafted or promoted — the specs it relates to (directly, and via the code's call graph), candidate supersession or obsolescence, conflicts, cross-relations ranked by code distance, and gaps — so specs are authored and integrated with full awareness of what already exists. Use after a draft story is created and before its specs are written, and at promotion when the context has not already been built. Read-only analysis; it does not author specs (see clew-draft) or finalize them (see clew-promote)."
+description: "Build the context around a story being drafted or promoted — the specs it relates to (directly, via the code's call graph, and via the high-altitude specs that govern its file/module), candidate supersession or obsolescence, conflicts, cross-relations ranked by code distance, and gaps — so specs are authored and integrated with full awareness of what already exists. Use after a draft story is created and before its specs are written, and at promotion when the context has not already been built. Read-only analysis; it does not author specs (see clew-draft) or finalize them (see clew-promote)."
 ---
 
 # clew-context
@@ -9,6 +9,8 @@ Build the context for a story being drafted or promoted, so the work is grounded
 This is read-only analysis — it produces understanding; it does not write or change specs or code.
 
 The core idea: the story's *stated* relations are what its author had in mind, but the *code* around the area often anchors specs that are just as relevant. The strongest signal is the gap between the two — especially a spec the code points at that has been abandoned.
+
+Relevance reaches a piece of code two ways, and this skill walks both: **across** the call graph (the behaviours it interacts with — usually `SW`), and **up** the file/module tree (the high-altitude specs that govern where it lives — usually `STK`/`SYS`, anchored coarsely at the file or `index.ts` level). The first is the execution-path expansion; the second is the containment ascent.
 
 If you already built this context for these drafts earlier in the session, reuse it rather than rebuilding.
 
@@ -68,7 +70,19 @@ From each anchor, walk the call graph and collect the project's trace markers:
 
 Each spec found this way that was not already `linked` is tagged `path` — relevant via the code, though the story never named it.
 
-### 5. Cross-relations — ranked by code distance
+### 5. Containment ascent — what governs where the code lives
+
+The call graph finds the specs a piece of code *interacts with*; it does not find the high-altitude specs that *govern the region it lives in*. Those — typically `STK` and `SYS` — are anchored coarsely, at the **file or module** level, so they are reached by climbing the containment tree, not by following calls.
+
+From each anchor, ascend its file/module hierarchy and collect the anchors at each level:
+
+- the anchor's **own file** — its file-scope anchors (for example a `type _Anchors = Realizes<…>` alias);
+- each ancestor directory's **`index.ts`** — the module's entry, where a module-level anchor lives — up to the package root;
+- stop at the package root; do not climb out of the package.
+
+Each spec found this way is tagged `governing` — the high-altitude intent (a stakeholder need or system capability) that holds over the code, though neither the story nor the call graph named it. Surface these as the "why": an agent changing a file that ascends to `STK-003` (low authoring friction) is told the constraint its change must respect.
+
+### 6. Cross-relations — ranked by code distance
 
 For specs that share a code location, rank the coupling so attention goes to the highest-impact first:
 
@@ -79,18 +93,19 @@ For specs that share a code location, rank the coupling so attention goes to the
 
 Flag the locations where the planned work might affect other specs.
 
-### 6. Supersession, conflicts, gaps
+### 7. Supersession, conflicts, gaps
 
 - **Supersession / obsolescence** — specs the story would replace, or that are already marked obsolete or superseded. A `path` spec that is obsolete is the strongest possible signal that a design direction was tried and abandoned; surface it prominently, never silently drop it.
 - **Conflicts** — existing specs the story's direction would contradict.
 - **Gaps** — behaviour the story implies that no spec covers; this tells the drafting step which specs (and which lenses) to create.
 
-### 7. Summarize
+### 8. Summarize
 
 Present the context map:
 
 - the acceptance criteria carried from the story;
 - `linked` specs vs `path` specs (with where each `path` spec was found);
+- `governing` specs from the containment ascent — the high-altitude `STK`/`SYS` intent over the area;
 - obsolete / superseded-on-path called out prominently;
 - cross-relations, ranked by code distance;
 - the gaps.
@@ -99,6 +114,6 @@ This summary is what the drafting step authors against and the promotion step in
 
 ## Done when
 
-- The context map is presented: `linked` vs `path` specs (with where each `path` spec was found), supersession/obsolescence and conflict candidates, cross-relations ranked by code distance, and the gaps.
+- The context map is presented: `linked` vs `path` specs (with where each `path` spec was found), `governing` specs from the containment ascent, supersession/obsolescence and conflict candidates, cross-relations ranked by code distance, and the gaps.
 - Obsolete or superseded specs found on the call path are called out, never silently dropped.
 - Nothing is written, moved, or committed — the analysis stays read-only.
