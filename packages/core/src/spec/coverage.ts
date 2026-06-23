@@ -1,7 +1,7 @@
 import { mkdir, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { Realizes, SysTraceables } from "@ariadne-thread/trace";
-import { realizes, SwTraceables } from "@ariadne-thread/trace";
+import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Waiver } from "../config/config.js";
 import type { AnchorLocation, Traceable } from "./generator.js";
 
@@ -53,7 +53,11 @@ export const computeCoverage: (
   traceables: readonly Traceable[],
   anchors: readonly AnchorLocation[],
 ) => SpecCoverage[] = realizes(
-  SwTraceables.SW_026_COMPUTE_COVERAGE,
+  [
+    SwTraceables.SW_026_COMPUTE_COVERAGE,
+    ConTraceables.CON_019_CONCERNS_NOT_COVERAGE,
+    ConTraceables.CON_020_COVERAGE_UNIVERSE,
+  ],
   (
     traceables: readonly Traceable[],
     anchors: readonly AnchorLocation[],

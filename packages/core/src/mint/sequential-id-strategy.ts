@@ -1,4 +1,4 @@
-import { realizes, SwTraceables } from "@ariadne-thread/trace";
+import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import { AriadneError, ErrorCode } from "../errors.js";
 import { withState } from "../state/state.js";
 import type { IdStrategy } from "./id-strategy.js";
@@ -14,7 +14,11 @@ export type SequentialIdStrategyOptions = {
  * Sequential id scheme: renders ids as `<PREFIX>-<zero-padded number>`,
  * with the numbers drawn from the per-prefix sequence allocator.
  */
-@realizes(SwTraceables.SW_002_MINT_SEQUENTIAL_IDS)
+@realizes([
+  SwTraceables.SW_002_MINT_SEQUENTIAL_IDS,
+  ConTraceables.CON_003_PADDING_CONFIGURED,
+  ConTraceables.CON_004_IDS_RETURNED_ONLY_AFTER_PERSIST,
+])
 export class SequentialIdStrategy implements IdStrategy {
   readonly #padding: number;
   readonly #stateFile: string | undefined;
@@ -52,7 +56,10 @@ export class SequentialIdStrategy implements IdStrategy {
  * high-water mark. A prefix used for the first time begins at 1.
  */
 const allocateConsecutive = realizes(
-  SwTraceables.SW_001_ALLOCATE_SEQUENCE_NUMBERS,
+  [
+    SwTraceables.SW_001_ALLOCATE_SEQUENCE_NUMBERS,
+    ConTraceables.CON_002_SEQUENCE_NUMBER_NEVER_REUSED,
+  ],
   (
     sequences: Record<string, number>,
     prefix: string,

@@ -1,4 +1,8 @@
+import type { ConTraceables, Realizes } from "@ariadne-thread/trace";
 import { ArchTraceables, realizes } from "@ariadne-thread/trace";
+
+// This module owns the released error-code set, realizing the stability constraint.
+type _Anchors = Realizes<ConTraceables.CON_006_ERROR_CODE_STABILITY, unknown>;
 
 /**
  * Stable, mnemonic error codes.

@@ -1,7 +1,12 @@
 import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ConTraceables, NfTraceables, verifies } from "@ariadne-thread/trace";
+import {
+  ConTraceables,
+  NfTraceables,
+  SysTraceables,
+  verifies,
+} from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 import { withState } from "../index.js";
 
@@ -29,58 +34,64 @@ describe("loading", () => {
 });
 
 describe("persistence", () => {
-  verifies(NfTraceables.NF_002_ATOMIC_STATE_WRITE, () => {
-    test("mutations are persisted across sessions", async () => {
-      const file = await tempStateFile();
-      await withState(
-        (state) => {
-          state.sequences.SW = 3;
-        },
-        { file },
-      );
-      const value = await withState((state) => state.sequences.SW, { file });
-      expect(value).toBe(3);
-    });
-
-    test("saving preserves sections the caller did not touch", async () => {
-      const file = await tempStateFile();
-      await writeFile(
-        file,
-        JSON.stringify({ sequences: { SW: 1 }, lastScannedCommit: "abc123" }),
-        "utf8",
-      );
-      await withState(
-        (state) => {
-          state.sequences.SW = 2;
-        },
-        { file },
-      );
-      const state = await readState(file);
-      expect(state.sequences.SW).toBe(2);
-      expect(state.lastScannedCommit).toBe("abc123");
-    });
-
-    test("a failing run does not persist", async () => {
-      const file = await tempStateFile();
-      await withState(
-        (state) => {
-          state.sequences.SW = 1;
-        },
-        { file },
-      );
-      await expect(
-        withState(
+  verifies(
+    [
+      NfTraceables.NF_002_ATOMIC_STATE_WRITE,
+      SysTraceables.SYS_004_CONFIGURATION_AND_STATE,
+    ],
+    () => {
+      test("mutations are persisted across sessions", async () => {
+        const file = await tempStateFile();
+        await withState(
           (state) => {
-            state.sequences.SW = 99;
-            throw new Error("boom");
+            state.sequences.SW = 3;
           },
           { file },
-        ),
-      ).rejects.toThrow("boom");
-      const value = await withState((state) => state.sequences.SW, { file });
-      expect(value).toBe(1);
-    });
-  });
+        );
+        const value = await withState((state) => state.sequences.SW, { file });
+        expect(value).toBe(3);
+      });
+
+      test("saving preserves sections the caller did not touch", async () => {
+        const file = await tempStateFile();
+        await writeFile(
+          file,
+          JSON.stringify({ sequences: { SW: 1 }, lastScannedCommit: "abc123" }),
+          "utf8",
+        );
+        await withState(
+          (state) => {
+            state.sequences.SW = 2;
+          },
+          { file },
+        );
+        const state = await readState(file);
+        expect(state.sequences.SW).toBe(2);
+        expect(state.lastScannedCommit).toBe("abc123");
+      });
+
+      test("a failing run does not persist", async () => {
+        const file = await tempStateFile();
+        await withState(
+          (state) => {
+            state.sequences.SW = 1;
+          },
+          { file },
+        );
+        await expect(
+          withState(
+            (state) => {
+              state.sequences.SW = 99;
+              throw new Error("boom");
+            },
+            { file },
+          ),
+        ).rejects.toThrow("boom");
+        const value = await withState((state) => state.sequences.SW, { file });
+        expect(value).toBe(1);
+      });
+    },
+  );
 });
 
 describe("concurrency", () => {
