@@ -48,7 +48,10 @@ export type ExclusionInput = {
  */
 export const compileExclusionRules: (input: ExclusionInput) => ExclusionRules =
   realizes(
-    SwTraceables.SW_025_READ_EXCLUSION_PATTERNS,
+    [
+      SwTraceables.SW_025_READ_EXCLUSION_PATTERNS,
+      ConTraceables.CON_016_SCAN_BUILTIN_EXCLUSIONS,
+    ],
     (input: ExclusionInput): ExclusionRules => ({
       userExcludes: input.exclude.map((glob) =>
         compileOrThrow(glob, "exclude"),

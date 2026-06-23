@@ -6,6 +6,7 @@ import {
   ArchTraceables,
   ConTraceables,
   SwTraceables,
+  SysTraceables,
   verifies,
 } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
@@ -46,6 +47,7 @@ describe("sequential allocation", () => {
       SwTraceables.SW_001_ALLOCATE_SEQUENCE_NUMBERS,
       SwTraceables.SW_002_MINT_SEQUENTIAL_IDS,
       ConTraceables.CON_002_SEQUENCE_NUMBER_NEVER_REUSED,
+      SysTraceables.SYS_003_STABLE_SPEC_IDENTITY,
     ],
     () => {
       test("a fresh prefix yields the numbers 1..N and advances the high-water mark", async () => {

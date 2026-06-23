@@ -1,6 +1,6 @@
 import type { ResolvedConfiguration } from "@ariadne-thread/core";
 import { requireConfig, resolveConfiguration } from "@ariadne-thread/core";
-import { realizes, SwTraceables } from "@ariadne-thread/trace";
+import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 import { createGeneratorRegistry } from "../generators.js";
 
@@ -15,7 +15,7 @@ import { createGeneratorRegistry } from "../generators.js";
  * it to stderr and exits non-zero.
  */
 export const registerConfig: (program: Command) => void = realizes(
-  SwTraceables.SW_020_CONFIG_COMMAND,
+  [SwTraceables.SW_020_CONFIG_COMMAND, ConTraceables.CON_015_CONFIG_READ_ONLY],
   (program: Command): void => {
     program
       .command("config")

@@ -1,7 +1,12 @@
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
+import {
+  ConTraceables,
+  SwTraceables,
+  SysTraceables,
+  verifies,
+} from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 import { ErrorCode, promote } from "../index.js";
 
@@ -65,6 +70,7 @@ describe("finalizing drafts", () => {
     [
       SwTraceables.SW_017_FINALIZE_DRAFTS,
       ConTraceables.CON_014_EXHAUSTIVE_SUBSTITUTION,
+      SysTraceables.SYS_005_SPEC_LIFECYCLE,
     ],
     () => {
       test("binds an id and moves a story draft into the stories directory", async () => {

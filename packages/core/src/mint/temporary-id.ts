@@ -18,7 +18,10 @@ const OPAQUE_BYTE_LENGTH = 5;
  * do not collide without any central coordination.
  */
 export const buildTemporaryId: (type: string) => string = realizes(
-  SwTraceables.SW_005_MINT_TEMPORARY_IDS,
+  [
+    SwTraceables.SW_005_MINT_TEMPORARY_IDS,
+    ConTraceables.CON_007_TEMPORARY_ID_UNBOUND,
+  ],
   (type: string): string => {
     const opaque = randomBytes(OPAQUE_BYTE_LENGTH).toString("hex");
     return `${type}-${TEMPORARY_MARKER}-${opaque}`;
