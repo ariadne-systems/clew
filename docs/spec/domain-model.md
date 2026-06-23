@@ -50,6 +50,7 @@ The set of configured prefixes is the single source of truth for id validity, so
 | `ignore` | `List<String>` | Regular expressions over the spec's filename; a matching traceable is excluded from every spec set and produces no symbol (CON-013). Optional. |
 | `exclude` | `List<String>` | Repository-root-relative globs (CON-018); a matching path is excluded from the code scan and produces no anchor (SW-024, SW-025). A user `exclude` is absolute in the exclusion precedence (CON-017). Optional. |
 | `unexclude` | `List<String>` | Repository-root-relative globs (CON-018) that re-include a path a built-in default (CON-016) would exclude; never overrides a user `exclude` (CON-017). Optional. |
+| `waivers` | `List<{ id: String, reason: String }>` | The committed coverage waiver list: a spec id paired with a reason, reported as waived rather than an open gap (SW-027). A waiver for a covered spec or an unknown id is reported as stale. Optional. |
 
 ## View
 
