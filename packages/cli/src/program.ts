@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import pkg from "../package.json" with { type: "json" };
 import { registerConfig } from "./commands/config.js";
+import { registerCoverage } from "./commands/coverage.js";
 import { registerInit } from "./commands/init.js";
 import { registerMint } from "./commands/mint.js";
 import { registerPromote } from "./commands/promote.js";
@@ -30,6 +31,7 @@ export function buildProgram(): Command {
   registerSetup(program);
   registerSpec(program);
   registerScan(program);
+  registerCoverage(program);
   registerConfig(program);
   registerPromote(program);
 
