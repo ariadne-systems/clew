@@ -85,7 +85,7 @@ const createIdStrategy = realizes(
  * pattern is consulted.
  */
 const assertPrefixConfigured = realizes(
-  ConTraceables.CON_005_ID_MATCHES_CONFIGURED_PATTERN,
+  ConTraceables.CON_005_ID_PREFIX_MUST_BE_CONFIGURED,
   (type: string, prefixes: Set<string>): void => {
     if (!prefixes.has(type)) {
       throw new AriadneError(

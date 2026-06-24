@@ -59,7 +59,7 @@ Complete the rename ADR-0003 calls for in the same change: `Type` becomes `Lens`
 **Realizes**
 
 - [SW-009 — The tool reads project configuration from `.ariadnerc.json`](../derived-specs/SW-009-read-configuration.md)
-- [CON-005 — A minted id's prefix must match the configured id token pattern](../derived-specs/CON-005-id-matches-configured-pattern.md) (rewritten: a minted id's prefix must be a configured prefix)
+- [CON-005 — A minted id's prefix must match the configured id token pattern](../derived-specs/CON-005-id-prefix-must-be-configured.md) (rewritten: a minted id's prefix must be a configured prefix)
 
 ## Changes
 

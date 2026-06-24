@@ -23,3 +23,8 @@ Changing the configured lenses changes which prefixes are accepted; no id patter
 **Concerns**
 
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+
+## Changes
+
+- **2026-06-23** — Renamed the file and the generated member from `id-matches-configured-pattern` to `id-prefix-must-be-configured`, to match the title that STR-009 had already rewritten from the id-token-pattern wording to the configured-prefix rule.
+No change in meaning; the slug and the `CON_005_…` symbol were the last places still carrying the superseded "pattern" wording.
