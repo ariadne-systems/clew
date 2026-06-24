@@ -32,7 +32,15 @@ The original wording missed the partial-configuration path the implementation no
 
 ---
 
-## 2. Scope
+## 2. A title states the decision
+
+A spec's title states the decision or constraint the spec pins, concretely — not a capability noun.
+Its **filename slug** is that title tightened to a kebab, and is what becomes the generated traceable's name (`CON-021-missing-realize-never-waivable.md` → `CON_021_MISSING_REALIZE_NEVER_WAIVABLE`) — the symbol code anchors to and a reader meets at the anchor. Title and slug must tell the same story, and both must carry the decision: `MISSING_REALIZE_NEVER_WAIVABLE`, not `coverage`.
+A title or slug that merely restates the component it governs, or a generic umbrella that fits many specs equally, is a defect to fix, not a matter of style.
+
+---
+
+## 3. Scope
 
 This convention is about the spec corpus only.
 It does not change how code is anchored to specs (the trace markers) or how ids are minted.
