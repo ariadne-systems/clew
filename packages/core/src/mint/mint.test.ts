@@ -188,7 +188,7 @@ describe("persistence on save failure", () => {
 });
 
 describe("prefix validation", () => {
-  verifies(ConTraceables.CON_005_ID_MATCHES_CONFIGURED_PATTERN, () => {
+  verifies(ConTraceables.CON_005_ID_PREFIX_MUST_BE_CONFIGURED, () => {
     test("a configured lens mints", async () => {
       const { configFile, stateFile } = await tempPaths({ padding: 3 });
 
