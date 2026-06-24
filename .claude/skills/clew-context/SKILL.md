@@ -1,11 +1,11 @@
 ---
 name: clew-context
-description: "Build the context around a story being drafted or promoted — the specs it relates to (directly, via the code's call graph, and via the high-altitude specs that govern its file/module), candidate supersession or obsolescence, conflicts, cross-relations ranked by code distance, and gaps — so specs are authored and integrated with full awareness of what already exists. Use after a draft story is created and before its specs are written, and at promotion when the context has not already been built. Read-only analysis; it does not author specs (see clew-draft) or finalize them (see clew-promote)."
+description: "Build the context around a story being drafted or promoted — the specs it relates to (directly, via the code's call graph, and via the high-altitude specs that govern its file/module), candidate supersession or obsolescence, conflicts, cross-relations ranked by code distance, and gaps — so specs are authored and integrated with full awareness of what already exists. The same walk grounds a change to existing code: an anchor is a checked claim, not a proof of correctness, so read the spec it points at and work from its intent. Use after a draft story is created and before its specs are written, at promotion when the context has not already been built, and before changing code in an anchored area. Read-only analysis; it does not author specs (see clew-draft) or finalize them (see clew-promote)."
 ---
 
 # clew-context
 
-Build the context for a story being drafted or promoted, so the work is grounded in what already exists rather than created in a vacuum.
+Build the context for a story being drafted or promoted — or for a change to existing code in an anchored area — so the work is grounded in what already exists rather than created in a vacuum.
 This is read-only analysis — it produces understanding; it does not write or change specs or code.
 
 The core idea: the story's *stated* relations are what its author had in mind, but the *code* around the area often anchors specs that are just as relevant. The strongest signal is the gap between the two — especially a spec the code points at that has been abandoned.
@@ -13,6 +13,14 @@ The core idea: the story's *stated* relations are what its author had in mind, b
 Relevance reaches a piece of code two ways, and this skill walks both: **across** the call graph (the behaviours it interacts with — usually `SW`), and **up** the file/module tree (the high-altitude specs that govern where it lives — usually `STK`/`SYS`, anchored coarsely at the file or `index.ts` level). The first is the execution-path expansion; the second is the containment ascent.
 
 If you already built this context for these drafts earlier in the session, reuse it rather than rebuilding.
+
+## An anchor is a claim, not a proof
+
+The build checks only that an anchor's spec id **exists** — never that the code is **correct**.
+`realizes` and `verifies` are *stated*, not *proven*: an anchor records that someone asserted this code implements or exercises the spec, not that it does. Do not rely on it as evidence the code is right.
+
+So when you change code that realizes a spec, **read that spec first** and make the change from its **intent**, not from the code's current behaviour.
+Where the code has drifted from the intent, the anchor was masking that drift — and reasoning from the intent, rather than preserving what the code happens to do, is what surfaces the bug.
 
 ## What a lens is
 
@@ -23,6 +31,7 @@ A project declares its lenses in `.ariadnerc.json`, each with an `id` and a one-
 
 - During drafting (`clew-draft`): **after the draft story exists but before its specs are written**, so spec creation is grounded in the corpus.
 - During promotion (`clew-promote`): **only if this context has not already been built** for these drafts.
+- Before **changing code anchored to a spec**: read that spec and work from its intent, treating the anchor as a claim, not a proof (see *An anchor is a claim, not a proof*).
 
 ## Reading the project
 

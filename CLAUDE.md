@@ -17,6 +17,14 @@ Those specs are the source of truth for what to build and for traceability.
 This is a TypeScript project.
 The global CLAUDE.md's Java, Spring, and Maven conventions do not apply here; `004` and `005` govern the stack.
 
+## Before you change code — get familiar first
+
+The first move on **any** code change — an edit or a new addition — is to understand the code you are about to touch. Never edit blind.
+
+If the code is anchored to a spec (`realizes` / `verifies`), read that spec and make the change from its **intent**, not from what the code currently does. An anchor is a checked *claim*, not a proof of correctness: where the code has drifted from the spec, working from the intent — rather than preserving the existing behaviour — is what surfaces the bug.
+
+For anything beyond a trivial edit, run the `clew-context` skill first: it walks from the code to the specs that govern it (across the call graph and up the file/module tree), so you change the code knowing the intent it must honour.
+
 ## Running the CLI (for skills and commands)
 
 The skills write commands as `clew <command>`.

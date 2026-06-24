@@ -51,6 +51,17 @@ For each lens you intend to use, confirm you can derive it:
 4. **Create the specs** — using that context, decide which specs the story needs (only configured lenses), temp-mint each (`clew mint --tmp <LENS>`), and write them into the drafts location, mirroring the spec tree (a derived-specs area; an entity draft is a domain-model section, to be merged on promotion). Cross-reference by id, wire the relations the context surfaced (what each realizes or concerns, and links to the related existing specs), and follow the project's existing specs as the template.
 5. **Stop for review** — present the drafts, the ids used, and the context findings (related specs, supersession/conflict candidates), so the user sees how the new work sits in the corpus. Do not promote or commit.
 
+## Every spec pins a decision — no hollow specs
+
+A spec must pin a **decision**: something a reader could not derive from the code and the title alone. Before writing one, name what it requires and — where there is a real choice — what it **excludes**. Drop or fold a candidate that fails this:
+
+- It only restates what the code or the component name obviously does.
+- It is a generic umbrella that would fit many sibling artifacts equally (an "X schema" stamped on every record).
+
+Write the spec's **title as that decision**, and give the file a **slug that is the title tightened** — the slug, not the title, becomes the generated traceable an agent reads cold at every anchor (`006`), so the two must tell the same story. Prefer a slug like `concerns-not-coverage` over `compute-coverage`.
+
+Be skeptical of speccing a pure data holder or DTO; it rarely carries a decision worth a spec of its own.
+
 ## Deriving through each lens
 
 The configured `description` says what a lens means in this project; the notes below are how to author it well. Keep each spec to one concern, with a verification a test or review can check.
