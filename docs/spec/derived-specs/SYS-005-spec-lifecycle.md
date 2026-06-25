@@ -4,7 +4,7 @@ The system supports drafting, allocating, and finalizing specs
 **Lens**: SYS
 
 **Description**
-The system shall support drafting, allocating, and finalizing specs — minting ids (including unbound temporary ids) and promoting reviewed drafts into the corpus.
+The system shall support drafting, allocating, and finalizing specs — minting ids (including unbound temporary ids) and promoting reviewed drafts into the corpus — and shall track each spec's implementation state (`not-implemented`, `implemented`, or `deprecated`) once it is in the corpus.
 
 **Rationale**
 Specs are authored iteratively; making allocation and promotion first-class keeps the authoring loop cheap and keeps unapproved work from consuming real ids (ADR-0001 D3).
@@ -17,3 +17,8 @@ Temporary ids can be minted without advancing state; promotion binds real ids an
 **Realizes**
 
 - [STK-003 — Low authoring friction](STK-003-low-authoring-friction.md)
+
+## Changes
+
+- **2026-06-25** — Broadened the lifecycle to include a spec's **implementation state** (`not-implemented` → `implemented` → `deprecated`), captured on the traceable (SW-031, CON-022; STR-020).
+The authoring lifecycle (mint/promote) is unchanged; the state extends it past finalization so coverage can scope its gate to implemented specs.
