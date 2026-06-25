@@ -42,13 +42,16 @@ jobs:
           retention-days: 7
 
   lint:
-    # Biome lints source; no build artifacts required.
+    # Static checks — Biome plus reference integrity; no build artifacts required.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
       - run: pnpm lint
       - run: pnpm format:check
+      # Every relative markdown link and @import in the spec corpus must resolve —
+      # the prose-layer rot the type-checker can't see (e.g. a renamed spec's links).
+      - run: pnpm check:refs
 
   typecheck:
     needs: build
