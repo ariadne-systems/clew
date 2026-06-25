@@ -27,3 +27,8 @@ The scan depends only on the configured artifact locations, not on any target la
 **Realizes**
 
 - [SYS-001 — Compile-checked anchoring](SYS-001-compile-checked-anchoring.md)
+
+## Changes
+
+- **2026-06-25** — The scanned traceable now also carries each spec's implementation status (`not-implemented` / `implemented` / `deprecated`), read by SW-031 (STR-020).
+The scan's behaviour is otherwise unchanged; the status is an added field on each traceable, so coverage can scope its gate to implemented specs.
