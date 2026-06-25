@@ -6,3 +6,6 @@ pre-commit:
       run: pnpm biome check --no-errors-on-unmatched --staged
     typecheck:
       run: pnpm typecheck
+    references:
+      glob: "*.md"
+      run: pnpm check:refs
