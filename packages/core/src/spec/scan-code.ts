@@ -7,7 +7,6 @@ import {
   readGenerators,
   readUnexclude,
 } from "../config/config.js";
-import { AriadneError, ErrorCode } from "../errors.js";
 import type { ExclusionRules } from "./exclusions.js";
 import {
   compileExclusionRules,
@@ -15,6 +14,7 @@ import {
   shouldDescend,
 } from "./exclusions.js";
 import type { AnchorLocation, Generator, SourceFile } from "./generator.js";
+import { resolveGeneratorOrThrow } from "./generator.js";
 
 export type ScanCodeOptions = {
   /**
@@ -56,7 +56,10 @@ export const scanCode: (options: ScanCodeOptions) => Promise<ScanCodeResult> =
         readUnexclude(options.configFile),
       ]);
       const generators = generatorConfigs.map((config) => {
-        const generator = resolveOrThrow(config.type, options.resolveGenerator);
+        const generator = resolveGeneratorOrThrow(
+          config.type,
+          options.resolveGenerator,
+        );
         return {
           generator,
           outputDir: config.outputDir ?? generator.defaultOutputDir,
@@ -185,22 +188,4 @@ function sortAnchors(anchors: AnchorLocation[]): void {
       left.relation.localeCompare(right.relation) ||
       left.id.localeCompare(right.id),
   );
-}
-
-/**
- * Resolves a configured generator name to its implementation, failing fast with a
- * stable code when the configuration names a generator that is not registered.
- */
-function resolveOrThrow(
-  name: string,
-  resolveGenerator: (name: string) => Generator | undefined,
-): Generator {
-  const generator = resolveGenerator(name);
-  if (generator === undefined) {
-    throw new AriadneError(
-      ErrorCode.UNKNOWN_GENERATOR,
-      `Configured generator "${name}" is not registered; remove it from \`generators\` or install a generator that provides it.`,
-    );
-  }
-  return generator;
 }

@@ -6,7 +6,14 @@ import { createJavaGenerator } from "./index.js";
 const specSets: SpecSet[] = [
   {
     name: "SW",
-    traceables: [{ id: "SW-002", lens: "SW", filename: "SW-002-mint-ids.md" }],
+    specs: [
+      {
+        id: "SW-002",
+        lens: "SW",
+        filename: "SW-002-mint-ids.md",
+        status: "active",
+      },
+    ],
   },
 ];
 
@@ -45,6 +52,17 @@ describe("java generator output", () => {
         expect(createJavaGenerator().defaultOutputDir).toBe(
           "src/main/java/ariadne/traceables",
         );
+      });
+
+      test("reads its emitted traceables back, round-tripping the ids (ARCH-004)", async () => {
+        const generator = createJavaGenerator();
+        const files = await generator.generate(specSets, {
+          outputDir: "src/main/java/ariadne/traceables",
+        });
+
+        const universe = generator.readTraceables(files);
+
+        expect(universe).toEqual([{ id: "SW-002", deprecated: false }]);
       });
     },
   );

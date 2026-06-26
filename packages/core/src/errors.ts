@@ -33,6 +33,8 @@ export const ErrorCode = {
   ENTITY_DRAFT_UNSUPPORTED: "E_ENTITY_DRAFT_UNSUPPORTED",
   /** A configured `exclude` or `unexclude` glob could not be compiled. */
   INVALID_EXCLUSION_PATTERN: "E_INVALID_EXCLUSION_PATTERN",
+  /** A spec declares a `**Status**` value that is not one of the recognized states. */
+  INVALID_SPEC_STATUS: "E_INVALID_SPEC_STATUS",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

@@ -1,7 +1,8 @@
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  ArchTraceables,
   ConTraceables,
   SwTraceables,
   SysTraceables,
@@ -11,18 +12,23 @@ import { describe, expect, test } from "vitest";
 import type {
   AnchorLocation,
   CoverageResult,
+  GeneratedTraceable,
+  Generator,
   SpecCoverage,
-  Traceable,
 } from "../index.js";
 import {
   computeCoverage,
   formatCoverageReport,
+  GENERATED_MARKER,
+  readUniverse,
   reconcileWaivers,
   writeCoverageResult,
 } from "../index.js";
 
-function traceable(id: string, lens: string): Traceable {
-  return { id, lens, filename: `${id}.md` };
+// A non-deprecated generated traceable; the coverage universe carries only the
+// id and deprecation — the lens is derived from the id prefix.
+function traceable(id: string, _lens?: string): GeneratedTraceable {
+  return { id, deprecated: false };
 }
 
 function anchor(
@@ -94,6 +100,25 @@ describe("computeCoverage", () => {
       expect(result.find((spec) => spec.id === "STK-1")?.status).toBe(
         "realized",
       );
+    });
+
+    test("reports a deprecated traceable as deprecated, not classified by its anchors", () => {
+      const universe: GeneratedTraceable[] = [
+        { id: "SW-1", deprecated: false },
+        { id: "SW-2", deprecated: true },
+      ];
+
+      const result = computeCoverage(universe, [
+        anchor("SW-1", "realizes"),
+        anchor("SW-2", "realizes"),
+        anchor("SW-2", "verifies"),
+      ]);
+
+      // SW-2's deprecated marker wins over its anchors; the lens is the id prefix.
+      expect(result).toEqual([
+        { id: "SW-1", lens: "SW", status: "realized" },
+        { id: "SW-2", lens: "SW", status: "deprecated" },
+      ]);
     });
   });
 });
@@ -254,6 +279,82 @@ describe("coverage result output", () => {
         expect(report).toContain("SW-2  realized — verified by acceptance");
         expect(report).toContain("Stale waivers (1):");
         expect(report).toContain("ARCH-* — nothing here");
+      });
+
+      test("lists a deprecated spec separately and does not count it in the totals", () => {
+        const report = formatCoverageReport({
+          specs: [
+            { id: "SW-1", lens: "SW", status: "covered" },
+            { id: "SW-9", lens: "SW", status: "deprecated" },
+          ],
+          staleWaivers: [],
+        });
+
+        // The deprecated spec is not in the count (1 spec, not 2) and not a gap.
+        expect(report).toContain(
+          "1 covered, 0 realized, 0 verified, 0 none (1 specs)",
+        );
+        expect(report).toContain("Deprecated (1):");
+        expect(report).toContain("  SW-9");
+        expect(report).not.toContain("Open gaps");
+      });
+    },
+  );
+});
+
+describe("readUniverse", () => {
+  verifies(
+    [
+      ArchTraceables.ARCH_004_GENERATOR_DISCOVERS_MARKERS,
+      ConTraceables.CON_020_COVERAGE_UNIVERSE,
+    ],
+    () => {
+      test("reads only generated files back — a stray, unmarked file in the output dir is ignored", async () => {
+        const dir = await mkdtemp(join(tmpdir(), "ariadne-universe-"));
+        const outputDir = join(dir, "out");
+        await mkdir(outputDir, { recursive: true });
+        // A generated enum file carries the marker; a hand-written file does not.
+        await writeFile(
+          join(outputDir, "SwTraceables.ts"),
+          `// ${GENERATED_MARKER}\nSW_001_A = "SW-001",\n`,
+          "utf8",
+        );
+        await writeFile(
+          join(outputDir, "stray.ts"),
+          'const STALE = "SW-999";\n',
+          "utf8",
+        );
+        await writeFile(
+          join(dir, ".ariadnerc.json"),
+          JSON.stringify({ generators: [{ type: "fake", outputDir: "out" }] }),
+          "utf8",
+        );
+        // A fake generator that reads back any `NAME = "ID"` it is handed, so the
+        // assertion turns on which files reached it (the marker filter), not on a
+        // language grammar.
+        const fake: Generator = {
+          name: "fake",
+          defaultOutputDir: "out",
+          sourceExtensions: [".ts"],
+          discover: () => [],
+          generate: async () => [],
+          readTraceables: (files) =>
+            files.flatMap((file) =>
+              [...file.contents.matchAll(/[A-Za-z_]\w* = "([^"]+)"/g)].map(
+                (match) => ({ id: match[1] as string, deprecated: false }),
+              ),
+            ),
+        };
+
+        const universe = await readUniverse({
+          resolveGenerator: () => fake,
+          configFile: join(dir, ".ariadnerc.json"),
+          projectRoot: dir,
+        });
+
+        // The stray file's "SW-999" never reaches the generator — only the marked
+        // file's member is in the universe.
+        expect(universe).toEqual([{ id: "SW-001", deprecated: false }]);
       });
     },
   );

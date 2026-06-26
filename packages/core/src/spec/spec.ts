@@ -9,9 +9,8 @@ import {
   readLenses,
   readSpecSets,
 } from "../config/config.js";
-import { AriadneError, ErrorCode } from "../errors.js";
 import type { GeneratedFile, Generator } from "./generator.js";
-import { GENERATED_MARKER } from "./generator.js";
+import { GENERATED_MARKER, resolveGeneratorOrThrow } from "./generator.js";
 import { scan } from "./scan.js";
 import { groupIntoSpecSets, lensMatchers } from "./spec-set.js";
 
@@ -38,7 +37,7 @@ export type GeneratorReport = {
 };
 
 export type SpecResult = {
-  /** How many traceables the scan found. */
+  /** How many traceables were generated — the `active` and `deprecated` specs. */
   traceableCount: number;
   /** The spec sets the traceables were grouped into. */
   specSetCount: number;
@@ -68,13 +67,24 @@ export const spec: (options: SpecOptions) => Promise<SpecResult> = realizes(
         readIgnore(configFile),
         readGenerators(configFile),
       ]);
-    const specSets = groupIntoSpecSets(traceables, matchers, ignorePatterns);
+    // Only `active` and `deprecated` specs become traceables; a `planned` spec is
+    // not generated (SW-014, CON-020), so it cannot be anchored and is outside the
+    // coverage universe. A `deprecated` spec's traceable is still emitted, marked
+    // by the generator (SW-018), so its existing anchors keep building.
+    const generated = traceables.filter(
+      (traceable) =>
+        traceable.status === "active" || traceable.status === "deprecated",
+    );
+    const specSets = groupIntoSpecSets(generated, matchers, ignorePatterns);
 
     const reports: GeneratorReport[] = [];
     // The set of files written under each write-root this run, so stale files can be pruned.
     const writtenByRoot = new Map<string, Set<string>>();
     for (const config of generatorConfigs) {
-      const generator = resolveOrThrow(config.type, options.resolveGenerator);
+      const generator = resolveGeneratorOrThrow(
+        config.type,
+        options.resolveGenerator,
+      );
       const outputDir = config.outputDir ?? generator.defaultOutputDir;
       const writeRoot = join(projectRoot, outputDir);
       const files = await generator.generate(specSets, { outputDir });
@@ -103,7 +113,7 @@ export const spec: (options: SpecOptions) => Promise<SpecResult> = realizes(
     );
 
     return {
-      traceableCount: traceables.length,
+      traceableCount: generated.length,
       specSetCount: specSets.length,
       generators: reports,
     };
@@ -153,25 +163,6 @@ async function resolveMatchers(
     return configured;
   }
   return lensMatchers(await readLenses(configFile));
-}
-
-/**
- * Resolves a configured generator name to its implementation, failing fast with
- * a stable code when the configuration names a generator that is not registered
- * Nothing is generated until every configured generator resolves.
- */
-function resolveOrThrow(
-  name: string,
-  resolveGenerator: (name: string) => Generator | undefined,
-): Generator {
-  const generator = resolveGenerator(name);
-  if (generator === undefined) {
-    throw new AriadneError(
-      ErrorCode.UNKNOWN_GENERATOR,
-      `Configured generator "${name}" is not registered; remove it from \`generators\` or install a generator that provides it.`,
-    );
-  }
-  return generator;
 }
 
 /** Writes a generated file under the output root, overwriting any prior content. */

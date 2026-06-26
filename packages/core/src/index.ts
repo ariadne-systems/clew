@@ -52,6 +52,7 @@ export type {
   CoverageEntry,
   CoverageResult,
   CoverageStatus,
+  ReadUniverseOptions,
   SpecCoverage,
   StaleWaiver,
 } from "./spec/coverage.js";
@@ -59,6 +60,7 @@ export {
   computeCoverage,
   DEFAULT_COVERAGE_FILE,
   formatCoverageReport,
+  readUniverse,
   reconcileWaivers,
   writeCoverageResult,
 } from "./spec/coverage.js";
@@ -66,13 +68,19 @@ export type {
   AnchorLocation,
   GenerateContext,
   GeneratedFile,
+  GeneratedTraceable,
   Generator,
   Relation,
+  ScannedSpec,
   SourceFile,
   SpecSet,
-  Traceable,
 } from "./spec/generator.js";
-export { GENERATED_MARKER, generatedHeader } from "./spec/generator.js";
+export {
+  GENERATED_MARKER,
+  generatedHeader,
+  parseGeneratedTraceables,
+  resolveGeneratorOrThrow,
+} from "./spec/generator.js";
 export {
   toIdentifier,
   toMemberName,

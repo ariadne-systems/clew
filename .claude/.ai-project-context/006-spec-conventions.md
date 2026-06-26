@@ -44,3 +44,23 @@ A title or slug that merely restates the component it governs, or a generic umbr
 
 This convention is about the spec corpus only.
 It does not change how code is anchored to specs (the trace markers) or how ids are minted.
+
+---
+
+## 4. Implementation status
+
+A spec promoted into the corpus may declare a `**Status**` field — its implementation state — as a field at the top, beside `**Lens**`:
+
+- `planned` (the default when the field is absent) — authored and approved, but not yet built.
+It generates **no** traceable, so it is outside the coverage universe (CON-020) and cannot be anchored.
+- `active` — being built, or in service.
+It generates a traceable; coverage then shows whether code actually anchors it — an open gap until it does, Covered once it does.
+- `deprecated` — retiring.
+Its traceable is still generated but **marked** deprecated, so existing anchors keep building, and coverage lists it without counting it.
+
+Set a spec `active` when work on it **begins** — that is what generates its traceable, so the code can anchor against it as it is written, not after the code is done.
+Set it `deprecated` when the spec is retiring.
+Because the status filters generation (SW-014), it is how a spec-first project keeps its unbuilt backlog out of coverage without waiving every spec.
+
+The `**Status**` field is the file-based source of the state; a future ALM connector maps it from the work item's state instead.
+An unrecognized value is rejected (CON-022).

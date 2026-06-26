@@ -9,6 +9,7 @@ import { ErrorCode, GENERATED_MARKER, spec } from "../index.js";
 type Fixture = {
   configFile: string;
   outputDir: string;
+  derivedDir: string;
 };
 
 // Lays out a spec tree, a config pointing `layout` at it and listing
@@ -26,7 +27,9 @@ async function fixture(
   await mkdir(derivedDir, { recursive: true });
   for (const name of idFilenames) {
     const target = name.startsWith("STR-") ? storiesDir : derivedDir;
-    await writeFile(join(target, name), "x", "utf8");
+    // Specs default to `active` so they are generated; the status filter (SW-014)
+    // drops only `planned` specs, which individual tests write explicitly.
+    await writeFile(join(target, name), "**Status**: active\n", "utf8");
   }
   const configFile = join(dir, ".ariadnerc.json");
   await writeFile(
@@ -41,7 +44,7 @@ async function fixture(
     }),
     "utf8",
   );
-  return { configFile, outputDir: join(dir, "out") };
+  return { configFile, outputDir: join(dir, "out"), derivedDir };
 }
 
 // A generator that records the spec sets it was handed and emits one file whose
@@ -56,15 +59,16 @@ function recordingGenerator(name: string): {
     defaultOutputDir: ".",
     sourceExtensions: [],
     discover: () => [],
+    readTraceables: () => [],
     generate(specSets) {
       received = specSets.map((specSet) => ({
         name: specSet.name,
-        traceables: specSet.traceables.map((traceable) => ({ ...traceable })),
+        specs: specSet.specs.map((traceable) => ({ ...traceable })),
       }));
       const body = specSets
         .map(
           (specSet) =>
-            `${specSet.name}: ${specSet.traceables.map((t) => t.id).join(",")}`,
+            `${specSet.name}: ${specSet.specs.map((t) => t.id).join(",")}`,
         )
         .join("\n");
       return Promise.resolve([{ path: `${name}.txt`, contents: body }]);
@@ -91,15 +95,30 @@ describe("spec generation", () => {
       expect(received()).toEqual([
         {
           name: "CON",
-          traceables: [
-            { id: "CON-012", lens: "CON", filename: "CON-012-c.md" },
+          specs: [
+            {
+              id: "CON-012",
+              lens: "CON",
+              filename: "CON-012-c.md",
+              status: "active",
+            },
           ],
         },
         {
           name: "SW",
-          traceables: [
-            { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-            { id: "SW-013", lens: "SW", filename: "SW-013-b.md" },
+          specs: [
+            {
+              id: "SW-012",
+              lens: "SW",
+              filename: "SW-012-a.md",
+              status: "active",
+            },
+            {
+              id: "SW-013",
+              lens: "SW",
+              filename: "SW-013-b.md",
+              status: "active",
+            },
           ],
         },
       ]);
@@ -107,6 +126,39 @@ describe("spec generation", () => {
       expect(result.specSetCount).toBe(2);
       expect(result.generators).toEqual([
         { name: "fake", outputDir: ".", files: ["fake.txt"] },
+      ]);
+    });
+
+    test("filters by status: a planned spec is not generated; active and deprecated are", async () => {
+      const { configFile, outputDir, derivedDir } = await fixture([], ["fake"]);
+      await writeFile(
+        join(derivedDir, "SW-001-a.md"),
+        "**Status**: active\n",
+        "utf8",
+      );
+      await writeFile(
+        join(derivedDir, "SW-002-b.md"),
+        "**Status**: planned\n",
+        "utf8",
+      );
+      await writeFile(
+        join(derivedDir, "SW-003-c.md"),
+        "**Status**: deprecated\n",
+        "utf8",
+      );
+      const { generator, received } = recordingGenerator("fake");
+
+      const result = await spec({
+        configFile,
+        outputDir,
+        resolveGenerator: () => generator,
+      });
+
+      // The planned spec is filtered out; active and deprecated become traceables.
+      expect(result.traceableCount).toBe(2);
+      expect(received()?.flatMap((set) => set.specs.map((t) => t.id))).toEqual([
+        "SW-001",
+        "SW-003",
       ]);
     });
 
@@ -233,7 +285,14 @@ describe("configured spec sets", () => {
         expect(received()).toEqual([
           {
             name: "SW",
-            traceables: [{ id: "SW-012", lens: "SW", filename: "SW-012-a.md" }],
+            specs: [
+              {
+                id: "SW-012",
+                lens: "SW",
+                filename: "SW-012-a.md",
+                status: "active",
+              },
+            ],
           },
         ]);
       });

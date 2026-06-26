@@ -6,6 +6,7 @@ import type {
 } from "@ariadne-thread/core";
 import {
   generatedHeader,
+  parseGeneratedTraceables,
   toIdentifier,
   toMemberName,
   toPascalCase,
@@ -42,9 +43,19 @@ export const createJavaGenerator: () => Generator = realizes(
       // Skeleton, like `generate` (STR-011): Java discovery follows the same
       // contract (ARCH-004) but is not implemented in the TypeScript scan story.
       discover: () => [],
+      readTraceables: (files) =>
+        parseGeneratedTraceables(files, CONSTANT_PATTERN),
     };
   },
 );
+
+/**
+ * A generated enum constant, optionally preceded by `@Deprecated`: `NAME("ID")`.
+ * `parseGeneratedTraceables` reads it back — capture group 1 is the deprecation
+ * marker, group 2 the spec id. Java does not yet emit `@Deprecated` constants (a
+ * follow-on), so today none match group 1; the parser handles it for when it does.
+ */
+const CONSTANT_PATTERN = /(@Deprecated\s+)?[A-Za-z_]\w*\("([^"]+)"\)/g;
 
 function renderTraceablesFile(
   specSets: readonly SpecSet[],
@@ -59,7 +70,7 @@ function renderTraceablesFile(
 
   for (const specSet of specSets) {
     const enumName = toIdentifier(toPascalCase(specSet.name));
-    const constants = specSet.traceables.map(
+    const constants = specSet.specs.map(
       (traceable) =>
         `    ${toMemberName(traceable.filename)}(${JSON.stringify(traceable.id)})`,
     );

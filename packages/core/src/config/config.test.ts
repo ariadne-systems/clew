@@ -30,6 +30,7 @@ function fakeGenerator(name: string, defaultOutputDir: string): Generator {
     defaultOutputDir,
     sourceExtensions: [],
     discover: () => [],
+    readTraceables: () => [],
     generate: async () => [],
   };
 }

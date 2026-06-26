@@ -6,13 +6,30 @@ import { createTypeScriptGenerator } from "./index.js";
 const specSets: SpecSet[] = [
   {
     name: "CON",
-    traceables: [{ id: "CON-012", lens: "CON", filename: "CON-012-owned.md" }],
+    specs: [
+      {
+        id: "CON-012",
+        lens: "CON",
+        filename: "CON-012-owned.md",
+        status: "active",
+      },
+    ],
   },
   {
     name: "SW",
-    traceables: [
-      { id: "SW-016", lens: "SW", filename: "SW-016-promote.md" },
-      { id: "SW-017", lens: "SW", filename: "SW-017-finalize.md" },
+    specs: [
+      {
+        id: "SW-016",
+        lens: "SW",
+        filename: "SW-016-promote.md",
+        status: "active",
+      },
+      {
+        id: "SW-017",
+        lens: "SW",
+        filename: "SW-017-finalize.md",
+        status: "active",
+      },
     ],
   },
 ];
@@ -69,6 +86,71 @@ describe("typescript generator output", () => {
         expect(sw?.contents).toContain("export enum SwTraceables {");
         expect(sw?.contents).toContain('SW_016_PROMOTE = "SW-016",');
         expect(sw?.contents).toContain('SW_017_FINALIZE = "SW-017",');
+      });
+
+      test("marks a deprecated spec's member with an @deprecated JSDoc; others have none", async () => {
+        const files = await generate([
+          {
+            name: "SW",
+            specs: [
+              {
+                id: "SW-016",
+                lens: "SW",
+                filename: "SW-016-promote.md",
+                status: "active",
+              },
+              {
+                id: "SW-018",
+                lens: "SW",
+                filename: "SW-018-output.md",
+                status: "deprecated",
+              },
+            ],
+          },
+        ]);
+
+        const sw = fileAt(files, "SwTraceables.ts");
+        expect(sw?.contents).toContain(
+          '  /** @deprecated */\n  SW_018_OUTPUT = "SW-018",',
+        );
+        // The active member carries no deprecation; only the deprecated one does.
+        expect(sw?.contents).toContain('  SW_016_PROMOTE = "SW-016",');
+        expect((sw?.contents.match(/@deprecated/g) ?? []).length).toBe(1);
+      });
+
+      test("reads its emitted traceables back, round-tripping ids and deprecation (ARCH-004)", async () => {
+        const generator = createTypeScriptGenerator();
+        const sets: SpecSet[] = [
+          {
+            name: "SW",
+            specs: [
+              {
+                id: "SW-016",
+                lens: "SW",
+                filename: "SW-016-promote.md",
+                status: "active",
+              },
+              {
+                id: "SW-018",
+                lens: "SW",
+                filename: "SW-018-output.md",
+                status: "deprecated",
+              },
+            ],
+          },
+        ];
+        const files = await generator.generate(sets, {
+          outputDir: "src/ariadne/traceables",
+        });
+
+        // Read every emitted file back; only the enum members are traceables, so
+        // the helper module and README contribute none.
+        const universe = generator.readTraceables(files);
+
+        expect(universe).toEqual([
+          { id: "SW-016", deprecated: false },
+          { id: "SW-018", deprecated: true },
+        ]);
       });
 
       test("emits a helper module re-exporting the enums with the anchoring utility", async () => {

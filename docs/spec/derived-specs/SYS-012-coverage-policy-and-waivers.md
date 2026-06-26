@@ -3,6 +3,8 @@ The system enforces traceability coverage by default, computed by policy and adm
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall define and enforce **traceability coverage** over the specs the `spec` command produces: only eligible relations count (`realizes`, `verifies`; not `concerns`), an uncovered spec fails by default, and an uncovered spec is admitted only through a committed waiver carrying a reason.
 
@@ -27,3 +29,5 @@ The coverage universe is now the directly-anchorable lenses only; `STK` and `SYS
 - **2026-06-23** — Dropped "directly-anchorable specs": `STK` and `SYS` are anchored in code at file/module altitude (ADR-0006) and covered like any other spec, so the universe is every spec the `spec` command produces. The no-transitive-coverage decision from the previous entry is unchanged.
 - **2026-06-23** — Narrowed what a waiver may accept: a gap is admitted only as a missing *test* — a waiver waives the `verify` requirement, matched by id or pattern, and a spec missing its realizing code is never waivable (STR-019; SW-030, CON-021).
 The "committed waiver carrying a reason" is unchanged; this bounds what that reason can excuse.
+- **2026-06-26** — The coverage universe is now the **generated traceables** (CON-020): a spec's `**Status**` filters generation, so only `active` and `deprecated` specs are in the universe and a `planned` spec is simply not generated.
+This replaced the `coverage.scope` config (dropped) — scoping to active specs is structural, not a gate option. The default-covered-unless-waived policy is unchanged.

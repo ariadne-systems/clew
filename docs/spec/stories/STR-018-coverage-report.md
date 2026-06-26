@@ -37,7 +37,7 @@ Turning the report into a pass/fail — the **gate** — is a separate concern a
 - **Eligible relations** — `realizes` and `verifies`; not `concerns`.
 
 **Out of scope**
-- The **gate** — turning the report into a pass/fail (non-zero exit), with its scope policy (`all` / `implemented`) and the spec status field; later stories.
+- The **gate** — turning the report into a pass/fail (non-zero exit); a later story. (Scoping coverage to built specs became structural — the spec status field filters generation, STR-020 — rather than a gate scope option.)
 - **Transitive coverage** and any spec→spec relation graph (ADR-0005, as narrowed).
 - **Resolution / traceback** queries (B1).
 - **Content-hash drift** (deferred; ADR-0001 D1).
@@ -59,9 +59,14 @@ Turning the report into a pass/fail — the **gate** — is a separate concern a
 - Its specs realize [SYS-012 — Coverage policy and waivers](../derived-specs/SYS-012-coverage-policy-and-waivers.md) and, for `coverage.json`, [SYS-013 — Shared schemas](../derived-specs/SYS-013-shared-schemas.md); both were unrealized roadmap specs until this story.
 - The `coverage` command is the sibling of [SW-023 — the `scan` command](../derived-specs/SW-023-scan-command.md): scan emits the locations index, coverage reads it back.
 - Picks up the coverage half deferred by [STR-016 — the anchor scan](STR-016-anchor-scan.md).
-- The **gate** (the pass/fail check) and its optional `implemented` scope (the spec status field) are later stories that read this report.
+- The **gate** (the pass/fail check) is a later story that reads this report; the spec status field that scopes the universe to built specs filters generation (STR-020), not the gate.
 
 **Artifacts** (not specs)
 
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration) gains a `waivers` attribute (`{ id, reason }`), applied on promotion as `exclude` / `unexclude` were (STR-017).
 - A changeset covering the coverage feature.
+
+## Changes
+
+- **2026-06-26** — Updated the forward-looking gate notes: the planned `coverage.scope` (`all` / `implemented`) option was dropped.
+Scoping coverage to built specs is now structural — a spec's status filters generation, so only `active` (and `deprecated`) specs become traceables (STR-020; CON-020, SW-014). The coverage report this story built is unchanged.
