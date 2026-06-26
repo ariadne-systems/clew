@@ -3,6 +3,8 @@ The tool's state is a single version-controlled file
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 The tool keeps its persistent state in one JSON file inside the repository, committed to version control.
 That file is the single source of truth for the state and is shared with the team through git.

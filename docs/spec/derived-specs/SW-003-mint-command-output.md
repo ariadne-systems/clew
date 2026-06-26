@@ -3,6 +3,8 @@ The mint command emits ids to stdout, one per line
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 When minting succeeds, the `ariadne mint` command writes each minted id on its own line to standard output, in allocation order, and writes nothing else to stdout.
 On failure it writes no id to stdout; the error goes to standard error.

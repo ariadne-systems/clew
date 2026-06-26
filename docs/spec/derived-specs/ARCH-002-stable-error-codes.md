@@ -3,6 +3,8 @@ Errors are identified by a stable, typed code
 
 **Lens**: ARCH
 
+**Status**: active
+
 **Description**
 A failure is represented by a typed error that carries a machine-readable code in addition to its human-readable message.
 Domain errors originate in the core and carry their code; how a code is surfaced to a consumer is a presentation concern (SW-004).

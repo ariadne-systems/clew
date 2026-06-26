@@ -3,6 +3,8 @@ The tool exposes a `mint` command that delegates to core
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The tool exposes a `mint` command, invoked as `ariadne mint <type> [count]`, where `count` is optional and defaults to 1.
 It accepts a `-t`/`--tmp` option that selects temporary, unbound minting (SW-005) in place of the default bound minting.

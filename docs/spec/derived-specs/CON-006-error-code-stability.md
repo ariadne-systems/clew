@@ -3,6 +3,8 @@ An error code is stable: never reused or renamed once released
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 Once an error code has been released it is never reused for a different condition and never renamed.
 The set of codes grows additively; a code that is retired is deprecated, not repurposed or removed.

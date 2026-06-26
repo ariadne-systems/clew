@@ -3,6 +3,8 @@ The numeric padding is configured in `.ariadnerc.json`
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 The width to which sequential numbers are zero-padded is read from `.ariadnerc.json`.
 It is not hard-coded.

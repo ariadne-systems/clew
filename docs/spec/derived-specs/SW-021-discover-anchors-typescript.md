@@ -3,6 +3,8 @@ Discover anchors in TypeScript via a lightweight lexical scan
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The TypeScript generator implements discovery for its own markers: it reads the source and returns every anchor as a spec id, its relation, and its location — the file path and line number where it occurs.
 It recognizes the marker in each of the forms the generator emits (SW-018): the function-wrapper `realizes(ids, value)` / `concerns(ids, value)`, the decorator `@realizes(ids)` / `@concerns(ids)`, the test wrapper `verifies(ids, run)`, and the type markers `Realizes<ids, T>` / `Concerns<ids, T>`.

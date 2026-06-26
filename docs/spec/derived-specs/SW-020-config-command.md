@@ -3,6 +3,8 @@ The tool exposes a `config` command that prints the resolved configuration
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The tool exposes a `config` command, invoked as `ariadne config`, taking no positional arguments and accepting a `--json` flag.
 The command carries no resolution logic of its own: it requires a configuration (CON-011), builds the generator registry, and delegates to core to resolve the configuration into a single view, then writes that view to standard output — human-readable by default, and as machine-readable JSON with `--json`.

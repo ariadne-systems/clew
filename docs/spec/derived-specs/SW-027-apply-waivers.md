@@ -3,6 +3,8 @@ Reconcile uncovered specs against the committed waiver list
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 Reconciles the computed coverage against the committed **waiver list**: a spec that some waiver waives (SW-030) is reported as **waived** rather than as an open gap, so the open-gap list converges as gaps are covered or accepted.
 A waiver that waives nothing — it matches no spec it can waive (SW-030) — is reported as a **stale waiver**.

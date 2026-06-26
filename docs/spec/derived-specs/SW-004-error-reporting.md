@@ -3,6 +3,8 @@ Errors are reported with their code
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 When a command fails, it writes the failure to standard error as `error[<CODE>]: <message>` and exits with a non-zero status.
 It writes nothing to standard output on failure.

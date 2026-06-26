@@ -3,6 +3,8 @@ A stakeholder needs the traceability vocabulary to match its own method and doma
 
 **Lens**: STK
 
+**Status**: active
+
 **Description**
 A team needs the traceability vocabulary — the kinds of spec it tracks — to match its own method and domain, rather than being locked to a taxonomy hard-coded into the tool.
 

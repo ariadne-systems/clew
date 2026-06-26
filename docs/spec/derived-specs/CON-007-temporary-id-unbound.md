@@ -3,6 +3,8 @@ A temporary id is unbound and consumes no sequence number
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 Producing a temporary id touches no persistent state: it opens no StateStore session, takes no lock, and does not advance any prefix's high-water mark.
 It may read configuration to validate the requested prefix, but configuration is not state.

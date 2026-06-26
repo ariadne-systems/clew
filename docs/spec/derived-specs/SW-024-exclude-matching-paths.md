@@ -3,6 +3,8 @@ The scan excludes a path matching the configured patterns
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 A candidate path the scan would otherwise read is excluded when the exclusion precedence resolves to excluded for it.
 An excluded path is invisible to the scan: it is not read, it is never handed to a generator's discover, and it produces no anchor location.

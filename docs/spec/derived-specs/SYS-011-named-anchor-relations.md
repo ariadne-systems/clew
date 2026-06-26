@@ -3,6 +3,8 @@ The system anchors code to specs with a closed set of named relations, computed 
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall represent code-to-spec anchors with a closed set of named relations — `realizes`, `verifies`, and `concerns` — and compute the trace graph only from those markers, never from prose comments.
 The `concerns` relation is existence-checked and does not count as verification or toward coverage.

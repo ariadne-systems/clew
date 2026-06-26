@@ -3,6 +3,8 @@ The system publishes stable, machine-readable schemas for its configuration and 
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall publish and consume stable, machine-readable schemas for its configuration, its locations record, and its coverage result, so they form a documented contract any tool can read over the same repository without translation.
 

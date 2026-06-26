@@ -3,6 +3,8 @@ A stakeholder needs traceability data version-controlled and reviewed alongside 
 
 **Lens**: STK
 
+**Status**: active
+
 **Description**
 A team needs the traceability data — ids, specs, configuration, and allocation state — to be version-controlled and reviewed alongside the code it describes, not held in a separate tool or database that drifts out of sync and out of review.
 

@@ -3,6 +3,8 @@
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 Only `realizes` and `verifies` establish that a spec is realized or verified; a `concerns` anchor establishes neither.
 A spec named only by `concerns` is None.

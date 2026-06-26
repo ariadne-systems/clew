@@ -3,6 +3,8 @@ The system reports failures with stable, machine-readable codes
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall report failures with stable, machine-readable codes, so automation and users can branch on a failure's identity rather than its message text.
 

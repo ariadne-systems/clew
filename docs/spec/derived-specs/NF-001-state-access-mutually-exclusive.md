@@ -3,6 +3,8 @@ State access is mutually exclusive across processes
 
 **Lens**: NF
 
+**Status**: active
+
 **Description**
 Only one process may hold an open state session at a time.
 A session takes a cross-process lock when it opens and releases it when it closes, so that read, mutate, and save never interleave with another session.

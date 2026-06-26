@@ -3,6 +3,8 @@ The system allocates unique, stable, persistent spec ids
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall allocate unique, stable, persistent ids for specs, and never reuse an id for a different spec.
 

@@ -3,6 +3,8 @@ Exclusion patterns are repository-root-relative globs
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 Every exclusion pattern — a built-in default, a user `exclude`, or an `unexclude` — is a glob matched against a path **relative to the project root**, normalized to forward slashes.
 A pattern without a leading `**/` matches only at the root: `out` matches `<root>/out` but not `<root>/foo/out`.

@@ -3,6 +3,8 @@ A waiver matches specs by id or glob pattern and waives a missing test
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 A waiver entry targets a spec **id** or a **pattern** — a glob over spec ids.
 A waiver waives the **verify** requirement only: it marks a not-Covered spec **waived** when the spec is missing exactly its test — implemented but unverified (`Realized`).

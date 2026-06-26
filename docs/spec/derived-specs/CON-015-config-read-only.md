@@ -3,6 +3,8 @@ The `config` command is read-only
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 The `config` command only reads and reports: it writes no file, advances no id state, and regenerates nothing.
 Resolving and printing the configuration has no side effect, so the command is safe to run at any time and as often as a caller needs — in particular, an authoring skill may call it to discover the resolved view without changing the project.

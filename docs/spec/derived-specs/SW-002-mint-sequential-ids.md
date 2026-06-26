@@ -3,6 +3,8 @@ Mint ids in sequential mode
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 In sequential mode, minting for a prefix produces ids of the form `<PREFIX>-<number>`.
 The numbers are obtained from the sequence allocator and rendered with the configured padding.

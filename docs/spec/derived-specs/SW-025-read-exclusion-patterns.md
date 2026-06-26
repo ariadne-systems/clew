@@ -3,6 +3,8 @@ Read the scan's `exclude` and `unexclude` patterns from configuration
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The scan reads two arrays from `.ariadnerc.json` (ENT-002): `exclude` and `unexclude`, each a list of glob patterns.
 An omitted array — a configuration that leaves out `exclude` or `unexclude` — yields an empty list for it, no configured exclusions, so a project that sets neither behaves exactly as before (SW-022); the scan already requires a configuration to run (CON-011), so this is an omitted section, not a missing file.

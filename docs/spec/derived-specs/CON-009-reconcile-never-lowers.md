@@ -3,6 +3,8 @@ Reconciliation never lowers a high-water mark
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 Initialization only raises a prefix's high-water mark to cover a discovered id; it never lowers an existing mark.
 If the recorded mark is already at or above every discovered id for a prefix, it is left unchanged.

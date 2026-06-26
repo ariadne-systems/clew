@@ -3,6 +3,8 @@ Id generation is a config-selected, pluggable strategy
 
 **Lens**: ARCH
 
+**Status**: active
+
 **Description**
 The scheme that generates an id's variable part is chosen by configuration and implemented behind a strategy interface.
 Sequential and opaque are two such strategies.

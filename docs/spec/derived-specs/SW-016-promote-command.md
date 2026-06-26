@@ -3,6 +3,8 @@ The tool exposes a `promote` command that delegates to core
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The tool exposes a `promote` command, invoked as `ariadne promote [draft…]`, where each optional argument names a draft to finalize; with no argument it finalizes all pending drafts in the configured drafts location.
 The command's action carries no binding, substitution, or move logic of its own: it delegates to core's finalize (SW-017), which binds each draft's id, substitutes its temporary id project-wide, and moves it into the layout, and it reports each temporary-id → bound-id mapping.

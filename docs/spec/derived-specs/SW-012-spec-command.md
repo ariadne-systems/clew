@@ -3,6 +3,8 @@ The tool exposes a `spec` command that delegates to core
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The tool exposes a `spec` command, invoked as `ariadne spec`, taking no positional arguments.
 The command's action carries no scanning or generation logic of its own: it delegates to core, which scans the configured artifacts and drives the configured generators (SW-013, SW-014), and reports what it produced.

@@ -3,6 +3,8 @@ A stakeholder needs assurance that every spec is implemented and tested, with dr
 
 **Lens**: STK
 
+**Status**: active
+
 **Description**
 A developer needs confidence that every spec the project commits to is actually implemented and tested — and that this stays true as the code changes.
 A spec that is dropped, half-built, or quietly diverges from its implementation should be surfaced automatically, not discovered in an audit or an incident.

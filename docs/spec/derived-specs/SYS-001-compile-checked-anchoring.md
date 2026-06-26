@@ -3,6 +3,8 @@ The system anchors code to specs with compile-time-checked references
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall represent each spec as a symbol that code references and the target language's compiler verifies, so that a reference to a renamed or removed spec fails to build rather than rotting silently.
 

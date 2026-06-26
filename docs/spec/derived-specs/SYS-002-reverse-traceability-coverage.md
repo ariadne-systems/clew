@@ -3,6 +3,8 @@ The system scans the code for its anchors and produces a located record of all t
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall scan the code for its anchors — all three relations, `realizes`, `verifies`, and `concerns` — and produce, from them, the machine-readable record of each anchor's spec id, relation, and location.
 The scan is delegated to the per-language generators, the dual of generation, never the core (ADR-0005 D2; ADR-0001 D9).
