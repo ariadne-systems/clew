@@ -27,3 +27,7 @@ A missing `type`, an extra argument, or an unknown option is rejected with a non
 **Realizes**
 
 - [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)
+
+## Changes
+
+- **2026-06-26** — STR-021 will extend the command with an `--as <author>` option (resolved by SW-032), added when that story is implemented; the current surface is otherwise unchanged.

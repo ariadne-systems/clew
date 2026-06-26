@@ -25,3 +25,8 @@ Cross-call uniqueness follows by construction from the crypto-random token; it i
 **Realizes**
 
 - [SYS-003 — Stable spec identity](SYS-003-stable-spec-identity.md)
+
+## Changes
+
+- **2026-06-26** — STR-021 (SW-032) replaces the opaque temporary-id form with a readable per-author sequence (`<PREFIX>-TMP-[<AUTHOR>-]<NNN>`).
+This spec describes the current opaque form and is superseded by SW-032 when STR-021 is implemented.

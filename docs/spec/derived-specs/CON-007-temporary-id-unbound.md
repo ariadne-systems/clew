@@ -24,3 +24,8 @@ Temporary generation acquires no lock and writes no state file.
 **Concerns**
 
 - [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
+
+## Changes
+
+- **2026-06-26** — STR-021 honours this invariant: the per-author next-number scan it introduces (SW-032) is a *read* of the drafts location, not a state write, and the draft counter is not the bound high-water mark.
+The statelessness here is unchanged.
