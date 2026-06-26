@@ -3,6 +3,8 @@ The tool reads project configuration from `.ariadnerc.json`
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The tool reads its per-project configuration from a single file, `.ariadnerc.json`, at the project root.
 Every configurable value has a documented default; a missing file, a missing section, or a missing attribute resolves to that default.

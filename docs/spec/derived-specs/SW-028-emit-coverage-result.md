@@ -3,6 +3,8 @@ Emit the coverage result as `coverage.json` and a human-readable report
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The result is emitted as **`coverage.json`** in the shared shape (ADR-0005 D6) — each spec's id, lens, and coverage status, with the reason for waived ones — and as a human-readable report.
 `coverage.json` is written atomically and replaces any existing file wholesale.

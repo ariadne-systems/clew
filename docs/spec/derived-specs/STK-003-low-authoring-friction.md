@@ -3,6 +3,8 @@ A stakeholder needs specs and their code links to be cheap to author and keep cu
 
 **Lens**: STK
 
+**Status**: active
+
 **Description**
 A developer needs to create specs and bind code to them cheaply, so traceability is sustained through the life of the project rather than abandoned the first time it becomes a chore.
 

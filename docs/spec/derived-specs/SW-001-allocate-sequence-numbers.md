@@ -3,6 +3,8 @@ Allocate consecutive sequence numbers for a prefix
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 Given a prefix and a count, the allocator returns that many consecutive numbers that have not been allocated before for that prefix.
 A prefix used for the first time begins at 1.

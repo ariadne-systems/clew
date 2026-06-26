@@ -3,6 +3,8 @@ Scan the code into the set of anchor locations
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 Scanning the code drives each configured generator's discover operation over the project's source and aggregates the results into the project's **anchor locations** — a collection, not a set: the same spec id may be anchored at many locations, and every one is recorded.
 An anchor location is a spec id, the relation it was anchored with (`realizes` / `verifies` / `concerns`), and where it was found — the file path (relative to the project root) and the line number; the location is file-and-line, with no column, matching the shared locations shape (ADR-0005 D6) — a deliberate limit: two markers on one line share a location, and column precision is a future option the traced-context use may want, not part of this story.

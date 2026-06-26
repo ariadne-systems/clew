@@ -3,6 +3,8 @@ Setup never overwrites an existing configuration
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 If `.ariadnerc.json` already exists, `setup` makes no change to it and reports that a configuration is present.
 Only an absent configuration is written; an existing one — default or customized — is left exactly as it is.

@@ -3,6 +3,8 @@ The system keeps version-controlled per-project configuration and allocation sta
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall keep version-controlled, per-project configuration and id-allocation state as plain files in the repository.
 

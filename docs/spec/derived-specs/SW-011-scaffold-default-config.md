@@ -3,6 +3,8 @@ Scaffold the default configuration and layout
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 Scaffolding writes `.ariadnerc.json` populated with the default lenses and the default layout (ENT-002), and creates the configured layout directories.
 It returns what it created — the configuration path and the directories — so the command can report it.

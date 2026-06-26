@@ -3,6 +3,8 @@ A state write is atomic
 
 **Lens**: NF
 
+**Status**: active
+
 **Description**
 Saving the state either fully succeeds or leaves the previous file intact.
 A process that crashes during a save never leaves a partially written or corrupt file.

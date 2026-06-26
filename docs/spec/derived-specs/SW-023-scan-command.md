@@ -3,6 +3,8 @@ The tool exposes a `scan` command that reports the code's anchor locations
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 `clew scan` runs the code scan and reports the anchor locations it finds — each a spec id, its relation, and its file-and-line.
 It is the *check* side of the tool, distinct from `spec`, which is the *declare* side (specs → traceables; SW-012): `spec` writes the markers' definitions, `scan` reads the markers' uses back out.

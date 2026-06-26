@@ -3,6 +3,8 @@ A waiver never hides a spec that is missing its implementation
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 A waiver waives the verify requirement only.
 A spec missing its realizing code — `None` (no realize, no verify) or verify-only (no realize) — is therefore never marked waived and remains an open gap, whether a waiver names it by id or matches it by pattern.

@@ -3,6 +3,8 @@ An automation or support stakeholder needs failures to carry stable identities t
 
 **Lens**: STK
 
+**Status**: active
+
 **Description**
 A CI user, integrator, or support engineer needs failures to carry stable identities, so automation and documentation can rely on them without parsing message prose.
 

@@ -3,6 +3,8 @@ The tool exposes a `setup` command that delegates to core
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The tool exposes a `setup` command, invoked as `ariadne setup`, taking no positional arguments.
 The command's action carries no scaffolding logic of its own: it delegates to core's configuration scaffolding (SW-011) and reports what it wrote.

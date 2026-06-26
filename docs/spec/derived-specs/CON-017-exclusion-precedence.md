@@ -3,6 +3,8 @@ Scan exclusion precedence — a user `exclude` is absolute, `unexclude` override
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 For each candidate path the scan visits, the exclusion decision is evaluated in this fixed order:
 

@@ -3,6 +3,8 @@ A sequence number is never reused
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 Once a number has been allocated for a prefix it is never allocated again — across separate invocations, after a restart, and over the lifetime of the repository.
 The high-water mark is persisted so allocation always continues from where it stopped.

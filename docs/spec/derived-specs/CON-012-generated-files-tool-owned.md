@@ -3,6 +3,8 @@ Generated traceables and utilities are tool-owned and never hand-edited
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 The traceables and the anchoring utility are generated from the specs; they are owned by the tool and are never hand-edited.
 Generation is deterministic: re-running on unchanged specs produces identical output.

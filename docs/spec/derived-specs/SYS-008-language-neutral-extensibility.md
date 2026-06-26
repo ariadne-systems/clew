@@ -3,6 +3,8 @@ The system supports arbitrary target languages through pluggable generators
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall support arbitrary target languages through pluggable generators, with no language assumption in the core — adding a language is a new generator, not a core change.
 

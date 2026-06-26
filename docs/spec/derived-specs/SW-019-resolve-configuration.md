@@ -3,6 +3,8 @@ The tool resolves the project configuration into a single view
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The tool resolves the project's configuration into one view that callers can read without re-applying defaults or derivations themselves.
 The view combines the independently-defaulted sections (SW-009) — the lenses and the layout — with the values the configuration does not state directly: the valid id prefixes, derived as the lens ids plus the story and entity prefixes (ADR-0003), and, for each configured generator, its resolved output directory — the configured `outputDir` or, when absent, that generator's own default.

@@ -3,6 +3,8 @@ Finalize reviewed drafts into the spec tree
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 Finalizing takes the drafts to promote — the pending drafts in the configured drafts location, or the ones named — and, for each:
 - binds its id by minting the draft's lens, which is the prefix of the draft's temporary id, in bound (non-temporary) mode, advancing the state (SW-002, CON-002);

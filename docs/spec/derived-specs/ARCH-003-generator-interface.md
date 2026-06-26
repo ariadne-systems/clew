@@ -3,6 +3,8 @@ Generation is delegated to language-specific generators behind a narrow interfac
 
 **Lens**: ARCH
 
+**Status**: active
+
 **Description**
 Emitting the traceables and the anchoring utility for a target language is the job of a language-specific generator, chosen by configuration and implemented behind a narrow interface.
 Given the traceables, grouped into the configured spec sets (by lens by default), a generator produces the verifiable symbols — one set per spec set — and the utility that anchors code to a spec, and defines how code references a symbol.

@@ -3,6 +3,8 @@ The scan excludes tool-owned and non-source locations by default
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 The code scan never reports anchors from tool-owned or non-source locations.
 By default it skips dependency and build directories (for example `node_modules` and build output) and the generated traceables directory — the `outputDir` of each configured generator (ENT-002), which holds the markers' definitions, not their uses (CON-012).

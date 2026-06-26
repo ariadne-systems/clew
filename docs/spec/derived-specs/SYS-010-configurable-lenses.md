@@ -3,6 +3,8 @@ The system uses the project's configured lenses as its traceability taxonomy and
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall use the project's configured lens set as its traceability taxonomy and as the source of truth for valid id prefixes; the lenses are project configuration, not a hard-coded tool taxonomy.
 

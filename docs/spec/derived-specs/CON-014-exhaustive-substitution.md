@@ -3,6 +3,8 @@ Promotion substitutes a draft's temporary id exhaustively
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 When a draft is promoted, every occurrence of its temporary id is replaced by the bound id, everywhere the id can appear: the promoted draft's body and filename, already-promoted specs and the domain model, and any other draft that referenced it.
 After a successful promote, no occurrence of that temporary id remains anywhere in the spec locations or the drafts location.

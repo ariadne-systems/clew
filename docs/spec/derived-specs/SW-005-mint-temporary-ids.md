@@ -3,6 +3,8 @@ Mint temporary, unbound ids
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 In temporary mode, minting for a prefix produces ids of the form `<PREFIX>-TMP-<opaque>`, where the opaque part is a crypto-random token.
 Minting a count of N yields N temporary ids.

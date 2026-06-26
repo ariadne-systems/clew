@@ -3,6 +3,8 @@ A command requires a project configuration and directs the user to setup
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 A command that allocates or reconciles ids, generates from the specs, or finalizes drafts — for example `mint`, `init`, `spec`, and `promote` — requires a project configuration to be present; `setup`, which creates the configuration, is the exception.
 When no `.ariadnerc.json` exists, the command makes no change and fails with an explicit error that directs the user to run `ariadne setup`, with a non-zero exit.

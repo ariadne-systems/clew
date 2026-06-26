@@ -3,6 +3,8 @@ The tool exposes an `init` command that delegates to core
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The tool exposes an `init` command, invoked as `ariadne init`, taking no positional arguments.
 The command's action carries no reconciliation logic of its own: it delegates to core's high-water-mark derivation (SW-006) and reports the outcome.

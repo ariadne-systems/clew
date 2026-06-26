@@ -3,6 +3,8 @@ Derive per-prefix high-water marks from existing artifacts
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 Initialization discovers the bound ids in the project's configured artifact directories (the layout, ENT-002) and, for each configured prefix, takes the highest number found as that prefix's high-water mark.
 Only configured prefixes are counted, so a non-lens file such as an ADR is ignored, and a prefix with no artifacts gets no mark.

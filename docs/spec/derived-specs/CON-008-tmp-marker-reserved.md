@@ -3,6 +3,8 @@ The `-TMP-` marker is reserved and a prefix may not use it
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 `TMP` is a reserved marker: it is the infix that separates a temporary id's prefix from its opaque suffix (`<PREFIX>-TMP-<opaque>`).
 A requested prefix may not equal the reserved marker, nor contain it as a hyphen-delimited segment.

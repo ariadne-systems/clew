@@ -3,6 +3,8 @@ Ids are returned only after the allocation is persisted
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 A mint returns ids only after the advanced high-water mark has been durably saved.
 If the state cannot be saved, the mint fails with an error, returns no ids, and leaves the persisted high-water mark unchanged.

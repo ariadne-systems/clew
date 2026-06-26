@@ -3,6 +3,8 @@ A stakeholder needs a trustworthy, exportable record that specs trace to their i
 
 **Lens**: STK
 
+**Status**: active
+
 **Description**
 An assessor or auditor needs a trustworthy record that each spec traces to the code that implements it and the tests that verify it, in a form an external process can read.
 

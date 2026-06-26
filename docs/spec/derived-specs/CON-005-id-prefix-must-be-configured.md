@@ -3,6 +3,8 @@ A minted id's prefix must be a configured prefix
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 Minting validates the requested prefix against the configured prefixes — the lens ids, plus the story and entity prefixes (ADR-0003).
 A prefix that is not configured is rejected before any number is allocated: the mint fails with an explicit error and allocates nothing.
