@@ -7,6 +7,7 @@ import type {
 import {
   GENERATED_MARKER,
   generatedHeader,
+  parseGeneratedTraceables,
   toIdentifier,
   toMemberName,
   toPascalCase,
@@ -66,16 +67,29 @@ export const createTypeScriptGenerator: () => Generator = realizes(
         return Promise.resolve(files);
       },
       discover: discoverAnchors,
+      readTraceables: (files) =>
+        parseGeneratedTraceables(files, MEMBER_PATTERN),
     };
   },
 );
 
+/**
+ * A generated enum member, optionally preceded by a `@deprecated` JSDoc:
+ * `NAME = "ID"`. `parseGeneratedTraceables` reads it back as the dual of generate —
+ * capture group 1 is the deprecation marker (SW-018), group 2 the spec id.
+ */
+const MEMBER_PATTERN = /(\/\*\* @deprecated \*\/\s+)?[A-Za-z_]\w* = "([^"]+)"/g;
+
 /** Emits one spec set as a string enum: member name from the spec's filename, value the id. */
 function renderSetFile(specSet: SpecSet): GeneratedFile {
-  const members = specSet.traceables.map(
-    (traceable) =>
-      `  ${toMemberName(traceable.filename)} = ${JSON.stringify(traceable.id)},`,
-  );
+  const members = specSet.specs.flatMap((traceable) => {
+    const member = `  ${toMemberName(traceable.filename)} = ${JSON.stringify(traceable.id)},`;
+    // A deprecated spec's member stays (so its anchors keep compiling) but carries
+    // a JSDoc `@deprecated`, which tsc and editors surface on every use (SW-018).
+    return traceable.status === "deprecated"
+      ? ["  /** @deprecated */", member]
+      : [member];
+  });
   const lines = [
     ...generatedHeader(GENERATOR_TYPE, specSet.name),
     "",
@@ -274,7 +288,7 @@ function setSymbolName(setName: string): string {
 /** An example anchor reference (`<Enum>.<MEMBER>`) drawn from the first traceable, for the JSDoc examples. */
 function exampleMember(specSets: readonly SpecSet[]): string | undefined {
   for (const specSet of specSets) {
-    const first = specSet.traceables[0];
+    const first = specSet.specs[0];
     if (first !== undefined) {
       return `${setSymbolName(specSet.name)}.${toMemberName(first.filename)}`;
     }

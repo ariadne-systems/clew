@@ -21,6 +21,7 @@ function contentGenerator(outputDir: string): Generator {
     name: "fake",
     defaultOutputDir: outputDir,
     sourceExtensions: [".ts"],
+    readTraceables: () => [],
     generate: async () => [],
     discover: (sources) =>
       sources.map((source) => ({

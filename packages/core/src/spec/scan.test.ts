@@ -1,9 +1,9 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { SwTraceables, verifies } from "@ariadne-thread/trace";
+import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { scan } from "../index.js";
+import { ErrorCode, scan } from "../index.js";
 
 type Fixture = {
   storiesDir: string;
@@ -39,6 +39,11 @@ async function fixture(idFilenames: string[]): Promise<Fixture> {
   return { storiesDir, derivedDir, configFile };
 }
 
+/** A scanned spec with the default planned status, for assertions. */
+function n(id: string, lens: string, filename: string) {
+  return { id, lens, filename, status: "planned" };
+}
+
 describe("scanning artifacts into traceables", () => {
   verifies(SwTraceables.SW_013_SCAN_TRACEABLES, () => {
     test("yields each lens-bearing id with its lens and filename, sorted by id", async () => {
@@ -53,9 +58,9 @@ describe("scanning artifacts into traceables", () => {
 
       // STR-011 is a story, not a lens-bearing spec, so it is not a traceable.
       expect(traceables).toEqual([
-        { id: "CON-012", lens: "CON", filename: "CON-012-owned.md" },
-        { id: "SW-012", lens: "SW", filename: "SW-012-command.md" },
-        { id: "SW-013", lens: "SW", filename: "SW-013-scan.md" },
+        n("CON-012", "CON", "CON-012-owned.md"),
+        n("SW-012", "SW", "SW-012-command.md"),
+        n("SW-013", "SW", "SW-013-scan.md"),
       ]);
     });
 
@@ -64,9 +69,7 @@ describe("scanning artifacts into traceables", () => {
 
       const traceables = await scan({ configFile });
 
-      expect(traceables).toEqual([
-        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-      ]);
+      expect(traceables).toEqual([n("SW-012", "SW", "SW-012-a.md")]);
     });
 
     test("a non-markdown file with a lens prefix is not a traceable", async () => {
@@ -75,9 +78,7 @@ describe("scanning artifacts into traceables", () => {
 
       const traceables = await scan({ configFile });
 
-      expect(traceables).toEqual([
-        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-      ]);
+      expect(traceables).toEqual([n("SW-012", "SW", "SW-012-a.md")]);
     });
 
     test("a file whose prefix is not configured contributes no traceable", async () => {
@@ -86,9 +87,7 @@ describe("scanning artifacts into traceables", () => {
 
       const traceables = await scan({ configFile });
 
-      expect(traceables).toEqual([
-        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-      ]);
+      expect(traceables).toEqual([n("SW-012", "SW", "SW-012-a.md")]);
     });
 
     test("a temporary id is not a traceable", async () => {
@@ -96,31 +95,25 @@ describe("scanning artifacts into traceables", () => {
 
       const traceables = await scan({ configFile });
 
-      expect(traceables).toEqual([
-        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-      ]);
+      expect(traceables).toEqual([n("SW-012", "SW", "SW-012-a.md")]);
     });
 
     test("removing a spec removes its traceable; adding one adds it", async () => {
       const { derivedDir, configFile } = await fixture(["SW-012-a.md"]);
 
       const before = await scan({ configFile });
-      expect(before).toEqual([
-        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-      ]);
+      expect(before).toEqual([n("SW-012", "SW", "SW-012-a.md")]);
 
       await writeFile(join(derivedDir, "SW-013-b.md"), "x", "utf8");
       const added = await scan({ configFile });
       expect(added).toEqual([
-        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-        { id: "SW-013", lens: "SW", filename: "SW-013-b.md" },
+        n("SW-012", "SW", "SW-012-a.md"),
+        n("SW-013", "SW", "SW-013-b.md"),
       ]);
 
       await rm(join(derivedDir, "SW-012-a.md"));
       const removed = await scan({ configFile });
-      expect(removed).toEqual([
-        { id: "SW-013", lens: "SW", filename: "SW-013-b.md" },
-      ]);
+      expect(removed).toEqual([n("SW-013", "SW", "SW-013-b.md")]);
     });
 
     test("a missing configured location is skipped, not an error", async () => {
@@ -129,9 +122,67 @@ describe("scanning artifacts into traceables", () => {
 
       const traceables = await scan({ configFile });
 
-      expect(traceables).toEqual([
-        { id: "SW-012", lens: "SW", filename: "SW-012-a.md" },
-      ]);
+      expect(traceables).toEqual([n("SW-012", "SW", "SW-012-a.md")]);
     });
   });
+
+  verifies(
+    [SwTraceables.SW_031_SCAN_SPEC_STATUS, ConTraceables.CON_022_VALID_STATUS],
+    () => {
+      test("reads each declared status; an absent Status field is planned", async () => {
+        const { derivedDir, configFile } = await fixture([]);
+        await writeFile(
+          join(derivedDir, "SW-001-a.md"),
+          "**Status**: active\n",
+          "utf8",
+        );
+        await writeFile(
+          join(derivedDir, "SW-002-b.md"),
+          "**Status**: deprecated\n",
+          "utf8",
+        );
+        await writeFile(
+          join(derivedDir, "SW-003-c.md"),
+          "No status field here.\n",
+          "utf8",
+        );
+
+        const traceables = await scan({ configFile });
+
+        expect(
+          traceables.map((traceable) => [traceable.id, traceable.status]),
+        ).toEqual([
+          ["SW-001", "active"],
+          ["SW-002", "deprecated"],
+          ["SW-003", "planned"],
+        ]);
+      });
+
+      test("an unrecognized status value is rejected", async () => {
+        const { derivedDir, configFile } = await fixture([]);
+        await writeFile(
+          join(derivedDir, "SW-001-a.md"),
+          "**Status**: in-progress\n",
+          "utf8",
+        );
+
+        await expect(scan({ configFile })).rejects.toMatchObject({
+          code: ErrorCode.INVALID_SPEC_STATUS,
+        });
+      });
+
+      test("a status line with trailing text is rejected, not silently treated as absent", async () => {
+        const { derivedDir, configFile } = await fixture([]);
+        await writeFile(
+          join(derivedDir, "SW-001-a.md"),
+          "**Status**: active (was planned)\n",
+          "utf8",
+        );
+
+        await expect(scan({ configFile })).rejects.toMatchObject({
+          code: ErrorCode.INVALID_SPEC_STATUS,
+        });
+      });
+    },
+  );
 });

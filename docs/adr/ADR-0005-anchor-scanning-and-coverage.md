@@ -169,3 +169,8 @@ clew's automation stays at the code↔spec level it is built for.
 - **2026-06-23** — Reversed the STK/SYS exclusion from the previous entry.
 STK and SYS are not documentation-only: they are anchored in code at file/module altitude (ADR-0006) and covered like any other spec, so the universe is every traceable the `spec` command produces, with no directly-anchorable-lens restriction (Scope, the D5 note).
 The flat code↔spec check and the no-transitive-coverage decision stand; only the earlier claim that nothing anchors STK/SYS was wrong.
+- **2026-06-26** — Settled how the coverage universe is *obtained* and *scoped*.
+The universe is the **generated traceables** (the enum members), read back through the generator — a read-back operation dual to generation alongside discover (D2 extended; ARCH-004) — rather than a fresh scan of the spec files, so an ALM-sourced status is resolved once at generation, not re-queried per coverage run.
+A spec's implementation status **filters generation**: only `active` and `deprecated` specs become traceables; a `planned` spec is not generated and is outside the universe; a `deprecated` spec's traceable is emitted but marked deprecated (kept resolvable so anchors still build) and is listed in the report without counting toward coverage.
+This supersedes the `coverage.scope` config option (dropped): scoping to active specs is structural.
+The flat code↔spec check, the eligible relations (D4), and default-plus-waivers (D5) are unchanged.

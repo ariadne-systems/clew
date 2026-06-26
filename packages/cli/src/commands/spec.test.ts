@@ -31,7 +31,8 @@ async function setupProjectDir(idFilenames: string[]): Promise<string> {
   const specDir = join(dir, "docs", "spec", "derived-specs");
   await mkdir(specDir, { recursive: true });
   for (const name of idFilenames) {
-    await writeFile(join(specDir, name), "x", "utf8");
+    // Specs must be `active` to be generated; the status filter (SW-014) drops `planned`.
+    await writeFile(join(specDir, name), "**Status**: active\n", "utf8");
   }
   process.chdir(dir);
   return dir;

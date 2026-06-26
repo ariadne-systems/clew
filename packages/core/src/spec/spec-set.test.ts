@@ -1,12 +1,17 @@
 import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import type { AriadneError, SpecSetMatcher, Traceable } from "../index.js";
+import type { AriadneError, ScannedSpec, SpecSetMatcher } from "../index.js";
 import { ErrorCode, groupIntoSpecSets, lensMatchers } from "../index.js";
 
-const traceables: Traceable[] = [
-  { id: "SW-013", lens: "SW", filename: "SW-013-scan.md" },
-  { id: "SW-012", lens: "SW", filename: "SW-012-command.md" },
-  { id: "CON-012", lens: "CON", filename: "CON-012-owned.md" },
+const specs: ScannedSpec[] = [
+  { id: "SW-013", lens: "SW", filename: "SW-013-scan.md", status: "active" },
+  { id: "SW-012", lens: "SW", filename: "SW-012-command.md", status: "active" },
+  {
+    id: "CON-012",
+    lens: "CON",
+    filename: "CON-012-owned.md",
+    status: "active",
+  },
 ];
 
 // Returns the stable error code a synchronous call throws, failing the test if
@@ -49,20 +54,35 @@ describe("grouping traceables into spec sets", () => {
           { id: "CON", description: "constraint" },
         ];
 
-        const specSets = groupIntoSpecSets(traceables, lensMatchers(lenses));
+        const specSets = groupIntoSpecSets(specs, lensMatchers(lenses));
 
         expect(specSets).toEqual([
           {
             name: "CON",
-            traceables: [
-              { id: "CON-012", lens: "CON", filename: "CON-012-owned.md" },
+            specs: [
+              {
+                id: "CON-012",
+                lens: "CON",
+                filename: "CON-012-owned.md",
+                status: "active",
+              },
             ],
           },
           {
             name: "SW",
-            traceables: [
-              { id: "SW-012", lens: "SW", filename: "SW-012-command.md" },
-              { id: "SW-013", lens: "SW", filename: "SW-013-scan.md" },
+            specs: [
+              {
+                id: "SW-012",
+                lens: "SW",
+                filename: "SW-012-command.md",
+                status: "active",
+              },
+              {
+                id: "SW-013",
+                lens: "SW",
+                filename: "SW-013-scan.md",
+                status: "active",
+              },
             ],
           },
         ]);
@@ -74,20 +94,35 @@ describe("grouping traceables into spec sets", () => {
           { name: "rest", catchAll: true },
         ];
 
-        const specSets = groupIntoSpecSets(traceables, matchers);
+        const specSets = groupIntoSpecSets(specs, matchers);
 
         expect(specSets).toEqual([
           {
             name: "commands",
-            traceables: [
-              { id: "SW-012", lens: "SW", filename: "SW-012-command.md" },
+            specs: [
+              {
+                id: "SW-012",
+                lens: "SW",
+                filename: "SW-012-command.md",
+                status: "active",
+              },
             ],
           },
           {
             name: "rest",
-            traceables: [
-              { id: "CON-012", lens: "CON", filename: "CON-012-owned.md" },
-              { id: "SW-013", lens: "SW", filename: "SW-013-scan.md" },
+            specs: [
+              {
+                id: "CON-012",
+                lens: "CON",
+                filename: "CON-012-owned.md",
+                status: "active",
+              },
+              {
+                id: "SW-013",
+                lens: "SW",
+                filename: "SW-013-scan.md",
+                status: "active",
+              },
             ],
           },
         ]);
@@ -98,8 +133,13 @@ describe("grouping traceables into spec sets", () => {
           { name: "by-prefix", pattern: "^SW-" },
           { name: "by-slug", pattern: "command" },
         ];
-        const overlapping = [
-          { id: "SW-012", lens: "SW", filename: "SW-012-command.md" },
+        const overlapping: ScannedSpec[] = [
+          {
+            id: "SW-012",
+            lens: "SW",
+            filename: "SW-012-command.md",
+            status: "active",
+          },
         ];
 
         expect(thrownCode(() => groupIntoSpecSets(overlapping, matchers))).toBe(
@@ -109,8 +149,13 @@ describe("grouping traceables into spec sets", () => {
 
       test("a traceable matching no set is an unmatched error", () => {
         const matchers: SpecSetMatcher[] = [{ name: "sw", pattern: "^SW-" }];
-        const unmatched = [
-          { id: "CON-012", lens: "CON", filename: "CON-012-owned.md" },
+        const unmatched: ScannedSpec[] = [
+          {
+            id: "CON-012",
+            lens: "CON",
+            filename: "CON-012-owned.md",
+            status: "active",
+          },
         ];
 
         expect(thrownCode(() => groupIntoSpecSets(unmatched, matchers))).toBe(
@@ -124,13 +169,17 @@ describe("grouping traceables into spec sets", () => {
           { name: "everything-else", catchAll: true },
         ];
 
-        const specSets = groupIntoSpecSets(traceables, matchers);
+        const specSets = groupIntoSpecSets(specs, matchers);
 
         expect(
-          specSets.find((specSet) => specSet.name === "everything-else")
-            ?.traceables,
+          specSets.find((specSet) => specSet.name === "everything-else")?.specs,
         ).toEqual([
-          { id: "CON-012", lens: "CON", filename: "CON-012-owned.md" },
+          {
+            id: "CON-012",
+            lens: "CON",
+            filename: "CON-012-owned.md",
+            status: "active",
+          },
         ]);
       });
 
@@ -140,7 +189,7 @@ describe("grouping traceables into spec sets", () => {
           { id: "CON", description: "constraint" },
         ];
 
-        const specSets = groupIntoSpecSets(traceables, lensMatchers(lenses), [
+        const specSets = groupIntoSpecSets(specs, lensMatchers(lenses), [
           "owned",
         ]);
 

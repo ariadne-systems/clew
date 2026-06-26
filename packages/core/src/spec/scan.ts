@@ -1,9 +1,11 @@
 import type { Dirent } from "node:fs";
-import { readdir } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { realizes, SwTraceables } from "@ariadne-thread/trace";
+import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import { readLayout, readLenses } from "../config/config.js";
-import type { Traceable } from "./generator.js";
+import { AriadneError, ErrorCode } from "../errors.js";
+import type { ScannedSpec, SpecStatus } from "./generator.js";
+import { SPEC_STATUSES } from "./generator.js";
 
 export type ScanOptions = {
   /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
@@ -38,14 +40,14 @@ const SPEC_FILENAME = /^([A-Z]+)-(\d+)(?:-.*)?\.md$/;
  * language. An id added to the specs appears in the set; an id removed disappears
  * from it. The result is sorted by id so generation downstream is deterministic.
  */
-export async function scan(options: ScanOptions = {}): Promise<Traceable[]> {
+export async function scan(options: ScanOptions = {}): Promise<ScannedSpec[]> {
   const [layout, lenses] = await Promise.all([
     readLayout(options.configFile),
     readLenses(options.configFile),
   ]);
   const lensIds = new Set(lenses.map((lens) => lens.id));
   const dirs = [layout.stories.dir, layout.derivedSpecs.dir];
-  const byId = new Map<string, Traceable>();
+  const byId = new Map<string, ScannedSpec>();
   for (const dir of dirs) {
     await collectTraceables(dir, lensIds, byId);
   }
@@ -62,7 +64,7 @@ export async function scan(options: ScanOptions = {}): Promise<Traceable[]> {
 async function collectTraceables(
   dir: string,
   lensIds: Set<string>,
-  byId: Map<string, Traceable>,
+  byId: Map<string, ScannedSpec>,
 ): Promise<void> {
   let entries: Dirent[];
   try {
@@ -74,29 +76,67 @@ async function collectTraceables(
     throw error;
   }
   for (const entry of entries) {
+    const path = join(dir, entry.name);
     if (entry.isDirectory()) {
       if (!IGNORED_DIRECTORIES.has(entry.name)) {
-        await collectTraceables(join(dir, entry.name), lensIds, byId);
+        await collectTraceables(path, lensIds, byId);
       }
     } else {
-      recordTraceable(entry.name, lensIds, byId);
+      await recordTraceable(path, entry.name, lensIds, byId);
     }
   }
 }
 
 /**
+ * A spec's `**Status**` field. The value is the rest of the line, trimmed — so a
+ * line with trailing text (e.g. `**Status**: active (was planned)`) captures the
+ * whole thing and is rejected as unrecognized (CON-022), rather than failing to
+ * match and silently falling through to `planned`.
+ */
+const STATUS_FIELD = /^\*\*Status\*\*:[ \t]*(.+?)[ \t]*$/m;
+
+/**
+ * Reads a spec's implementation state from its `**Status**` field (SW-031): the
+ * declared value, or `planned` when the field is absent. An unrecognized
+ * value is rejected rather than silently dropping the spec out of enforcement
+ * (CON-022).
+ */
+const readSpecStatus: (content: string) => SpecStatus = realizes(
+  [SwTraceables.SW_031_SCAN_SPEC_STATUS, ConTraceables.CON_022_VALID_STATUS],
+  (content: string): SpecStatus => {
+    const value = STATUS_FIELD.exec(content)?.[1];
+    if (value === undefined) {
+      return "planned";
+    }
+    if (!(SPEC_STATUSES as readonly string[]).includes(value)) {
+      throw new AriadneError(
+        ErrorCode.INVALID_SPEC_STATUS,
+        `Unrecognized spec status "${value}"; expected one of ${SPEC_STATUSES.join(", ")}.`,
+      );
+    }
+    return value as SpecStatus;
+  },
+);
+
+/**
  * Records the traceable a filename declares, if any. Only a configured lens
  * prefix counts (ADR-0003), so a non-lens file — a story, an entity, or an ADR —
  * contributes no traceable. The filename is kept on the traceable so spec-set
- * matchers can select on it.
+ * matchers can select on it, and the spec's `**Status**` is read onto it (SW-031).
  */
-const recordTraceable = realizes(
+const recordTraceable: (
+  filePath: string,
+  filename: string,
+  lensIds: Set<string>,
+  byId: Map<string, ScannedSpec>,
+) => Promise<void> = realizes(
   SwTraceables.SW_013_SCAN_TRACEABLES,
-  (
+  async (
+    filePath: string,
     filename: string,
     lensIds: Set<string>,
-    byId: Map<string, Traceable>,
-  ): void => {
+    byId: Map<string, ScannedSpec>,
+  ): Promise<void> => {
     const match = SPEC_FILENAME.exec(filename);
     if (match === null) {
       return;
@@ -106,6 +146,7 @@ const recordTraceable = realizes(
       return;
     }
     const id = `${prefix}-${digits}`;
-    byId.set(id, { id, lens: prefix, filename });
+    const status = readSpecStatus(await readFile(filePath, "utf8"));
+    byId.set(id, { id, lens: prefix, filename, status });
   },
 );

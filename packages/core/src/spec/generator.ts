@@ -4,6 +4,7 @@ import {
   type Realizes,
   realizes,
 } from "@ariadne-thread/trace";
+import { AriadneError, ErrorCode } from "../errors.js";
 
 /**
  * The language emission seam (STR-011).
@@ -17,26 +18,36 @@ import {
  */
 
 /**
- * A single scanned spec: its id, its lens (its prefix), and the filename it was
- * declared in. The filename is what spec-set matchers match against, so
- * a grouping can select on the descriptive slug, not only the sparse id (whose
- * only matchable part is the lens prefix).
+ * A spec's implementation state, carried on its scanned spec (SW-031): a spec
+ * is `planned` (the default when its `**Status**` field is absent),
+ * `active`, or `deprecated`.
  */
-export interface Traceable {
+export const SPEC_STATUSES = ["planned", "active", "deprecated"] as const;
+export type SpecStatus = (typeof SPEC_STATUSES)[number];
+
+/**
+ * A single scanned spec: its id, its lens (its prefix), the filename it was
+ * declared in, and its implementation state. The filename is what spec-set
+ * matchers match against, so a grouping can select on the descriptive slug, not
+ * only the sparse id (whose only matchable part is the lens prefix).
+ */
+export interface ScannedSpec {
   readonly id: string;
   readonly lens: string;
   readonly filename: string;
+  /** The spec's implementation state (SW-031); the scan always sets it. */
+  readonly status: SpecStatus;
 }
 
 /**
- * A configured grouping of traceables a generator emits as one symbol set.
+ * A configured grouping of scanned specs a generator emits as one symbol set.
  * Grouping is by lens by default; the configurable grouping
  * rules are the follow-on story (STR-012) and are not built here.
  */
 export interface SpecSet {
   /** The set's name; the lens id when grouping by lens (the default). */
   readonly name: string;
-  readonly traceables: readonly Traceable[];
+  readonly specs: readonly ScannedSpec[];
 }
 
 /**
@@ -75,6 +86,17 @@ export interface AnchorLocation {
   readonly relation: Relation;
   readonly file: string;
   readonly line: number;
+}
+
+/**
+ * A traceable read back from a generator's emitted output — a generated enum
+ * member: its spec id and whether the member is marked deprecated (SW-018). This
+ * is the coverage universe (CON-020): the generator that wrote the enum reads it
+ * back, so coverage measures the generated set without re-scanning the specs.
+ */
+export interface GeneratedTraceable {
+  readonly id: string;
+  readonly deprecated: boolean;
 }
 
 /**
@@ -120,6 +142,15 @@ export interface Generator
    * markers a generator emits round-trip through its discover (ADR-0005 D2).
    */
   discover(sources: readonly SourceFile[]): readonly AnchorLocation[];
+  /**
+   * Reads the traceables this generator emitted back from its generated output —
+   * the coverage universe (CON-020, ARCH-004), beside `discover`. The component
+   * that wrote the enum members reads them back, so coverage is measured against
+   * the generated set, not a re-scan of the specs; a member marked deprecated
+   * (SW-018) is reported as such. The emitted members round-trip: generate then
+   * readTraceables recovers exactly the ids emitted (ADR-0005 D2).
+   */
+  readTraceables(files: readonly SourceFile[]): readonly GeneratedTraceable[];
 }
 
 /**
@@ -164,3 +195,46 @@ export const generatedHeader: (
     return lines;
   },
 );
+
+/**
+ * Resolves a configured generator name to its implementation, failing fast with a
+ * stable code when the configuration names one that is not registered (ADR-0001 D9).
+ * Shared by generation, the code scan, and coverage so the resolution policy and
+ * its error message stay in one place.
+ */
+export function resolveGeneratorOrThrow(
+  name: string,
+  resolveGenerator: (name: string) => Generator | undefined,
+): Generator {
+  const generator = resolveGenerator(name);
+  if (generator === undefined) {
+    throw new AriadneError(
+      ErrorCode.UNKNOWN_GENERATOR,
+      `Configured generator "${name}" is not registered; remove it from \`generators\` or install a generator that provides it.`,
+    );
+  }
+  return generator;
+}
+
+/**
+ * Parses a generator's emitted output back into the traceables it declared
+ * (ARCH-004), shared by the language generators' `readTraceables`. `pattern` is a
+ * global regex run over each file's text whose capture group 1 is an optional
+ * deprecation marker and group 2 is the spec id; a member whose marker is present
+ * is reported deprecated (SW-018).
+ */
+export function parseGeneratedTraceables(
+  files: readonly SourceFile[],
+  pattern: RegExp,
+): GeneratedTraceable[] {
+  const traceables: GeneratedTraceable[] = [];
+  for (const file of files) {
+    for (const match of file.contents.matchAll(pattern)) {
+      const [, deprecatedMarker, id] = match;
+      if (id !== undefined) {
+        traceables.push({ id, deprecated: deprecatedMarker !== undefined });
+      }
+    }
+  }
+  return traceables;
+}

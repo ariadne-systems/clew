@@ -1,9 +1,22 @@
-import { mkdir, rename, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import type { Dirent } from "node:fs";
+import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
+import { dirname, extname, join } from "node:path";
 import type { Realizes, SysTraceables } from "@ariadne-thread/trace";
-import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
+import {
+  ArchTraceables,
+  ConTraceables,
+  realizes,
+  SwTraceables,
+} from "@ariadne-thread/trace";
 import type { Waiver } from "../config/config.js";
-import type { AnchorLocation, Traceable } from "./generator.js";
+import { readGenerators } from "../config/config.js";
+import type {
+  AnchorLocation,
+  GeneratedTraceable,
+  Generator,
+  SourceFile,
+} from "./generator.js";
+import { GENERATED_MARKER, resolveGeneratorOrThrow } from "./generator.js";
 
 // Module-level anchor — this module realizes the coverage-policy capability.
 type _Anchors = Realizes<
@@ -11,8 +24,16 @@ type _Anchors = Realizes<
   unknown
 >;
 
-/** A spec's coverage status, the cross-product of realized and verified. */
-export type CoverageStatus = "covered" | "realized" | "verified" | "none";
+/**
+ * A spec's coverage status: the cross-product of realized and verified, plus
+ * `deprecated` — a retiring spec that is listed but not classified (SW-026).
+ */
+export type CoverageStatus =
+  | "covered"
+  | "realized"
+  | "verified"
+  | "none"
+  | "deprecated";
 
 /** A spec in the coverage universe, with its computed status. */
 export type SpecCoverage = {
@@ -46,11 +67,14 @@ export const DEFAULT_COVERAGE_FILE = ".ariadne/coverage.json";
  * **verifies** it (SW-026): Covered (both), Realized (realize only), Verified
  * (verify only), None (neither). Only `realizes` and `verifies` decide the status;
  * a `concerns` anchor contributes to neither, so a concerns-only spec is None
- * (CON-019). The universe is exactly the traceables the spec scan produces — every
- * one is classified, with no filter by lens (CON-020). The result is sorted by id.
+ * (CON-019). The universe is the generated traceables read back through the
+ * generator (CON-020) — the `active` and `deprecated` specs; a `planned` spec was
+ * never generated and is absent. A `deprecated` traceable is not classified: its
+ * status is `deprecated`, so the report lists it without counting it (SW-026). The
+ * lens is the id's prefix. The result is sorted by id.
  */
 export const computeCoverage: (
-  traceables: readonly Traceable[],
+  universe: readonly GeneratedTraceable[],
   anchors: readonly AnchorLocation[],
 ) => SpecCoverage[] = realizes(
   [
@@ -59,7 +83,7 @@ export const computeCoverage: (
     ConTraceables.CON_020_COVERAGE_UNIVERSE,
   ],
   (
-    traceables: readonly Traceable[],
+    universe: readonly GeneratedTraceable[],
     anchors: readonly AnchorLocation[],
   ): SpecCoverage[] => {
     const realized = new Set<string>();
@@ -71,18 +95,23 @@ export const computeCoverage: (
         verified.add(anchor.id);
       }
     }
-    return traceables
+    return universe
       .map((traceable) => ({
         id: traceable.id,
-        lens: traceable.lens,
-        status: statusOf(
-          realized.has(traceable.id),
-          verified.has(traceable.id),
-        ),
+        lens: lensOf(traceable.id),
+        status: traceable.deprecated
+          ? ("deprecated" as const)
+          : statusOf(realized.has(traceable.id), verified.has(traceable.id)),
       }))
       .sort((left, right) => left.id.localeCompare(right.id));
   },
 );
+
+/** The lens of a spec id — its prefix, before the first hyphen (`SW-026` → `SW`). */
+function lensOf(id: string): string {
+  const hyphen = id.indexOf("-");
+  return hyphen === -1 ? id : id.slice(0, hyphen);
+}
 
 /** The status for a spec's realized/verified pair. */
 function statusOf(realized: boolean, verified: boolean): CoverageStatus {
@@ -96,6 +125,98 @@ function statusOf(realized: boolean, verified: boolean): CoverageStatus {
     return "verified";
   }
   return "none";
+}
+
+export type ReadUniverseOptions = {
+  /** Resolves a configured generator name to its implementation (ADR-0001 D9). */
+  resolveGenerator: (name: string) => Generator | undefined;
+  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  configFile?: string;
+  /** Project root the generator output directories resolve against. Defaults to the cwd. */
+  projectRoot?: string;
+};
+
+/**
+ * Reads the coverage universe back from the generated traceables (CON-020,
+ * ARCH-004): for each configured generator it reads that generator's output
+ * directory and asks the generator to read its own emitted enum members back, then
+ * merges them by id (a member any generator marks deprecated is deprecated). The
+ * universe is therefore the *generated* set — `active` and `deprecated` specs, the
+ * `spec` command's output — not a re-scan of the spec files, so a spec's status is
+ * resolved once at generation and an ALM-sourced status is never re-queried per
+ * coverage run. The result is sorted by id.
+ */
+export const readUniverse: (
+  options: ReadUniverseOptions,
+) => Promise<GeneratedTraceable[]> = realizes(
+  [
+    ArchTraceables.ARCH_004_GENERATOR_DISCOVERS_MARKERS,
+    ConTraceables.CON_020_COVERAGE_UNIVERSE,
+  ],
+  async (options: ReadUniverseOptions): Promise<GeneratedTraceable[]> => {
+    const projectRoot = options.projectRoot ?? ".";
+    const generatorConfigs = await readGenerators(options.configFile);
+    // Each configured generator's output is independent; read them concurrently.
+    const perGenerator = await Promise.all(
+      generatorConfigs.map(async (config) => {
+        const generator = resolveGeneratorOrThrow(
+          config.type,
+          options.resolveGenerator,
+        );
+        const outputDir = config.outputDir ?? generator.defaultOutputDir;
+        const files = await readGeneratedFiles(
+          join(projectRoot, outputDir),
+          generator.sourceExtensions,
+        );
+        return generator.readTraceables(files);
+      }),
+    );
+    // Merge by id across generators. A member any generator marks deprecated is
+    // deprecated (the union of deprecation) — intentional, not a consistency check;
+    // detecting divergent generated trees is a separate concern.
+    const deprecatedById = new Map<string, boolean>();
+    for (const traceable of perGenerator.flat()) {
+      deprecatedById.set(
+        traceable.id,
+        traceable.deprecated || (deprecatedById.get(traceable.id) ?? false),
+      );
+    }
+    return [...deprecatedById.entries()]
+      .map(([id, deprecated]) => ({ id, deprecated }))
+      .sort((left, right) => left.id.localeCompare(right.id));
+  },
+);
+
+/**
+ * Reads a generator's output directory into the source files of its own
+ * extensions that the tool actually generated. Only files carrying
+ * GENERATED_MARKER are returned, so a hand-written or stray file in the directory
+ * cannot inject phantom traceables — the same guard `pruneStaleGenerated` applies
+ * before deleting. The reads run concurrently; a missing directory yields no files.
+ */
+async function readGeneratedFiles(
+  dir: string,
+  extensions: readonly string[],
+): Promise<SourceFile[]> {
+  let entries: Dirent[];
+  try {
+    entries = await readdir(dir, { withFileTypes: true });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return [];
+    }
+    throw error;
+  }
+  const candidates = entries.filter(
+    (entry) => entry.isFile() && extensions.includes(extname(entry.name)),
+  );
+  const files = await Promise.all(
+    candidates.map(async (entry) => {
+      const path = join(dir, entry.name);
+      return { path, contents: await readFile(path, "utf8") };
+    }),
+  );
+  return files.filter((file) => file.contents.includes(GENERATED_MARKER));
 }
 
 /** Compiles a spec-id glob — `*` matches any run of characters — to an anchored RegExp. */
@@ -234,15 +355,16 @@ export const formatCoverageReport: (result: CoverageResult) => string =
   realizes(
     SwTraceables.SW_028_EMIT_COVERAGE_RESULT,
     (result: CoverageResult): string => {
-      const counts: Record<CoverageStatus, number> = {
-        covered: 0,
-        realized: 0,
-        verified: 0,
-        none: 0,
-      };
+      const counts = { covered: 0, realized: 0, verified: 0, none: 0 };
       const gaps: SpecCoverage[] = [];
       const waived: Array<SpecCoverage & { reason: string }> = [];
+      const deprecated: SpecCoverage[] = [];
       for (const spec of result.specs) {
+        // A deprecated spec is listed, never counted toward coverage (SW-026).
+        if (spec.status === "deprecated") {
+          deprecated.push(spec);
+          continue;
+        }
         counts[spec.status] += 1;
         if (spec.status === "covered") {
           continue;
@@ -254,8 +376,10 @@ export const formatCoverageReport: (result: CoverageResult) => string =
         }
       }
 
+      const counted =
+        counts.covered + counts.realized + counts.verified + counts.none;
       const lines = [
-        `Coverage: ${counts.covered} covered, ${counts.realized} realized, ${counts.verified} verified, ${counts.none} none (${result.specs.length} specs).`,
+        `Coverage: ${counts.covered} covered, ${counts.realized} realized, ${counts.verified} verified, ${counts.none} none (${counted} specs).`,
       ];
       appendSection(
         lines,
@@ -268,6 +392,12 @@ export const formatCoverageReport: (result: CoverageResult) => string =
         `Waived (${waived.length})`,
         waived,
         (spec) => `  ${spec.id}  ${spec.status} — ${spec.reason}`,
+      );
+      appendSection(
+        lines,
+        `Deprecated (${deprecated.length})`,
+        deprecated,
+        (spec) => `  ${spec.id}`,
       );
       appendSection(
         lines,

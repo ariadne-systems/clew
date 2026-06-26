@@ -13,9 +13,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// An isolated project: a configured generator, two spec files (the universe), a
-// source file that realizes one of them, and a waiver accepting that realized
-// spec's missing test; the other spec, anchored nowhere, stays a genuine gap.
+// An isolated project: a configured generator, two active spec files (which
+// generate into the trace — the universe coverage reads back), a source file that
+// realizes one of them, and a waiver accepting that realized spec's missing test;
+// the other spec, anchored nowhere, stays a genuine gap.
 async function setupProjectDir(): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-coverage-"));
   await writeFile(
@@ -28,8 +29,16 @@ async function setupProjectDir(): Promise<string> {
   );
   const specsDir = join(dir, "docs", "spec", "derived-specs");
   await mkdir(specsDir, { recursive: true });
-  await writeFile(join(specsDir, "SW-001-a.md"), "# SW-001\n", "utf8");
-  await writeFile(join(specsDir, "SW-002-b.md"), "# SW-002\n", "utf8");
+  await writeFile(
+    join(specsDir, "SW-001-a.md"),
+    "**Status**: active\n# SW-001\n",
+    "utf8",
+  );
+  await writeFile(
+    join(specsDir, "SW-002-b.md"),
+    "**Status**: active\n# SW-002\n",
+    "utf8",
+  );
   await mkdir(join(dir, "src"), { recursive: true });
   await writeFile(
     join(dir, "src", "app.ts"),
@@ -61,6 +70,9 @@ describe("coverage command", () => {
       const dir = await setupProjectDir();
       const stdout = captureStdout();
 
+      // Coverage reads the universe back from the generated trace (CON-020), so
+      // generate it first.
+      await runAriadne("spec");
       await runAriadne("coverage");
 
       const out = stdout();
