@@ -47,3 +47,8 @@ Where draft files live, and how temporary ids are later replaced by bound ids at
 - [SW-005 — Mint temporary, unbound ids](../derived-specs/SW-005-mint-temporary-ids.md)
 - [CON-007 — A temporary id is unbound and consumes no sequence number](../derived-specs/CON-007-temporary-id-unbound.md)
 - [CON-008 — The `-TMP-` marker is reserved and a type may not use it](../derived-specs/CON-008-tmp-marker-reserved.md)
+
+## Changes
+
+- **2026-06-26** — STR-021 supersedes the opaque temporary-id form this story introduced, replacing it with a readable per-author sequence (SW-032, CON-023).
+The `--tmp` mode, the `-TMP-` reservation (CON-008), and statelessness (CON-007) are unchanged; only the suffix form is revised.
