@@ -32,3 +32,7 @@ Binding follows the same persistence guarantee as minting: an id is reported onl
 **Realizes**
 
 - [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)
+
+## Changes
+
+- **2026-06-27** — Finalization is now atomic (CON-024): its substitution and move run as prepare-then-commit through atomic renames, so a failed promotion leaves the spec tree unchanged. The mechanical steps — bind, substitute, move — are otherwise unchanged.

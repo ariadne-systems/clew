@@ -1,8 +1,8 @@
 {
   "sequences": {
-    "STR": 21,
+    "STR": 22,
     "SW": 32,
-    "CON": 23,
+    "CON": 24,
     "ARCH": 4,
     "NF": 2,
     "ENT": 2,
