@@ -41,6 +41,10 @@ The tool only writes text; it runs no language runtime of its own.
 The tool runs fully locally when the spec lives in the repo.
 A central authority is needed only when identity must be guaranteed across a boundary a per-repo file cannot cover, such as parallel branches with heavy minting or multiple repos against one source.
 
+Running locally, the project's configuration and its first-party generators are trusted input, the way a build tool trusts its own config: the tool does not sandbox where they may write.
+Defending against a hostile `.ariadnerc.json` is a non-goal — a hostile checkout is already a compromise before the tool runs.
+The one write guard the core keeps is against a *buggy* generator: a generated filename must be a flat name in the output directory, never a nested or escaping path.
+
 ## Views
 
 These diagrams are views, not the source of truth.
