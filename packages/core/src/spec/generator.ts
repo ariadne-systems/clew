@@ -51,10 +51,11 @@ export interface SpecSet {
 }
 
 /**
- * A file a generator produces. The path is the file's name within the project's
- * configured output directory (ENT-002); the core joins it under that directory
- * and writes the bytes, so the generator decides filenames and the core decides
- * the location, and the core carries no language knowledge.
+ * A file a generator produces. The path is a flat filename within the project's
+ * configured output directory (ENT-002) — a plain name, never a nested or escaping
+ * path; the core joins it under that directory and writes the bytes, so the
+ * generator decides filenames and the core decides the location, and the core
+ * carries no language knowledge.
  */
 export interface GeneratedFile {
   readonly path: string;

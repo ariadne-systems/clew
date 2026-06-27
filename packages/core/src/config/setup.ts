@@ -43,21 +43,24 @@ export const setup: (options?: SetupOptions) => Promise<SetupResult> = realizes(
     if (await configExists(configFile)) {
       return { created: false, configFile, directories: [], lenses: [] };
     }
-    const config = {
-      idGeneration: { mode: DEFAULT_MODE, padding: DEFAULT_PADDING },
-      lenses: DEFAULT_LENSES,
-      layout: DEFAULT_LAYOUT,
-    };
-    await writeFile(configFile, `${JSON.stringify(config, null, 2)}\n`, "utf8");
     const root = dirname(configFile);
     const directories = [
       DEFAULT_LAYOUT.stories.dir,
       DEFAULT_LAYOUT.derivedSpecs.dir,
       DEFAULT_LAYOUT.drafts.dir,
     ];
+    // Create the layout directories before writing the config, so a config on disk
+    // always implies a complete scaffold: if a mkdir fails, no config is written, and
+    // a re-run starts clean rather than short-circuiting on a half-made project.
     for (const dir of directories) {
       await mkdir(join(root, dir), { recursive: true });
     }
+    const config = {
+      idGeneration: { mode: DEFAULT_MODE, padding: DEFAULT_PADDING },
+      lenses: DEFAULT_LENSES,
+      layout: DEFAULT_LAYOUT,
+    };
+    await writeFile(configFile, `${JSON.stringify(config, null, 2)}\n`, "utf8");
     return {
       created: true,
       configFile,

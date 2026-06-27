@@ -129,6 +129,33 @@ describe("spec generation", () => {
       ]);
     });
 
+    test("rejects a generator that returns a non-flat output path", async () => {
+      const { configFile, outputDir } = await fixture(
+        ["SW-012-a.md"],
+        ["escaper"],
+      );
+      const escaper: Generator = {
+        name: "escaper",
+        defaultOutputDir: ".",
+        sourceExtensions: [],
+        discover: () => [],
+        readTraceables: () => [],
+        generate: () =>
+          Promise.resolve([
+            { path: "../escape.ts", contents: GENERATED_MARKER },
+          ]),
+      };
+
+      await expect(
+        spec({
+          configFile,
+          outputDir,
+          resolveGenerator: (name) =>
+            name === "escaper" ? escaper : undefined,
+        }),
+      ).rejects.toThrow(/flat filename/i);
+    });
+
     test("filters by status: a planned spec is not generated; active and deprecated are", async () => {
       const { configFile, outputDir, derivedDir } = await fixture([], ["fake"]);
       await writeFile(

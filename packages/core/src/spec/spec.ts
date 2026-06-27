@@ -170,7 +170,29 @@ async function writeGeneratedFile(
   outputDir: string,
   file: GeneratedFile,
 ): Promise<void> {
+  assertFlatGeneratedName(file.path);
   const target = join(outputDir, file.path);
   await mkdir(dirname(target), { recursive: true });
   await writeFile(target, file.contents, "utf8");
+}
+
+/**
+ * Rejects a generated filename that is not a flat name in the output directory — a
+ * nested path, an escaping `..`, or an absolute path. This keeps a (buggy)
+ * generator from writing outside its output directory, and keeps the top-level
+ * prune and coverage read-back complete, since every generated file is one level
+ * deep. A bad path is a generator bug, not user input, so it throws plainly.
+ */
+function assertFlatGeneratedName(name: string): void {
+  if (
+    name.length === 0 ||
+    name === "." ||
+    name === ".." ||
+    name.includes("/") ||
+    name.includes("\\")
+  ) {
+    throw new Error(
+      `Generator returned "${name}", which is not a flat filename; generated files must be plain names directly in the output directory.`,
+    );
+  }
 }
