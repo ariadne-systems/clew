@@ -36,3 +36,5 @@ The scan depends only on the configured artifact locations, not on any target la
 The scan's behaviour is otherwise unchanged; the status is an added field on each traceable, so coverage can scope its gate to implemented specs.
 - **2026-06-26** — Renamed the scan's output from "traceables" to "scanned specs": a *traceable* is the generated enum member (CON-020), so what the scan produces — the per-spec record of id, lens, filename, and status — is a scanned spec, which generation turns into traceables.
 The scan's behaviour is unchanged; this aligns the vocabulary.
+- **2026-06-27** — The scan now rejects a duplicate spec id (CON-025) instead of collapsing two files to one (last-wins).
+STR-023: a duplicate — for example from two branches each minting the next id and then merging — is reported with the id and the conflicting files.
