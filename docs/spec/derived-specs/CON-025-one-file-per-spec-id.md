@@ -3,10 +3,13 @@ A bound spec id is declared by exactly one file
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 Each bound spec id is declared by exactly one file in the scanned artifact locations.
-When two files declare the same id, the scan rejects the corpus with an error naming the id and the conflicting files, rather than silently keeping one.
-The check is on the bound id; how the duplicate arose — a merge, a copy — does not matter.
+The scan enforces this for the ids it turns into traceables: when two files declare the same lens-bearing id, it rejects them with an error naming the id and the conflicting files, rather than silently keeping one.
+A non-lens id — a story or entity — is not a traceable and is not checked by the generation scan; duplicate detection across every prefix is a corpus-integrity concern handled separately.
+How the duplicate arose — a merge, a copy — does not matter.
 
 **Rationale**
 Every trace is keyed on the id (SYS-003); if two files share an id, generation and coverage act on whichever the scan happened to visit last, so one spec silently vanishes from the graph while the other's anchors may bind against the wrong file.
@@ -27,3 +30,10 @@ The rejection does not depend on the order the files are visited.
 
 - Constrains [SW-013 — Scan the configured artifacts into the set of scanned specs](SW-013-scan-traceables.md) — the scan that enforces it.
 - Mirrors [CON-013 — Each scanned spec belongs to exactly one spec set](CON-013-spec-set-partition.md) — both fail fast on an ambiguous corpus.
+
+## Changes
+
+- **2026-06-27** — Set active: implementation of STR-023 began.
+- **2026-06-27** — Scoped the scan's enforcement to traceable (lens) ids.
+A review showed that checking non-traceable ids (stories) in the generation scan made it fail on data generation never uses, and reached past configured prefixes; comprehensive cross-prefix duplicate detection belongs to a separate integrity check.
+Also recorded that a file reached twice through overlapping scan roots is not a duplicate of itself.

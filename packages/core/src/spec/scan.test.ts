@@ -186,3 +186,82 @@ describe("scanning artifacts into traceables", () => {
     },
   );
 });
+
+describe("duplicate ids", () => {
+  verifies(ConTraceables.CON_025_ONE_FILE_PER_SPEC_ID, () => {
+    test("two files declaring the same traceable id are rejected, naming both", async () => {
+      const { configFile } = await fixture(["SW-013-b.md", "SW-013-a.md"]);
+
+      await expect(scan({ configFile })).rejects.toMatchObject({
+        code: ErrorCode.DUPLICATE_SPEC_ID,
+        message: expect.stringMatching(/SW-013-a\.md.*SW-013-b\.md/),
+      });
+    });
+
+    test("distinct ids are accepted", async () => {
+      const { configFile } = await fixture(["SW-013-a.md", "SW-014-b.md"]);
+
+      const specs = await scan({ configFile });
+
+      expect(specs.map((spec) => spec.id)).toEqual(["SW-013", "SW-014"]);
+    });
+
+    test("a duplicate spanning the two scan roots is named in sorted order, not walk order", async () => {
+      const { storiesDir, derivedDir, configFile } = await fixture([]);
+      // The same traceable id in both roots. `stories/` is walked first, so its
+      // file is seen first; the message must still be sorted, putting the
+      // `derived-specs` path (which sorts before `stories`) ahead of it.
+      await writeFile(join(storiesDir, "SW-013-z.md"), "x", "utf8");
+      await writeFile(join(derivedDir, "SW-013-a.md"), "x", "utf8");
+
+      const error = (await scan({ configFile }).catch(
+        (caught) => caught,
+      )) as Error & { code?: string };
+
+      expect(error.code).toBe(ErrorCode.DUPLICATE_SPEC_ID);
+      expect(error.message.indexOf("SW-013-a.md")).toBeLessThan(
+        error.message.indexOf("SW-013-z.md"),
+      );
+    });
+
+    test("names both files distinctly when they share a basename in different directories", async () => {
+      const { derivedDir, configFile } = await fixture([]);
+      await mkdir(join(derivedDir, "sub"), { recursive: true });
+      await writeFile(join(derivedDir, "SW-013-x.md"), "x", "utf8");
+      await writeFile(join(derivedDir, "sub", "SW-013-x.md"), "x", "utf8");
+
+      const error = (await scan({ configFile }).catch(
+        (caught) => caught,
+      )) as Error & { code?: string };
+
+      expect(error.code).toBe(ErrorCode.DUPLICATE_SPEC_ID);
+      const named = error.message.match(/"([^"]+)" and "([^"]+)"/);
+      expect(named?.[1]).toMatch(/SW-013-x\.md$/);
+      expect(named?.[2]).toMatch(/SW-013-x\.md$/);
+      expect(named?.[1]).not.toBe(named?.[2]);
+    });
+
+    test("a file is not a duplicate of itself when the two scan roots overlap", async () => {
+      const dir = await mkdtemp(join(tmpdir(), "ariadne-scan-"));
+      const specDir = join(dir, "docs", "spec");
+      await mkdir(specDir, { recursive: true });
+      await writeFile(join(specDir, "SW-013-x.md"), "x", "utf8");
+      const configFile = join(dir, ".ariadnerc.json");
+      await writeFile(
+        configFile,
+        JSON.stringify({
+          idGeneration: { mode: "sequential", padding: 3 },
+          layout: {
+            stories: { dir: specDir, prefix: "STR" },
+            derivedSpecs: { dir: specDir },
+          },
+        }),
+        "utf8",
+      );
+
+      const specs = await scan({ configFile });
+
+      expect(specs.map((spec) => spec.id)).toEqual(["SW-013"]);
+    });
+  });
+});
