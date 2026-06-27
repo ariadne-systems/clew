@@ -30,13 +30,17 @@ const IGNORED_DIRECTORIES = new Set([
  */
 const SPEC_FILENAME = /^([A-Z]+)-(\d+)(?:-.*)?\.md$/;
 
+/** A scanned traceable and the path it was found at, for duplicate detection. */
+type SeenSpec = { path: string; spec: ScannedSpec };
+
 /**
  * Scans the configured artifact locations into the set of traceables.
  * A traceable is a lens-bearing spec id — its prefix is a configured lens
  * (ADR-0003) — tagged with that lens, so the set can be grouped into spec sets
  * for generation. A non-lens id such as a story (`STR`) or entity (`ENT`) is not
- * a traceable and is not scanned. The scan is language-neutral: it reads only the
- * configured layout (ENT-002) and lenses, and knows nothing of any target
+ * a traceable and is not scanned. A traceable id that two files declare is rejected,
+ * so a duplicate never collapses silently. The scan is language-neutral: it reads
+ * only the configured layout (ENT-002) and lenses, and knows nothing of any target
  * language. An id added to the specs appears in the set; an id removed disappears
  * from it. The result is sorted by id so generation downstream is deterministic.
  */
@@ -47,13 +51,15 @@ export async function scan(options: ScanOptions = {}): Promise<ScannedSpec[]> {
   ]);
   const lensIds = new Set(lenses.map((lens) => lens.id));
   const dirs = [layout.stories.dir, layout.derivedSpecs.dir];
-  const byId = new Map<string, ScannedSpec>();
+  // Each traceable id mapped to where it was found, so a second file declaring it
+  // is rejected — and the same file reached twice (overlapping roots) is not.
+  const seen = new Map<string, SeenSpec>();
   for (const dir of dirs) {
-    await collectTraceables(dir, lensIds, byId);
+    await collectTraceables(dir, lensIds, seen);
   }
-  return [...byId.values()].sort((left, right) =>
-    left.id.localeCompare(right.id),
-  );
+  return [...seen.values()]
+    .map((entry) => entry.spec)
+    .sort((left, right) => left.id.localeCompare(right.id));
 }
 
 /**
@@ -64,7 +70,7 @@ export async function scan(options: ScanOptions = {}): Promise<ScannedSpec[]> {
 async function collectTraceables(
   dir: string,
   lensIds: Set<string>,
-  byId: Map<string, ScannedSpec>,
+  seen: Map<string, SeenSpec>,
 ): Promise<void> {
   let entries: Dirent[];
   try {
@@ -79,10 +85,10 @@ async function collectTraceables(
     const path = join(dir, entry.name);
     if (entry.isDirectory()) {
       if (!IGNORED_DIRECTORIES.has(entry.name)) {
-        await collectTraceables(path, lensIds, byId);
+        await collectTraceables(path, lensIds, seen);
       }
     } else {
-      await recordTraceable(path, entry.name, lensIds, byId);
+      await recordTraceable(path, entry.name, lensIds, seen);
     }
   }
 }
@@ -119,23 +125,28 @@ const readSpecStatus: (content: string) => SpecStatus = realizes(
 );
 
 /**
- * Records the traceable a filename declares, if any. Only a configured lens
- * prefix counts (ADR-0003), so a non-lens file — a story, an entity, or an ADR —
- * contributes no traceable. The filename is kept on the traceable so spec-set
- * matchers can select on it, and the spec's `**Status**` is read onto it (SW-031).
+ * Records the traceable a filename declares, and rejects a duplicate. Only a
+ * configured lens prefix counts, so a story, entity, or ADR contributes nothing. A
+ * second file declaring an already-seen traceable id is rejected rather than
+ * overwriting the first, so a duplicate never collapses silently. The filename is
+ * kept on the traceable so spec-set matchers can select on it, and the spec's
+ * `**Status**` is read onto it.
  */
 const recordTraceable: (
   filePath: string,
   filename: string,
   lensIds: Set<string>,
-  byId: Map<string, ScannedSpec>,
+  seen: Map<string, SeenSpec>,
 ) => Promise<void> = realizes(
-  SwTraceables.SW_013_SCAN_TRACEABLES,
+  [
+    SwTraceables.SW_013_SCAN_TRACEABLES,
+    ConTraceables.CON_025_ONE_FILE_PER_SPEC_ID,
+  ],
   async (
     filePath: string,
     filename: string,
     lensIds: Set<string>,
-    byId: Map<string, ScannedSpec>,
+    seen: Map<string, SeenSpec>,
   ): Promise<void> => {
     const match = SPEC_FILENAME.exec(filename);
     if (match === null) {
@@ -146,7 +157,24 @@ const recordTraceable: (
       return;
     }
     const id = `${prefix}-${digits}`;
+    const existing = seen.get(id);
+    if (existing !== undefined) {
+      // The same file reached twice (overlapping scan roots) is not a duplicate;
+      // only a different file declaring the id is. Sort the two paths so the
+      // rejection reads the same whatever order the walk reached them.
+      if (existing.path === filePath) {
+        return;
+      }
+      const [first, second] = [existing.path, filePath].sort();
+      throw new AriadneError(
+        ErrorCode.DUPLICATE_SPEC_ID,
+        `Spec id "${id}" is declared by more than one file: "${first}" and "${second}". Each bound id must be declared by exactly one file.`,
+      );
+    }
     const status = readSpecStatus(await readFile(filePath, "utf8"));
-    byId.set(id, { id, lens: prefix, filename, status });
+    seen.set(id, {
+      path: filePath,
+      spec: { id, lens: prefix, filename, status },
+    });
   },
 );

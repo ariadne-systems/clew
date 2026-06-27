@@ -39,6 +39,8 @@ export const ErrorCode = {
   INVALID_AUTHOR: "E_INVALID_AUTHOR",
   /** Command options are combined invalidly (e.g. `--as` without `--tmp`). */
   INVALID_OPTIONS: "E_INVALID_OPTIONS",
+  /** Two files declare the same bound spec id. */
+  DUPLICATE_SPEC_ID: "E_DUPLICATE_SPEC_ID",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
