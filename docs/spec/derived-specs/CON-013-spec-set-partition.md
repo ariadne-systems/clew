@@ -31,3 +31,4 @@ A spec matching an ignore pattern is in no set and produces no symbol.
 
 - **2026-06-26** — Renamed "traceable" to "spec" throughout: a *traceable* is the generated enum member (CON-020), and the partition is of the specs the scan finds, before they are generated into traceables.
 The partition rule (exactly one set, or explicitly ignored) is unchanged; this only aligns the vocabulary.
+- **2026-06-27** — Recorded the sibling check CON-025 (STR-023): the scan rejects two files that declare one id, the same fail-fast-on-an-ambiguous-corpus discipline this partition rule applies to spec sets.
