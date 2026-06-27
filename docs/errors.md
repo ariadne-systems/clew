@@ -20,3 +20,6 @@ A released code is never reused for a different condition and never renamed (CON
 | `E_DRAFT_NOT_FOUND` | A draft named for `promote` was not found among the pending drafts. |
 | `E_ENTITY_DRAFT_UNSUPPORTED` | An entity draft cannot be finalized by `promote`; merge it into the domain model by hand. |
 | `E_INVALID_EXCLUSION_PATTERN` | A configured `exclude` or `unexclude` glob could not be compiled; fix the named pattern. |
+| `E_INVALID_SPEC_STATUS` | A spec declares a `**Status**` value that is not one of `planned`, `active`, or `deprecated`. |
+| `E_INVALID_AUTHOR` | A draft author (`--as` or `CLEW_DRAFT_AUTHOR`) is not letter-led and uppercase (`[A-Z][A-Z0-9]*`). |
+| `E_INVALID_OPTIONS` | Command options are combined invalidly, for example `--as` passed without `--tmp`. |

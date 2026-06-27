@@ -1,11 +1,13 @@
-import type { Dirent } from "node:fs";
-import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Layout } from "../config/config.js";
 import { readLayout, readLenses } from "../config/config.js";
 import { AriadneError, ErrorCode } from "../errors.js";
+import { walkFiles } from "../fs/walk-files.js";
 import { mint } from "../mint/mint.js";
+import { parseTemporaryDraftId } from "../mint/temporary-id.js";
+import { escapeRegExp } from "../text/escape-regexp.js";
 
 export type PromoteOptions = {
   /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
@@ -40,9 +42,6 @@ type DraftFile = {
   /** The filename remainder after the temporary id, e.g. `-promote-command.md`. */
   slug: string;
 };
-
-/** A draft filename begins with a temporary id: `<PREFIX>-TMP-<opaque>`. */
-const TEMPORARY_DRAFT_FILENAME = /^([A-Z]+)-TMP-[0-9a-f]+/;
 
 /**
  * Finalizes reviewed drafts into the spec tree (STR-013): the mechanical
@@ -170,45 +169,34 @@ function resolveTargetDir(
 /** Discovers the draft files under the drafts location, parsing each temporary id. */
 async function discoverDrafts(draftsDir: string): Promise<DraftFile[]> {
   const drafts: DraftFile[] = [];
-  await walkDrafts(draftsDir, drafts);
-  return drafts;
-}
-
-async function walkDrafts(dir: string, drafts: DraftFile[]): Promise<void> {
-  const entries = await readDirOrEmpty(dir);
-  for (const entry of entries) {
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      await walkDrafts(full, drafts);
-    } else {
-      const draft = parseDraft(full, entry.name);
-      if (draft !== undefined) {
-        drafts.push(draft);
-      }
+  for (const file of await walkFiles(draftsDir)) {
+    const draft = parseDraft(file.path, file.name);
+    if (draft !== undefined) {
+      drafts.push(draft);
     }
   }
+  return drafts;
 }
 
 /** Parses a draft's temporary id from its filename, or returns undefined for a non-draft. */
 function parseDraft(path: string, fileName: string): DraftFile | undefined {
-  const match = TEMPORARY_DRAFT_FILENAME.exec(fileName);
-  if (match === null || match[1] === undefined) {
+  const parsed = parseTemporaryDraftId(fileName);
+  if (parsed === undefined) {
     return undefined;
   }
-  const temporaryId = match[0];
   return {
     path,
     fileName,
-    temporaryId,
-    prefix: match[1],
-    slug: fileName.slice(temporaryId.length),
+    temporaryId: parsed.temporaryId,
+    prefix: parsed.prefix,
+    slug: fileName.slice(parsed.temporaryId.length),
   };
 }
 
 /**
- * Replaces every temporary id with its bound id across the configured spec
- * locations and the drafts location — the only places a temporary id appears
- * A temporary id is globally unique, so a literal replace is exact.
+ * Each replacement is bounded so a shorter id (`SW-TMP-1`) never matches inside a
+ * longer one (`SW-TMP-10`): a temporary id's trailing run is alphanumeric, so it
+ * ends only where no further id character follows.
  */
 const substituteProjectWide = realizes(
   ConTraceables.CON_014_EXHAUSTIVE_SUBSTITUTION,
@@ -222,7 +210,10 @@ const substituteProjectWide = realizes(
       if (original !== null) {
         let updated = original;
         for (const [temporaryId, boundId] of substitutions) {
-          updated = updated.replaceAll(temporaryId, boundId);
+          updated = updated.replace(
+            new RegExp(`${escapeRegExp(temporaryId)}(?![0-9A-Za-z])`, "g"),
+            boundId,
+          );
         }
         if (updated !== original) {
           await writeFile(file, updated, "utf8");
@@ -237,33 +228,13 @@ async function collectSpecFiles(layout: Layout): Promise<string[]> {
   const dirs = [layout.stories.dir, layout.derivedSpecs.dir, layout.drafts.dir];
   const found = new Set<string>([layout.entities.file]);
   for (const dir of dirs) {
-    await walkMarkdown(dir, found);
+    for (const file of await walkFiles(dir)) {
+      if (file.name.endsWith(".md")) {
+        found.add(file.path);
+      }
+    }
   }
   return [...found];
-}
-
-async function walkMarkdown(dir: string, found: Set<string>): Promise<void> {
-  const entries = await readDirOrEmpty(dir);
-  for (const entry of entries) {
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      await walkMarkdown(full, found);
-    } else if (entry.name.endsWith(".md")) {
-      found.add(full);
-    }
-  }
-}
-
-/** Lists a directory's entries, treating a missing directory as empty. */
-async function readDirOrEmpty(dir: string): Promise<Dirent[]> {
-  try {
-    return await readdir(dir, { withFileTypes: true });
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return [];
-    }
-    throw error;
-  }
 }
 
 /** Reads a file, treating a missing file as absent rather than an error. */

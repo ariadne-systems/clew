@@ -12,15 +12,21 @@ import {
 import { describe, expect, test } from "vitest";
 import { ErrorCode, mint, mintTemporary } from "../index.js";
 
-type Paths = { configFile: string; stateFile: string };
+type Paths = { configFile: string; stateFile: string; draftsDir: string };
 
 async function tempPaths(
   idGeneration?: { mode?: string; padding?: number },
   lenses?: Array<{ id: string; description: string }>,
 ): Promise<Paths> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-mint-"));
+  const draftsDir = join(dir, "drafts");
+  await mkdir(draftsDir, { recursive: true });
   const configFile = join(dir, ".ariadnerc.json");
-  const config: Record<string, unknown> = {};
+  // Point the drafts location at an isolated dir so temporary minting's
+  // per-author scan does not read the real corpus.
+  const config: Record<string, unknown> = {
+    layout: { drafts: { dir: draftsDir } },
+  };
   if (idGeneration) {
     config.idGeneration = idGeneration;
   }
@@ -28,7 +34,7 @@ async function tempPaths(
     config.lenses = lenses;
   }
   await writeFile(configFile, JSON.stringify(config), "utf8");
-  return { configFile, stateFile: join(dir, "state.json") };
+  return { configFile, stateFile: join(dir, "state.json"), draftsDir };
 }
 
 async function readHighWaterMark(
@@ -241,27 +247,96 @@ describe("prefix validation", () => {
 describe("temporary minting", () => {
   verifies(
     [
-      SwTraceables.SW_005_MINT_TEMPORARY_IDS,
+      SwTraceables.SW_032_TEMPORARY_MINTING_PER_AUTHOR_NUMBERING,
       ConTraceables.CON_007_TEMPORARY_ID_UNBOUND,
+      ConTraceables.CON_023_TEMPORARY_AUTHOR_LETTER_LED,
     ],
     () => {
-      test("mints N temporary ids of the form <TYPE>-TMP-<opaque>", async () => {
+      test("solo: mints a padded per-prefix sequence with no author postfix", async () => {
         const { configFile, stateFile } = await tempPaths({ padding: 3 });
 
         const ids = await mintTemporary("SW", 3, { configFile, stateFile });
 
-        expect(ids).toHaveLength(3);
-        for (const id of ids) {
-          expect(id).toMatch(/^SW-TMP-[0-9a-f]+$/);
-        }
+        expect(ids).toEqual(["SW-TMP-001", "SW-TMP-002", "SW-TMP-003"]);
       });
 
-      test("the opaque suffixes within a call are all distinct", async () => {
+      test("with an author, the sequence is namespaced by the author postfix", async () => {
         const { configFile, stateFile } = await tempPaths({ padding: 3 });
 
-        const ids = await mintTemporary("SW", 5, { configFile, stateFile });
+        const ids = await mintTemporary("SW", 3, {
+          configFile,
+          stateFile,
+          author: "TS",
+        });
 
-        expect(new Set(ids).size).toBe(5);
+        expect(ids).toEqual([
+          "SW-TMP-TS-001",
+          "SW-TMP-TS-002",
+          "SW-TMP-TS-003",
+        ]);
+      });
+
+      test("the next number is the per-(prefix, author) maximum plus one, found by scanning drafts", async () => {
+        const { configFile, stateFile, draftsDir } = await tempPaths({
+          padding: 3,
+        });
+        // TS up to 004; another author's 009 and an author-less 007 must not shift TS.
+        await writeFile(join(draftsDir, "SW-TMP-TS-004-a.md"), "x", "utf8");
+        await writeFile(join(draftsDir, "SW-TMP-TS-002-b.md"), "x", "utf8");
+        await writeFile(join(draftsDir, "SW-TMP-AB-009-c.md"), "x", "utf8");
+        await writeFile(join(draftsDir, "SW-TMP-007-d.md"), "x", "utf8");
+
+        const ids = await mintTemporary("SW", 2, {
+          configFile,
+          stateFile,
+          author: "TS",
+        });
+
+        expect(ids).toEqual(["SW-TMP-TS-005", "SW-TMP-TS-006"]);
+      });
+
+      test("a freed number is not reused — the maximum drives the next, not the count", async () => {
+        const { configFile, stateFile, draftsDir } = await tempPaths({
+          padding: 3,
+        });
+        // 001 and 002 were promoted away; only 003 remains, so the next is 004.
+        await writeFile(join(draftsDir, "SW-TMP-003-x.md"), "x", "utf8");
+
+        const ids = await mintTemporary("SW", 1, { configFile, stateFile });
+
+        expect(ids).toEqual(["SW-TMP-004"]);
+      });
+
+      test("a legacy opaque-hex draft does not shift the readable sequence", async () => {
+        const { configFile, stateFile, draftsDir } = await tempPaths({
+          padding: 3,
+        });
+        // A legacy `<PREFIX>-TMP-<hex>` draft (promote still accepts these) begins
+        // with a digit; its leading digits must not be read as a number.
+        await writeFile(join(draftsDir, "SW-TMP-9f3a1c-old.md"), "x", "utf8");
+
+        const ids = await mintTemporary("SW", 1, { configFile, stateFile });
+
+        expect(ids).toEqual(["SW-TMP-001"]);
+      });
+
+      test("an author that is not letter-led is rejected with code E_INVALID_AUTHOR, nothing produced", async () => {
+        const { configFile, stateFile } = await tempPaths({ padding: 3 });
+
+        await expect(
+          mintTemporary("SW", 1, { configFile, stateFile, author: "12" }),
+        ).rejects.toMatchObject({ code: ErrorCode.INVALID_AUTHOR });
+        await expect(
+          mintTemporary("SW", 1, { configFile, stateFile, author: "ts" }),
+        ).rejects.toMatchObject({ code: ErrorCode.INVALID_AUTHOR });
+      });
+
+      test("the reserved marker is rejected as an author, so a temporary id keeps one marker", async () => {
+        const { configFile, stateFile } = await tempPaths({ padding: 3 });
+
+        await expect(
+          mintTemporary("SW", 1, { configFile, stateFile, author: "TMP" }),
+        ).rejects.toMatchObject({ code: ErrorCode.INVALID_AUTHOR });
       });
 
       test("temporary minting advances no sequence and writes no state file", async () => {
@@ -289,7 +364,7 @@ describe("temporary minting", () => {
         const ids = await mintTemporary("SW", 3, { configFile, stateFile });
 
         for (const id of ids) {
-          expect(id).toMatch(/^SW-TMP-[0-9a-f]+$/);
+          expect(id).toMatch(/^SW-TMP-\d+$/);
           expect(id).not.toMatch(/^SW-\d+$/);
         }
       });
@@ -356,10 +431,7 @@ describe("reserved temporary marker", () => {
 
       const ids = await mintTemporary("TMPX", 2, { configFile, stateFile });
 
-      expect(ids).toHaveLength(2);
-      for (const id of ids) {
-        expect(id).toMatch(/^TMPX-TMP-[0-9a-f]+$/);
-      }
+      expect(ids).toEqual(["TMPX-TMP-001", "TMPX-TMP-002"]);
     });
   });
 });

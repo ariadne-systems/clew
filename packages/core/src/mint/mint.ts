@@ -1,16 +1,25 @@
-import { ArchTraceables, ConTraceables, realizes } from "@ariadne-thread/trace";
+import {
+  ArchTraceables,
+  ConTraceables,
+  realizes,
+  SwTraceables,
+} from "@ariadne-thread/trace";
 import type { IdGenerationConfig } from "../config/config.js";
 import {
   readConfiguredPrefixes,
   readIdGenerationConfig,
+  readLayout,
 } from "../config/config.js";
 import { AriadneError, ErrorCode } from "../errors.js";
+import { walkFiles } from "../fs/walk-files.js";
 import type { IdStrategy } from "./id-strategy.js";
 import { OpaqueIdStrategy } from "./opaque-id-strategy.js";
 import { SequentialIdStrategy } from "./sequential-id-strategy.js";
 import {
+  assertValidAuthor,
   buildTemporaryId,
   TEMPORARY_MARKER,
+  temporaryNumberPattern,
   typeUsesReservedMarker,
 } from "./temporary-id.js";
 
@@ -19,6 +28,15 @@ export type MintOptions = {
   configFile?: string;
   /** Path to the state file. Defaults to the StateStore default. */
   stateFile?: string;
+};
+
+export type MintTemporaryOptions = MintOptions & {
+  /**
+   * The draft author, namespacing the per-author sequence. The caller resolves it
+   * (the `--as` option, falling back to `CLEW_DRAFT_AUTHOR`); omitted is the solo
+   * default. When given it must be a letter-led, uppercase postfix.
+   */
+  author?: string;
 };
 
 /**
@@ -42,30 +60,69 @@ export async function mint(
 }
 
 /**
- * Mints `count` temporary, unbound ids for `type`, each of the form
- * `<TYPE>-TMP-<opaque>`. Temporary minting is stateless: it reads configuration
- * to validate the prefix, but opens no StateStore session, takes no lock, and
- * advances no sequence, so nothing is bound. The prefix is validated by
- * the same rules as the bound path: the reserved-marker rule and the
- * configured-prefix rule, so every temporary id carries exactly one
- * `-TMP-` marker and parses unambiguously.
+ * Mints `count` temporary, unbound ids for `type` — `<TYPE>-TMP-[<AUTHOR>-]<NNN>`,
+ * the optional author namespacing the sequence.
  */
-export async function mintTemporary(
+export const mintTemporary: (
   type: string,
   count: number,
-  options: MintOptions = {},
-): Promise<string[]> {
-  const prefixes = await readConfiguredPrefixes(options.configFile);
-  assertTypeNotReserved(type);
-  assertPrefixConfigured(type, prefixes);
-  if (!Number.isInteger(count) || count < 1) {
-    throw new AriadneError(
-      ErrorCode.INVALID_COUNT,
-      `Mint count must be a positive integer, got ${count}.`,
+  options?: MintTemporaryOptions,
+) => Promise<string[]> = realizes(
+  [
+    SwTraceables.SW_032_TEMPORARY_MINTING_PER_AUTHOR_NUMBERING,
+    ConTraceables.CON_007_TEMPORARY_ID_UNBOUND,
+  ],
+  async (
+    type: string,
+    count: number,
+    options: MintTemporaryOptions = {},
+  ): Promise<string[]> => {
+    const [prefixes, idConfig, layout] = await Promise.all([
+      readConfiguredPrefixes(options.configFile),
+      readIdGenerationConfig(options.configFile),
+      readLayout(options.configFile),
+    ]);
+    assertTypeNotReserved(type);
+    assertPrefixConfigured(type, prefixes);
+    if (!Number.isInteger(count) || count < 1) {
+      throw new AriadneError(
+        ErrorCode.INVALID_COUNT,
+        `Mint count must be a positive integer, got ${count}.`,
+      );
+    }
+    const { author } = options;
+    if (author !== undefined) {
+      assertValidAuthor(author);
+    }
+    const start = await maxDraftNumber(layout.drafts.dir, type, author);
+    return Array.from({ length: count }, (_value, index) =>
+      buildTemporaryId(type, author, start + index + 1, idConfig.padding),
     );
-  }
-  return Array.from({ length: count }, () => buildTemporaryId(type));
-}
+  },
+);
+
+/**
+ * The highest temporary number for `(type, author)` among the draft filenames — 0
+ * when none, or when the drafts directory is missing.
+ */
+const maxDraftNumber = realizes(
+  SwTraceables.SW_032_TEMPORARY_MINTING_PER_AUTHOR_NUMBERING,
+  async (
+    draftsDir: string,
+    type: string,
+    author: string | undefined,
+  ): Promise<number> => {
+    const pattern = temporaryNumberPattern(type, author);
+    let max = 0;
+    for (const file of await walkFiles(draftsDir)) {
+      const found = pattern.exec(file.name);
+      if (found?.[1] !== undefined) {
+        max = Math.max(max, Number(found[1]));
+      }
+    }
+    return max;
+  },
+);
 
 /** Selects the id strategy from configuration. */
 const createIdStrategy = realizes(
