@@ -1,9 +1,10 @@
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { ConTraceables, NfTraceables, realizes } from "@ariadne-thread/trace";
 import lockfile from "proper-lockfile";
 import type { AriadneState, SequenceMap } from "../entities/ariadne-state.js";
 import { AriadneError, ErrorCode } from "../errors.js";
+import { writeFileAtomic } from "../fs/atomic-write.js";
 
 /** Default location of the committed state file. */
 export const DEFAULT_STATE_FILE = ".ariadne/state.json";
@@ -45,10 +46,8 @@ const loadState = realizes(
 const saveState = realizes(
   NfTraceables.NF_002_ATOMIC_STATE_WRITE,
   async (file: string, state: AriadneState): Promise<void> => {
-    const tmp = `${file}.tmp`;
     try {
-      await writeFile(tmp, `${JSON.stringify(state, null, 2)}\n`, "utf8");
-      await rename(tmp, file);
+      await writeFileAtomic(file, `${JSON.stringify(state, null, 2)}\n`);
     } catch (error) {
       throw new AriadneError(
         ErrorCode.STATE_WRITE_FAILED,
