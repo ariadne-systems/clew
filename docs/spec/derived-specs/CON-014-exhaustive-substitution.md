@@ -24,3 +24,7 @@ A reference to the promoted draft from an already-promoted spec, and from an unp
 **Concerns**
 
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+
+## Changes
+
+- **2026-06-27** — Recorded the failure-case complement (CON-024): this constrains a successful promotion — no occurrence of the temporary id is left behind — while CON-024 constrains a failed one, where no change is left behind.
