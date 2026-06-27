@@ -3,6 +3,8 @@ A temporary id's author postfix is letter-led, never bare digits
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 When a temporary id carries an author postfix, that postfix is **letter-led** — `[A-Z][A-Z0-9]*`: uppercase, beginning with a letter, never bare digits.
 This keeps the optional postfix unambiguous against the number, so `SW-TMP-001` parses as number-only and `SW-TMP-TS-001` as author-then-number, with no id readable as either.

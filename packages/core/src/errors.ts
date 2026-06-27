@@ -35,6 +35,10 @@ export const ErrorCode = {
   INVALID_EXCLUSION_PATTERN: "E_INVALID_EXCLUSION_PATTERN",
   /** A spec declares a `**Status**` value that is not one of the recognized states. */
   INVALID_SPEC_STATUS: "E_INVALID_SPEC_STATUS",
+  /** A draft author postfix (`--as` or `CLEW_DRAFT_AUTHOR`) is not letter-led. */
+  INVALID_AUTHOR: "E_INVALID_AUTHOR",
+  /** Command options are combined invalidly (e.g. `--as` without `--tmp`). */
+  INVALID_OPTIONS: "E_INVALID_OPTIONS",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

@@ -3,7 +3,7 @@ Mint temporary, unbound ids
 
 **Lens**: SW
 
-**Status**: active
+**Status**: deprecated
 
 **Description**
 In temporary mode, minting for a prefix produces ids of the form `<PREFIX>-TMP-<opaque>`, where the opaque part is a crypto-random token.
@@ -30,3 +30,4 @@ Cross-call uniqueness follows by construction from the crypto-random token; it i
 
 - **2026-06-26** — STR-021 (SW-032) replaces the opaque temporary-id form with a readable per-author sequence (`<PREFIX>-TMP-[<AUTHOR>-]<NNN>`).
 This spec describes the current opaque form and is superseded by SW-032 when STR-021 is implemented.
+- **2026-06-26** — **Deprecated.** STR-021 is implemented — temporary minting is now the per-author sequence (SW-032), and no code realizes this spec. The opaque form above is the historical behaviour.

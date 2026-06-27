@@ -3,6 +3,8 @@ Temporary minting numbers ids per author, the author resolved from `--as` or the
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 Minting a temporary id produces `<PREFIX>-TMP-[<AUTHOR>-]<NNN>` (SW-005, as revised).
 The author is resolved in order — the `--as` option, then the `CLEW_DRAFT_AUTHOR` environment variable — and is **omitted** when neither is set, the solo default, with no fail-fast.

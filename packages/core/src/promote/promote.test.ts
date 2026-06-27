@@ -103,6 +103,77 @@ describe("finalizing drafts", () => {
         await expect(readFile(from, "utf8")).rejects.toThrow();
       });
 
+      test("recognizes the readable temporary forms — solo and author-postfixed", async () => {
+        const p = await project();
+        await writeDraft(
+          p.draftsDir,
+          "derived-specs",
+          "SW-TMP-001-solo.md",
+          "Spec SW-TMP-001\n",
+        );
+        await writeDraft(
+          p.draftsDir,
+          "derived-specs",
+          "CON-TMP-TS-002-author.md",
+          "Spec CON-TMP-TS-002\n",
+        );
+
+        const result = await promote({
+          configFile: p.configFile,
+          stateFile: p.stateFile,
+        });
+
+        const boundByTemporary = new Map(
+          result.promoted.map((draft) => [draft.temporaryId, draft.boundId]),
+        );
+        expect(boundByTemporary.get("SW-TMP-001")).toBe("SW-001");
+        expect(boundByTemporary.get("CON-TMP-TS-002")).toBe("CON-001");
+        expect(
+          await readFile(join(p.derivedDir, "SW-001-solo.md"), "utf8"),
+        ).toBe("Spec SW-001\n");
+        expect(
+          await readFile(join(p.derivedDir, "CON-001-author.md"), "utf8"),
+        ).toBe("Spec CON-001\n");
+      });
+
+      test("a temporary id that is a string-prefix of another is substituted without corrupting the longer one", async () => {
+        const p = await project();
+        // The two temporary ids share a prefix: `SW-TMP-1` is the head of `SW-TMP-10`.
+        await writeDraft(
+          p.draftsDir,
+          "derived-specs",
+          "SW-TMP-1-low.md",
+          "low\n",
+        );
+        await writeDraft(
+          p.draftsDir,
+          "derived-specs",
+          "SW-TMP-10-high.md",
+          "high\n",
+        );
+        // An existing spec references the longer id; the shorter id's substitution
+        // must not rewrite a substring of it.
+        await writeFile(
+          join(p.derivedDir, "SW-009-ref.md"),
+          "See SW-TMP-10 and SW-TMP-1.\n",
+          "utf8",
+        );
+
+        const result = await promote({
+          configFile: p.configFile,
+          stateFile: p.stateFile,
+        });
+
+        const boundByTemporary = new Map(
+          result.promoted.map((draft) => [draft.temporaryId, draft.boundId]),
+        );
+        const boundShort = boundByTemporary.get("SW-TMP-1");
+        const boundLong = boundByTemporary.get("SW-TMP-10");
+        expect(
+          await readFile(join(p.derivedDir, "SW-009-ref.md"), "utf8"),
+        ).toBe(`See ${boundLong} and ${boundShort}.\n`);
+      });
+
       test("substitutes the temporary id in an already-promoted spec and an unpromoted draft", async () => {
         const p = await project();
         await writeDraft(

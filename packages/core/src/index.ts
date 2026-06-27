@@ -40,7 +40,7 @@ export { setup } from "./config/setup.js";
 export type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
 export { AriadneError, ErrorCode } from "./errors.js";
 export type { IdStrategy } from "./mint/id-strategy.js";
-export type { MintOptions } from "./mint/mint.js";
+export type { MintOptions, MintTemporaryOptions } from "./mint/mint.js";
 export { mint, mintTemporary } from "./mint/mint.js";
 export type {
   PromotedDraft,

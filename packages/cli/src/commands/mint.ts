@@ -8,6 +8,29 @@ import {
 import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
+type MintCommandOptions = { tmp?: boolean; as?: string };
+
+/**
+ * Whether `--as` was given without `--tmp`. Author namespacing applies only to
+ * temporary minting, so this combination is rejected rather than silently ignored.
+ */
+function authorWithoutTemporary(options: MintCommandOptions): boolean {
+  return options.as !== undefined && !options.tmp;
+}
+
+/**
+ * Resolves the draft author: the `--as` option, then `CLEW_DRAFT_AUTHOR`. An unset
+ * value is the solo default; a present-but-empty flag or env var counts as unset, so
+ * it falls back rather than failing author validation downstream.
+ */
+function resolveAuthor(options: MintCommandOptions): string | undefined {
+  const configuredAuthor = options.as ?? process.env.CLEW_DRAFT_AUTHOR;
+  if (configuredAuthor === undefined || configuredAuthor.length === 0) {
+    return undefined;
+  }
+  return configuredAuthor;
+}
+
 /**
  * Registers the `clew mint` command surface (STR-005, STR-007).
  * The action stays thin: it delegates allocation and validation to core's
@@ -26,8 +49,12 @@ export const registerMint: (program: Command) => void = realizes(
       .argument("<type>", "id prefix to mint for (e.g. SW)")
       .argument("[count]", "how many ids to mint", "1")
       .option("-t, --tmp", "mint temporary, unbound ids that touch no state")
+      .option(
+        "--as <author>",
+        "namespace temporary ids by author (e.g. TS); falls back to CLEW_DRAFT_AUTHOR",
+      )
       .action(
-        async (type: string, count: string, options: { tmp?: boolean }) => {
+        async (type: string, count: string, options: MintCommandOptions) => {
           await requireConfig();
           const requestedCount = Number(count);
           if (!Number.isInteger(requestedCount)) {
@@ -36,8 +63,16 @@ export const registerMint: (program: Command) => void = realizes(
               `count must be a whole number, got "${count}".`,
             );
           }
+          if (authorWithoutTemporary(options)) {
+            throw new AriadneError(
+              ErrorCode.INVALID_OPTIONS,
+              "`--as` applies only to temporary minting; pass `--tmp`, or drop `--as`.",
+            );
+          }
           const ids = options.tmp
-            ? await mintTemporary(type, requestedCount)
+            ? await mintTemporary(type, requestedCount, {
+                author: resolveAuthor(options),
+              })
             : await mint(type, requestedCount);
           for (const id of ids) {
             process.stdout.write(`${id}\n`);

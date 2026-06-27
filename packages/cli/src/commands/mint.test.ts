@@ -12,6 +12,7 @@ const originalCwd = process.cwd();
 afterEach(() => {
   process.chdir(originalCwd);
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
 });
 
 // Creates an isolated project directory with a known config and switches into
@@ -106,27 +107,35 @@ describe("invalid input", () => {
       expect(stdout()).toBe("");
       expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
     });
+
+    test("--as without --tmp is rejected with code E_INVALID_OPTIONS and nothing is minted", async () => {
+      const dir = await setupProjectDir();
+      const stdout = captureStdout();
+
+      await expect(
+        runAriadne("mint", "--as", "TS", "SW"),
+      ).rejects.toMatchObject({ code: ErrorCode.INVALID_OPTIONS });
+
+      expect(stdout()).toBe("");
+      expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
+    });
   });
 });
 
 describe("temporary mode", () => {
   verifies(
     [
-      SwTraceables.SW_005_MINT_TEMPORARY_IDS,
+      SwTraceables.SW_008_MINT_COMMAND,
       ConTraceables.CON_007_TEMPORARY_ID_UNBOUND,
     ],
     () => {
-      test("mint --tmp prints temporary ids, one per line", async () => {
+      test("mint --tmp prints the temporary sequence, one per line", async () => {
         await setupProjectDir();
         const stdout = captureStdout();
 
         await runAriadne("mint", "--tmp", "SW", "3");
 
-        const lines = stdout().trimEnd().split("\n");
-        expect(lines).toHaveLength(3);
-        for (const line of lines) {
-          expect(line).toMatch(/^SW-TMP-[0-9a-f]+$/);
-        }
+        expect(stdout()).toBe("SW-TMP-001\nSW-TMP-002\nSW-TMP-003\n");
       });
 
       test("the short form -t mints a temporary id", async () => {
@@ -135,7 +144,36 @@ describe("temporary mode", () => {
 
         await runAriadne("mint", "-t", "SW");
 
-        expect(stdout()).toMatch(/^SW-TMP-[0-9a-f]+\n$/);
+        expect(stdout()).toBe("SW-TMP-001\n");
+      });
+
+      test("--as namespaces the temporary ids by author", async () => {
+        await setupProjectDir();
+        const stdout = captureStdout();
+
+        await runAriadne("mint", "--tmp", "--as", "TS", "SW", "2");
+
+        expect(stdout()).toBe("SW-TMP-TS-001\nSW-TMP-TS-002\n");
+      });
+
+      test("the author falls back to CLEW_DRAFT_AUTHOR when --as is absent", async () => {
+        await setupProjectDir();
+        vi.stubEnv("CLEW_DRAFT_AUTHOR", "ENV");
+        const stdout = captureStdout();
+
+        await runAriadne("mint", "--tmp", "SW");
+
+        expect(stdout()).toBe("SW-TMP-ENV-001\n");
+      });
+
+      test("an empty CLEW_DRAFT_AUTHOR falls back to the solo default rather than failing", async () => {
+        await setupProjectDir();
+        vi.stubEnv("CLEW_DRAFT_AUTHOR", "");
+        const stdout = captureStdout();
+
+        await runAriadne("mint", "--tmp", "SW");
+
+        expect(stdout()).toBe("SW-TMP-001\n");
       });
 
       test("temporary minting writes no state file", async () => {

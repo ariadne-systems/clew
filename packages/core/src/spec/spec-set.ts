@@ -1,6 +1,7 @@
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Lens, SpecSetMatcher } from "../config/config.js";
 import { AriadneError, ErrorCode } from "../errors.js";
+import { escapeRegExp } from "../text/escape-regexp.js";
 import type { ScannedSpec, SpecSet } from "./generator.js";
 
 /**
@@ -137,9 +138,4 @@ function toSortedSpecSets(
       specs: members.sort((left, right) => left.id.localeCompare(right.id)),
     }))
     .sort((left, right) => left.name.localeCompare(right.name));
-}
-
-/** Escapes a literal string for safe use inside a regular expression. */
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
