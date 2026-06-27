@@ -1,9 +1,14 @@
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { access, readFile, rm } from "node:fs/promises";
+import { join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Layout } from "../config/config.js";
 import { readLayout, readLenses } from "../config/config.js";
 import { AriadneError, ErrorCode } from "../errors.js";
+import {
+  type FileWrite,
+  TEMP_SUFFIX,
+  writeFilesAtomic,
+} from "../fs/atomic-write.js";
 import { walkFiles } from "../fs/walk-files.js";
 import { mint } from "../mint/mint.js";
 import { parseTemporaryDraftId } from "../mint/temporary-id.js";
@@ -44,13 +49,12 @@ type DraftFile = {
 };
 
 /**
- * Finalizes reviewed drafts into the spec tree (STR-013): the mechanical
- * half of promotion. For each draft — the pending drafts in the configured drafts
- * location, or the ones named — it binds a real id by minting the draft's lens
- * (its temporary id's prefix), substitutes that temporary id project-wide
- * and moves the draft into its configured location renamed to the
- * bound id. Ids are bound first, then the substitution runs, then the files move,
- * so a failure never leaves a half-substituted tree (STR-013). It performs no
+ * Finalizes reviewed drafts into the spec tree: the mechanical half of promotion.
+ * For each draft — the pending drafts in the configured drafts location, or the
+ * ones named — it binds a real id by minting the draft's lens (its temporary id's
+ * prefix), substitutes that temporary id across the corpus, and moves the draft
+ * into its configured location renamed to the bound id. The substitution and move
+ * are staged to temporary files and committed by rename. It performs no
  * integration reasoning and does not commit.
  */
 export const promote: (options?: PromoteOptions) => Promise<PromoteResult> =
@@ -96,12 +100,7 @@ export const promote: (options?: PromoteOptions) => Promise<PromoteResult> =
         });
       }
 
-      await substituteProjectWide(layout, substitutions);
-
-      for (const entry of promoted) {
-        await mkdir(dirname(entry.to), { recursive: true });
-        await rename(entry.from, entry.to);
-      }
+      await applyAtomically(layout, promoted, substitutions);
 
       return { promoted };
     },
@@ -180,6 +179,11 @@ async function discoverDrafts(draftsDir: string): Promise<DraftFile[]> {
 
 /** Parses a draft's temporary id from its filename, or returns undefined for a non-draft. */
 function parseDraft(path: string, fileName: string): DraftFile | undefined {
+  // A staging temporary left by an interrupted run is not a draft, even though its
+  // head parses as a temporary id.
+  if (fileName.endsWith(TEMP_SUFFIX)) {
+    return undefined;
+  }
   const parsed = parseTemporaryDraftId(fileName);
   if (parsed === undefined) {
     return undefined;
@@ -194,34 +198,105 @@ function parseDraft(path: string, fileName: string): DraftFile | undefined {
 }
 
 /**
- * Each replacement is bounded so a shorter id (`SW-TMP-1`) never matches inside a
- * longer one (`SW-TMP-10`): a temporary id's trailing run is alphanumeric, so it
- * ends only where no further id character follows.
+ * Applies a promotion's file changes as a stage-then-commit. Each promoted draft
+ * moves to its bound-id target carrying its substituted content; every other spec
+ * file that mentions a promoted id is rewritten where it sits. A draft's target
+ * must be free first; the writes are then staged and committed together by
+ * `writeFilesAtomic`, and the moved drafts removed.
  */
-const substituteProjectWide = realizes(
-  ConTraceables.CON_014_EXHAUSTIVE_SUBSTITUTION,
+const applyAtomically = realizes(
+  [
+    ConTraceables.CON_014_EXHAUSTIVE_SUBSTITUTION,
+    ConTraceables.CON_024_ATOMIC_PROMOTION,
+  ],
   async (
     layout: Layout,
+    promoted: readonly PromotedDraft[],
     substitutions: ReadonlyMap<string, string>,
   ): Promise<void> => {
-    const files = await collectSpecFiles(layout);
-    for (const file of files) {
-      const original = await readFileOrNull(file);
-      if (original !== null) {
-        let updated = original;
-        for (const [temporaryId, boundId] of substitutions) {
-          updated = updated.replace(
-            new RegExp(`${escapeRegExp(temporaryId)}(?![0-9A-Za-z])`, "g"),
-            boundId,
-          );
-        }
-        if (updated !== original) {
-          await writeFile(file, updated, "utf8");
-        }
+    const draftSources = new Set(promoted.map((entry) => entry.from));
+
+    const writes: FileWrite[] = [];
+    // Rewrite in place every spec file that mentions a promoted id — except a
+    // promoted draft itself, which is moved rather than rewritten where it sits.
+    for (const file of await collectSpecFiles(layout)) {
+      if (draftSources.has(file)) {
+        continue;
       }
+      const original = await readFileOrNull(file);
+      if (original === null) {
+        continue;
+      }
+      const updated = applySubstitutions(original, substitutions);
+      if (updated !== original) {
+        writes.push({ path: file, content: updated });
+      }
+    }
+    // Move each promoted draft to its bound-id target, carrying its substituted
+    // content. The move list comes from `promoted`, not the markdown-only file
+    // walk, so a draft is moved whatever its filename.
+    for (const entry of promoted) {
+      const original = await readFileOrNull(entry.from);
+      if (original === null) {
+        throw new Error(
+          `Draft "${entry.from}" disappeared before it could be promoted.`,
+        );
+      }
+      writes.push({
+        path: entry.to,
+        content: applySubstitutions(original, substitutions),
+      });
+    }
+
+    // A bound-id target must be free; a collision means the id was already used, so
+    // abort before staging anything.
+    for (const entry of promoted) {
+      if (await pathExists(entry.to)) {
+        throw new Error(`Promotion target "${entry.to}" already exists.`);
+      }
+    }
+
+    await writeFilesAtomic(writes);
+
+    // The targets are committed; remove the moved drafts. If a removal fails (a
+    // draft held open, a permission denial), the promotion is already applied — name
+    // every leftover so it can be deleted before a retry, which would otherwise
+    // promote it again under a new id.
+    const unremoved: string[] = [];
+    for (const entry of promoted) {
+      try {
+        await rm(entry.from, { force: true });
+      } catch {
+        unremoved.push(entry.from);
+      }
+    }
+    if (unremoved.length > 0) {
+      throw new Error(
+        `Promotion was applied, but these draft files could not be removed: ${unremoved.join(", ")}. Delete them before re-running, or they will be promoted again under new ids.`,
+      );
     }
   },
 );
+
+/**
+ * Replaces every temporary id with its bound id in `text`. Each replacement is
+ * bounded so a shorter id (`SW-TMP-1`) never matches inside a longer one
+ * (`SW-TMP-10`): a temporary id's trailing run is alphanumeric, so it ends only
+ * where no further id character follows.
+ */
+function applySubstitutions(
+  text: string,
+  substitutions: ReadonlyMap<string, string>,
+): string {
+  let updated = text;
+  for (const [temporaryId, boundId] of substitutions) {
+    updated = updated.replace(
+      new RegExp(`${escapeRegExp(temporaryId)}(?![0-9A-Za-z])`, "g"),
+      boundId,
+    );
+  }
+  return updated;
+}
 
 /** The markdown files a temporary id can appear in: the spec tree and the drafts. */
 async function collectSpecFiles(layout: Layout): Promise<string[]> {
@@ -244,6 +319,19 @@ async function readFileOrNull(file: string): Promise<string | null> {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return null;
+    }
+    throw error;
+  }
+}
+
+/** Whether a path exists. A missing path is `false`; any other error propagates. */
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await access(path);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return false;
     }
     throw error;
   }

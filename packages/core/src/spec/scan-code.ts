@@ -1,12 +1,13 @@
 import type { Dirent } from "node:fs";
-import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
-import { dirname, extname, join } from "node:path";
+import { readdir, readFile } from "node:fs/promises";
+import { extname, join } from "node:path";
 import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import {
   readExclude,
   readGenerators,
   readUnexclude,
 } from "../config/config.js";
+import { writeFileAtomic } from "../fs/atomic-write.js";
 import type { ExclusionRules } from "./exclusions.js";
 import {
   compileExclusionRules,
@@ -170,11 +171,8 @@ export const writeLocationsIndex: (
       options.projectRoot ?? ".",
       options.file ?? DEFAULT_LOCATIONS_FILE,
     );
-    await mkdir(dirname(file), { recursive: true });
-    const temporary = `${file}.tmp`;
     const body = `${JSON.stringify({ locations: result.anchors }, null, 2)}\n`;
-    await writeFile(temporary, body, "utf8");
-    await rename(temporary, file);
+    await writeFileAtomic(file, body);
     return file;
   },
 );

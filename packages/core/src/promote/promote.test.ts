@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -239,6 +239,27 @@ describe("finalizing drafts", () => {
         ]);
       });
 
+      test("moves a promoted draft whatever its filename extension", async () => {
+        const p = await project();
+        const from = await writeDraft(
+          p.draftsDir,
+          "derived-specs",
+          "SW-TMP-001-note.txt",
+          "Spec SW-TMP-001\n",
+        );
+
+        const result = await promote({
+          configFile: p.configFile,
+          stateFile: p.stateFile,
+        });
+
+        expect(result.promoted[0]?.boundId).toBe("SW-001");
+        expect(
+          await readFile(join(p.derivedDir, "SW-001-note.txt"), "utf8"),
+        ).toBe("Spec SW-001\n");
+        await expect(readFile(from, "utf8")).rejects.toThrow();
+      });
+
       test("returns nothing when there are no pending drafts", async () => {
         const p = await project();
 
@@ -251,6 +272,95 @@ describe("finalizing drafts", () => {
       });
     },
   );
+});
+
+describe("atomic finalization", () => {
+  verifies(ConTraceables.CON_024_ATOMIC_PROMOTION, () => {
+    test("a promotion whose bound-id target is occupied leaves the spec tree unchanged", async () => {
+      const p = await project();
+      const draftPath = await writeDraft(
+        p.draftsDir,
+        "derived-specs",
+        "SW-TMP-001-x.md",
+        "Spec SW-TMP-001\n",
+      );
+      // A promoted spec that references the draft — it must keep the temporary id
+      // if the run aborts.
+      await writeFile(
+        join(p.derivedDir, "SW-009-ref.md"),
+        "See SW-TMP-001.\n",
+        "utf8",
+      );
+      // Occupy the bound-id target: the first SW mint binds SW-001, so the
+      // pre-flight aborts before anything is staged. The minted id is left as a
+      // harmless gap — the guarantee is over the spec tree, not the sequence.
+      await writeFile(join(p.derivedDir, "SW-001-x.md"), "occupied\n", "utf8");
+
+      await expect(
+        promote({ configFile: p.configFile, stateFile: p.stateFile }),
+      ).rejects.toThrow();
+
+      // The spec tree is unchanged: the reference still points at the temporary
+      // id, the draft is still a draft, and the occupant is intact.
+      expect(await readFile(join(p.derivedDir, "SW-009-ref.md"), "utf8")).toBe(
+        "See SW-TMP-001.\n",
+      );
+      expect(await readFile(draftPath, "utf8")).toBe("Spec SW-TMP-001\n");
+      expect(await readFile(join(p.derivedDir, "SW-001-x.md"), "utf8")).toBe(
+        "occupied\n",
+      );
+    });
+
+    test("a successful promotion leaves no staging temporary behind", async () => {
+      const p = await project();
+      await writeDraft(
+        p.draftsDir,
+        "derived-specs",
+        "SW-TMP-001-x.md",
+        "Spec SW-TMP-001\n",
+      );
+      await writeFile(
+        join(p.derivedDir, "SW-009-ref.md"),
+        "See SW-TMP-001.\n",
+        "utf8",
+      );
+
+      await promote({ configFile: p.configFile, stateFile: p.stateFile });
+
+      for (const dir of [p.storiesDir, p.derivedDir, p.draftsDir]) {
+        const entries = await readdir(dir, { recursive: true });
+        expect(entries.filter((name) => name.endsWith(".tmp"))).toEqual([]);
+      }
+    });
+
+    test("a leftover staging temporary in the drafts dir is not promoted", async () => {
+      const p = await project();
+      await writeDraft(
+        p.draftsDir,
+        "derived-specs",
+        "SW-TMP-001-x.md",
+        "Spec SW-TMP-001\n",
+      );
+      // An orphaned staging temp from an interrupted run: its head parses as a
+      // temporary id, but the suffix marks it as not a draft.
+      const leftover = await writeDraft(
+        p.draftsDir,
+        "derived-specs",
+        "SW-TMP-009-y.md.tmp",
+        "leftover\n",
+      );
+
+      const result = await promote({
+        configFile: p.configFile,
+        stateFile: p.stateFile,
+      });
+
+      expect(result.promoted.map((entry) => entry.temporaryId)).toEqual([
+        "SW-TMP-001",
+      ]);
+      expect(await readFile(leftover, "utf8")).toBe("leftover\n");
+    });
+  });
 });
 
 describe("rejected drafts", () => {
