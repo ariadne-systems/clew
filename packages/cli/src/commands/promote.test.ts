@@ -50,7 +50,7 @@ describe("promote output", () => {
       const dir = await setupProjectDir();
       const stdout = captureStdout();
 
-      await runAriadne("promote");
+      await runAriadne("promote", "all");
 
       expect(stdout()).toContain("SW-TMP-deadbeef01 -> SW-001");
       const moved = await readFile(
@@ -66,7 +66,7 @@ describe("promote output", () => {
       process.chdir(dir);
       const stdout = captureStdout();
 
-      await runAriadne("promote");
+      await runAriadne("promote", "all");
 
       expect(stdout()).toContain("No pending drafts to promote.");
     });
@@ -74,15 +74,27 @@ describe("promote output", () => {
 });
 
 describe("promote invalid invocation", () => {
-  verifies(SwTraceables.SW_016_PROMOTE_COMMAND, () => {
-    test("an unknown option exits non-zero", () => {
-      const program = buildProgram().exitOverride();
+  verifies(
+    [
+      SwTraceables.SW_016_PROMOTE_COMMAND,
+      ConTraceables.CON_028_PROMOTION_ROOTED_AT_NAMED_DRAFTS,
+    ],
+    () => {
+      test("an unknown option exits non-zero", () => {
+        const program = buildProgram().exitOverride();
 
-      expect(() =>
-        program.parse(["node", "ariadne", "promote", "--bogus"]),
-      ).toThrow();
-    });
-  });
+        expect(() =>
+          program.parse(["node", "ariadne", "promote", "--bogus"]),
+        ).toThrow();
+      });
+
+      test("no named root exits non-zero", () => {
+        const program = buildProgram().exitOverride();
+
+        expect(() => program.parse(["node", "ariadne", "promote"])).toThrow();
+      });
+    },
+  );
 });
 
 describe("configuration required", () => {
@@ -93,7 +105,7 @@ describe("configuration required", () => {
       );
       process.chdir(dir);
 
-      await expect(runAriadne("promote")).rejects.toMatchObject({
+      await expect(runAriadne("promote", "all")).rejects.toMatchObject({
         code: ErrorCode.NO_CONFIG,
       });
     });

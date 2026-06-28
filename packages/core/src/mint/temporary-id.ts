@@ -96,6 +96,24 @@ export function parseTemporaryDraftId(
 }
 
 /**
+ * Every temporary-id token appearing anywhere in a body of text. Unanchored and
+ * global, with the trailing run closed at a non-id character so a token is read
+ * whole whether it stands alone, ends a slugged filename (`…-001-slug.md`), or
+ * sits in prose. The grammar matches `parseTemporaryDraftId`, so an extracted
+ * token equals the temporary id a draft filename parses to — letting promotion
+ * resolve a reference between drafts by exact lookup.
+ */
+const TEMPORARY_ID_IN_TEXT = new RegExp(
+  `[A-Z]+-${TEMPORARY_MARKER}-(?:${AUTHOR_SEGMENT}-)?[0-9a-f]+(?![0-9A-Za-z])`,
+  "g",
+);
+
+/** Finds every temporary-id token in `content`, for resolving references between drafts. */
+export function findTemporaryReferences(content: string): string[] {
+  return content.match(TEMPORARY_ID_IN_TEXT) ?? [];
+}
+
+/**
  * Whether `type` uses the reserved marker as a hyphen-delimited segment. Segment-wise,
  * so `TMPX` is allowed while `TMP` and `MY-TMP` are not.
  */

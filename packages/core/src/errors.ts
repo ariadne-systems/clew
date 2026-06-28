@@ -41,6 +41,8 @@ export const ErrorCode = {
   INVALID_OPTIONS: "E_INVALID_OPTIONS",
   /** Two files declare the same bound spec id. */
   DUPLICATE_SPEC_ID: "E_DUPLICATE_SPEC_ID",
+  /** A draft in a promotion references a temporary id that is not in the resolved set. */
+  UNRESOLVED_REFERENCE: "E_UNRESOLVED_REFERENCE",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
