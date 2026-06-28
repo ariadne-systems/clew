@@ -44,13 +44,14 @@ This reconciliation is the point of promotion.
 
 ### 3. Finalize — run `clew promote` (mechanical)
 
-Once integration is confirmed, run `clew promote` to finalize the drafts; it does the mechanical work deterministically, so you do not bind ids, substitute, or move files by hand:
+Once integration is confirmed, run `clew promote <story…>` to finalize; name the story (or stories) to promote — or `all`. It does the mechanical work deterministically, so you do not bind ids, substitute, or move files by hand:
 
-- it **binds** a real id for each draft by minting the draft's lens — the temporary id's prefix — advancing the state;
-- it **substitutes** every resolved temporary id project-wide, across the spec tree and the drafts location, including references in already-promoted specs, the domain model, and any draft that remains unpromoted — so a draft that referenced a promoted one points at the resolved id rather than a dangling temporary one;
+- it **resolves the set** as the named roots plus the closure of their temporary references — a story carries its specs through its references — and **refuses** if a reference points to a draft not in the set, so a promotion is never partial;
+- it **binds** a real id for each draft in the set by minting the draft's lens — the temporary id's prefix — advancing the state;
+- it **substitutes** each resolved temporary id within the drafts location — the promoted drafts and any other still-unpromoted draft that references them — so a draft that referenced a promoted one points at the bound id; the already-promoted spec tree is never rewritten;
 - it **moves** each draft into its place in the spec tree per the layout, renamed to its bound id.
 
-Invoke it for the drafts you confirmed: `clew promote` finalizes all pending drafts, or `clew promote <id|path>…` only the named ones. It reports each temporary-id → bound-id mapping.
+Invoke it for the story you confirmed: `clew promote <story|spec…>` finalizes those roots and their reference closure, or `clew promote all` finalizes every pending draft. A story must reference its draft specs, or they are not reached. It reports each temporary-id → bound-id mapping.
 
 Two things it does not do, which stay with you after it runs:
 
@@ -65,6 +66,6 @@ Leave committing to the user, and remind them the state file advanced so it is c
 ## Done when
 
 - The integration is reconciled with the user: relations, supersession, conflict, and duplication candidates presented and confirmed; no existing spec changed silently.
-- `clew promote` has finalized the confirmed drafts — each temporary id bound and reported (temp → bound), references substituted project-wide, files moved into the spec tree.
+- `clew promote` has finalized the confirmed story and its reference closure — each temporary id bound and reported (temp → bound), references substituted within the drafts, files moved into the spec tree.
 - The confirmed integration edits to existing specs are applied, and any entity draft is merged into the domain model by hand.
 - The user is reminded that the state file advanced and that committing is theirs.

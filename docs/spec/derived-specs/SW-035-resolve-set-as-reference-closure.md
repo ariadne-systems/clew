@@ -6,8 +6,8 @@ Promotion resolves its set as the closure of the named roots' references
 **Status**: active
 
 **Description**
-Promotion resolves the set it finalizes from the drafts named as roots — one or more stories or specs, or the keyword `all` — by following temporary references transitively: the set is the named roots plus every draft reachable from them through a temporary reference (CON-028).
-A reference that resolves to no draft in the set — a `-TMP-` marker (CON-008) pointing outside it — makes the promotion refuse before any id is bound, naming the unresolved reference, so no id is spent (CON-002) and nothing is moved.
+Promotion resolves the set it finalizes from the drafts named as roots — one or more stories or specs, or the keyword `all` — and the specs a **story** root directly references: only a story root brings other drafts into the set; a spec is a leaf, its references validated against the set rather than followed onward (CON-028).
+A draft in the set that references one the set does not include — a `-TMP-` marker (CON-008) pointing outside it — makes the promotion refuse before any id is bound, naming the reference, so no id is spent (CON-002) and nothing is moved.
 Substitution of the resolved ids then runs only within the drafts of the set (CON-014); the already-promoted tree is never rewritten.
 
 **Rationale**
@@ -15,8 +15,8 @@ Computing the set from the named roots' references makes "promote this story" me
 Resolving the whole closure and refusing an unresolved reference up front is what keeps a temporary id from ever reaching the promoted tree (CON-027); doing it before binding means a refused promotion costs nothing.
 
 **Verification Description**
-Promoting a named story finalizes that story and exactly the drafts reachable from it by temporary reference, and no other pending draft.
-A closure that reaches a temporary reference to a draft not in the set is refused, naming it, with no id bound and nothing moved.
+Promoting a named story finalizes that story and exactly the drafts it directly references, and no other pending draft.
+A draft in the set that references one the set does not include — including a spec the story did not itself reference — is refused, naming it, with no id bound and nothing moved.
 Promoting a named spec whose references are all already bound finalizes just that spec.
 
 ## Relations
@@ -41,3 +41,4 @@ Promoting a named spec whose references are all already bound finalizes just tha
 - **2026-06-28** — Reframed from a substitution-scope spec (its earlier slug was `substitute-within-drafts-refuse-unresolved`) to the set-resolution behaviour: promotion resolves its set as the named roots' reference closure (CON-028) rather than taking a flat batch and checking for a leftover `-TMP-` marker.
 The drafts-only substitution (CON-014) and the refusal are unchanged in effect; what changed is that the set is now derived from named roots, not handed in as a pending batch.
 - **2026-06-28** — Set active: implementation of STR-025 began.
+- **2026-06-28** — The set is the named roots and the specs a story root directly references, not the transitive closure: only a story root expands the set, a spec root is a leaf, and a reference is validated against the set rather than followed onward (CON-028). A spec the story did not itself reference, or a draft referenced by a named spec, is no longer pulled in — it is refused.

@@ -11,16 +11,25 @@ import {
 } from "../fs/atomic-write.js";
 import { walkFiles } from "../fs/walk-files.js";
 import { mint } from "../mint/mint.js";
-import { parseTemporaryDraftId } from "../mint/temporary-id.js";
+import {
+  findTemporaryReferences,
+  parseTemporaryDraftId,
+} from "../mint/temporary-id.js";
 import { escapeRegExp } from "../text/escape-regexp.js";
+
+/** The keyword that roots a promotion at every pending draft rather than a named set. */
+const ALL_DRAFTS = "all";
 
 export type PromoteOptions = {
   /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
   configFile?: string;
   /** Path to the state file. Defaults to the StateStore default. */
   stateFile?: string;
-  /** Drafts to finalize, by temporary id or path. Empty finalizes all pending drafts. */
-  drafts?: readonly string[];
+  /**
+   * The drafts to root the promotion at — each a temporary id, filename, or path —
+   * or the single keyword `all` to promote every pending draft. At least one is required.
+   */
+  roots: readonly string[];
 };
 
 /** A draft that was finalized: its temporary id bound, and its file moved. */
@@ -50,17 +59,14 @@ type DraftFile = {
 
 /**
  * Finalizes reviewed drafts into the spec tree: the mechanical half of promotion.
- * For each draft — the pending drafts in the configured drafts location, or the
- * ones named — it binds a real id by minting the draft's lens (its temporary id's
- * prefix), substitutes that temporary id across the corpus, and moves the draft
- * into its configured location renamed to the bound id. The substitution and move
- * are staged to temporary files and committed by rename. It performs no
- * integration reasoning and does not commit.
+ * It resolves the set to promote from the given roots, binds each draft's id by
+ * minting its lens, rewrites the temporary ids to the bound ones, and moves each
+ * draft into place. It performs no integration reasoning and does not commit.
  */
-export const promote: (options?: PromoteOptions) => Promise<PromoteResult> =
+export const promote: (options: PromoteOptions) => Promise<PromoteResult> =
   realizes(
     SwTraceables.SW_017_FINALIZE_DRAFTS,
-    async (options: PromoteOptions = {}): Promise<PromoteResult> => {
+    async (options: PromoteOptions): Promise<PromoteResult> => {
       const [layout, lenses] = await Promise.all([
         readLayout(options.configFile),
         readLenses(options.configFile),
@@ -68,14 +74,18 @@ export const promote: (options?: PromoteOptions) => Promise<PromoteResult> =
       const lensIds = new Set(lenses.map((lens) => lens.id));
 
       const pending = await discoverDrafts(layout.drafts.dir);
-      const selected = selectDrafts(pending, options.drafts);
-      if (selected.length === 0) {
+      const set = await resolvePromotionSet(
+        options.roots,
+        pending,
+        layout.stories.prefix,
+      );
+      if (set.length === 0) {
         return { promoted: [] };
       }
 
       // Resolve every target before binding any id, so nothing is spent on a
-      // draft that cannot be placed (STR-013).
-      const targets = selected.map((draft) => ({
+      // draft that cannot be placed.
+      const targets = set.map((draft) => ({
         draft,
         targetDir: resolveTargetDir(draft.prefix, layout, lensIds),
       }));
@@ -106,24 +116,128 @@ export const promote: (options?: PromoteOptions) => Promise<PromoteResult> =
     },
   );
 
-/** Narrows the selection to the named drafts, or returns all when none are named. */
-function selectDrafts(
+/**
+ * Resolves the drafts a promotion finalizes from its roots: each named root —
+ * matched by temporary id, filename, or path — and, for a root that is a story,
+ * the specs it directly references; or every pending draft for the keyword `all`.
+ * An empty `roots`, or a named root that matches nothing, fails.
+ */
+const resolvePromotionSet: (
+  roots: readonly string[],
   pending: readonly DraftFile[],
-  names: readonly string[] | undefined,
-): DraftFile[] {
-  if (names === undefined || names.length === 0) {
-    return [...pending];
-  }
-  return names.map((name) => {
-    const match = pending.find((draft) => matchesName(draft, name));
-    if (match === undefined) {
+  storyPrefix: string,
+) => Promise<DraftFile[]> = realizes(
+  [
+    SwTraceables.SW_035_RESOLVE_SET_AS_REFERENCE_CLOSURE,
+    ConTraceables.CON_028_PROMOTION_ROOTED_AT_NAMED_DRAFTS,
+  ],
+  async (
+    roots: readonly string[],
+    pending: readonly DraftFile[],
+    storyPrefix: string,
+  ): Promise<DraftFile[]> => {
+    if (roots.length === 0) {
       throw new AriadneError(
-        ErrorCode.DRAFT_NOT_FOUND,
-        `No pending draft matches "${name}".`,
+        ErrorCode.INVALID_OPTIONS,
+        `promote requires at least one draft to promote, or the keyword "${ALL_DRAFTS}".`,
       );
     }
-    return match;
-  });
+    // `all` makes every pending draft a root, so it must stand alone — combining it
+    // with named roots would silently discard them.
+    if (roots.includes(ALL_DRAFTS) && roots.length > 1) {
+      throw new AriadneError(
+        ErrorCode.INVALID_OPTIONS,
+        `"${ALL_DRAFTS}" promotes every pending draft and must be the only argument; name drafts, or pass "${ALL_DRAFTS}" alone.`,
+      );
+    }
+    const byTemporaryId = new Map(
+      pending.map((draft) => [draft.temporaryId, draft]),
+    );
+    const seeds = roots.includes(ALL_DRAFTS)
+      ? pending
+      : roots.map((name) => resolveRoot(name, pending));
+    return gatherSet(seeds, byTemporaryId, storyPrefix);
+  },
+);
+
+/** Resolves a named root to a pending draft, or fails if none matches it. */
+function resolveRoot(name: string, pending: readonly DraftFile[]): DraftFile {
+  const match = pending.find((draft) => matchesName(draft, name));
+  if (match === undefined) {
+    throw new AriadneError(
+      ErrorCode.DRAFT_NOT_FOUND,
+      `No pending draft matches "${name}".`,
+    );
+  }
+  return match;
+}
+
+/**
+ * Gathers the drafts a promotion finalizes: the seed roots, plus — for a root
+ * that is a story — the specs it directly references. A spec is a leaf: its
+ * references are validated against the set, never followed, so naming a spec
+ * never reaches past it. Every draft in the set must reference only drafts the
+ * set includes; one that references outside it fails rather than being pulled in.
+ * So a story must itself reference each of its specs, and a follow-on spec named
+ * directly must reference only already-bound ids.
+ */
+async function gatherSet(
+  seeds: readonly DraftFile[],
+  byTemporaryId: ReadonlyMap<string, DraftFile>,
+  storyPrefix: string,
+): Promise<DraftFile[]> {
+  const referencesByDraft = new Map<string, string[]>();
+  const referencesOf = async (draft: DraftFile): Promise<string[]> => {
+    const cached = referencesByDraft.get(draft.temporaryId);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const references = findTemporaryReferences(
+      await readFile(draft.path, "utf8"),
+    ).filter((reference) => reference !== draft.temporaryId);
+    referencesByDraft.set(draft.temporaryId, references);
+    return references;
+  };
+
+  // Only a story root brings other drafts in (its specs); a spec root is a leaf.
+  const set = new Map(seeds.map((draft) => [draft.temporaryId, draft]));
+  for (const root of seeds) {
+    if (root.prefix !== storyPrefix) {
+      continue;
+    }
+    for (const reference of await referencesOf(root)) {
+      const referenced = byTemporaryId.get(reference);
+      if (referenced !== undefined) {
+        set.set(referenced.temporaryId, referenced);
+      }
+    }
+  }
+  // Every draft in the set must reference only drafts the set includes; a
+  // reference outside it — a spec's reference, or a spec a story did not list —
+  // fails rather than being followed.
+  for (const draft of set.values()) {
+    for (const reference of await referencesOf(draft)) {
+      if (!set.has(reference)) {
+        throw unresolvedReference(draft, reference, byTemporaryId);
+      }
+    }
+  }
+  return [...set.values()];
+}
+
+/** The refusal for a reference that the promotion set does not include. */
+function unresolvedReference(
+  draft: DraftFile,
+  reference: string,
+  byTemporaryId: ReadonlyMap<string, DraftFile>,
+): AriadneError {
+  const detail = byTemporaryId.has(reference)
+    ? "a pending draft this promotion does not include; promote them together by naming the story that references both"
+    : "not a pending draft";
+  return new AriadneError(
+    ErrorCode.UNRESOLVED_REFERENCE,
+    `Draft "${draft.path}" references "${reference}", ${detail}.`,
+  );
 }
 
 /** Whether a draft is named by `name` — its temporary id, filename, or path. */
@@ -137,10 +251,10 @@ function matchesName(draft: DraftFile, name: string): boolean {
 }
 
 /**
- * Resolves where a draft is placed from its prefix (ENT-002): a story to the
- * stories directory, a derived spec (a lens prefix) to the derived-specs
- * directory. An entity draft is a content merge into the domain model, not a
- * file move, so it is unsupported here (STR-013, out of scope).
+ * Resolves where a draft is placed from its prefix: a story to the stories
+ * directory, a derived spec (a lens prefix) to the derived-specs directory. An
+ * entity draft is a content merge into the domain model, not a file move, so it
+ * is unsupported here.
  */
 function resolveTargetDir(
   prefix: string,
@@ -198,16 +312,22 @@ function parseDraft(path: string, fileName: string): DraftFile | undefined {
 }
 
 /**
- * Applies a promotion's file changes as a stage-then-commit. Each promoted draft
- * moves to its bound-id target carrying its substituted content; every other spec
- * file that mentions a promoted id is rewritten where it sits. A draft's target
- * must be free first; the writes are then staged and committed together by
+ * Applies a promotion's file changes as a stage-then-commit. Substitution runs
+ * only within the drafts location — a still-unpromoted draft that references a
+ * promoted one is rewritten to the bound id, while the spec tree is left
+ * untouched. Each promoted draft then moves to its bound-id target carrying its
+ * substituted content; the writes are staged and committed together by
  * `writeFilesAtomic`, and the moved drafts removed.
  */
-const applyAtomically = realizes(
+const applyAtomically: (
+  layout: Layout,
+  promoted: readonly PromotedDraft[],
+  substitutions: ReadonlyMap<string, string>,
+) => Promise<void> = realizes(
   [
     ConTraceables.CON_014_EXHAUSTIVE_SUBSTITUTION,
     ConTraceables.CON_024_ATOMIC_PROMOTION,
+    ConTraceables.CON_027_NO_TEMPORARY_ID_IN_PROMOTED_CORPUS,
   ],
   async (
     layout: Layout,
@@ -217,9 +337,9 @@ const applyAtomically = realizes(
     const draftSources = new Set(promoted.map((entry) => entry.from));
 
     const writes: FileWrite[] = [];
-    // Rewrite in place every spec file that mentions a promoted id — except a
-    // promoted draft itself, which is moved rather than rewritten where it sits.
-    for (const file of await collectSpecFiles(layout)) {
+    // Rewrite in place every other draft that mentions a promoted id — never a file
+    // outside the drafts location, and not a promoted draft itself, which is moved.
+    for (const file of await collectDraftFiles(layout.drafts.dir)) {
       if (draftSources.has(file)) {
         continue;
       }
@@ -233,8 +353,8 @@ const applyAtomically = realizes(
       }
     }
     // Move each promoted draft to its bound-id target, carrying its substituted
-    // content. The move list comes from `promoted`, not the markdown-only file
-    // walk, so a draft is moved whatever its filename.
+    // content. The move list comes from `promoted`, not the file walk, so a draft
+    // is moved whatever its filename.
     for (const entry of promoted) {
       const original = await readFileOrNull(entry.from);
       if (original === null) {
@@ -298,18 +418,15 @@ function applySubstitutions(
   return updated;
 }
 
-/** The markdown files a temporary id can appear in: the spec tree and the drafts. */
-async function collectSpecFiles(layout: Layout): Promise<string[]> {
-  const dirs = [layout.stories.dir, layout.derivedSpecs.dir, layout.drafts.dir];
-  const found = new Set<string>([layout.entities.file]);
-  for (const dir of dirs) {
-    for (const file of await walkFiles(dir)) {
-      if (file.name.endsWith(".md")) {
-        found.add(file.path);
-      }
+/** The files in the drafts location a temporary id can appear in, minus staging temporaries. */
+async function collectDraftFiles(draftsDir: string): Promise<string[]> {
+  const files: string[] = [];
+  for (const file of await walkFiles(draftsDir)) {
+    if (!file.name.endsWith(TEMP_SUFFIX)) {
+      files.push(file.path);
     }
   }
-  return [...found];
+  return files;
 }
 
 /** Reads a file, treating a missing file as absent rather than an error. */

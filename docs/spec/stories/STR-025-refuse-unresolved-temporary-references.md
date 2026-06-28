@@ -20,7 +20,7 @@ Two concrete failures follow from the current scope:
 **Solution Approach**
 Root promotion at named drafts, resolve the set from their references, substitute safely, and refuse anything unresolved:
 - **Root at named drafts.** `promote` requires one or more named drafts — a story (which carries its specs through its references) or a spec — or the keyword `all`; the no-argument "finalize all pending" form is removed (SW-016, CON-028).
-- **Resolve the set as the closure.** The set finalized is the transitive closure of the temporary references reachable from the named roots (SW-035), so "promote this story" means "promote this story and what it depends on."
+- **Resolve the set from the roots.** The set finalized is the named roots and the specs a story root directly references (SW-035) — only a story root brings other drafts in; a spec is a leaf, its references validated against the set, not followed onward. So "promote this story" means "promote this story and the specs it lists"; a story must reference each of its specs, and a spec named directly must reference only bound ids.
 - **Substitute only within the drafts** of the set — the promoted drafts' own bodies and any other still-unpromoted draft that references them — leaving the already-promoted spec tree and the domain model untouched (CON-014).
 - **Refuse before binding** if the closure reaches a temporary reference to a draft outside the set — an unresolved `-TMP-` marker (CON-008); nothing is bound or moved, so no id is spent (CON-002).
 
@@ -28,8 +28,8 @@ Promotion therefore finalizes only a referentially-closed set rooted at a named 
 
 **Acceptance Criteria**
 - `promote` requires at least one named draft (a story or a spec) or the keyword `all`; invoked with no argument it errors, and never finalizes whatever happens to be pending (SW-016, CON-028).
-- Promoting a story finalizes that story and exactly the drafts reachable from it by temporary reference — its closure — and no other pending draft.
-- A promotion whose closure reaches a temporary reference to a draft outside the set refuses, with an error naming the draft and the unresolved id; no id is bound and no file is moved (the refusal precedes binding, so no id is spent).
+- Promoting a story finalizes that story and exactly the drafts it directly references, and no other pending draft.
+- A draft in the set that references one the set does not include — including a spec the story did not itself reference — refuses, with an error naming the draft and the reference; no id is bound and no file is moved (the refusal precedes binding, so no id is spent).
 - A promotion leaves every already-promoted spec and the domain model byte-for-byte unchanged; promote writes outside the drafts location only to place the promoted drafts at their bound-id targets.
 - A still-unpromoted draft that references a draft in the set has its reference rewritten to the bound id.
 - The existing guarantees hold: a successful promotion binds each id and moves each draft (SW-017), and a failed one leaves the tree unchanged (CON-024).
@@ -68,3 +68,4 @@ Promotion therefore finalizes only a referentially-closed set rooted at a named 
 - **2026-06-28** — Broadened from "scope substitution + refuse a leftover marker" to the full promote model: promotion is **rooted at named drafts** (a story or spec, or `all`) and finalizes the **reference closure** of those roots (CON-028, SW-035), with the no-argument "all pending" form removed (SW-016).
 The substitution-scoping and refusal are unchanged in effect; what changed is how the set is selected.
 This supersedes STR-013's draft-selection decision.
+- **2026-06-28** — Settled the set as the named roots and the specs a *story* root *directly* references, not the transitive closure: only a story root expands the set, a spec is a leaf, and a reference is validated rather than followed. So neither a spec the story omitted nor a draft referenced by a named spec is pulled in — both are refused — and a promotion cannot reach silently across story boundaries or down a spec's references.

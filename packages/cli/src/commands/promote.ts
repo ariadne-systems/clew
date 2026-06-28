@@ -3,27 +3,27 @@ import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
- * Registers the `clew promote` command surface (STR-013).
- * The action stays thin: it requires a configuration and delegates the
- * mechanical finalize — bind each draft's id, substitute its temporary id
- * project-wide, move it into the layout — to core's `promote()`. It then
- * reports each temporary-id → bound-id mapping to stdout. Any error propagates to
- * the bin entry, which writes it to stderr and exits non-zero. Integration
- * reasoning stays with the `ariadne-promote` skill, not here.
+ * Registers the `clew promote` command surface.
+ * The action stays thin: it requires a configuration and delegates the mechanical
+ * finalize to core's `promote()`, then reports each temporary-id → bound-id mapping
+ * to stdout. At least one root — a story or spec, or `all` — is required; commander
+ * rejects the no-argument form. Any error propagates to the bin entry, which writes
+ * it to stderr and exits non-zero. Integration reasoning stays with the
+ * `clew-promote` skill, not here.
  */
 export const registerPromote: (program: Command) => void = realizes(
   SwTraceables.SW_016_PROMOTE_COMMAND,
   (program: Command): void => {
     program
       .command("promote")
-      .description("Finalize reviewed drafts into the spec tree.")
+      .description("Finalize a story (and its specs) into the spec tree.")
       .argument(
-        "[drafts...]",
-        "drafts to finalize (temporary id or path); omit to finalize all pending",
+        "<roots...>",
+        "the story or spec to promote (temporary id or path), or 'all' for every pending draft",
       )
-      .action(async (drafts: string[]) => {
+      .action(async (roots: string[]) => {
         await requireConfig();
-        const { promoted } = await promote({ drafts });
+        const { promoted } = await promote({ roots });
         if (promoted.length === 0) {
           process.stdout.write("No pending drafts to promote.\n");
           return;

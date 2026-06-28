@@ -24,3 +24,4 @@ A released code is never reused for a different condition and never renamed (CON
 | `E_INVALID_AUTHOR` | A draft author (`--as` or `CLEW_DRAFT_AUTHOR`) is not letter-led and uppercase (`[A-Z][A-Z0-9]*`). |
 | `E_INVALID_OPTIONS` | Command options are combined invalidly, for example `--as` passed without `--tmp`. |
 | `E_DUPLICATE_SPEC_ID` | Two files declare the same bound spec id; each id must be declared by exactly one file. |
+| `E_UNRESOLVED_REFERENCE` | A draft in a promotion references a temporary id that is not in the resolved set; name the missing draft so the whole set can be promoted together. |
