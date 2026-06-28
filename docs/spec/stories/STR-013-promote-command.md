@@ -64,3 +64,7 @@ This story depends on the existing `mint` allocation (STR-004) and the configure
 
 - **2026-06-21** — Renamed skill references `ariadne-promote` → `clew-promote` to match the CLI's rename to `clew`.
 Names only; the spec's meaning is unchanged.
+- **2026-06-28** — Two of this story's resolved decisions are superseded by STR-025.
+The **draft-selection** decision (promote-all by default; named drafts optional) is replaced by rooting promotion at one or more named drafts — a story, which carries its specs through its references, or a spec — or the keyword `all`, with the no-argument form removed (CON-028, SW-016).
+The **substitution-scope** decision (substitute project-wide, including already-promoted specs and the domain model) is replaced by substituting only within the drafts of the resolved set and refusing an unresolved reference, so the promoted tree is never rewritten (CON-014, CON-027).
+The binding/move mechanics are unchanged.
