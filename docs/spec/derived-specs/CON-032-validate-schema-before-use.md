@@ -23,9 +23,9 @@ The schema is checked before any document is validated against it.
 
 **Realizes**
 
-- [SYS-TMP-SCHEMA-001 — The system validates each artifact against its declared schema when it reads it](SYS-TMP-SCHEMA-001-validate-artifacts-on-load.md)
+- [SYS-015 — The system validates each artifact against its declared schema when it reads it](SYS-015-validate-artifacts-on-load.md)
 
 **Related**
 
-- Enforces [ARCH-TMP-SCHEMA-001 — A document schema pins only what clew reads; the rest is project-defined](ARCH-TMP-SCHEMA-001-schema-core-is-what-clew-reads.md) — this is where "a project cannot relax the pinned core" is actually checked, at the schema.
-- Mirrors [CON-TMP-SCHEMA-001 — A document that violates its schema is rejected, or warned per config](CON-TMP-SCHEMA-001-reject-schema-violation.md) at the meta level — that rejects a document against its schema; this rejects a schema against clew's contract.
+- Enforces [ARCH-007 — A document schema pins only what clew reads; the rest is project-defined](ARCH-007-schema-core-is-what-clew-reads.md) — this is where "a project cannot relax the pinned core" is actually checked, at the schema.
+- Mirrors [CON-031 — A document that violates its schema is rejected, or warned per config](CON-031-reject-schema-violation.md) at the meta level — that rejects a document against its schema; this rejects a schema against clew's contract.

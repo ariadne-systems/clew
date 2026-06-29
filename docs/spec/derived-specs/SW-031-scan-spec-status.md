@@ -21,6 +21,12 @@ A spec with `**Status**: active` yields a scanned spec with that state; `depreca
 
 - [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)
 
+**Related**
+
+- Generalized by [SW-036 — The scan validates each document against its schema](SW-036-scan-validates-schema.md): reading the status is one part of validating the whole document schema on scan.
+
 ## Changes
 
 - **2026-06-26** — Renamed the status values (`not-implemented` → `planned`, `implemented` → `active`; CON-022) and aligned the wording: the scan reads the status onto the **scanned spec**, and **generation** — not coverage — filters by it.
+
+- **2026-06-29** — Noted that reading the status is one part of the document-schema validation the scan performs (SW-036), promoted as the SCHEMA feature (STR-026).

@@ -51,6 +51,7 @@ The set of configured prefixes is the single source of truth for id validity, so
 | `exclude` | `List<String>` | Repository-root-relative globs (CON-018); a matching path is excluded from the code scan and produces no anchor (SW-024, SW-025). A user `exclude` is absolute in the exclusion precedence (CON-017). Optional. |
 | `unexclude` | `List<String>` | Repository-root-relative globs (CON-018) that re-include a path a built-in default (CON-016) would exclude; never overrides a user `exclude` (CON-017). Optional. |
 | `waivers` | `List<{ id?: String, pattern?: String, reason: String }>` | The committed coverage waiver list: each entry targets a spec `id` or a glob `pattern` over ids (exactly one), with a reason, and waives a missing *test* — a matching spec that is implemented but unverified is reported waived rather than an open gap (SW-027, SW-030). A spec missing its realizing code is never waived (CON-021). A waiver that waives nothing is reported as stale. Optional. |
+| `schemas` | `{ story?: String, "derived-spec"?: String }` | Per-document-type validation schema files; clew validates each document against its type's schema when it reads it (SW-036) — the pinned core merged with the project's required fields and enums (ARCH-007). Optional. |
 
 ## View
 

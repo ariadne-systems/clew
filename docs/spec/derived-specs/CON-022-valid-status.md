@@ -21,7 +21,13 @@ Each declared value and an absent field are accepted; any other value is rejecte
 
 - [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)
 
+**Related**
+
+- Generalized by [ARCH-007 — A document schema pins only what clew reads; the rest is project-defined](ARCH-007-schema-core-is-what-clew-reads.md): the status value check is one instance of the schema's pinned core, enforced by [CON-031 — A document that violates its schema is rejected, or warned per config](CON-031-reject-schema-violation.md).
+
 ## Changes
 
 - **2026-06-26** — Renamed the status values to lifecycle terms: `not-implemented` → `planned`, `implemented` → `active` (`deprecated` unchanged).
 "implemented" was wrong — a traceable is generated when work goes **active** (so code can anchor against it *during* implementation, not after it is done), and coverage already carries the built-vs-in-progress distinction. (`draft` was avoided: it already names an unpromoted spec in clew.)
+
+- **2026-06-29** — Noted that the status value check is one instance of the document-schema pinned core (ARCH-007, CON-031), promoted as the SCHEMA feature (STR-026).

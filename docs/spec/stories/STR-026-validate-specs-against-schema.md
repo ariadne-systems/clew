@@ -44,14 +44,14 @@ A schema is a hand-authored contract an adopter reads and maintains, and YAML's 
 
 **Realizes**
 
-- [SYS-TMP-SCHEMA-001 — The system validates each artifact against its declared schema when it reads it](../derived-specs/SYS-TMP-SCHEMA-001-validate-artifacts-on-load.md)
+- [SYS-015 — The system validates each artifact against its declared schema when it reads it](../derived-specs/SYS-015-validate-artifacts-on-load.md)
 
 **Realizes** (new specs)
 
-- [ARCH-TMP-SCHEMA-001 — A document schema pins only what clew reads; the rest is project-defined](../derived-specs/ARCH-TMP-SCHEMA-001-schema-core-is-what-clew-reads.md)
-- [SW-TMP-SCHEMA-001 — The scan validates each document against its schema](../derived-specs/SW-TMP-SCHEMA-001-scan-validates-schema.md)
-- [CON-TMP-SCHEMA-001 — A document that violates its schema is rejected, or warned per config](../derived-specs/CON-TMP-SCHEMA-001-reject-schema-violation.md)
-- [CON-TMP-SCHEMA-002 — A schema is validated against clew's minimum contract before it is used](../derived-specs/CON-TMP-SCHEMA-002-validate-schema-before-use.md)
+- [ARCH-007 — A document schema pins only what clew reads; the rest is project-defined](../derived-specs/ARCH-007-schema-core-is-what-clew-reads.md)
+- [SW-036 — The scan validates each document against its schema](../derived-specs/SW-036-scan-validates-schema.md)
+- [CON-031 — A document that violates its schema is rejected, or warned per config](../derived-specs/CON-031-reject-schema-violation.md)
+- [CON-032 — A schema is validated against clew's minimum contract before it is used](../derived-specs/CON-032-validate-schema-before-use.md)
 
 **Related**
 
