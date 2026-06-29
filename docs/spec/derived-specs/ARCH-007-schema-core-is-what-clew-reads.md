@@ -22,7 +22,7 @@ A project cannot relax the pinned core: an id, `**Status**`, or unresolved-relat
 
 **Realizes**
 
-- [SYS-TMP-SCHEMA-001 — The system validates each artifact against its declared schema when it reads it](SYS-TMP-SCHEMA-001-validate-artifacts-on-load.md)
+- [SYS-015 — The system validates each artifact against its declared schema when it reads it](SYS-015-validate-artifacts-on-load.md)
 
 **Related**
 

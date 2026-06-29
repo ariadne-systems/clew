@@ -20,7 +20,7 @@ The suite is the single home for every mechanical integrity check, so each is ad
 - every `**Status**` is a recognized value (CON-022);
 - no spec id appears in a code comment or name — comment detection is a capability of the language generator (ARCH-006), reusing its lexer; the check ranges over the same source files the anchor scan does, through the one shared exclusion-aware walk (SW-024); the rule is mechanized here rather than as a separate command;
 - no two files declare the same id (the same logic `scan` gates on, surfaced as a check);
-- a document conforms to its declared schema — required fields and enums — which the scan validates on load (the document-schema validation feature, its own story); surfaced here rather than hand-rolled in the suite.
+- a document conforms to its declared schema — required fields and enums — which the scan validates on load (STR-026 — the document-schema validation feature); surfaced here rather than hand-rolled in the suite.
 Each check is a small module reusing existing core plumbing — the scan, draft parsing, the located-anchor record (SYS-002); the command is a thin runner that aggregates the findings and sets the exit code.
 Judgment-adjacent checks are deliberately excluded or kept as soft warnings (see Out of scope) — the suite is mechanical, not opinionated.
 
@@ -64,8 +64,11 @@ Judgment-adjacent checks are deliberately excluded or kept as soft warnings (see
 - Enforces [CON-022 — a spec's status is one of the declared values](../derived-specs/CON-022-valid-status.md) as a standing check; a dangling temporary reference ([CON-027](../derived-specs/CON-027-no-temporary-id-in-promoted-corpus.md)) shows up as a non-resolving link, caught by reference-rot.
 - Generalizes the repo-local reference-rot script (`scripts/check-references.mjs`) into a shipped capability.
 - Revises [CON-016](../derived-specs/CON-016-scan-builtin-exclusions.md), [ARCH-003](../derived-specs/ARCH-003-generator-interface.md), and [SW-024](../derived-specs/SW-024-exclude-matching-paths.md): the checks scan the same source domain as the anchor scan through one shared, exclusion-aware walk; generator output is no longer auto-excluded but kept inert ([CON-030](../derived-specs/CON-030-generated-output-inert-to-scan.md)); and comment detection moves onto the generator.
+- Defers structural and field conformance to [STR-026 — clew validates each spec and story against a configurable schema](STR-026-validate-specs-against-schema.md): the schema feature validates each document on scan, so the suite hand-rolls no required-fields check.
 
 ## Changes
 
 - **2026-06-29** — Corrected the comment-finder design while implementing the suite.
 Comment detection moves from a separate core-owned registry onto the language generator (ARCH-006, ARCH-003), reusing the generator's lexer; the spec-id-in-comment check now ranges over the same source set as the anchor scan through one shared, exclusion-aware walk (SW-024); and generator output is no longer auto-excluded but kept inert by a new constraint (CON-030), which supersedes CON-016's automatic output-directory exclusion.
+
+- **2026-06-29** — The deferred document-schema validation is now promoted as STR-026; the suite's deferral points to it, with no hand-rolled required-fields check.
