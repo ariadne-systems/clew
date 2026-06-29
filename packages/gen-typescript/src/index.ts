@@ -5,6 +5,7 @@ import type {
   SpecSet,
 } from "@ariadne-thread/core";
 import {
+  classifyCFamily,
   GENERATED_MARKER,
   generatedHeader,
   parseGeneratedTraceables,
@@ -17,7 +18,12 @@ import type {
   StkTraceables,
   SysTraceables,
 } from "@ariadne-thread/trace";
-import { ArchTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
+import {
+  ArchTraceables,
+  ConTraceables,
+  realizes,
+  SwTraceables,
+} from "@ariadne-thread/trace";
 import { discoverAnchors, SOURCE_EXTENSIONS } from "./discover.js";
 
 // Module-level anchors — a concrete language generator behind the neutral
@@ -51,6 +57,8 @@ export const createTypeScriptGenerator: () => Generator = realizes(
   [
     SwTraceables.SW_018_TYPESCRIPT_OUTPUT,
     ArchTraceables.ARCH_003_GENERATOR_INTERFACE,
+    ArchTraceables.ARCH_006_PLUGGABLE_COMMENT_FINDERS,
+    ConTraceables.CON_030_GENERATED_OUTPUT_INERT_TO_SCAN,
   ],
   (): Generator => {
     return {
@@ -69,6 +77,14 @@ export const createTypeScriptGenerator: () => Generator = realizes(
       discover: discoverAnchors,
       readTraceables: (files) =>
         parseGeneratedTraceables(files, MEMBER_PATTERN),
+      // TypeScript/JavaScript have template and regex literals, so the lexer must
+      // classify them to avoid mis-reading a `/` or backtick as a comment opener.
+      findComments: (content) =>
+        classifyCFamily(content, {
+          templates: true,
+          regex: true,
+          textBlocks: false,
+        }).comments,
     };
   },
 );

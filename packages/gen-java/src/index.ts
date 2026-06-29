@@ -5,13 +5,14 @@ import type {
   SpecSet,
 } from "@ariadne-thread/core";
 import {
+  classifyCFamily,
   generatedHeader,
   parseGeneratedTraceables,
   toIdentifier,
   toMemberName,
   toPascalCase,
 } from "@ariadne-thread/core";
-import { ArchTraceables, realizes } from "@ariadne-thread/trace";
+import { ArchTraceables, ConTraceables, realizes } from "@ariadne-thread/trace";
 
 /** This generator's type — its name and the `generator-type` in the provenance header. */
 const GENERATOR_TYPE = "java";
@@ -28,7 +29,11 @@ const OUTPUT_PATH = "Traceables.java";
  * first working emission, not a complete generator.
  */
 export const createJavaGenerator: () => Generator = realizes(
-  ArchTraceables.ARCH_003_GENERATOR_INTERFACE,
+  [
+    ArchTraceables.ARCH_003_GENERATOR_INTERFACE,
+    ArchTraceables.ARCH_006_PLUGGABLE_COMMENT_FINDERS,
+    ConTraceables.CON_030_GENERATED_OUTPUT_INERT_TO_SCAN,
+  ],
   (): Generator => {
     return {
       name: GENERATOR_TYPE,
@@ -45,6 +50,15 @@ export const createJavaGenerator: () => Generator = realizes(
       discover: () => [],
       readTraceables: (files) =>
         parseGeneratedTraceables(files, CONSTANT_PATTERN),
+      // Java has neither template literals nor regex literals, but has text blocks
+      // (`"""…"""`); enabling them keeps a comment-like token inside a text block from
+      // being read as a comment, and scans only `//` and `/* */` elsewhere.
+      findComments: (content) =>
+        classifyCFamily(content, {
+          templates: false,
+          regex: false,
+          textBlocks: true,
+        }).comments,
     };
   },
 );

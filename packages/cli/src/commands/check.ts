@@ -1,6 +1,7 @@
 import { check, formatCheckReport, requireConfig } from "@ariadne-thread/core";
 import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
+import { createGeneratorRegistry } from "../generators.js";
 
 /**
  * Registers the `clew check` command surface. Thin: it requires a
@@ -20,7 +21,10 @@ export const registerCheck: (program: Command) => void = realizes(
       .allowExcessArguments(false)
       .action(async () => {
         await requireConfig();
-        const result = await check();
+        const registry = createGeneratorRegistry();
+        const result = await check({
+          resolveGenerator: (name) => registry.get(name),
+        });
         if (result.findings.length === 0) {
           process.stdout.write(formatCheckReport(result));
           return;

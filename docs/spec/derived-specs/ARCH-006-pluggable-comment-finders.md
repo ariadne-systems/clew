@@ -1,21 +1,23 @@
 **Title**
-Comment detection is delegated to pluggable per-language comment finders
+Comment detection is a generator capability
 
 **Lens**: ARCH
 
 **Status**: active
 
 **Description**
-Identifying what is a comment — so it can be scanned for a stray spec-id token — is language-specific, so clew delegates it to a per-language **comment finder** behind a narrow interface, selected for a file by its language.
-A new language is supported by registering a finder; the spec-id-in-comment check is unchanged.
-clew ships finders for the languages it already scans for anchors; others plug in the same way.
+Identifying what is a comment — so it can be scanned for a stray spec-id token — is language-specific, the same lexical knowledge a generator already uses to discover markers.
+So clew makes comment detection an operation of the generator contract (ARCH-003), not a separate registry: a generator classifies its language's source into code and comment regions, and the spec-id-in-comment check reads comments through that.
+A language gains comment detection by implementing the generator — the same way it gains generation and discovery — with no separate finder to register and no second comment scanner in the core.
 
 **Rationale**
 Comment syntax varies by language (`//`, `/* */`, `#`, `--`, `<!-- -->`, …); baking one language's rules into the check would miss comments in other languages, or misread code (a `//` inside a string) as a comment.
-A finder per language keeps the check correct across languages and extensible without touching the check — the same shape clew already uses for language-specific generation (ARCH-003) and anchor scanning, so a project adding a language adds a finder, not a fork.
+Putting comment detection on the generator keeps it correct across languages and reuses the lexer the generator already has for discovery — one classifier per language, not two — so the comment check inherits every language the project already generates for.
+A core-owned registry of comment finders, separate from the generators, would drift from them: a language with a generator but no registered finder would be silently unscanned, and the core would carry a second, weaker lexer.
 
 **Verification Description**
-A comment in a supported language is recognized and scanned; a second language's comments are recognized once its finder is registered, with no change to the check; a construct that is not a comment in that language is not scanned.
+A comment in a generated-for language is recognized and scanned through that language's generator; a construct that is not a comment in that language is not scanned.
+A language the project generates for is scanned for spec-id-in-comment with no separate finder registered; there is no language that has a generator but no comment detection.
 
 ## Relations
 
@@ -25,5 +27,10 @@ A comment in a supported language is recognized and scanned; a second language's
 
 **Related**
 
-- Mirrors [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](ARCH-003-generator-interface.md) — the same pluggable-per-language shape, for comment detection.
-- The report [SW-033 — clew reports a spec id found in a code comment](SW-033-flag-spec-id-in-comment.md) finds comments through the registered finder.
+- Part of [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](ARCH-003-generator-interface.md): comment identification is one operation of the generator contract, beside generation and discovery.
+- [SW-033 — clew reports a spec id found in a code comment](SW-033-flag-spec-id-in-comment.md) finds comments through the generator's comment identification.
+
+## Changes
+
+- **2026-06-29** — Reframed from a separate, core-owned registry of per-language comment finders to an operation of the generator contract (ARCH-003): a generator identifies its own comments, reusing the lexer it already uses for discovery.
+A separate registry drifts from the generators — a language with a generator but no registered finder is silently unscanned — and duplicates the generator's lexer in the core.

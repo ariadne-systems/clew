@@ -5,8 +5,9 @@ import { AriadneError, ErrorCode } from "../errors.js";
  * The built-in default exclusions, as repository-root-relative globs (CON-016,
  * CON-018). A bare segment matches only at the root; a leading `**` matches at any depth.
  * Dependency and build directories recur per module, so they use a leading `**`; the
- * tool's own state directory is root-only. The configured generators' output
- * directories are added to these per scan.
+ * tool's own state directory is root-only. A generator's output directory is not
+ * excluded by default — generated output is inert to the scan, so a project
+ * that wants it skipped lists it under `exclude` like any other path.
  */
 const DEFAULT_GLOBS: readonly string[] = [
   "**/node_modules",
@@ -36,8 +37,6 @@ export type ExclusionRules = {
 export type ExclusionInput = {
   readonly exclude: readonly string[];
   readonly unexclude: readonly string[];
-  /** Configured generator output directories, excluded as root-relative paths. */
-  readonly outputDirs: readonly string[];
 };
 
 /**
@@ -59,10 +58,7 @@ export const compileExclusionRules: (input: ExclusionInput) => ExclusionRules =
       unexcludes: input.unexclude.map((glob) =>
         compileOrThrow(glob, "unexclude"),
       ),
-      defaults: [
-        ...DEFAULT_GLOBS,
-        ...input.outputDirs.map(normalizeDirectory),
-      ].map(compileGlob),
+      defaults: DEFAULT_GLOBS.map(compileGlob),
     }),
   );
 
@@ -247,9 +243,4 @@ function couldMatchBelow(dirPath: string, glob: CompiledGlob): boolean {
     patternIndex += 1;
   }
   return true;
-}
-
-/** Normalizes a configured directory to a root-relative, forward-slash path. */
-function normalizeDirectory(dir: string): string {
-  return dir.replaceAll("\\", "/").replace(/^\.\//, "").replace(/\/+$/, "");
 }

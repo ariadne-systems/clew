@@ -9,7 +9,12 @@ import {
   verifies,
 } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { check, type Finding } from "../index.js";
+import {
+  check,
+  classifyCFamily,
+  type Finding,
+  type Generator,
+} from "../index.js";
 
 type Project = {
   configFile: string;
@@ -18,10 +23,41 @@ type Project = {
   derivedDir: string;
 };
 
+// A minimal TypeScript-like generator: the comment check selects `.ts` files and
+// reads their comments through its `findComments`, backed by the shared C-family lexer.
+const tsGenerator: Generator = {
+  name: "typescript",
+  defaultOutputDir: "out",
+  sourceExtensions: [
+    ".ts",
+    ".tsx",
+    ".mts",
+    ".cts",
+    ".js",
+    ".jsx",
+    ".mjs",
+    ".cjs",
+  ],
+  generate: () => Promise.resolve([]),
+  discover: () => [],
+  readTraceables: () => [],
+  findComments: (content) =>
+    classifyCFamily(content, {
+      templates: true,
+      regex: true,
+      textBlocks: false,
+    }).comments,
+};
+
+const resolveGenerator = (name: string): Generator | undefined =>
+  name === "typescript" ? tsGenerator : undefined;
+
 // Lays out an empty spec corpus (stories, derived specs) with a config whose
 // layout points at those directories, so `check` reads its locations from
 // configuration.
-async function project(): Promise<Project> {
+async function project(
+  extraConfig: Record<string, unknown> = {},
+): Promise<Project> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-check-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
   const derivedDir = join(dir, "docs", "spec", "derived-specs");
@@ -37,6 +73,8 @@ async function project(): Promise<Project> {
         entities: { file: domainModel, prefix: "ENT" },
         drafts: { dir: join(dir, "docs", "spec", "drafts") },
       },
+      generators: [{ type: "typescript", outputDir: "out" }],
+      ...extraConfig,
     }),
     "utf8",
   );
@@ -64,7 +102,10 @@ describe("the check suite", () => {
         );
         await writeFile(join(p.derivedDir, "SW-002-b.md"), "Spec b\n", "utf8");
 
-        const result = await check({ configFile: p.configFile });
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
 
         expect(result.findings).toEqual([]);
       });
@@ -77,12 +118,15 @@ describe("the check suite", () => {
           "utf8",
         );
 
-        const result = await check({ configFile: p.configFile });
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
 
         expect(result.findings).toEqual([
           {
             check: "reference-rot",
-            file: join(p.derivedDir, "SW-001-a.md"),
+            file: "docs/spec/derived-specs/SW-001-a.md",
             line: 2,
             message: 'link to "SW-099-missing.md" resolves to nothing',
           },
@@ -98,7 +142,10 @@ describe("the check suite", () => {
         );
         await writeFile(join(p.derivedDir, "SW-001-a.md"), "Spec a\n", "utf8");
 
-        const result = await check({ configFile: p.configFile });
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
 
         expect(result.findings).toEqual([]);
       });
@@ -116,7 +163,10 @@ describe("the check suite", () => {
           "utf8",
         );
 
-        const result = await check({ configFile: p.configFile });
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
 
         expect(result.findings.map((finding) => finding.message)).toEqual([
           'link "SW-002-b.md#no-such-heading" points at a heading that does not exist',
@@ -131,7 +181,10 @@ describe("the check suite", () => {
           "utf8",
         );
 
-        const result = await check({ configFile: p.configFile });
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
 
         expect(result.findings).toEqual([]);
       });
@@ -159,14 +212,17 @@ describe("corpus invariant checks", () => {
           "utf8",
         );
 
-        const result = await check({ configFile: p.configFile });
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
 
         expect(
           result.findings.filter((f) => f.check === "invalid-status"),
         ).toEqual([
           {
             check: "invalid-status",
-            file: join(p.derivedDir, "SW-001-a.md"),
+            file: "docs/spec/derived-specs/SW-001-a.md",
             line: 3,
             message:
               'unrecognized status "in-progress"; expected one of planned, active, deprecated',
@@ -174,12 +230,33 @@ describe("corpus invariant checks", () => {
         ]);
       });
 
+      test("a CRLF spec file's status is parsed without the carriage return", async () => {
+        const p = await project();
+        await writeFile(
+          join(p.derivedDir, "SW-001-a.md"),
+          "**Lens**: SW\r\n\r\n**Status**: active\r\n",
+          "utf8",
+        );
+
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
+
+        expect(
+          result.findings.filter((f) => f.check === "invalid-status"),
+        ).toEqual([]);
+      });
+
       test("two files declaring one id are reported (duplicate-id)", async () => {
         const p = await project();
         await writeFile(join(p.derivedDir, "SW-003-x.md"), "x\n", "utf8");
         await writeFile(join(p.derivedDir, "SW-003-y.md"), "y\n", "utf8");
 
-        const result = await check({ configFile: p.configFile });
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
 
         const duplicate = result.findings.filter(
           (f) => f.check === "duplicate-id",
@@ -206,6 +283,24 @@ describe("the spec-id-in-comment check", () => {
         return findings.filter((f) => f.check === "spec-id-in-comment");
       }
 
+      test("a spec id in a JavaScript-family comment is reported", async () => {
+        const p = await project();
+        await writeFile(
+          join(p.root, "x.mjs"),
+          "export const a = 1; // see SW-032\n",
+          "utf8",
+        );
+
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
+
+        expect(commentFindings(result.findings).map((f) => f.file)).toEqual([
+          "x.mjs",
+        ]);
+      });
+
       test("a spec id in a line comment is reported with its location", async () => {
         const p = await project();
         await writeFile(
@@ -214,7 +309,10 @@ describe("the spec-id-in-comment check", () => {
           "utf8",
         );
 
-        const result = await check({ configFile: p.configFile });
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
 
         expect(commentFindings(result.findings)).toEqual([
           {
@@ -235,7 +333,10 @@ describe("the spec-id-in-comment check", () => {
           "utf8",
         );
 
-        const result = await check({ configFile: p.configFile });
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
 
         expect(commentFindings(result.findings)).toEqual([]);
       });
@@ -248,7 +349,10 @@ describe("the spec-id-in-comment check", () => {
           "utf8",
         );
 
-        const result = await check({ configFile: p.configFile });
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
 
         const found = commentFindings(result.findings);
         expect(found).toHaveLength(1);
@@ -259,10 +363,83 @@ describe("the spec-id-in-comment check", () => {
         const p = await project();
         await writeFile(join(p.root, "x.py"), "# see SW-032\n", "utf8");
 
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
+
+        expect(commentFindings(result.findings)).toEqual([]);
+      });
+
+      test("without a generator resolver, the comment check is skipped but the suite still runs", async () => {
+        const p = await project();
+        await writeFile(
+          join(p.root, "x.ts"),
+          "const a = 1; // see SW-032 for the why\n",
+          "utf8",
+        );
+
         const result = await check({ configFile: p.configFile });
 
         expect(commentFindings(result.findings)).toEqual([]);
       });
     },
   );
+});
+
+describe("exclusions apply to every check", () => {
+  verifies(SwTraceables.SW_024_EXCLUDE_MATCHING_PATHS, () => {
+    test("an excluded spec file is not checked", async () => {
+      const p = await project({
+        exclude: ["docs/spec/derived-specs/SW-001-a.md"],
+      });
+      await writeFile(
+        join(p.derivedDir, "SW-001-a.md"),
+        "See [gone](SW-999-missing.md).\n",
+        "utf8",
+      );
+
+      const result = await check({
+        configFile: p.configFile,
+        resolveGenerator,
+      });
+
+      expect(result.findings).toEqual([]);
+    });
+
+    test("an excluded domain model is not checked", async () => {
+      const p = await project({ exclude: ["docs/spec/domain-model.md"] });
+      await writeFile(
+        join(p.root, "docs", "spec", "domain-model.md"),
+        "See [gone](nope.md).\n",
+        "utf8",
+      );
+
+      const result = await check({
+        configFile: p.configFile,
+        resolveGenerator,
+      });
+
+      expect(result.findings).toEqual([]);
+    });
+
+    test("a link to an excluded target is not validated", async () => {
+      const p = await project({
+        exclude: ["docs/spec/derived-specs/SW-002-b.md"],
+      });
+      await writeFile(
+        join(p.storiesDir, "STR-001-x.md"),
+        "See [b](../derived-specs/SW-002-b.md#no-such-heading).\n",
+        "utf8",
+      );
+      await writeFile(join(p.derivedDir, "SW-002-b.md"), "## Real\n", "utf8");
+
+      const result = await check({
+        configFile: p.configFile,
+        resolveGenerator,
+      });
+
+      expect(result.findings).toEqual([]);
+    });
+  });
 });

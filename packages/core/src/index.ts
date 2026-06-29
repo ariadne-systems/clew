@@ -103,6 +103,12 @@ export type { InitOptions, InitResult, RaisedMark } from "./state/init.js";
 export { init } from "./state/init.js";
 export type { WithStateOptions } from "./state/state.js";
 export { DEFAULT_STATE_FILE, withState } from "./state/state.js";
+export type {
+  CFamilyDialect,
+  ClassifiedSource,
+  CommentSpan,
+} from "./text/c-family-lexer.js";
+export { classifyCFamily, lineOf } from "./text/c-family-lexer.js";
 
 // Module-level anchors — the high-altitude system capabilities this package
 // realizes, anchored at module altitude (fine-grained behaviours are anchored at

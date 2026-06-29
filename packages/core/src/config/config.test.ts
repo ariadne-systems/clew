@@ -29,6 +29,7 @@ function fakeGenerator(name: string, defaultOutputDir: string): Generator {
     name,
     defaultOutputDir,
     sourceExtensions: [],
+    findComments: () => [],
     discover: () => [],
     readTraceables: () => [],
     generate: async () => [],

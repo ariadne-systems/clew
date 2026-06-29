@@ -5,6 +5,7 @@ import {
   realizes,
 } from "@ariadne-thread/trace";
 import { AriadneError, ErrorCode } from "../errors.js";
+import type { CommentSpan } from "../text/c-family-lexer.js";
 
 /**
  * The language emission seam (STR-011).
@@ -152,6 +153,14 @@ export interface Generator
    * readTraceables recovers exactly the ids emitted (ADR-0005 D2).
    */
   readTraceables(files: readonly SourceFile[]): readonly GeneratedTraceable[];
+  /**
+   * Identifies the comment spans in a source file of this generator's language —
+   * the seam the spec-id-in-comment check reads through. It is the same
+   * per-language lexical knowledge as discover, exposed as the comment view rather
+   * than the code view, so a stray spec id in a comment is found wherever the
+   * generator already scans for anchors, with no separate comment scanner in the core.
+   */
+  findComments(content: string): readonly CommentSpan[];
 }
 
 /**
@@ -215,6 +224,25 @@ export function resolveGeneratorOrThrow(
     );
   }
   return generator;
+}
+
+/**
+ * Maps each generator's source extensions to the generator that owns them — the
+ * first generator to claim an extension wins. Lets a consumer pick the generator for
+ * a file by its extension, the dual of selecting a generator's files by extension.
+ */
+export function generatorsByExtension(
+  generators: readonly Generator[],
+): Map<string, Generator> {
+  const byExtension = new Map<string, Generator>();
+  for (const generator of generators) {
+    for (const extension of generator.sourceExtensions) {
+      if (!byExtension.has(extension)) {
+        byExtension.set(extension, generator);
+      }
+    }
+  }
+  return byExtension;
 }
 
 /**

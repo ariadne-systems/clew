@@ -21,6 +21,7 @@ function contentGenerator(outputDir: string): Generator {
     name: "fake",
     defaultOutputDir: outputDir,
     sourceExtensions: [".ts"],
+    findComments: () => [],
     readTraceables: () => [],
     generate: async () => [],
     discover: (sources) =>
@@ -100,7 +101,7 @@ describe("code scan", () => {
   });
 
   verifies(ConTraceables.CON_016_SCAN_BUILTIN_EXCLUSIONS, () => {
-    test("excludes dependency, build, and generator-output locations", async () => {
+    test("excludes dependency and build locations, but not the generator output", async () => {
       const generator = contentGenerator("gen/out");
       const { root, configFile } = await project(
         {
@@ -118,7 +119,13 @@ describe("code scan", () => {
         projectRoot: root,
       });
 
-      expect(result.anchors.map((anchor) => anchor.id)).toEqual(["SW-100"]);
+      // Dependency and build directories are excluded by default; the generator's
+      // output directory is not — generated output is inert, so it is scanned like
+      // any other source unless the project lists it under `exclude`.
+      expect([...result.anchors.map((anchor) => anchor.id)].sort()).toEqual([
+        "SW-100",
+        "SW-400",
+      ]);
     });
   });
 
