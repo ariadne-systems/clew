@@ -3,6 +3,8 @@ Every relation link resolves to an existing spec
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 Every link a spec or story makes under its `## Relations` resolves to a spec that exists in the corpus.
 A link to an id, or a file, that does not exist is a dangling reference and is rejected with its location.

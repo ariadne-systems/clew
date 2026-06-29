@@ -3,6 +3,8 @@ Deterministic integrity checks are one shipped `clew check` suite
 
 **Lens**: ARCH
 
+**Status**: active
+
 **Description**
 Every deterministic check over the corpus or the anchors is a member of a single `clew check` suite shipped with the tool — not a separate top-level command, and not a repo-local script.
 Adding a check means adding a module to the suite; the command surface stays one verb.

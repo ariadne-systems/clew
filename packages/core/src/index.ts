@@ -4,6 +4,8 @@ import type {
   SysTraceables,
 } from "@ariadne-thread/trace";
 
+export type { CheckOptions, CheckResult, Finding } from "./check/check.js";
+export { check, formatCheckReport } from "./check/check.js";
 export type {
   GeneratorConfig,
   IdGenerationConfig,
