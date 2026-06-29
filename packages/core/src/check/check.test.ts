@@ -1,19 +1,26 @@
 import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ArchTraceables, ConTraceables, verifies } from "@ariadne-thread/trace";
+import {
+  ArchTraceables,
+  ConTraceables,
+  SwTraceables,
+  SysTraceables,
+  verifies,
+} from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { check } from "../index.js";
+import { check, type Finding } from "../index.js";
 
 type Project = {
   configFile: string;
+  root: string;
   storiesDir: string;
   derivedDir: string;
 };
 
 // Lays out an empty spec corpus (stories, derived specs) with a config whose
 // layout points at those directories, so `check` reads its locations from
-// configuration (ENT-002).
+// configuration.
 async function project(): Promise<Project> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-check-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
@@ -33,7 +40,12 @@ async function project(): Promise<Project> {
     }),
     "utf8",
   );
-  return { configFile: join(dir, ".ariadnerc.json"), storiesDir, derivedDir };
+  return {
+    configFile: join(dir, ".ariadnerc.json"),
+    root: dir,
+    storiesDir,
+    derivedDir,
+  };
 }
 
 describe("the check suite", () => {
@@ -176,6 +188,80 @@ describe("corpus invariant checks", () => {
         expect(duplicate[0]?.message).toContain('spec id "SW-003"');
         expect(duplicate[0]?.message).toContain("SW-003-x.md");
         expect(duplicate[0]?.message).toContain("SW-003-y.md");
+      });
+    },
+  );
+});
+
+describe("the spec-id-in-comment check", () => {
+  verifies(
+    [
+      SysTraceables.SYS_014_DETECT_REFERENCES_BYPASSING_ANCHOR,
+      SwTraceables.SW_033_FLAG_SPEC_ID_IN_COMMENT,
+      ConTraceables.CON_026_SPEC_ID_ONLY_IN_ANCHOR,
+      ArchTraceables.ARCH_006_PLUGGABLE_COMMENT_FINDERS,
+    ],
+    () => {
+      function commentFindings(findings: Finding[]): Finding[] {
+        return findings.filter((f) => f.check === "spec-id-in-comment");
+      }
+
+      test("a spec id in a line comment is reported with its location", async () => {
+        const p = await project();
+        await writeFile(
+          join(p.root, "x.ts"),
+          "const a = 1; // see SW-032 for the why\n",
+          "utf8",
+        );
+
+        const result = await check({ configFile: p.configFile });
+
+        expect(commentFindings(result.findings)).toEqual([
+          {
+            check: "spec-id-in-comment",
+            file: "x.ts",
+            line: 1,
+            message:
+              'spec id "SW-032" in a comment must appear only inside its anchor',
+          },
+        ]);
+      });
+
+      test("the underscore anchor form, and an id in a string, are not reported", async () => {
+        const p = await project();
+        await writeFile(
+          join(p.root, "x.ts"),
+          'const id = Sw.SW_032_MINT;\nconst label = "SW-032";\n',
+          "utf8",
+        );
+
+        const result = await check({ configFile: p.configFile });
+
+        expect(commentFindings(result.findings)).toEqual([]);
+      });
+
+      test("a spec id deep in a block comment reports the right line", async () => {
+        const p = await project();
+        await writeFile(
+          join(p.root, "x.ts"),
+          "/**\n * A doc block.\n * Implements SW-040 here.\n */\nexport const y = 1;\n",
+          "utf8",
+        );
+
+        const result = await check({ configFile: p.configFile });
+
+        const found = commentFindings(result.findings);
+        expect(found).toHaveLength(1);
+        expect(found[0]?.line).toBe(3);
+      });
+
+      test("a language with no registered finder is skipped", async () => {
+        const p = await project();
+        await writeFile(join(p.root, "x.py"), "# see SW-032\n", "utf8");
+
+        const result = await check({ configFile: p.configFile });
+
+        expect(commentFindings(result.findings)).toEqual([]);
       });
     },
   );
