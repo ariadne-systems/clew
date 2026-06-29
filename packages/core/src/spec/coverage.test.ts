@@ -336,6 +336,7 @@ describe("readUniverse", () => {
           name: "fake",
           defaultOutputDir: "out",
           sourceExtensions: [".ts"],
+          findComments: () => [],
           discover: () => [],
           generate: async () => [],
           readTraceables: (files) =>

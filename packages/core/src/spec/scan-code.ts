@@ -1,5 +1,4 @@
-import type { Dirent } from "node:fs";
-import { readdir, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import {
@@ -8,6 +7,7 @@ import {
   readUnexclude,
 } from "../config/config.js";
 import { writeFileAtomic } from "../fs/atomic-write.js";
+import { walkProject } from "../fs/walk-files.js";
 import type { ExclusionRules } from "./exclusions.js";
 import {
   compileExclusionRules,
@@ -56,29 +56,18 @@ export const scanCode: (options: ScanCodeOptions) => Promise<ScanCodeResult> =
         readExclude(options.configFile),
         readUnexclude(options.configFile),
       ]);
-      const generators = generatorConfigs.map((config) => {
-        const generator = resolveGeneratorOrThrow(
-          config.type,
-          options.resolveGenerator,
-        );
-        return {
-          generator,
-          outputDir: config.outputDir ?? generator.defaultOutputDir,
-        };
-      });
+      const generators = generatorConfigs.map((config) =>
+        resolveGeneratorOrThrow(config.type, options.resolveGenerator),
+      );
 
-      const rules = compileExclusionRules({
-        exclude,
-        unexclude,
-        outputDirs: generators.map(({ outputDir }) => outputDir),
-      });
+      const rules = compileExclusionRules({ exclude, unexclude });
       const extensions = new Set(
-        generators.flatMap(({ generator }) => generator.sourceExtensions),
+        generators.flatMap((generator) => generator.sourceExtensions),
       );
       const sources = await collectSources(projectRoot, extensions, rules);
 
       const anchors: AnchorLocation[] = [];
-      for (const { generator } of generators) {
+      for (const generator of generators) {
         const matching = sources.filter((source) =>
           generator.sourceExtensions.includes(extname(source.path)),
         );
@@ -108,42 +97,17 @@ const collectSources: (
     extensions: ReadonlySet<string>,
     rules: ExclusionRules,
   ): Promise<SourceFile[]> => {
-    const sources: SourceFile[] = [];
-    await walk("");
-    return sources;
-
-    async function walk(relativeDir: string): Promise<void> {
-      const absoluteDir =
-        relativeDir === "" ? projectRoot : join(projectRoot, relativeDir);
-      let entries: Dirent[];
-      try {
-        entries = await readdir(absoluteDir, { withFileTypes: true });
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-          return;
-        }
-        throw error;
-      }
-      for (const entry of entries) {
-        const relativeChild =
-          relativeDir === "" ? entry.name : `${relativeDir}/${entry.name}`;
-        if (entry.isDirectory()) {
-          if (shouldDescend(relativeChild, rules)) {
-            await walk(relativeChild);
-          }
-        } else if (
-          entry.isFile() &&
-          extensions.has(extname(entry.name)) &&
-          !fileExcluded(relativeChild, rules)
-        ) {
-          const contents = await readFile(
-            join(projectRoot, relativeChild),
-            "utf8",
-          );
-          sources.push({ path: relativeChild, contents });
-        }
-      }
-    }
+    const paths = await walkProject(projectRoot, {
+      descend: (dir) => shouldDescend(dir, rules),
+      accept: (path) =>
+        extensions.has(extname(path)) && !fileExcluded(path, rules),
+    });
+    return Promise.all(
+      paths.map(async (path) => ({
+        path,
+        contents: await readFile(join(projectRoot, path), "utf8"),
+      })),
+    );
   },
 );
 

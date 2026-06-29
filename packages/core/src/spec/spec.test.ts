@@ -58,6 +58,7 @@ function recordingGenerator(name: string): {
     name,
     defaultOutputDir: ".",
     sourceExtensions: [],
+    findComments: () => [],
     discover: () => [],
     readTraceables: () => [],
     generate(specSets) {
@@ -138,6 +139,7 @@ describe("spec generation", () => {
         name: "escaper",
         defaultOutputDir: ".",
         sourceExtensions: [],
+        findComments: () => [],
         discover: () => [],
         readTraceables: () => [],
         generate: () =>

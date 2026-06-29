@@ -13,7 +13,6 @@ function compile(input: Partial<ExclusionInput>): ExclusionRules {
   return compileExclusionRules({
     exclude: [],
     unexclude: [],
-    outputDirs: [],
     ...input,
   });
 }
@@ -53,12 +52,6 @@ describe("exclusion precedence", () => {
       expect(fileExcluded("node_modules/pkg/x.ts", rules)).toBe(true);
       expect(fileExcluded("dist/x.ts", rules)).toBe(true);
       expect(fileExcluded("src/app.ts", rules)).toBe(false);
-    });
-
-    test("a generator output directory is excluded", () => {
-      const rules = compile({ outputDirs: ["packages/trace/src"] });
-      expect(fileExcluded("packages/trace/src/X.ts", rules)).toBe(true);
-      expect(fileExcluded("packages/trace/other/X.ts", rules)).toBe(false);
     });
 
     test("unexclude re-includes a path a built-in default would exclude", () => {

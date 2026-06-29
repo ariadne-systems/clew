@@ -1,6 +1,12 @@
-import type { Dirent } from "node:fs";
-import { access, readdir, readFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { access, readFile } from "node:fs/promises";
+import {
+  dirname,
+  extname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+} from "node:path";
 import {
   ArchTraceables,
   ConTraceables,
@@ -17,15 +23,19 @@ import {
   readLenses,
   readUnexclude,
 } from "../config/config.js";
-import { walkFiles } from "../fs/walk-files.js";
+import { walkProject } from "../fs/walk-files.js";
 import type { ExclusionRules } from "../spec/exclusions.js";
 import {
   compileExclusionRules,
   fileExcluded,
   shouldDescend,
 } from "../spec/exclusions.js";
-import { SPEC_STATUSES } from "../spec/generator.js";
-import { commentFinderFor } from "./comment-finders.js";
+import type { Generator } from "../spec/generator.js";
+import {
+  generatorsByExtension,
+  resolveGeneratorOrThrow,
+  SPEC_STATUSES,
+} from "../spec/generator.js";
 
 /** A bound spec filename: a lens or story prefix, a number, an optional slug. */
 const SPEC_FILENAME = /^([A-Z]+)-(\d+)(?:-.*)?\.md$/;
@@ -45,6 +55,14 @@ export type Finding = {
 };
 
 export type CheckOptions = {
+  /**
+   * Resolves a configured generator name to its implementation, injected so the
+   * core depends on no concrete generator (ADR-0001 D9), exactly as the scan does.
+   * The spec-id-in-comment check reads each source through its generator's comment
+   * detection, so it runs only when a resolver is supplied; the corpus checks need
+   * none and always run.
+   */
+  resolveGenerator?: (name: string) => Generator | undefined;
   /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
   configFile?: string;
   /** Project root the code checks walk. Defaults to the config file's directory, else cwd. */
@@ -61,10 +79,14 @@ type CheckContext = {
   lensIds: Set<string>;
   /** The configured spec prefixes (lens ids plus the story and entity prefixes). */
   prefixes: Set<string>;
-  /** The project root the code checks walk. */
+  /** The project root every check walks from. */
   projectRoot: string;
-  /** The compiled exclusion rules a code scan honours. */
+  /** The resolved generators — their source extensions select code files, their comment detection reads them. */
+  generators: readonly Generator[];
+  /** The compiled exclusion rules every check honours. */
   exclusion: ExclusionRules;
+  /** The spec-tree markdown files (stories, derived specs), walked once and shared by the corpus checks. */
+  specTreeFiles: readonly string[];
 };
 
 /** A finding before the runner stamps which check produced it. */
@@ -97,7 +119,7 @@ export const check: (options?: CheckOptions) => Promise<CheckResult> = realizes(
     const projectRoot =
       options.projectRoot ??
       (options.configFile === undefined ? "." : dirname(options.configFile));
-    const [layout, lenses, prefixes, exclude, unexclude, generators] =
+    const [layout, lenses, prefixes, exclude, unexclude, generatorConfigs] =
       await Promise.all([
         readLayout(options.configFile),
         readLenses(options.configFile),
@@ -106,18 +128,24 @@ export const check: (options?: CheckOptions) => Promise<CheckResult> = realizes(
         readUnexclude(options.configFile),
         readGenerators(options.configFile),
       ]);
-    const context: CheckContext = {
+    const resolveGenerator = options.resolveGenerator;
+    const generators =
+      resolveGenerator === undefined
+        ? []
+        : generatorConfigs.map((config) =>
+            resolveGeneratorOrThrow(config.type, resolveGenerator),
+          );
+    const corpus = {
       layout,
       lensIds: new Set(lenses.map((lens) => lens.id)),
       prefixes,
       projectRoot,
-      exclusion: compileExclusionRules({
-        exclude,
-        unexclude,
-        outputDirs: generators.flatMap((generator) =>
-          generator.outputDir === undefined ? [] : [generator.outputDir],
-        ),
-      }),
+      generators,
+      exclusion: compileExclusionRules({ exclude, unexclude }),
+    };
+    const context: CheckContext = {
+      ...corpus,
+      specTreeFiles: await specTreeMarkdown(corpus),
     };
     const findings: Finding[] = [];
     for (const module of suite()) {
@@ -155,34 +183,19 @@ const referenceRot: (context: CheckContext) => Promise<RawFinding[]> = realizes(
   async (context: CheckContext): Promise<RawFinding[]> => {
     const findings: RawFinding[] = [];
     const anchorsByFile = new Map<string, Set<string>>();
-    for (const file of await corpusMarkdown(context.layout)) {
-      const lines = (await readFile(file, "utf8")).split("\n");
+    for (const file of await corpusMarkdown(context)) {
+      const absolute = join(context.projectRoot, file);
+      const lines = (await readFile(absolute, "utf8")).split(/\r?\n/);
       for (const [index, line] of lines.entries()) {
         for (const target of localLinks(line)) {
-          const hash = target.indexOf("#");
-          const path = hash === -1 ? target : target.slice(0, hash);
-          const fragment =
-            hash === -1 ? "" : target.slice(hash + 1).toLowerCase();
-          if (path === "") {
-            continue;
-          }
-          const resolved = resolve(dirname(file), path);
-          if (!(await pathExists(resolved))) {
-            findings.push({
-              file,
-              line: index + 1,
-              message: `link to "${target}" resolves to nothing`,
-            });
-          } else if (
-            fragment !== "" &&
-            resolved.endsWith(".md") &&
-            !(await headingAnchors(resolved, anchorsByFile)).has(fragment)
-          ) {
-            findings.push({
-              file,
-              line: index + 1,
-              message: `link "${target}" points at a heading that does not exist`,
-            });
+          const finding = await brokenLink(
+            context,
+            { file, absolute, line: index + 1 },
+            target,
+            anchorsByFile,
+          );
+          if (finding !== undefined) {
+            findings.push(finding);
           }
         }
       }
@@ -190,6 +203,50 @@ const referenceRot: (context: CheckContext) => Promise<RawFinding[]> = realizes(
     return findings;
   },
 );
+
+/**
+ * The reference-rot finding for one link target, or undefined when it resolves. A
+ * link to an excluded path is skipped: an excluded path is invisible to every check,
+ * so its existence and headings are neither read nor validated.
+ */
+async function brokenLink(
+  context: CheckContext,
+  at: { file: string; absolute: string; line: number },
+  target: string,
+  anchorsByFile: Map<string, Set<string>>,
+): Promise<RawFinding | undefined> {
+  const hash = target.indexOf("#");
+  const path = hash === -1 ? target : target.slice(0, hash);
+  if (path === "") {
+    return undefined;
+  }
+  const resolved = resolve(dirname(at.absolute), path);
+  if (
+    fileExcluded(toRelative(context.projectRoot, resolved), context.exclusion)
+  ) {
+    return undefined;
+  }
+  if (!(await pathExists(resolved))) {
+    return {
+      file: at.file,
+      line: at.line,
+      message: `link to "${target}" resolves to nothing`,
+    };
+  }
+  const fragment = hash === -1 ? "" : target.slice(hash + 1).toLowerCase();
+  if (
+    fragment !== "" &&
+    resolved.endsWith(".md") &&
+    !(await headingAnchors(resolved, anchorsByFile)).has(fragment)
+  ) {
+    return {
+      file: at.file,
+      line: at.line,
+      message: `link "${target}" points at a heading that does not exist`,
+    };
+  }
+  return undefined;
+}
 
 /**
  * The invalid-status member: a spec's `**Status**`, when present, is one
@@ -202,11 +259,13 @@ const invalidStatus: (context: CheckContext) => Promise<RawFinding[]> =
     async (context: CheckContext): Promise<RawFinding[]> => {
       const recognized = SPEC_STATUSES as readonly string[];
       const findings: RawFinding[] = [];
-      for (const spec of await specFiles(context)) {
+      for (const spec of specFiles(context)) {
         if (!context.lensIds.has(spec.prefix)) {
           continue;
         }
-        const lines = (await readFile(spec.path, "utf8")).split("\n");
+        const lines = (
+          await readFile(join(context.projectRoot, spec.path), "utf8")
+        ).split(/\r?\n/);
         for (const [index, line] of lines.entries()) {
           const value = STATUS_FIELD.exec(line)?.[1];
           if (value !== undefined && !recognized.includes(value)) {
@@ -270,23 +329,27 @@ const specIdInComment: (context: CheckContext) => Promise<RawFinding[]> =
       if (pattern === undefined) {
         return [];
       }
+      const generatorByExtension = generatorsByExtension(context.generators);
+      if (generatorByExtension.size === 0) {
+        return [];
+      }
+      const files = await walkProject(context.projectRoot, {
+        descend: (dir) => shouldDescend(dir, context.exclusion),
+        accept: (path) =>
+          generatorByExtension.has(extname(path)) &&
+          !fileExcluded(path, context.exclusion),
+      });
       const findings: RawFinding[] = [];
-      for (const file of await codeFiles(context)) {
-        const finder = commentFinderFor(file);
-        if (finder === undefined) {
-          continue;
-        }
-        const content = await readFile(join(context.projectRoot, file), "utf8");
-        for (const span of finder(content)) {
-          for (const [offset, commentLine] of span.text.split("\n").entries()) {
-            for (const match of commentLine.matchAll(pattern)) {
-              findings.push({
-                file,
-                line: span.line + offset,
-                message: `spec id "${match[0]}" in a comment must appear only inside its anchor`,
-              });
-            }
-          }
+      for (const file of files) {
+        const generator = generatorByExtension.get(extname(file));
+        if (generator !== undefined) {
+          const content = await readFile(
+            join(context.projectRoot, file),
+            "utf8",
+          );
+          findings.push(
+            ...commentSpecIdFindings(file, content, generator, pattern),
+          );
         }
       }
       return findings;
@@ -302,81 +365,101 @@ function specIdPattern(prefixes: Set<string>): RegExp | undefined {
   return new RegExp(`\\b(?:${alternation})-\\d+\\b`, "g");
 }
 
-/** The code files under the project root a comment finder can read, honouring the exclusions. */
-async function codeFiles(context: CheckContext): Promise<string[]> {
-  const files: string[] = [];
-  await walk("");
-  return files;
-
-  async function walk(relativeDir: string): Promise<void> {
-    const absoluteDir =
-      relativeDir === ""
-        ? context.projectRoot
-        : join(context.projectRoot, relativeDir);
-    let entries: Dirent[];
-    try {
-      entries = await readdir(absoluteDir, { withFileTypes: true });
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        return;
+/** The spec-id-in-comment findings in one source file, via its generator's comment detection. */
+function commentSpecIdFindings(
+  file: string,
+  content: string,
+  generator: Generator,
+  pattern: RegExp,
+): RawFinding[] {
+  const findings: RawFinding[] = [];
+  for (const span of generator.findComments(content)) {
+    span.text.split("\n").forEach((commentLine, offset) => {
+      for (const match of commentLine.matchAll(pattern)) {
+        findings.push({
+          file,
+          line: span.line + offset,
+          message: `spec id "${match[0]}" in a comment must appear only inside its anchor`,
+        });
       }
-      throw error;
-    }
-    for (const entry of entries) {
-      const relativeChild =
-        relativeDir === "" ? entry.name : `${relativeDir}/${entry.name}`;
-      if (entry.isDirectory()) {
-        if (shouldDescend(relativeChild, context.exclusion)) {
-          await walk(relativeChild);
-        }
-      } else if (
-        entry.isFile() &&
-        commentFinderFor(entry.name) !== undefined &&
-        !fileExcluded(relativeChild, context.exclusion)
-      ) {
-        files.push(relativeChild);
-      }
-    }
+    });
   }
+  return findings;
 }
 
-/** Every bound-id-named file in the stories and derived-specs locations. */
-async function specFiles(
-  context: CheckContext,
-): Promise<{ path: string; prefix: string; number: string }[]> {
-  const specs: { path: string; prefix: string; number: string }[] = [];
-  for (const dir of [
+/** A path made project-root-relative with forward slashes, so findings and exclusion matching name a file one way. */
+function toRelative(projectRoot: string, target: string): string {
+  const rel = isAbsolute(target) ? relative(projectRoot, target) : target;
+  return rel.replaceAll("\\", "/").replace(/^\.\//, "").replace(/\/+$/, "");
+}
+
+/** Whether the walk should enter `dir` to reach a spec-tree directory — it is an ancestor, the dir itself, or inside it. */
+function withinSpecTree(dir: string, specTreeDirs: readonly string[]): boolean {
+  return specTreeDirs.some(
+    (specDir) =>
+      specDir === dir ||
+      specDir.startsWith(`${dir}/`) ||
+      dir.startsWith(`${specDir}/`),
+  );
+}
+
+/**
+ * The markdown files in the spec-tree directories (stories, derived specs), as
+ * project-root-relative forward-slash paths — walked from the project root and
+ * honouring the exclusions, the same walk and root the code check uses, so every
+ * check names its file the same way.
+ */
+async function specTreeMarkdown(
+  context: Pick<CheckContext, "projectRoot" | "layout" | "exclusion">,
+): Promise<string[]> {
+  const specTreeDirs = [
     context.layout.stories.dir,
     context.layout.derivedSpecs.dir,
-  ]) {
-    for (const file of await walkFiles(dir)) {
-      const match = SPEC_FILENAME.exec(file.name);
-      if (match?.[1] !== undefined && match[2] !== undefined) {
-        specs.push({ path: file.path, prefix: match[1], number: match[2] });
-      }
+  ].map((dir) => toRelative(context.projectRoot, dir));
+  return walkProject(context.projectRoot, {
+    descend: (dir) =>
+      withinSpecTree(dir, specTreeDirs) &&
+      shouldDescend(dir, context.exclusion),
+    accept: (path) =>
+      path.endsWith(".md") &&
+      specTreeDirs.some((dir) => path.startsWith(`${dir}/`)) &&
+      !fileExcluded(path, context.exclusion),
+  });
+}
+
+/** Every bound-id-named file in the (already-walked) spec-tree, with its parsed prefix and number. */
+function specFiles(
+  context: CheckContext,
+): { path: string; prefix: string; number: string }[] {
+  const specs: { path: string; prefix: string; number: string }[] = [];
+  for (const path of context.specTreeFiles) {
+    const name = path.slice(path.lastIndexOf("/") + 1);
+    const match = SPEC_FILENAME.exec(name);
+    if (match?.[1] !== undefined && match[2] !== undefined) {
+      specs.push({ path, prefix: match[1], number: match[2] });
     }
   }
   return specs;
 }
 
-/** The markdown files of the spec corpus: the stories, the derived specs, and the domain model. */
-async function corpusMarkdown(layout: Layout): Promise<string[]> {
-  const files: string[] = [];
-  for (const dir of [layout.stories.dir, layout.derivedSpecs.dir]) {
-    for (const file of await walkFiles(dir)) {
-      if (file.name.endsWith(".md")) {
-        files.push(file.path);
-      }
-    }
-  }
-  if (await pathExists(layout.entities.file)) {
-    files.push(layout.entities.file);
+/** The markdown of the spec corpus: the (already-walked) spec-tree files and the domain model, project-root-relative. */
+async function corpusMarkdown(context: CheckContext): Promise<string[]> {
+  const files = [...context.specTreeFiles];
+  const entities = toRelative(
+    context.projectRoot,
+    context.layout.entities.file,
+  );
+  if (
+    !fileExcluded(entities, context.exclusion) &&
+    (await pathExists(join(context.projectRoot, entities)))
+  ) {
+    files.push(entities);
   }
   return files;
 }
 
 /** The local link targets on a line — not an external URL, not a bare `#anchor`. */
-function* localLinks(line: string): Generator<string> {
+function* localLinks(line: string): IterableIterator<string> {
   for (const match of line.matchAll(LINK)) {
     const target = match[1];
     if (
@@ -400,7 +483,7 @@ async function headingAnchors(
   }
   const slugs = new Set<string>();
   const seen = new Map<string, number>();
-  for (const line of (await readFile(file, "utf8")).split("\n")) {
+  for (const line of (await readFile(file, "utf8")).split(/\r?\n/)) {
     const heading = line.match(/^#{1,6}\s+(.+?)\s*#*\s*$/);
     if (heading === null || heading[1] === undefined) {
       continue;

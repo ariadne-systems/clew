@@ -60,7 +60,7 @@ This story is the **scan primitive only**: collecting located anchors; computing
 - [SW-022 — Scan the code into the set of anchor locations](../derived-specs/SW-022-scan-code-into-anchor-locations.md)
 - [SW-021 — Discover anchors in TypeScript via a lightweight lexical scan](../derived-specs/SW-021-discover-anchors-typescript.md)
 - [SW-023 — The tool exposes a `scan` command that reports the code's anchor locations](../derived-specs/SW-023-scan-command.md)
-- [CON-016 — The scan excludes tool-owned and non-source locations by default](../derived-specs/CON-016-scan-builtin-exclusions.md)
+- [CON-016 — The scan excludes dependency and build directories by default](../derived-specs/CON-016-scan-builtin-exclusions.md)
 
 **Related (existing corpus)**
 
@@ -69,3 +69,8 @@ This story is the **scan primitive only**: collecting located anchors; computing
 - TypeScript discovery is the sibling of [SW-018 — TypeScript generator output](../derived-specs/SW-018-typescript-output.md) (the emit side of the same markers).
 - Built-in exclusion relates to [CON-012 — Generated files are tool-owned](../derived-specs/CON-012-generated-files-tool-owned.md).
 - Picks up the *check* side deferred by [STR-011 — the `spec` command](STR-011-spec-command.md).
+
+## Changes
+
+- **2026-06-29** — Updated the link text for CON-016 to its revised title (STR-024).
+Reference-only; this story's meaning is unchanged.
