@@ -3,6 +3,8 @@ Comment detection is delegated to pluggable per-language comment finders
 
 **Lens**: ARCH
 
+**Status**: active
+
 **Description**
 Identifying what is a comment — so it can be scanned for a stray spec-id token — is language-specific, so clew delegates it to a per-language **comment finder** behind a narrow interface, selected for a file by its language.
 A new language is supported by registering a finder; the spec-id-in-comment check is unchanged.

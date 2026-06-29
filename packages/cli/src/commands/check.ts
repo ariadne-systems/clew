@@ -3,7 +3,7 @@ import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 
 /**
- * Registers the `clew check` command surface (SW-034). Thin: it requires a
+ * Registers the `clew check` command surface. Thin: it requires a
  * configuration, runs the integrity-check suite in core, prints the report, and
  * exits non-zero when any check fails — so it runs the same in pre-commit, CI, or
  * an agent's loop. Any error propagates to the bin entry, which writes it to

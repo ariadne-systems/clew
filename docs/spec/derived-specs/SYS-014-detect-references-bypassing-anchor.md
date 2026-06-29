@@ -3,6 +3,8 @@ The system detects a spec reference that bypasses the anchor
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall detect, mechanically, a code-to-spec reference that is not an anchor — a spec id appearing in a comment or a name rather than inside a `realizes` / `verifies` / `concerns` anchor — and report it located, so a reference the compiler cannot see is caught rather than left to rot.
 

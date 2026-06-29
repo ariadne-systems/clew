@@ -3,6 +3,8 @@ clew reports a spec id found in a code comment
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 clew shall scan source files and report each spec-id token — the hyphenated form a spec is named by, e.g. `SW-032` — that appears in a comment or a test or suite name rather than inside an anchor, emitting the file and line and exiting non-zero when any is found.
 The anchor symbol's underscore form (`SW_032_…`) is not a match, so a correctly anchored reference is never reported.

@@ -3,6 +3,8 @@ A spec id appears in code only inside its anchor
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 A spec id may appear in code only inside an anchor (`realizes` / `verifies` / `concerns`), where the compiler checks it.
 A spec id written anywhere else — a comment, a JSDoc block, a test or suite name — is forbidden: it is an unchecked copy the compiler and coverage cannot see, so it rots.

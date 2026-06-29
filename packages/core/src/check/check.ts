@@ -1,10 +1,31 @@
-import { access, readFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { ArchTraceables, ConTraceables, realizes } from "@ariadne-thread/trace";
+import type { Dirent } from "node:fs";
+import { access, readdir, readFile } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
+import {
+  ArchTraceables,
+  ConTraceables,
+  realizes,
+  SwTraceables,
+  SysTraceables,
+} from "@ariadne-thread/trace";
 import type { Layout } from "../config/config.js";
-import { readLayout, readLenses } from "../config/config.js";
+import {
+  readConfiguredPrefixes,
+  readExclude,
+  readGenerators,
+  readLayout,
+  readLenses,
+  readUnexclude,
+} from "../config/config.js";
 import { walkFiles } from "../fs/walk-files.js";
+import type { ExclusionRules } from "../spec/exclusions.js";
+import {
+  compileExclusionRules,
+  fileExcluded,
+  shouldDescend,
+} from "../spec/exclusions.js";
 import { SPEC_STATUSES } from "../spec/generator.js";
+import { commentFinderFor } from "./comment-finders.js";
 
 /** A bound spec filename: a lens or story prefix, a number, an optional slug. */
 const SPEC_FILENAME = /^([A-Z]+)-(\d+)(?:-.*)?\.md$/;
@@ -26,6 +47,8 @@ export type Finding = {
 export type CheckOptions = {
   /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
   configFile?: string;
+  /** Project root the code checks walk. Defaults to the config file's directory, else cwd. */
+  projectRoot?: string;
 };
 
 export type CheckResult = {
@@ -36,6 +59,12 @@ export type CheckResult = {
 type CheckContext = {
   layout: Layout;
   lensIds: Set<string>;
+  /** The configured spec prefixes (lens ids plus the story and entity prefixes). */
+  prefixes: Set<string>;
+  /** The project root the code checks walk. */
+  projectRoot: string;
+  /** The compiled exclusion rules a code scan honours. */
+  exclusion: ExclusionRules;
 };
 
 /** A finding before the runner stamps which check produced it. */
@@ -53,6 +82,7 @@ function suite(): readonly CheckModule[] {
     { name: "reference-rot", run: referenceRot },
     { name: "invalid-status", run: invalidStatus },
     { name: "duplicate-id", run: duplicateId },
+    { name: "spec-id-in-comment", run: specIdInComment },
   ];
 }
 
@@ -64,13 +94,30 @@ function suite(): readonly CheckModule[] {
 export const check: (options?: CheckOptions) => Promise<CheckResult> = realizes(
   ArchTraceables.ARCH_005_CHECKS_ARE_ONE_SUITE,
   async (options: CheckOptions = {}): Promise<CheckResult> => {
-    const [layout, lenses] = await Promise.all([
-      readLayout(options.configFile),
-      readLenses(options.configFile),
-    ]);
+    const projectRoot =
+      options.projectRoot ??
+      (options.configFile === undefined ? "." : dirname(options.configFile));
+    const [layout, lenses, prefixes, exclude, unexclude, generators] =
+      await Promise.all([
+        readLayout(options.configFile),
+        readLenses(options.configFile),
+        readConfiguredPrefixes(options.configFile),
+        readExclude(options.configFile),
+        readUnexclude(options.configFile),
+        readGenerators(options.configFile),
+      ]);
     const context: CheckContext = {
       layout,
       lensIds: new Set(lenses.map((lens) => lens.id)),
+      prefixes,
+      projectRoot,
+      exclusion: compileExclusionRules({
+        exclude,
+        unexclude,
+        outputDirs: generators.flatMap((generator) =>
+          generator.outputDir === undefined ? [] : [generator.outputDir],
+        ),
+      }),
     };
     const findings: Finding[] = [];
     for (const module of suite()) {
@@ -98,7 +145,7 @@ export function formatCheckReport(result: CheckResult): string {
 const LINK = /\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
 
 /**
- * The reference-rot member (CON-029): every link a spec or story makes resolves to
+ * The reference-rot member: every link a spec or story makes resolves to
  * a file that exists, and a `#fragment` to a heading in that file. It is
  * type-agnostic — it confirms the link lands on a real node, not what relation it
  * expresses — so it needs none of the project's relation vocabulary.
@@ -145,7 +192,7 @@ const referenceRot: (context: CheckContext) => Promise<RawFinding[]> = realizes(
 );
 
 /**
- * The invalid-status member (CON-022): a spec's `**Status**`, when present, is one
+ * The invalid-status member: a spec's `**Status**`, when present, is one
  * of the recognized values. An unrecognized value would silently drop the spec out
  * of generation, so it is reported rather than guessed.
  */
@@ -176,9 +223,9 @@ const invalidStatus: (context: CheckContext) => Promise<RawFinding[]> =
   );
 
 /**
- * The duplicate-id member (CON-025): a bound id is declared by exactly one file.
- * This is the comprehensive detection CON-025 leaves to a separate check — across
- * every prefix, not only the lens ids the generation scan gates on.
+ * The duplicate-id member: a bound id is declared by exactly one file.
+ * This is the comprehensive detection deferred from the generation scan — across
+ * every prefix, not only the lens ids generation gates on.
  */
 const duplicateId: (context: CheckContext) => Promise<RawFinding[]> = realizes(
   ConTraceables.CON_025_ONE_FILE_PER_SPEC_ID,
@@ -203,6 +250,95 @@ const duplicateId: (context: CheckContext) => Promise<RawFinding[]> = realizes(
     return findings;
   },
 );
+
+/**
+ * The spec-id-in-comment member: a spec id may live in code only inside an anchor
+ * — the underscore form the compiler checks — never in a comment or a name. It
+ * scans each source file's comments, found by the per-language finder, for a
+ * hyphenated spec-id token of a configured prefix; the underscore anchor form
+ * never matches, so a real anchor never trips.
+ */
+const specIdInComment: (context: CheckContext) => Promise<RawFinding[]> =
+  realizes(
+    [
+      SysTraceables.SYS_014_DETECT_REFERENCES_BYPASSING_ANCHOR,
+      SwTraceables.SW_033_FLAG_SPEC_ID_IN_COMMENT,
+      ConTraceables.CON_026_SPEC_ID_ONLY_IN_ANCHOR,
+    ],
+    async (context: CheckContext): Promise<RawFinding[]> => {
+      const pattern = specIdPattern(context.prefixes);
+      if (pattern === undefined) {
+        return [];
+      }
+      const findings: RawFinding[] = [];
+      for (const file of await codeFiles(context)) {
+        const finder = commentFinderFor(file);
+        if (finder === undefined) {
+          continue;
+        }
+        const content = await readFile(join(context.projectRoot, file), "utf8");
+        for (const span of finder(content)) {
+          for (const [offset, commentLine] of span.text.split("\n").entries()) {
+            for (const match of commentLine.matchAll(pattern)) {
+              findings.push({
+                file,
+                line: span.line + offset,
+                message: `spec id "${match[0]}" in a comment must appear only inside its anchor`,
+              });
+            }
+          }
+        }
+      }
+      return findings;
+    },
+  );
+
+/** A global pattern matching a hyphenated spec id of any configured prefix, or undefined when none. */
+function specIdPattern(prefixes: Set<string>): RegExp | undefined {
+  if (prefixes.size === 0) {
+    return undefined;
+  }
+  const alternation = [...prefixes].sort().join("|");
+  return new RegExp(`\\b(?:${alternation})-\\d+\\b`, "g");
+}
+
+/** The code files under the project root a comment finder can read, honouring the exclusions. */
+async function codeFiles(context: CheckContext): Promise<string[]> {
+  const files: string[] = [];
+  await walk("");
+  return files;
+
+  async function walk(relativeDir: string): Promise<void> {
+    const absoluteDir =
+      relativeDir === ""
+        ? context.projectRoot
+        : join(context.projectRoot, relativeDir);
+    let entries: Dirent[];
+    try {
+      entries = await readdir(absoluteDir, { withFileTypes: true });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        return;
+      }
+      throw error;
+    }
+    for (const entry of entries) {
+      const relativeChild =
+        relativeDir === "" ? entry.name : `${relativeDir}/${entry.name}`;
+      if (entry.isDirectory()) {
+        if (shouldDescend(relativeChild, context.exclusion)) {
+          await walk(relativeChild);
+        }
+      } else if (
+        entry.isFile() &&
+        commentFinderFor(entry.name) !== undefined &&
+        !fileExcluded(relativeChild, context.exclusion)
+      ) {
+        files.push(relativeChild);
+      }
+    }
+  }
+}
 
 /** Every bound-id-named file in the stories and derived-specs locations. */
 async function specFiles(
