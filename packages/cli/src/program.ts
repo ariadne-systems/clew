@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import pkg from "../package.json" with { type: "json" };
+import { registerCheck } from "./commands/check.js";
 import { registerConfig } from "./commands/config.js";
 import { registerCoverage } from "./commands/coverage.js";
 import { registerInit } from "./commands/init.js";
@@ -32,6 +33,7 @@ export function buildProgram(): Command {
   registerSpec(program);
   registerScan(program);
   registerCoverage(program);
+  registerCheck(program);
   registerConfig(program);
   registerPromote(program);
 

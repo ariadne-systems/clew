@@ -16,7 +16,7 @@ And several of these checks do not exist at all yet — nothing catches a dangli
 Add one `clew check` command that runs a **suite** of deterministic checks over the corpus and the anchors, reports every violation with its location, and exits non-zero if any check fails.
 The suite is the single home for every mechanical integrity check, so each is added once and inherited everywhere clew runs:
 - relation links resolve to real spec files (reference rot, CON-029) — type-agnostically, since the relation vocabulary is project-defined;
-- no temporary id survives in the promoted tree (CON-027 as a standing check — the invariant that no temporary id reaches the tree, complementing the promote-time CON-014 guarantee);
+- a dangling temporary reference in the promoted tree is caught by reference-rot — a leftover `-TMP-` link no longer resolves; CON-027 itself is enforced at promotion (the unresolved-reference refusal), so the suite adds no naive `-TMP-` token scan, which would flag the temp-id scheme's own documented examples;
 - every `**Status**` is a recognized value (CON-022);
 - no spec id appears in a code comment or name — comment detection delegated to pluggable per-language finders (ARCH-006), the rule mechanized here rather than as a separate command;
 - no two files declare the same id (the same logic `scan` gates on, surfaced as a check);
@@ -27,7 +27,7 @@ Judgment-adjacent checks are deliberately excluded or kept as soft warnings (see
 **Acceptance Criteria**
 - `clew check` runs every configured check, prints each violation with its file and location, and exits non-zero if any check fails; a clean corpus exits zero with nothing to report.
 - A relation link to a non-existent spec id is reported.
-- A temporary id left anywhere in the promoted tree is reported (CON-027).
+- A leftover temporary-id reference in the promoted tree — a link that no longer resolves — is reported by reference-rot (CON-029).
 - An unrecognized `**Status**` value is reported (CON-022).
 - A spec id in a code comment or test name is reported.
 - Two files declaring the same id are reported.
@@ -60,5 +60,5 @@ Judgment-adjacent checks are deliberately excluded or kept as soft warnings (see
 
 - Folds in the spec-id-in-comment check — detection (SYS-014), the report (SW-033), and the invariant it holds (CON-026) — as one member of this suite rather than a standalone command; the earlier standalone-command framing is dropped.
 - Surfaces [CON-025 — A bound spec id is declared by exactly one file](../derived-specs/CON-025-one-file-per-spec-id.md) — the same logic `scan` gates on at generation, exposed as a standing check.
-- Enforces existing invariants as checks: [CON-027 — no temporary id in the promoted tree](../derived-specs/CON-027-no-temporary-id-in-promoted-corpus.md) and [CON-022 — a spec's status is one of the declared values](../derived-specs/CON-022-valid-status.md).
+- Enforces [CON-022 — a spec's status is one of the declared values](../derived-specs/CON-022-valid-status.md) as a standing check; a dangling temporary reference ([CON-027](../derived-specs/CON-027-no-temporary-id-in-promoted-corpus.md)) shows up as a non-resolving link, caught by reference-rot.
 - Generalizes the repo-local reference-rot script (`scripts/check-references.mjs`) into a shipped capability.

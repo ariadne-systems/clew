@@ -3,6 +3,8 @@ clew exposes a `check` command that runs the integrity-check suite
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 clew exposes a `check` command that runs the project's deterministic integrity checks over the corpus and the anchors, reports every violation with its location, and exits non-zero when any check fails.
 The command is a thin runner: each check is a module reusing existing core plumbing — the scan, draft parsing, the located-anchor record — and the runner aggregates their findings and sets the exit code.
