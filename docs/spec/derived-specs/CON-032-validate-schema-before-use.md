@@ -3,6 +3,8 @@ A schema is validated against clew's minimum contract before it is used
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 Before clew applies a project schema, it validates the schema itself against clew's minimum contract.
 The schema must be well-formed — a recognized shape (`fields` as label → `{ required, enum }`, an `onError` of `warn` or `fail`) — and it must not reach into the pinned core: it may not redefine the id form or the `**Status**` value set, which are clew's.

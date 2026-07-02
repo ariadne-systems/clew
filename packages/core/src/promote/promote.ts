@@ -1,5 +1,5 @@
 import { access, readFile, rm } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Layout } from "../config/config.js";
 import { readLayout, readLenses } from "../config/config.js";
@@ -15,6 +15,8 @@ import {
   findTemporaryReferences,
   parseTemporaryDraftId,
 } from "../mint/temporary-id.js";
+import { validateOnLoad } from "../spec/document-schema.js";
+import { loadSchemas } from "../spec/document-schema-loader.js";
 import { escapeRegExp } from "../text/escape-regexp.js";
 
 /** The keyword that roots a promotion at every pending draft rather than a named set. */
@@ -81,6 +83,23 @@ export const promote: (options: PromoteOptions) => Promise<PromoteResult> =
       );
       if (set.length === 0) {
         return { promoted: [] };
+      }
+
+      // Validate each story being promoted against its schema before binding any
+      // id, so a malformed story fails the promotion rather than entering the
+      // corpus.
+      const projectRoot =
+        options.configFile === undefined ? "." : dirname(options.configFile);
+      const schemas = await loadSchemas(options.configFile, projectRoot);
+      for (const draft of set) {
+        if (draft.prefix === layout.stories.prefix) {
+          validateOnLoad(
+            await readFile(draft.path, "utf8"),
+            "story",
+            schemas,
+            draft.path,
+          );
+        }
       }
 
       // Resolve every target before binding any id, so nothing is spent on a
@@ -231,12 +250,19 @@ function unresolvedReference(
   reference: string,
   byTemporaryId: ReadonlyMap<string, DraftFile>,
 ): AriadneError {
-  const detail = byTemporaryId.has(reference)
-    ? "a pending draft this promotion does not include; promote them together by naming the story that references both"
-    : "not a pending draft";
+  const inSet = byTemporaryId.has(reference);
   return new AriadneError(
     ErrorCode.UNRESOLVED_REFERENCE,
-    `Draft "${draft.path}" references "${reference}", ${detail}.`,
+    `unresolved reference to "${reference}"`,
+    {
+      location: draft.path,
+      note: inSet
+        ? "it names a pending draft this promotion does not include"
+        : "it names something that is not a pending draft",
+      help: inSet
+        ? "promote them together by naming the story that references both"
+        : "add the referenced draft, or remove the reference",
+    },
   );
 }
 

@@ -397,6 +397,28 @@ export async function readUnexclude(
   return readGlobList(file, "unexclude");
 }
 
+/** The configured per-document-type schema files: a document type mapped to its schema file path. */
+export type SchemaConfig = { story?: string; "derived-spec"?: string };
+
+/**
+ * Reads the `schemas` section: a per-document-type validation schema file,
+ * keyed by `story` or `derived-spec`. A missing or malformed section yields no
+ * configured schemas — only the pinned core is enforced.
+ */
+export async function readSchemas(
+  file: string = DEFAULT_CONFIG_FILE,
+): Promise<SchemaConfig> {
+  const raw = asObject((await readRawConfig(file)).schemas);
+  const config: SchemaConfig = {};
+  if (typeof raw.story === "string") {
+    config.story = raw.story;
+  }
+  if (typeof raw["derived-spec"] === "string") {
+    config["derived-spec"] = raw["derived-spec"];
+  }
+  return config;
+}
+
 /** A committed coverage waiver — a spec `id` or a glob `pattern`, with a reason (ENT-002). */
 export type Waiver = { id?: string; pattern?: string; reason: string };
 

@@ -44,5 +44,6 @@ Runtime:
 
 - commander, picocolors, pino (CLI)
 - proper-lockfile (core state locking)
+- yaml (core document-schema parsing) — schemas are hand-authored YAML (`.ariadnerc.json` stays JSON); justified in STR-026.
 
 Do not introduce alternative libraries (for example tsup, ESLint, Prettier, Jest) without explicit justification.

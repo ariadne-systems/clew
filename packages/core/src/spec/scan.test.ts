@@ -1,7 +1,12 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
+import {
+  ConTraceables,
+  SwTraceables,
+  SysTraceables,
+  verifies,
+} from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 import { ErrorCode, scan } from "../index.js";
 
@@ -168,6 +173,7 @@ describe("scanning artifacts into traceables", () => {
 
         await expect(scan({ configFile })).rejects.toMatchObject({
           code: ErrorCode.INVALID_SPEC_STATUS,
+          location: expect.stringContaining("SW-001-a.md"),
         });
       });
 
@@ -194,7 +200,7 @@ describe("duplicate ids", () => {
 
       await expect(scan({ configFile })).rejects.toMatchObject({
         code: ErrorCode.DUPLICATE_SPEC_ID,
-        message: expect.stringMatching(/SW-013-a\.md.*SW-013-b\.md/),
+        note: expect.stringMatching(/SW-013-a\.md.*SW-013-b\.md/),
       });
     });
 
@@ -216,11 +222,11 @@ describe("duplicate ids", () => {
 
       const error = (await scan({ configFile }).catch(
         (caught) => caught,
-      )) as Error & { code?: string };
+      )) as Error & { code?: string; note?: string };
 
       expect(error.code).toBe(ErrorCode.DUPLICATE_SPEC_ID);
-      expect(error.message.indexOf("SW-013-a.md")).toBeLessThan(
-        error.message.indexOf("SW-013-z.md"),
+      expect(error.note?.indexOf("SW-013-a.md")).toBeLessThan(
+        error.note?.indexOf("SW-013-z.md") ?? -1,
       );
     });
 
@@ -232,10 +238,10 @@ describe("duplicate ids", () => {
 
       const error = (await scan({ configFile }).catch(
         (caught) => caught,
-      )) as Error & { code?: string };
+      )) as Error & { code?: string; note?: string };
 
       expect(error.code).toBe(ErrorCode.DUPLICATE_SPEC_ID);
-      const named = error.message.match(/"([^"]+)" and "([^"]+)"/);
+      const named = (error.note ?? "").match(/"([^"]+)" and "([^"]+)"/);
       expect(named?.[1]).toMatch(/SW-013-x\.md$/);
       expect(named?.[2]).toMatch(/SW-013-x\.md$/);
       expect(named?.[1]).not.toBe(named?.[2]);
@@ -262,6 +268,94 @@ describe("duplicate ids", () => {
       const specs = await scan({ configFile });
 
       expect(specs.map((spec) => spec.id)).toEqual(["SW-013"]);
+    });
+  });
+});
+
+describe("scan-time schema validation", () => {
+  verifies(SysTraceables.SYS_015_VALIDATE_ARTIFACTS_ON_LOAD, () => {
+    // A project whose `derived-spec` schema requires a `Title` field at the given
+    // severity, with one derived spec carrying the supplied body.
+    async function schemaProject(
+      specBody: string,
+      onError = "fail",
+    ): Promise<string> {
+      const dir = await mkdtemp(join(tmpdir(), "ariadne-scan-"));
+      const derivedDir = join(dir, "docs", "spec", "derived-specs");
+      await mkdir(derivedDir, { recursive: true });
+      await writeFile(
+        join(dir, "ds.yml"),
+        `onError: ${onError}\nfields:\n  Title:\n    required: true\n`,
+        "utf8",
+      );
+      await writeFile(join(derivedDir, "SW-001-a.md"), specBody, "utf8");
+      const configFile = join(dir, ".ariadnerc.json");
+      await writeFile(
+        configFile,
+        JSON.stringify({
+          layout: {
+            stories: {
+              dir: join(dir, "docs", "spec", "stories"),
+              prefix: "STR",
+            },
+            derivedSpecs: { dir: derivedDir },
+          },
+          schemas: { "derived-spec": "ds.yml" },
+        }),
+        "utf8",
+      );
+      return configFile;
+    }
+
+    test("a derived spec missing a fail-severity required field rejects the scan", async () => {
+      const configFile = await schemaProject("**Lens**: SW\n");
+
+      await expect(scan({ configFile })).rejects.toMatchObject({
+        code: ErrorCode.SCHEMA_VIOLATION,
+      });
+    });
+
+    test("a conformant derived spec scans", async () => {
+      const configFile = await schemaProject("**Title**\n\n**Lens**: SW\n");
+
+      const specs = await scan({ configFile });
+
+      expect(specs.map((spec) => spec.id)).toEqual(["SW-001"]);
+    });
+
+    test("a warn-severity violation does not stop the scan", async () => {
+      const configFile = await schemaProject("**Lens**: SW\n", "warn");
+
+      const specs = await scan({ configFile });
+
+      expect(specs.map((spec) => spec.id)).toEqual(["SW-001"]);
+    });
+
+    test("a malformed schema is rejected, naming it", async () => {
+      const dir = await mkdtemp(join(tmpdir(), "ariadne-scan-"));
+      const derivedDir = join(dir, "docs", "spec", "derived-specs");
+      await mkdir(derivedDir, { recursive: true });
+      await writeFile(join(dir, "ds.yml"), "id:\n  pattern: x\n", "utf8");
+      await writeFile(join(derivedDir, "SW-001-a.md"), "**Title**\n", "utf8");
+      const configFile = join(dir, ".ariadnerc.json");
+      await writeFile(
+        configFile,
+        JSON.stringify({
+          layout: {
+            stories: {
+              dir: join(dir, "docs", "spec", "stories"),
+              prefix: "STR",
+            },
+            derivedSpecs: { dir: derivedDir },
+          },
+          schemas: { "derived-spec": "ds.yml" },
+        }),
+        "utf8",
+      );
+
+      await expect(scan({ configFile })).rejects.toMatchObject({
+        code: ErrorCode.INVALID_SCHEMA,
+      });
     });
   });
 });

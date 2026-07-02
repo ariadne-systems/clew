@@ -43,22 +43,49 @@ export const ErrorCode = {
   DUPLICATE_SPEC_ID: "E_DUPLICATE_SPEC_ID",
   /** A draft in a promotion references a temporary id that is not in the resolved set. */
   UNRESOLVED_REFERENCE: "E_UNRESOLVED_REFERENCE",
+  /** A document schema is malformed, or reaches into clew's pinned core (the id form or the status values). */
+  INVALID_SCHEMA: "E_INVALID_SCHEMA",
+  /** A document violates its schema at `fail` severity (a missing required field or an out-of-enum value). */
+  SCHEMA_VIOLATION: "E_SCHEMA_VIOLATION",
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
 /**
+ * The optional, human-facing context rendered beneath a coded failure, following
+ * the compiler-diagnostic convention (rustc/clang): a location pointer, a note on
+ * what the condition means, and a help line naming the concrete fix. Any of them
+ * may be omitted — a trivial failure carries none, so it renders as a single line.
+ */
+export interface AriadneErrorOptions extends ErrorOptions {
+  /** Where the failure was found — a file path, optionally `:line`. Rendered as `--> location`. */
+  location?: string;
+  /** What the condition means or why it matters. Rendered as `= note: ...`. */
+  note?: string;
+  /** The concrete action(s) that resolve it. One or more, each rendered as its own `= help: ...` line. */
+  help?: string | readonly string[];
+}
+
+/**
  * A failure carrying a stable, machine-readable code in addition to its
  * human-readable message. The code is the failure's identity and is
- * what consumers branch on; the message is for humans and may be reworded.
+ * what consumers branch on; the message is the one-line summary and may be
+ * reworded. The optional `location`/`note`/`help` carry the diagnostic context a
+ * user needs to locate and fix the failure, rendered in the compiler convention.
  */
 @realizes(ArchTraceables.ARCH_002_STABLE_ERROR_CODES)
 export class AriadneError extends Error {
   readonly code: ErrorCode;
+  readonly location?: string;
+  readonly note?: string;
+  readonly help?: string | readonly string[];
 
-  constructor(code: ErrorCode, message: string, options?: ErrorOptions) {
+  constructor(code: ErrorCode, message: string, options?: AriadneErrorOptions) {
     super(message, options);
     this.code = code;
     this.name = "AriadneError";
+    this.location = options?.location;
+    this.note = options?.note;
+    this.help = options?.help;
   }
 }

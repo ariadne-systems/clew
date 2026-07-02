@@ -1,11 +1,17 @@
 import type { Dirent } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import { readLayout, readLenses } from "../config/config.js";
 import { AriadneError, ErrorCode } from "../errors.js";
+import type { DocumentSchema, DocumentType } from "./document-schema.js";
+import { validateOnLoad } from "./document-schema.js";
+import { loadSchemas } from "./document-schema-loader.js";
 import type { ScannedSpec, SpecStatus } from "./generator.js";
 import { SPEC_STATUSES } from "./generator.js";
+
+/** The loaded per-document-type schemas, threaded through the walk for scan-time validation. */
+type Schemas = ReadonlyMap<DocumentType, DocumentSchema>;
 
 export type ScanOptions = {
   /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
@@ -45,9 +51,12 @@ type SeenSpec = { path: string; spec: ScannedSpec };
  * from it. The result is sorted by id so generation downstream is deterministic.
  */
 export async function scan(options: ScanOptions = {}): Promise<ScannedSpec[]> {
-  const [layout, lenses] = await Promise.all([
+  const projectRoot =
+    options.configFile === undefined ? "." : dirname(options.configFile);
+  const [layout, lenses, schemas] = await Promise.all([
     readLayout(options.configFile),
     readLenses(options.configFile),
+    loadSchemas(options.configFile, projectRoot),
   ]);
   const lensIds = new Set(lenses.map((lens) => lens.id));
   const dirs = [layout.stories.dir, layout.derivedSpecs.dir];
@@ -55,7 +64,7 @@ export async function scan(options: ScanOptions = {}): Promise<ScannedSpec[]> {
   // is rejected — and the same file reached twice (overlapping roots) is not.
   const seen = new Map<string, SeenSpec>();
   for (const dir of dirs) {
-    await collectTraceables(dir, lensIds, seen);
+    await collectTraceables(dir, lensIds, seen, schemas);
   }
   return [...seen.values()]
     .map((entry) => entry.spec)
@@ -71,6 +80,7 @@ async function collectTraceables(
   dir: string,
   lensIds: Set<string>,
   seen: Map<string, SeenSpec>,
+  schemas: Schemas,
 ): Promise<void> {
   let entries: Dirent[];
   try {
@@ -85,10 +95,10 @@ async function collectTraceables(
     const path = join(dir, entry.name);
     if (entry.isDirectory()) {
       if (!IGNORED_DIRECTORIES.has(entry.name)) {
-        await collectTraceables(path, lensIds, seen);
+        await collectTraceables(path, lensIds, seen, schemas);
       }
     } else {
-      await recordTraceable(path, entry.name, lensIds, seen);
+      await recordTraceable(path, entry.name, lensIds, seen, schemas);
     }
   }
 }
@@ -107,22 +117,31 @@ const STATUS_FIELD = /^\*\*Status\*\*:[ \t]*(.+?)[ \t]*$/m;
  * value is rejected rather than silently dropping the spec out of enforcement
  * (CON-022).
  */
-const readSpecStatus: (content: string) => SpecStatus = realizes(
-  [SwTraceables.SW_031_SCAN_SPEC_STATUS, ConTraceables.CON_022_VALID_STATUS],
-  (content: string): SpecStatus => {
-    const value = STATUS_FIELD.exec(content)?.[1];
-    if (value === undefined) {
-      return "planned";
-    }
-    if (!(SPEC_STATUSES as readonly string[]).includes(value)) {
-      throw new AriadneError(
-        ErrorCode.INVALID_SPEC_STATUS,
-        `Unrecognized spec status "${value}"; expected one of ${SPEC_STATUSES.join(", ")}.`,
-      );
-    }
-    return value as SpecStatus;
-  },
-);
+const readSpecStatus: (content: string, location: string) => SpecStatus =
+  realizes(
+    [SwTraceables.SW_031_SCAN_SPEC_STATUS, ConTraceables.CON_022_VALID_STATUS],
+    (content: string, location: string): SpecStatus => {
+      const value = STATUS_FIELD.exec(content)?.[1];
+      if (value === undefined) {
+        return "planned";
+      }
+      if (!(SPEC_STATUSES as readonly string[]).includes(value)) {
+        throw new AriadneError(
+          ErrorCode.INVALID_SPEC_STATUS,
+          `unrecognized spec status "${value}"`,
+          {
+            location,
+            note: "a spec's **Status** must be a recognized state, or the spec would silently drop out of coverage",
+            help: [
+              `set **Status** to one of ${SPEC_STATUSES.join(", ")}, or remove it to default to planned`,
+              "run `clew check` to see all validation issues at once",
+            ],
+          },
+        );
+      }
+      return value as SpecStatus;
+    },
+  );
 
 /**
  * Records the traceable a filename declares, and rejects a duplicate. Only a
@@ -137,6 +156,7 @@ const recordTraceable: (
   filename: string,
   lensIds: Set<string>,
   seen: Map<string, SeenSpec>,
+  schemas: Schemas,
 ) => Promise<void> = realizes(
   [
     SwTraceables.SW_013_SCAN_TRACEABLES,
@@ -147,6 +167,7 @@ const recordTraceable: (
     filename: string,
     lensIds: Set<string>,
     seen: Map<string, SeenSpec>,
+    schemas: Schemas,
   ): Promise<void> => {
     const match = SPEC_FILENAME.exec(filename);
     if (match === null) {
@@ -168,10 +189,18 @@ const recordTraceable: (
       const [first, second] = [existing.path, filePath].sort();
       throw new AriadneError(
         ErrorCode.DUPLICATE_SPEC_ID,
-        `Spec id "${id}" is declared by more than one file: "${first}" and "${second}". Each bound id must be declared by exactly one file.`,
+        `spec id "${id}" is declared by more than one file`,
+        {
+          note: `both "${first}" and "${second}" declare it`,
+          help: "each bound id must be declared by exactly one file — rename or remove one",
+        },
       );
     }
-    const status = readSpecStatus(await readFile(filePath, "utf8"));
+    const content = await readFile(filePath, "utf8");
+    // Validate the derived spec against its schema as it is read; a fail-severity
+    // violation throws, warnings are surfaced by `clew check`.
+    validateOnLoad(content, "derived-spec", schemas, filePath);
+    const status = readSpecStatus(content, filePath);
     seen.set(id, {
       path: filePath,
       spec: { id, lens: prefix, filename, status },

@@ -9,6 +9,10 @@
       "outputDir": "packages/trace/src"
     }
   ],
+  "schemas": {
+    "story": "docs/spec/schemas/story.schema.yaml",
+    "derived-spec": "docs/spec/schemas/derived-spec.schema.yaml"
+  },
   "waivers": [
     {
       "pattern": "STK-*",

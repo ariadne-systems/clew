@@ -25,3 +25,5 @@ A released code is never reused for a different condition and never renamed (CON
 | `E_INVALID_OPTIONS` | Command options are combined invalidly, for example `--as` passed without `--tmp`. |
 | `E_DUPLICATE_SPEC_ID` | Two files declare the same bound spec id; each id must be declared by exactly one file. |
 | `E_UNRESOLVED_REFERENCE` | A draft in a promotion references a temporary id that is not in the resolved set; name the missing draft so the whole set can be promoted together. |
+| `E_INVALID_SCHEMA` | A document schema is malformed, or reaches into clew's pinned core (the id form or the `**Status**` value set); fix the named schema. |
+| `E_SCHEMA_VIOLATION` | A document violates its schema at `fail` severity — a missing required field or an out-of-enum value; fix the named document. |

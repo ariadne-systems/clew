@@ -1,0 +1,18 @@
+# Document schema for stories (the `story` document type).
+# clew merges this with the pinned core (id form, `**Status**` grammar, relation
+# links) it always enforces. Fields are listed in the order a story must present
+# them; a `**Bold label**` the schema does not list may appear anywhere.
+onError: fail
+fields:
+  Title:
+    required: true
+  Business Value:
+    required: true
+  Problem / Context:
+    required: true
+  Solution Approach:
+    required: true
+  Acceptance Criteria:
+    required: true
+  Out of scope:
+    required: true

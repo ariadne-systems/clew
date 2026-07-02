@@ -3,6 +3,8 @@ The system validates each artifact against its declared schema when it reads it
 
 **Lens**: SYS
 
+**Status**: active
+
 **Description**
 The system shall validate each spec and story against the schema declared for its document type at the moment it reads the artifact, so a structurally malformed document is caught on load rather than relied upon downstream.
 The enforced contract is the union of a pinned core the system always applies and a project-supplied part; each violation is reported located, at a configurable severity.
