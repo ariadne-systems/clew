@@ -662,3 +662,90 @@ describe("rejected drafts", () => {
     });
   });
 });
+
+describe("schema validation on promotion", () => {
+  verifies(SysTraceables.SYS_015_VALIDATE_ARTIFACTS_ON_LOAD, () => {
+    // A project whose `story` schema requires a `Title` field with `fail` severity.
+    async function storySchemaProject(): Promise<Project> {
+      const dir = await mkdtemp(join(tmpdir(), "ariadne-promote-"));
+      const storiesDir = join(dir, "docs", "spec", "stories");
+      const derivedDir = join(dir, "docs", "spec", "derived-specs");
+      const draftsDir = join(dir, "docs", "spec", "drafts");
+      const domainModel = join(dir, "docs", "spec", "domain-model.md");
+      await mkdir(join(draftsDir, "stories"), { recursive: true });
+      await mkdir(join(draftsDir, "derived-specs"), { recursive: true });
+      await mkdir(storiesDir, { recursive: true });
+      await mkdir(derivedDir, { recursive: true });
+      await writeFile(
+        join(dir, "story.yml"),
+        "onError: fail\nfields:\n  Title:\n    required: true\n",
+        "utf8",
+      );
+      const configFile = join(dir, ".ariadnerc.json");
+      await writeFile(
+        configFile,
+        JSON.stringify({
+          layout: {
+            stories: { dir: storiesDir, prefix: "STR" },
+            derivedSpecs: { dir: derivedDir },
+            drafts: { dir: draftsDir },
+            entities: { file: domainModel, prefix: "ENT" },
+          },
+          schemas: { story: "story.yml" },
+        }),
+        "utf8",
+      );
+      return {
+        configFile,
+        stateFile: join(dir, ".ariadne", "state.json"),
+        storiesDir,
+        derivedDir,
+        draftsDir,
+      };
+    }
+
+    test("a story missing a fail-severity required field aborts the promotion", async () => {
+      const p = await storySchemaProject();
+      const from = await writeDraft(
+        p.draftsDir,
+        "stories",
+        "STR-TMP-001-x.md",
+        "no title here\n",
+      );
+
+      await expect(
+        promote({
+          configFile: p.configFile,
+          stateFile: p.stateFile,
+          roots: ["STR-TMP-001"],
+        }),
+      ).rejects.toMatchObject({ code: ErrorCode.SCHEMA_VIOLATION });
+
+      // The draft is untouched and no id was bound — the abort is before binding.
+      expect(await readFile(from, "utf8")).toBe("no title here\n");
+      await expect(
+        readFile(join(p.storiesDir, "STR-001-x.md"), "utf8"),
+      ).rejects.toThrow();
+    });
+
+    test("a conformant story promotes", async () => {
+      const p = await storySchemaProject();
+      await writeDraft(
+        p.draftsDir,
+        "stories",
+        "STR-TMP-001-x.md",
+        "**Title**\nA story.\n",
+      );
+
+      const result = await promote({
+        configFile: p.configFile,
+        stateFile: p.stateFile,
+        roots: ["STR-TMP-001"],
+      });
+
+      expect(result.promoted.map((draft) => draft.boundId)).toEqual([
+        "STR-001",
+      ]);
+    });
+  });
+});

@@ -3,6 +3,8 @@ A document schema pins only what clew reads; the rest is project-defined
 
 **Lens**: ARCH
 
+**Status**: active
+
 **Description**
 A document schema's enforced contract is split by one line: clew pins only the parts it mechanically reads, and the project supplies the rest.
 The pinned core is exactly what clew depends on — the id form (a configured prefix and a number), that ids are unique, the `**Status**` grammar and value set, and that `## Relations` links resolve — and clew enforces it in code, not from a project file.

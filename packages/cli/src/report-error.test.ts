@@ -15,6 +15,50 @@ verifies(SwTraceables.SW_004_ERROR_REPORTING, () => {
     );
   });
 
+  test("a coded error renders location, note, and help beneath the summary", () => {
+    const error = new AriadneError(
+      ErrorCode.INVALID_SPEC_STATUS,
+      'unrecognized spec status "actives"',
+      {
+        location: "docs/spec/derived-specs/ARCH-003.md",
+        note: "a spec's status must be a recognized state",
+        help: "set **Status** to planned, active, or deprecated",
+      },
+    );
+
+    expect(formatError(error)).toBe(
+      [
+        'error[E_INVALID_SPEC_STATUS]: unrecognized spec status "actives"',
+        "  --> docs/spec/derived-specs/ARCH-003.md",
+        "  = note: a spec's status must be a recognized state",
+        "  = help: set **Status** to planned, active, or deprecated",
+      ].join("\n"),
+    );
+  });
+
+  test("each help line renders as its own = help:", () => {
+    const error = new AriadneError(
+      ErrorCode.SCHEMA_VIOLATION,
+      "document does not conform to its schema",
+      {
+        location: "docs/spec/derived-specs/ARCH-003.md",
+        help: [
+          "fix the reported fields",
+          "run `clew check` to see all validation issues at once",
+        ],
+      },
+    );
+
+    expect(formatError(error)).toBe(
+      [
+        "error[E_SCHEMA_VIOLATION]: document does not conform to its schema",
+        "  --> docs/spec/derived-specs/ARCH-003.md",
+        "  = help: fix the reported fields",
+        "  = help: run `clew check` to see all validation issues at once",
+      ].join("\n"),
+    );
+  });
+
   test("a plain error falls back to its message", () => {
     expect(formatError(new Error("boom"))).toBe("boom");
   });

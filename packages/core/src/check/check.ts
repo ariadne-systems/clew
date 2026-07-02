@@ -1,5 +1,6 @@
 import { access, readFile } from "node:fs/promises";
 import {
+  basename,
   dirname,
   extname,
   isAbsolute,
@@ -24,6 +25,9 @@ import {
   readUnexclude,
 } from "../config/config.js";
 import { walkProject } from "../fs/walk-files.js";
+import type { DocumentSchema, DocumentType } from "../spec/document-schema.js";
+import { validateDocument } from "../spec/document-schema.js";
+import { loadSchemas } from "../spec/document-schema-loader.js";
 import type { ExclusionRules } from "../spec/exclusions.js";
 import {
   compileExclusionRules,
@@ -87,6 +91,8 @@ type CheckContext = {
   exclusion: ExclusionRules;
   /** The spec-tree markdown files (stories, derived specs), walked once and shared by the corpus checks. */
   specTreeFiles: readonly string[];
+  /** The loaded per-document-type schemas; an empty map when none is configured. */
+  schemas: ReadonlyMap<DocumentType, DocumentSchema>;
 };
 
 /** A finding before the runner stamps which check produced it. */
@@ -105,6 +111,7 @@ function suite(): readonly CheckModule[] {
     { name: "invalid-status", run: invalidStatus },
     { name: "duplicate-id", run: duplicateId },
     { name: "spec-id-in-comment", run: specIdInComment },
+    { name: "document-schema", run: documentSchema },
   ];
 }
 
@@ -146,6 +153,7 @@ export const check: (options?: CheckOptions) => Promise<CheckResult> = realizes(
     const context: CheckContext = {
       ...corpus,
       specTreeFiles: await specTreeMarkdown(corpus),
+      schemas: await loadSchemas(options.configFile, projectRoot),
     };
     const findings: Finding[] = [];
     for (const module of suite()) {
@@ -386,6 +394,46 @@ function commentSpecIdFindings(
   }
   return findings;
 }
+
+/**
+ * The document-schema member: each story and derived spec satisfies its type's
+ * schema — its project-required fields are present and its inline values are in
+ * range. Both severities are reported here, since `check` is the standing
+ * gate; the scan and promote block on `fail`. With no schema configured, nothing is
+ * checked beyond the pinned core the other members already enforce.
+ */
+const documentSchema: (context: CheckContext) => Promise<RawFinding[]> =
+  realizes(
+    SysTraceables.SYS_015_VALIDATE_ARTIFACTS_ON_LOAD,
+    async (context: CheckContext): Promise<RawFinding[]> => {
+      if (context.schemas.size === 0) {
+        return [];
+      }
+      const storyPrefix = context.layout.stories.prefix;
+      const findings: RawFinding[] = [];
+      for (const file of context.specTreeFiles) {
+        // A story is identified by its bound id prefix (e.g. `STR-`), not by the
+        // directory it sits in.
+        const type: DocumentType = basename(file).startsWith(`${storyPrefix}-`)
+          ? "story"
+          : "derived-spec";
+        const schema = context.schemas.get(type);
+        if (schema !== undefined) {
+          const content = await readFile(
+            join(context.projectRoot, file),
+            "utf8",
+          );
+          for (const violation of validateDocument(content, schema)) {
+            findings.push({
+              file,
+              message: `${violation.severity}: ${violation.message}`,
+            });
+          }
+        }
+      }
+      return findings;
+    },
+  );
 
 /** A path made project-root-relative with forward slashes, so findings and exclusion matching name a file one way. */
 function toRelative(projectRoot: string, target: string): string {

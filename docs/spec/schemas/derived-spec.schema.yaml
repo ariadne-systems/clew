@@ -1,0 +1,19 @@
+# Document schema for derived specs (the `derived-spec` document type: SW, CON,
+# ARCH, NF, STK, SYS). clew merges this with the pinned core (id form, `**Status**`
+# grammar and value set, relation links) it always enforces — so `Status` is not
+# listed here, and `Lens` carries only the allowed values, not the pinned status set.
+# Fields are listed in the order a spec must present them; a `**Bold label**` the
+# schema does not list (the `## Relations` sub-labels) may appear anywhere after them.
+onError: fail
+fields:
+  Title:
+    required: true
+  Lens:
+    required: true
+    enum: [STK, SYS, SW, ARCH, NF, CON]
+  Description:
+    required: true
+  Rationale:
+    required: true
+  Verification Description:
+    required: true

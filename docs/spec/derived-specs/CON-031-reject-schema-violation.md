@@ -3,6 +3,8 @@ A document that violates its schema is rejected, or warned per config
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 A document that does not satisfy its schema is reported with its location.
 A **pinned-core** violation — the id form, uniqueness, `**Status**`, or an unresolved `## Relations` link — always **fails**, because clew cannot function on a document that breaks it.

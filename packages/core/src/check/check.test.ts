@@ -443,3 +443,55 @@ describe("exclusions apply to every check", () => {
     });
   });
 });
+
+describe("the document-schema check", () => {
+  verifies(SysTraceables.SYS_015_VALIDATE_ARTIFACTS_ON_LOAD, () => {
+    test("reports a document's project-field violation as a finding", async () => {
+      const p = await project({ schemas: { "derived-spec": "ds.yml" } });
+      await writeFile(
+        join(p.root, "ds.yml"),
+        "onError: warn\nfields:\n  Title:\n    required: true\n",
+        "utf8",
+      );
+      await writeFile(
+        join(p.derivedDir, "SW-001-a.md"),
+        "**Lens**: SW\n",
+        "utf8",
+      );
+
+      const result = await check({
+        configFile: p.configFile,
+        resolveGenerator,
+      });
+
+      const schemaFindings = result.findings.filter(
+        (f) => f.check === "document-schema",
+      );
+      expect(schemaFindings).toHaveLength(1);
+      expect(schemaFindings[0]?.file).toBe(
+        "docs/spec/derived-specs/SW-001-a.md",
+      );
+      expect(schemaFindings[0]?.message).toContain(
+        'warn: missing required field "Title"',
+      );
+    });
+
+    test("with no schema configured, the check reports nothing", async () => {
+      const p = await project();
+      await writeFile(
+        join(p.derivedDir, "SW-001-a.md"),
+        "**Lens**: SW\n",
+        "utf8",
+      );
+
+      const result = await check({
+        configFile: p.configFile,
+        resolveGenerator,
+      });
+
+      expect(
+        result.findings.filter((f) => f.check === "document-schema"),
+      ).toEqual([]);
+    });
+  });
+});
