@@ -36,12 +36,12 @@ export type ScanCodeResult = {
 };
 
 /**
- * Scans the project's code into the set of anchor locations (SW-022).
+ * Scans the project's code into the set of anchor locations.
  * It drives each configured generator's discover over the source — the dual of
  * generation — and aggregates the results. The core is language-neutral: it
  * selects the source files (by each generator's extensions) and applies the
  * exclusions — the built-in defaults and the project's configured `exclude` /
- * `unexclude` (STR-017) — and the generators read their own marker grammar back
+ * `unexclude` — and the generators read their own marker grammar back
  * out. The same id may appear at many locations; every one is recorded. The
  * result is sorted so a run is deterministic.
  */
@@ -80,7 +80,7 @@ export const scanCode: (options: ScanCodeOptions) => Promise<ScanCodeResult> =
 
 /**
  * Walks the project tree collecting the source files whose extension a generator
- * scans, applying the exclusions before discovery (SW-024): an excluded file is
+ * scans, applying the exclusions before discovery: an excluded file is
  * not read, and an excluded directory is not descended into — unless an
  * `unexclude` re-includes a path beneath it. A directory that does not exist is
  * skipped. Paths are recorded relative to the project root with forward slashes,
@@ -115,9 +115,9 @@ const collectSources: (
 export const DEFAULT_LOCATIONS_FILE = ".ariadne/locations.json";
 
 /**
- * Writes the anchor locations as the locations index (SW-023), in the shared
+ * Writes the anchor locations as the locations index, in the shared
  * `locations.json` shape (ADR-0005 D6). The write is atomic — to a temporary file,
- * then renamed into place (NF-002) — so an interrupted scan leaves the previous
+ * then renamed into place — so an interrupted scan leaves the previous
  * index intact, never a partial one a later coverage run would trust as complete.
  * A run replaces any existing index wholesale; the scan is full, not incremental.
  * Returns the path written.

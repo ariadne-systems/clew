@@ -28,7 +28,7 @@ export type SetupResult = {
 
 /**
  * Scaffolds the default configuration and layout: writes
- * `.ariadnerc.json` with the default lenses and layout (ENT-002) and creates the
+ * `.ariadnerc.json` with the default lenses and layout and creates the
  * configured layout directories, relative to the configuration's directory.
  * An existing configuration is never overwritten, so setup is safe to
  * re-run.

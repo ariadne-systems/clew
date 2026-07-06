@@ -20,7 +20,7 @@ type Project = {
 
 // Lays out an empty project (stories, derived specs, drafts) with a config whose
 // layout points at those directories, so `promote` reads its locations from
-// configuration (ENT-002). State is unseeded, so the first bound id for a prefix
+// configuration. State is unseeded, so the first bound id for a prefix
 // is number 1.
 async function project(): Promise<Project> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-promote-"));
@@ -567,7 +567,7 @@ describe("atomic finalization", () => {
         "CON-TMP-cafe000099-ref.md",
         "See SW-TMP-001.\n",
       );
-      // Occupy the bound-id target: the first SW mint binds SW-001, so the
+      // Occupy the bound-id target: the first SW mint binds the first SW id, so the
       // pre-flight aborts before anything is staged. The minted id is left as a
       // harmless gap — the guarantee is over the files, not the sequence.
       await writeFile(join(p.derivedDir, "SW-001-x.md"), "occupied\n", "utf8");

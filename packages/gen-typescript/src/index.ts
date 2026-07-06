@@ -50,7 +50,7 @@ const GENERATOR_TYPE = "typescript";
  * transpilers and bundlers, and a `README.md` documents the markers for an author
  * (or agent) anchoring code. The output is deterministic and tool-owned;
  * the helpers are emitted, not shipped. File names are relative to the project's
- * configured output directory, which the core resolves (ENT-002).
+ * configured output directory, which the core resolves.
  */
 export const createTypeScriptGenerator: () => Generator = realizes(
   [
@@ -91,7 +91,7 @@ export const createTypeScriptGenerator: () => Generator = realizes(
 /**
  * A generated enum member, optionally preceded by a `@deprecated` JSDoc:
  * `NAME = "ID"`. `parseGeneratedTraceables` reads it back as the dual of generate —
- * capture group 1 is the deprecation marker (SW-018), group 2 the spec id.
+ * capture group 1 is the deprecation marker, group 2 the spec id.
  */
 const MEMBER_PATTERN = /(\/\*\* @deprecated \*\/\s+)?[A-Za-z_]\w* = "([^"]+)"/g;
 
@@ -100,7 +100,7 @@ function renderSetFile(specSet: SpecSet): GeneratedFile {
   const members = specSet.specs.flatMap((traceable) => {
     const member = `  ${toMemberName(traceable.filename)} = ${JSON.stringify(traceable.id)},`;
     // A deprecated spec's member stays (so its anchors keep compiling) but carries
-    // a JSDoc `@deprecated`, which tsc and editors surface on every use (SW-018).
+    // a JSDoc `@deprecated`, which tsc and editors surface on every use.
     return traceable.status === "deprecated"
       ? ["  /** @deprecated */", member]
       : [member];
@@ -228,7 +228,7 @@ function renderHelperModule(specSets: readonly SpecSet[]): GeneratedFile {
 }
 
 /**
- * Emits the README documenting the markers for the TypeScript target (CON-012).
+ * Emits the README documenting the markers for the TypeScript target.
  * The marker API is the same every run, so the file is deterministic; an example
  * uses a real member when one exists.
  */

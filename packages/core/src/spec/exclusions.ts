@@ -2,8 +2,8 @@ import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import { AriadneError, ErrorCode } from "../errors.js";
 
 /**
- * The built-in default exclusions, as repository-root-relative globs (CON-016,
- * CON-018). A bare segment matches only at the root; a leading `**` matches at any depth.
+ * The built-in default exclusions, as repository-root-relative globs. A bare
+ * segment matches only at the root; a leading `**` matches at any depth.
  * Dependency and build directories recur per module, so they use a leading `**`; the
  * tool's own state directory is root-only. A generator's output directory is not
  * excluded by default — generated output is inert to the scan, so a project
@@ -26,7 +26,7 @@ export type CompiledGlob = {
   readonly segments: readonly (RegExp | null)[];
 };
 
-/** The compiled exclusion rules, in precedence layers (CON-017). */
+/** The compiled exclusion rules, in precedence layers. */
 export type ExclusionRules = {
   readonly userExcludes: readonly CompiledGlob[];
   readonly unexcludes: readonly CompiledGlob[];
@@ -41,7 +41,7 @@ export type ExclusionInput = {
 
 /**
  * Compiles the exclusion rules from the configured patterns and the generator
- * output directories (SW-025). Every pattern is compiled up front; an
+ * output directories. Every pattern is compiled up front; an
  * uncompilable `exclude` or `unexclude` glob fails fast with a stable error
  * naming it, rather than silently degrading to a pattern that never matches.
  */
@@ -63,7 +63,7 @@ export const compileExclusionRules: (input: ExclusionInput) => ExclusionRules =
   );
 
 /**
- * Whether a path is excluded, by precedence (CON-017): a user `exclude` match —
+ * Whether a path is excluded, by precedence: a user `exclude` match —
  * on the path or any ancestor directory — wins; otherwise an `unexclude` match
  * re-includes it; otherwise a built-in default match excludes it; otherwise it is
  * included. Matching an ancestor counts, so a file under an excluded directory is
@@ -85,7 +85,7 @@ export const fileExcluded: (path: string, rules: ExclusionRules) => boolean =
   );
 
 /**
- * Whether the walk should descend into a directory (SW-024). A directory a user
+ * Whether the walk should descend into a directory. A directory a user
  * `exclude` matches is never descended (the veto is absolute). A directory a
  * built-in default would exclude is descended only when some `unexclude` could
  * match a path beneath it — otherwise it is pruned, so a tree like `node_modules`
@@ -132,7 +132,7 @@ function compileGlob(glob: string): CompiledGlob {
 
 /**
  * Compiles a glob to a case-sensitive, anchored regular expression over a
- * repository-root-relative, forward-slash path (CON-018). A leading `**` matches any depth
+ * repository-root-relative, forward-slash path. A leading `**` matches any depth
  * (including none), `**` matches across segments, `*` matches within a segment,
  * `?` a single non-slash character, and `[…]` a character class. Throws on an
  * uncompilable pattern (an unterminated character class).

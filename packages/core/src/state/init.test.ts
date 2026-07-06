@@ -13,7 +13,7 @@ type Fixture = {
 
 // Lays out an artifact tree under <dir>/docs/spec (stories under stories/, other
 // specs under derived-specs/) and writes a config whose `layout` points at those
-// directories, so `init` reads the locations from configuration (ENT-002).
+// directories, so `init` reads the locations from configuration.
 // Optionally seeds the state so the never-lower and idempotency cases can start
 // from a mark.
 async function fixture(

@@ -45,7 +45,7 @@ export type SpecResult = {
 };
 
 /**
- * Generates the traceables and anchoring utilities from the specs (STR-011).
+ * Generates the traceables and anchoring utilities from the specs.
  * It scans the configured artifacts into the traceable set, groups them
  * into spec sets (by lens, the default), and drives each configured generator
  * through the generator interface only — the core performs no language-specific

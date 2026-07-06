@@ -6,7 +6,7 @@
  * corpus must resolve to a file that exists. This guards the prose layer the
  * type-checker cannot see: a renamed spec leaves its links dangling, a moved doc
  * orphans its `@import`s, a mistyped heading anchor points nowhere, and nothing in
- * the build notices — exactly how CON-005's links and the declatrace `@import`s
+ * the build notices — exactly how the spec corpus's links and the declatrace `@import`s
  * rotted. A link's `#fragment` is checked against the target file's heading slugs;
  * external URLs and bare intra-document anchors are not.
  */

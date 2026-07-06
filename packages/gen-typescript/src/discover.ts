@@ -20,7 +20,7 @@ export const SOURCE_EXTENSIONS: readonly string[] = [
 ];
 
 /**
- * Discovers the TypeScript anchors in the given sources (SW-021), the dual of
+ * Discovers the TypeScript anchors in the given sources, the dual of
  * generation (ADR-0005 D2). It classifies each source with the shared C-family
  * lexer and matches markers only in code, never inside a comment, string, template
  * literal, or regex literal (ADR-0005 D3; ADR-0004 D4). From each marker it reads

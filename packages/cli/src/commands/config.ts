@@ -5,13 +5,13 @@ import type { Command } from "commander";
 import { createGeneratorRegistry } from "../generators.js";
 
 /**
- * Registers the `clew config` command surface (STR-015).
+ * Registers the `clew config` command surface.
  * The action stays thin: it requires a configuration, builds the generator
  * registry — so a generator's default output directory can be resolved — and
  * delegates to core's `resolveConfiguration()`, which assembles the resolved
  * view. It then writes that view to stdout: human-readable by default, or as
  * JSON with `--json` for an agent. The command resolves nothing itself and
- * changes nothing (CON-015). Any error propagates to the bin entry, which writes
+ * changes nothing. Any error propagates to the bin entry, which writes
  * it to stderr and exits non-zero.
  */
 export const registerConfig: (program: Command) => void = realizes(

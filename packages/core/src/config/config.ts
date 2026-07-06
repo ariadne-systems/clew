@@ -24,7 +24,7 @@ export const DEFAULT_MODE: IdGenerationMode = concerns(
   "sequential",
 );
 
-/** A configured generator: its target-language `type` and, optionally, where it writes (ENT-002). */
+/** A configured generator: its target-language `type` and, optionally, where it writes. */
 export type GeneratorConfig = {
   type: string;
   /** Directory it writes into, relative to the project root; defaults to the generator's own. */
@@ -47,7 +47,7 @@ export type Lens = {
   description: string;
 };
 
-/** The default lens set — the opinionated template shipped when none is configured (ADR-0001 D8, ENT-002). */
+/** The default lens set — the opinionated template shipped when none is configured (ADR-0001 D8). */
 export const DEFAULT_LENSES: readonly Lens[] = [
   {
     id: "STK",
@@ -79,7 +79,7 @@ export const DEFAULT_LENSES: readonly Lens[] = [
 
 /**
  * A configured spec set: a named grouping selected by a regular expression over
- * a spec's filename (ENT-002). One set may be flagged the `catchAll`,
+ * a spec's filename. One set may be flagged the `catchAll`,
  * which collects traceables that match no other set's pattern; a
  * catch-all needs no pattern of its own.
  */
@@ -89,7 +89,7 @@ export type SpecSetMatcher = {
   catchAll?: boolean;
 };
 
-/** Where each kind of artifact lives, and the structural-kind prefixes (ENT-002). */
+/** Where each kind of artifact lives, and the structural-kind prefixes. */
 export type Layout = {
   stories: { dir: string; prefix: string };
   derivedSpecs: { dir: string };
@@ -98,7 +98,7 @@ export type Layout = {
   state: { file: string };
 };
 
-/** The default layout — the opinionated template (ADR-0001 D8, ENT-002). */
+/** The default layout — the opinionated template (ADR-0001 D8). */
 export const DEFAULT_LAYOUT: Layout = {
   stories: { dir: "docs/spec/stories", prefix: "STR" },
   derivedSpecs: { dir: "docs/spec/derived-specs" },
@@ -148,7 +148,7 @@ export async function readLenses(
 }
 
 /**
- * Reads the `layout` section: where each kind of artifact lives (ENT-002).
+ * Reads the `layout` section: where each kind of artifact lives.
  * Each value falls back to its default independently.
  */
 export async function readLayout(
@@ -195,7 +195,7 @@ export async function readConfiguredPrefixes(
   return prefixes;
 }
 
-/** A configured generator with its output directory resolved (ENT-002). */
+/** A configured generator with its output directory resolved. */
 export type ResolvedGenerator = {
   type: string;
   /** Where it writes, relative to the project root: the configured `outputDir` or the generator's own default. */
@@ -217,8 +217,8 @@ export type ResolvedConfiguration = {
 export type ResolveConfigurationOptions = {
   /**
    * Resolves a configured generator name to its implementation, so a generator's
-   * default output directory can be read through the generator interface
-   * (ARCH-003). Injecting it keeps the core free of any concrete generator
+   * default output directory can be read through the generator interface.
+   * Injecting it keeps the core free of any concrete generator
    * (ADR-0001 D9).
    */
   resolveGenerator: (name: string) => Generator | undefined;
@@ -227,11 +227,11 @@ export type ResolveConfigurationOptions = {
 };
 
 /**
- * Resolves the project configuration into a single view (SW-019).
+ * Resolves the project configuration into a single view.
  * It composes the independently-defaulted section readers — the lenses, the
  * layout, and the derived prefixes (ADR-0003) — with each configured generator's
  * resolved output directory: the configured `outputDir`, or, when absent, the
- * generator's own default read through the generator interface (ARCH-003). The
+ * generator's own default read through the generator interface. The
  * generators are injected, so the core resolves the view without depending on
  * any concrete generator.
  */
@@ -260,7 +260,7 @@ export const resolveConfiguration: (
 /**
  * Resolves a configured generator's output directory: the configured `outputDir`
  * when set, otherwise the generator's own default — the same rule the `spec`
- * command applies (SW-014). The generator is only consulted when no directory is
+ * command applies. The generator is only consulted when no directory is
  * configured; a configured generator that resolves to nothing fails fast with a
  * stable code.
  */
@@ -378,7 +378,7 @@ async function readGlobList(
 }
 
 /**
- * Reads the `exclude` section: the project's scan exclusion globs (SW-025).
+ * Reads the `exclude` section: the project's scan exclusion globs.
  * A missing section yields an empty list — no configured exclusions.
  */
 export async function readExclude(
@@ -389,7 +389,7 @@ export async function readExclude(
 
 /**
  * Reads the `unexclude` section: globs that re-include paths a built-in default
- * would exclude (SW-025). A missing section yields an empty list.
+ * would exclude. A missing section yields an empty list.
  */
 export async function readUnexclude(
   file: string = DEFAULT_CONFIG_FILE,
@@ -419,11 +419,11 @@ export async function readSchemas(
   return config;
 }
 
-/** A committed coverage waiver — a spec `id` or a glob `pattern`, with a reason (ENT-002). */
+/** A committed coverage waiver — a spec `id` or a glob `pattern`, with a reason. */
 export type Waiver = { id?: string; pattern?: string; reason: string };
 
 /**
- * Reads the `waivers` section: the committed coverage waiver list (ENT-002),
+ * Reads the `waivers` section: the committed coverage waiver list,
  * each entry a spec `id` or a glob `pattern` with a reason. A missing or
  * malformed section yields an empty list — nothing is waived.
  */
