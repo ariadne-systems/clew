@@ -67,21 +67,26 @@ describe("spec output", () => {
         await runAriadne("spec");
 
         expect(stdout()).toContain("Scanned 2 traceables in 2 spec sets.");
-        const tsDir = join(dir, "out-ts");
+        const tsDir = join(dir, "out-ts", "clew");
         const swSet = await readFile(join(tsDir, "SwTraceables.ts"), "utf8");
         expect(swSet).toContain('"SW-012"');
         const helper = await readFile(join(tsDir, "index.ts"), "utf8");
         expect(helper).toContain("export type TraceableId");
         const java = await readFile(
-          join(dir, "out-java", "Traceables.java"),
+          join(dir, "out-java", "clew", "SwTraceables.java"),
           "utf8",
         );
         expect(java).toContain("SW_012");
+        const annotation = await readFile(
+          join(dir, "out-java", "clew", "annotation", "RealizesSw.java"),
+          "utf8",
+        );
+        expect(annotation).toContain("public @interface RealizesSw");
       });
 
       test("a second run on unchanged specs writes byte-identical output", async () => {
         const dir = await setupProjectDir(["SW-012-a.md"]);
-        const generated = join(dir, "out-ts", "index.ts");
+        const generated = join(dir, "out-ts", "clew", "index.ts");
 
         captureStdout();
         await runAriadne("spec");

@@ -3,6 +3,8 @@ Discover anchors in Java via a lexical scan
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The Java generator implements discovery for its own markers: it reads the source and returns every anchor as a spec id, its relation, and its location — the file path and line number where it occurs.
 It recognizes each annotation the generator emits (SW-037) — one per relation (`realizes` / `verifies` / `concerns`) per spec set, each named for its relation and set (`@RealizesSoftware`, `@VerifiesSoftware`, `@ConcernsSoftware`, …) — on a package, type, method, or field, whose value is a single enum member or a `{…}` list of members, reading the relation from the annotation's leading verb and the referenced member(s) as the ids.
@@ -35,3 +37,7 @@ The ids the generator emits for a set of example markers are exactly the ids its
 - Parallels [SW-021 — Discover anchors in TypeScript via a lightweight lexical scan](SW-021-discover-anchors-typescript.md) — the same discovery, for Java's annotation forms.
 - Implements the discover half of [ARCH-004 — Generation and reading back are dual operations](ARCH-004-generator-discovers-markers.md) for Java.
 - Reads comments and code regions through [ARCH-006 — Comment detection is a generator capability](ARCH-006-pluggable-comment-finders.md), the shared C-family lexer in its Java dialect.
+
+## Changes
+
+- **2026-07-04** — Set `**Status**: active` when implementation began, so the traceable is generated and the discovery code can anchor to it.

@@ -1,5 +1,4 @@
-import type { Dirent } from "node:fs";
-import { readdir, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import type { Realizes, SysTraceables } from "@ariadne-thread/trace";
 import {
@@ -11,13 +10,18 @@ import {
 import type { Waiver } from "../config/config.js";
 import { readGenerators } from "../config/config.js";
 import { writeFileAtomic } from "../fs/atomic-write.js";
+import { walkFiles } from "../fs/walk-files.js";
 import type {
   AnchorLocation,
   GeneratedTraceable,
   Generator,
   SourceFile,
 } from "./generator.js";
-import { GENERATED_MARKER, resolveGeneratorOrThrow } from "./generator.js";
+import {
+  GENERATED_MARKER,
+  GENERATED_SUBDIR,
+  resolveGeneratorOrThrow,
+} from "./generator.js";
 
 // Module-level anchor — this module realizes the coverage-policy capability.
 type _Anchors = Realizes<
@@ -164,7 +168,10 @@ export const readUniverse: (
           config.type,
           options.resolveGenerator,
         );
-        const outputDir = config.outputDir ?? generator.defaultOutputDir;
+        const outputDir = join(
+          config.outputDir ?? generator.defaultOutputDir,
+          GENERATED_SUBDIR,
+        );
         const files = await readGeneratedFiles(
           join(projectRoot, outputDir),
           generator.sourceExtensions,
@@ -189,33 +196,25 @@ export const readUniverse: (
 );
 
 /**
- * Reads a generator's output directory into the source files of its own
- * extensions that the tool actually generated. Only files carrying
- * GENERATED_MARKER are returned, so a hand-written or stray file in the directory
- * cannot inject phantom traceables — the same guard `pruneStaleGenerated` applies
- * before deleting. The reads run concurrently; a missing directory yields no files.
+ * Reads a generator's reserved output directory — recursively, so a file emitted
+ * into a subpackage is included — into the source files of its own extensions that
+ * the tool actually generated. Only files carrying GENERATED_MARKER are returned, so
+ * a hand-written or stray file cannot inject phantom traceables. The reads run
+ * concurrently; a missing directory yields no files.
  */
 async function readGeneratedFiles(
   dir: string,
   extensions: readonly string[],
 ): Promise<SourceFile[]> {
-  let entries: Dirent[];
-  try {
-    entries = await readdir(dir, { withFileTypes: true });
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return [];
-    }
-    throw error;
-  }
-  const candidates = entries.filter(
-    (entry) => entry.isFile() && extensions.includes(extname(entry.name)),
+  const walked = await walkFiles(dir);
+  const candidates = walked.filter((file) =>
+    extensions.includes(extname(file.name)),
   );
   const files = await Promise.all(
-    candidates.map(async (entry) => {
-      const path = join(dir, entry.name);
-      return { path, contents: await readFile(path, "utf8") };
-    }),
+    candidates.map(async (file) => ({
+      path: file.path,
+      contents: await readFile(file.path, "utf8"),
+    })),
   );
   return files.filter((file) => file.contents.includes(GENERATED_MARKER));
 }

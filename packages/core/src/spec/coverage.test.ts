@@ -312,15 +312,17 @@ describe("readUniverse", () => {
       test("reads only generated files back — a stray, unmarked file in the output dir is ignored", async () => {
         const dir = await mkdtemp(join(tmpdir(), "ariadne-universe-"));
         const outputDir = join(dir, "out");
-        await mkdir(outputDir, { recursive: true });
+        // Generated files live in clew's reserved subdirectory of the output dir.
+        const clewDir = join(outputDir, "clew");
+        await mkdir(clewDir, { recursive: true });
         // A generated enum file carries the marker; a hand-written file does not.
         await writeFile(
-          join(outputDir, "SwTraceables.ts"),
+          join(clewDir, "SwTraceables.ts"),
           `// ${GENERATED_MARKER}\nSW_001_A = "SW-001",\n`,
           "utf8",
         );
         await writeFile(
-          join(outputDir, "stray.ts"),
+          join(clewDir, "stray.ts"),
           'const STALE = "SW-999";\n',
           "utf8",
         );

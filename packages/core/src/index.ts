@@ -85,6 +85,9 @@ export {
   resolveGeneratorOrThrow,
 } from "./spec/generator.js";
 export {
+  memberIds,
+  relationOfVerb,
+  setSymbolName,
   toIdentifier,
   toMemberName,
   toPascalCase,
