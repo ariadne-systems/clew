@@ -31,7 +31,7 @@ type _Anchors = Realizes<
 
 /**
  * A spec's coverage status: the cross-product of realized and verified, plus
- * `deprecated` — a retiring spec that is listed but not classified (SW-026).
+ * `deprecated` — a retiring spec that is listed but not classified.
  */
 export type CoverageStatus =
   | "covered"
@@ -69,14 +69,14 @@ export const DEFAULT_COVERAGE_FILE = ".ariadne/coverage.json";
 
 /**
  * Classifies each traceable by whether code **realizes** it and a test
- * **verifies** it (SW-026): Covered (both), Realized (realize only), Verified
+ * **verifies** it: Covered (both), Realized (realize only), Verified
  * (verify only), None (neither). Only `realizes` and `verifies` decide the status;
- * a `concerns` anchor contributes to neither, so a concerns-only spec is None
- * (CON-019). The universe is the generated traceables read back through the
- * generator (CON-020) — the `active` and `deprecated` specs; a `planned` spec was
- * never generated and is absent. A `deprecated` traceable is not classified: its
- * status is `deprecated`, so the report lists it without counting it (SW-026). The
- * lens is the id's prefix. The result is sorted by id.
+ * a `concerns` anchor contributes to neither, so a concerns-only spec is None. The
+ * universe is the generated traceables read back through the generator — the
+ * `active` and `deprecated` specs; a `planned` spec was never generated and is
+ * absent. A `deprecated` traceable is not classified: its status is `deprecated`,
+ * so the report lists it without counting it. The lens is the id's prefix. The
+ * result is sorted by id.
  */
 export const computeCoverage: (
   universe: readonly GeneratedTraceable[],
@@ -112,7 +112,7 @@ export const computeCoverage: (
   },
 );
 
-/** The lens of a spec id — its prefix, before the first hyphen (`SW-026` → `SW`). */
+/** The lens of a spec id — its prefix, before the first hyphen (`SW-NNN` → `SW`). */
 function lensOf(id: string): string {
   const hyphen = id.indexOf("-");
   return hyphen === -1 ? id : id.slice(0, hyphen);
@@ -142,8 +142,8 @@ export type ReadUniverseOptions = {
 };
 
 /**
- * Reads the coverage universe back from the generated traceables (CON-020,
- * ARCH-004): for each configured generator it reads that generator's output
+ * Reads the coverage universe back from the generated traceables: for each
+ * configured generator it reads that generator's output
  * directory and asks the generator to read its own emitted enum members back, then
  * merges them by id (a member any generator marks deprecated is deprecated). The
  * universe is therefore the *generated* set — `active` and `deprecated` specs, the
@@ -233,7 +233,7 @@ function waiverTarget(waiver: { id?: string; pattern?: string }): string {
   return waiver.id ?? waiver.pattern ?? "";
 }
 
-/** Whether a waiver applies to a spec id — by exact id or by glob pattern (SW-030). */
+/** Whether a waiver applies to a spec id — by exact id or by glob pattern. */
 const waiverMatches: (waiver: Waiver, id: string) => boolean = realizes(
   SwTraceables.SW_030_WAIVER_MATCH_BY_ID_OR_PATTERN,
   (waiver: Waiver, id: string): boolean => {
@@ -248,13 +248,13 @@ const waiverMatches: (waiver: Waiver, id: string) => boolean = realizes(
 );
 
 /**
- * Reconciles the computed coverage against the committed waiver list (SW-027). A
+ * Reconciles the computed coverage against the committed waiver list. A
  * spec that a waiver waives is reported **waived** — carrying its reason — rather
  * than as an open gap. A waiver waives only a missing test: it applies to a spec
- * that is Realized (implemented, not verified) and matches it by id or pattern
- * (SW-030); a spec missing its realizing code — None or verify-only — is never
- * waived (CON-021). A waiver that waives nothing — it matches no Realized spec —
- * is reported as a **stale waiver**. The stale waivers are sorted by target.
+ * that is Realized (implemented, not verified) and matches it by id or pattern; a
+ * spec missing its realizing code — None or verify-only — is never waived. A
+ * waiver that waives nothing — it matches no Realized spec — is reported as a
+ * **stale waiver**. The stale waivers are sorted by target.
  */
 export const reconcileWaivers: (
   coverage: readonly SpecCoverage[],
@@ -270,7 +270,7 @@ export const reconcileWaivers: (
   ): CoverageResult => {
     const specs: CoverageEntry[] = coverage.map((spec) => {
       // Only a Realized spec — implemented but untested — is waivable; a spec
-      // missing its realizing code is never waived (CON-021).
+      // missing its realizing code is never waived.
       if (spec.status !== "realized") {
         return spec;
       }
@@ -297,10 +297,10 @@ export const reconcileWaivers: (
 );
 
 /**
- * Writes the coverage result as `coverage.json` in the shared shape (SW-028;
- * ADR-0005 D6): each spec's id, lens, and status, with the reason for waived ones,
+ * Writes the coverage result as `coverage.json` in the shared shape
+ * (ADR-0005 D6): each spec's id, lens, and status, with the reason for waived ones,
  * plus the stale waivers. The write is atomic — to a temporary file, then renamed
- * into place (NF-002) — and replaces any existing file wholesale. Returns the path
+ * into place — and replaces any existing file wholesale. Returns the path
  * written.
  */
 export const writeCoverageResult: (
@@ -344,7 +344,7 @@ function toShape(result: CoverageResult): {
 }
 
 /**
- * Formats the coverage result as a human-readable report (SW-028): a count per
+ * Formats the coverage result as a human-readable report: a count per
  * status over the universe, then the open gaps (not Covered, not waived), the
  * waived specs, and any stale waivers.
  */
@@ -357,7 +357,7 @@ export const formatCoverageReport: (result: CoverageResult) => string =
       const waived: Array<SpecCoverage & { reason: string }> = [];
       const deprecated: SpecCoverage[] = [];
       for (const spec of result.specs) {
-        // A deprecated spec is listed, never counted toward coverage (SW-026).
+        // A deprecated spec is listed, never counted toward coverage.
         if (spec.status === "deprecated") {
           deprecated.push(spec);
           continue;

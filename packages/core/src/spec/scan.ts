@@ -28,7 +28,7 @@ const IGNORED_DIRECTORIES = new Set([
 
 /**
  * A markdown spec filename: a bound id at the start — an uppercase prefix and a
- * number as a whole segment (e.g. `SW-013-scan.md` or `SW-013.md`) — and the
+ * number as a whole segment (e.g. `SW-NNN-scan.md` or `SW-NNN.md`) — and the
  * `.md` extension at the end. The number must close the id segment, so a
  * temporary id (`SW-TMP-...`) does not match; the `.md` anchor keeps a non-spec
  * file out and keeps the scan coherent with the `.md`-anchored default lens
@@ -46,7 +46,7 @@ type SeenSpec = { path: string; spec: ScannedSpec };
  * for generation. A non-lens id such as a story (`STR`) or entity (`ENT`) is not
  * a traceable and is not scanned. A traceable id that two files declare is rejected,
  * so a duplicate never collapses silently. The scan is language-neutral: it reads
- * only the configured layout (ENT-002) and lenses, and knows nothing of any target
+ * only the configured layout and lenses, and knows nothing of any target
  * language. An id added to the specs appears in the set; an id removed disappears
  * from it. The result is sorted by id so generation downstream is deterministic.
  */
@@ -106,16 +106,15 @@ async function collectTraceables(
 /**
  * A spec's `**Status**` field. The value is the rest of the line, trimmed — so a
  * line with trailing text (e.g. `**Status**: active (was planned)`) captures the
- * whole thing and is rejected as unrecognized (CON-022), rather than failing to
+ * whole thing and is rejected as unrecognized, rather than failing to
  * match and silently falling through to `planned`.
  */
 const STATUS_FIELD = /^\*\*Status\*\*:[ \t]*(.+?)[ \t]*$/m;
 
 /**
- * Reads a spec's implementation state from its `**Status**` field (SW-031): the
+ * Reads a spec's implementation state from its `**Status**` field: the
  * declared value, or `planned` when the field is absent. An unrecognized
- * value is rejected rather than silently dropping the spec out of enforcement
- * (CON-022).
+ * value is rejected rather than silently dropping the spec out of enforcement.
  */
 const readSpecStatus: (content: string, location: string) => SpecStatus =
   realizes(

@@ -13,7 +13,7 @@ import type { Command } from "commander";
 import { createGeneratorRegistry } from "../generators.js";
 
 /**
- * Registers the `clew coverage` command surface (SW-029). The action stays thin:
+ * Registers the `clew coverage` command surface. The action stays thin:
  * it requires a configuration, gathers the universe (the generated traceables,
  * read back through the configured generators), the code anchors (the
  * generator-driven code scan), and the committed waivers, then

@@ -114,7 +114,7 @@ describe("computeCoverage", () => {
         anchor("SW-2", "verifies"),
       ]);
 
-      // SW-2's deprecated marker wins over its anchors; the lens is the id prefix.
+      // The deprecated marker wins over the spec's anchors; the lens is the id prefix.
       expect(result).toEqual([
         { id: "SW-1", lens: "SW", status: "realized" },
         { id: "SW-2", lens: "SW", status: "deprecated" },
@@ -355,7 +355,7 @@ describe("readUniverse", () => {
           projectRoot: dir,
         });
 
-        // The stray file's "SW-999" never reaches the generator — only the marked
+        // The stray file's member never reaches the generator — only the marked
         // file's member is in the universe.
         expect(universe).toEqual([{ id: "SW-001", deprecated: false }]);
       });

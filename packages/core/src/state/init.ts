@@ -36,15 +36,15 @@ const IGNORED_DIRECTORIES = new Set([
 
 /**
  * A bound id at the start of an artifact filename: an uppercase prefix and a
- * number as a whole segment (e.g. `STR-007-...` or `SW-005.md`). The number must
- * close the segment, so a temporary id (`SW-TMP-...`) does not match — a
+ * number as a whole segment (e.g. `PREFIX-007-...` or `PREFIX-005.md`). The number must
+ * close the segment, so a temporary id (`PREFIX-TMP-...`) does not match — a
  * temporary id is unbound and must never advance a high-water mark.
  */
 const BOUND_ID_IN_FILENAME = /^([A-Z]+)-(\d+)(?:[-.]|$)/;
 
 /**
  * Initializes the StateStore from existing artifacts: scans the
- * configured layout directories (ENT-002), takes the highest number per
+ * configured layout directories, takes the highest number per
  * configured prefix, and reconciles those into the state's high-water marks.
  * Only configured prefixes are counted, so non-lens files such as ADRs are
  * ignored. Reconciliation only ever raises a mark, never lowers one,

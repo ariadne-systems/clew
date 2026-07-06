@@ -2,7 +2,7 @@
 export type SequenceMap = Record<string, number>;
 
 /**
- * The tool's persistent, version-controlled state (ENT-001 AriadneState).
+ * The tool's persistent, version-controlled state.
  * A map of sections; `sequences` is the first. Other sections are preserved untouched.
  */
 export type AriadneState = {

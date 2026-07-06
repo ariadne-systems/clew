@@ -7,7 +7,7 @@ import type { ScannedSpec, SpecSet } from "./generator.js";
 /**
  * The default matchers: one per configured lens, each selecting that lens's
  * markdown specs by their filename (e.g. lens `SW` → `^SW-.*\.md$`, matching
- * `SW-012-command.md`). This expresses the default "group by lens" through the
+ * `SW-NNN-command.md`). This expresses the default "group by lens" through the
  * same matcher mechanism as any other grouping, rather than a dedicated code
  * path.
  */

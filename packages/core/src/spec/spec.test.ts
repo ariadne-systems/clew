@@ -27,7 +27,7 @@ async function fixture(
   await mkdir(derivedDir, { recursive: true });
   for (const name of idFilenames) {
     const target = name.startsWith("STR-") ? storiesDir : derivedDir;
-    // Specs default to `active` so they are generated; the status filter (SW-014)
+    // Specs default to `active` so they are generated; the status filter
     // drops only `planned` specs, which individual tests write explicitly.
     await writeFile(join(target, name), "**Status**: active\n", "utf8");
   }

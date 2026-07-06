@@ -18,7 +18,7 @@ type Fixture = {
 
 // Lays out an artifact tree (stories under stories/, other specs under
 // derived-specs/) and writes a config whose `layout` points at those
-// directories, so `scan` reads the locations from configuration (ENT-002).
+// directories, so `scan` reads the locations from configuration.
 async function fixture(idFilenames: string[]): Promise<Fixture> {
   const dir = await mkdtemp(join(tmpdir(), "ariadne-scan-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
@@ -61,7 +61,7 @@ describe("scanning artifacts into traceables", () => {
 
       const traceables = await scan({ configFile });
 
-      // STR-011 is a story, not a lens-bearing spec, so it is not a traceable.
+      // The story id is not a lens-bearing spec, so it is not a traceable.
       expect(traceables).toEqual([
         n("CON-012", "CON", "CON-012-owned.md"),
         n("SW-012", "SW", "SW-012-command.md"),

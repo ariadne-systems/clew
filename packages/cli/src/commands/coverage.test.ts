@@ -70,7 +70,7 @@ describe("coverage command", () => {
       const dir = await setupProjectDir();
       const stdout = captureStdout();
 
-      // Coverage reads the universe back from the generated trace (CON-020), so
+      // Coverage reads the universe back from the generated trace, so
       // generate it first.
       await runAriadne("spec");
       await runAriadne("coverage");

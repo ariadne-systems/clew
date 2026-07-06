@@ -8,7 +8,7 @@ import type { Command } from "commander";
 import { createGeneratorRegistry } from "../generators.js";
 
 /**
- * Registers the `clew scan` command surface (SW-023) — the *check* side, dual to
+ * Registers the `clew scan` command surface — the *check* side, dual to
  * `spec` (the *declare* side). The action stays thin: it requires a configuration,
  * builds the generator registry, and delegates to core's `scanCode()`, which
  * drives each generator's discover through the interface. It reports the located

@@ -8,7 +8,7 @@ import { AriadneError, ErrorCode } from "../errors.js";
 import type { CommentSpan } from "../text/c-family-lexer.js";
 
 /**
- * The language emission seam (STR-011).
+ * The language emission seam.
  * Emitting the traceable symbols and the anchoring utility for a target language
  * is the job of a language-specific generator, chosen by configuration and
  * implemented behind this narrow interface. The core depends only on this
@@ -19,7 +19,7 @@ import type { CommentSpan } from "../text/c-family-lexer.js";
  */
 
 /**
- * A spec's implementation state, carried on its scanned spec (SW-031): a spec
+ * A spec's implementation state, carried on its scanned spec: a spec
  * is `planned` (the default when its `**Status**` field is absent),
  * `active`, or `deprecated`.
  */
@@ -36,14 +36,14 @@ export interface ScannedSpec {
   readonly id: string;
   readonly lens: string;
   readonly filename: string;
-  /** The spec's implementation state (SW-031); the scan always sets it. */
+  /** The spec's implementation state; the scan always sets it. */
   readonly status: SpecStatus;
 }
 
 /**
  * A configured grouping of scanned specs a generator emits as one symbol set.
  * Grouping is by lens by default; the configurable grouping
- * rules are the follow-on story (STR-012) and are not built here.
+ * rules are the follow-on story and are not built here.
  */
 export interface SpecSet {
   /** The set's name; the lens id when grouping by lens (the default). */
@@ -53,7 +53,7 @@ export interface SpecSet {
 
 /**
  * A file a generator produces. The path is a relative path within the project's
- * configured output directory (ENT-002) — a plain filename, or a nested one such as
+ * configured output directory — a plain filename, or a nested one such as
  * a subpackage (`annotation/Foo.java`), but never an escaping path; the core joins
  * it under that directory, creating subdirectories, and writes the bytes, so the
  * generator decides filenames and the core decides the location, and the core
@@ -64,7 +64,7 @@ export interface GeneratedFile {
   readonly contents: string;
 }
 
-/** Context the core passes to a generator: the resolved directory its files will be written into (ENT-002). */
+/** Context the core passes to a generator: the resolved directory its files will be written into. */
 export interface GenerateContext {
   readonly outputDir: string;
 }
@@ -93,8 +93,8 @@ export interface AnchorLocation {
 
 /**
  * A traceable read back from a generator's emitted output — a generated enum
- * member: its spec id and whether the member is marked deprecated (SW-018). This
- * is the coverage universe (CON-020): the generator that wrote the enum reads it
+ * member: its spec id and whether the member is marked deprecated. This
+ * is the coverage universe: the generator that wrote the enum reads it
  * back, so coverage measures the generated set without re-scanning the specs.
  */
 export interface GeneratedTraceable {
@@ -122,14 +122,14 @@ export interface Generator
   readonly name: string;
   /**
    * The directory this generator writes into when a configured generator does
-   * not set its own `outputDir` (ENT-002) — the generator's idiomatic location
+   * not set its own `outputDir` — the generator's idiomatic location
    * for the target language. The core reads it as an opaque path.
    */
   readonly defaultOutputDir: string;
   /**
    * The file extensions (each with a leading dot) whose files this generator
    * scans for anchors. The core reads only files matching some generator's
-   * extensions, and hands each generator its own (ARCH-004).
+   * extensions, and hands each generator its own.
    */
   readonly sourceExtensions: readonly string[];
   /** Emits the traceable symbols and the anchoring utility for the spec sets. */
@@ -139,7 +139,7 @@ export interface Generator
   ): Promise<readonly GeneratedFile[]>;
   /**
    * Discovers the anchors this generator's markers declare in the given sources —
-   * the dual of generate (ARCH-004). The core selects the files and applies
+   * the dual of generate. The core selects the files and applies
    * exclusions; the generator reads its own marker grammar back out, returning a
    * located anchor per marker. Generation and discovery name the same ids: the
    * markers a generator emits round-trip through its discover (ADR-0005 D2).
@@ -147,10 +147,10 @@ export interface Generator
   discover(sources: readonly SourceFile[]): readonly AnchorLocation[];
   /**
    * Reads the traceables this generator emitted back from its generated output —
-   * the coverage universe (CON-020, ARCH-004), beside `discover`. The component
+   * the coverage universe, beside `discover`. The component
    * that wrote the enum members reads them back, so coverage is measured against
    * the generated set, not a re-scan of the specs; a member marked deprecated
-   * (SW-018) is reported as such. The emitted members round-trip: generate then
+   * is reported as such. The emitted members round-trip: generate then
    * readTraceables recovers exactly the ids emitted (ADR-0005 D2).
    */
   readTraceables(files: readonly SourceFile[]): readonly GeneratedTraceable[];
@@ -255,11 +255,11 @@ export function generatorsByExtension(
 }
 
 /**
- * Parses a generator's emitted output back into the traceables it declared
- * (ARCH-004), shared by the language generators' `readTraceables`. `pattern` is a
+ * Parses a generator's emitted output back into the traceables it declared,
+ * shared by the language generators' `readTraceables`. `pattern` is a
  * global regex run over each file's text whose capture group 1 is an optional
  * deprecation marker and group 2 is the spec id; a member whose marker is present
- * is reported deprecated (SW-018).
+ * is reported deprecated.
  */
 export function parseGeneratedTraceables(
   files: readonly SourceFile[],
