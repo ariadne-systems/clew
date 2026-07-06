@@ -1,5 +1,4 @@
-import type { Dirent } from "node:fs";
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { SpecSetMatcher } from "../config/config.js";
@@ -10,7 +9,7 @@ import {
   readSpecSets,
 } from "../config/config.js";
 import type { GeneratedFile, Generator } from "./generator.js";
-import { GENERATED_MARKER, resolveGeneratorOrThrow } from "./generator.js";
+import { GENERATED_SUBDIR, resolveGeneratorOrThrow } from "./generator.js";
 import { scan } from "./scan.js";
 import { groupIntoSpecSets, lensMatchers } from "./spec-set.js";
 
@@ -52,7 +51,8 @@ export type SpecResult = {
  * through the generator interface only — the core performs no language-specific
  * emission and references no concrete generator. Generation is
  * deterministic: the scan and grouping are sorted, so an unchanged spec set
- * yields byte-identical output, and a generated file is overwritten on each run.
+ * yields byte-identical output, and clew's reserved output directory is wiped and
+ * regenerated on each run.
  */
 export const spec: (options: SpecOptions) => Promise<SpecResult> = realizes(
   SwTraceables.SW_014_GENERATE_TRACEABLES,
@@ -68,48 +68,62 @@ export const spec: (options: SpecOptions) => Promise<SpecResult> = realizes(
         readGenerators(configFile),
       ]);
     // Only `active` and `deprecated` specs become traceables; a `planned` spec is
-    // not generated (SW-014, CON-020), so it cannot be anchored and is outside the
-    // coverage universe. A `deprecated` spec's traceable is still emitted, marked
-    // by the generator (SW-018), so its existing anchors keep building.
+    // filtered out here.
     const generated = traceables.filter(
       (traceable) =>
         traceable.status === "active" || traceable.status === "deprecated",
     );
     const specSets = groupIntoSpecSets(generated, matchers, ignorePatterns);
 
-    const reports: GeneratorReport[] = [];
-    // The set of files written under each write-root this run, so stale files can be pruned.
-    const writtenByRoot = new Map<string, Set<string>>();
+    // Generate and validate every generator's output before replacing any
+    // directory, so a bad path fails before the previous output is touched.
+    const produced: {
+      name: string;
+      outputDir: string;
+      writeRoot: string;
+      files: readonly GeneratedFile[];
+    }[] = [];
     for (const config of generatorConfigs) {
       const generator = resolveGeneratorOrThrow(
         config.type,
         options.resolveGenerator,
       );
-      const outputDir = config.outputDir ?? generator.defaultOutputDir;
-      const writeRoot = join(projectRoot, outputDir);
-      const files = await generator.generate(specSets, { outputDir });
-      await Promise.all(
-        files.map((file) => writeGeneratedFile(writeRoot, file)),
+      const outputDir = join(
+        config.outputDir ?? generator.defaultOutputDir,
+        GENERATED_SUBDIR,
       );
-
-      const written = writtenByRoot.get(writeRoot) ?? new Set<string>();
+      const files = await generator.generate(specSets, { outputDir });
       for (const file of files) {
-        written.add(file.path);
+        assertSafeGeneratedPath(file.path);
       }
-      writtenByRoot.set(writeRoot, written);
-      reports.push({
+      produced.push({
         name: config.type,
         outputDir,
-        files: files.map((file) => file.path),
+        writeRoot: join(projectRoot, outputDir),
+        files,
       });
     }
 
-    // Remove files this tool generated in a previous run that are no longer emitted
-    // (e.g. a spec set that disappeared), so a removed id stops compiling.
+    // Group files by reserved directory (two generators may share one); the
+    // directories are independent, so replace them concurrently.
+    const filesByRoot = new Map<string, GeneratedFile[]>();
+    for (const { writeRoot, files } of produced) {
+      const bucket = filesByRoot.get(writeRoot) ?? [];
+      bucket.push(...files);
+      filesByRoot.set(writeRoot, bucket);
+    }
     await Promise.all(
-      [...writtenByRoot].map(([writeRoot, written]) =>
-        pruneStaleGenerated(writeRoot, written),
+      [...filesByRoot].map(([writeRoot, files]) =>
+        replaceDirectory(writeRoot, files),
       ),
+    );
+
+    const reports: GeneratorReport[] = produced.map(
+      ({ name, outputDir, files }) => ({
+        name,
+        outputDir,
+        files: files.map((file) => file.path),
+      }),
     );
 
     return {
@@ -121,33 +135,22 @@ export const spec: (options: SpecOptions) => Promise<SpecResult> = realizes(
 );
 
 /**
- * Deletes files in `writeRoot` that carry the generated marker but were not
- * written this run — the tool's own stale output from a prior run. A file the
- * tool did not generate (no marker) is never touched.
+ * Replaces the reserved output directory atomically: writes the output into a
+ * temporary sibling, removes the target, then renames the sibling into place.
  */
-const pruneStaleGenerated = realizes(
+const replaceDirectory: (
+  writeRoot: string,
+  files: readonly GeneratedFile[],
+) => Promise<void> = realizes(
   ConTraceables.CON_012_GENERATED_FILES_TOOL_OWNED,
-  async (writeRoot: string, written: ReadonlySet<string>): Promise<void> => {
-    let entries: Dirent[];
-    try {
-      entries = await readdir(writeRoot, { withFileTypes: true });
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        return;
-      }
-      throw error;
-    }
+  async (writeRoot: string, files: readonly GeneratedFile[]): Promise<void> => {
+    const stagingRoot = `${writeRoot}.staging`;
+    await rm(stagingRoot, { recursive: true, force: true });
     await Promise.all(
-      entries.map(async (entry) => {
-        if (entry.isFile() && !written.has(entry.name)) {
-          const path = join(writeRoot, entry.name);
-          const contents = await readFile(path, "utf8");
-          if (contents.includes(GENERATED_MARKER)) {
-            await rm(path);
-          }
-        }
-      }),
+      files.map((file) => writeGeneratedFile(stagingRoot, file)),
     );
+    await rm(writeRoot, { recursive: true, force: true });
+    await rename(stagingRoot, writeRoot);
   },
 );
 
@@ -165,34 +168,35 @@ async function resolveMatchers(
   return lensMatchers(await readLenses(configFile));
 }
 
-/** Writes a generated file under the output root, overwriting any prior content. */
+/** Writes a generated file under the output root; its path is validated up front, before any wipe. */
 async function writeGeneratedFile(
   outputDir: string,
   file: GeneratedFile,
 ): Promise<void> {
-  assertFlatGeneratedName(file.path);
   const target = join(outputDir, file.path);
   await mkdir(dirname(target), { recursive: true });
   await writeFile(target, file.contents, "utf8");
 }
 
 /**
- * Rejects a generated filename that is not a flat name in the output directory — a
- * nested path, an escaping `..`, or an absolute path. This keeps a (buggy)
- * generator from writing outside its output directory, and keeps the top-level
- * prune and coverage read-back complete, since every generated file is one level
- * deep. A bad path is a generator bug, not user input, so it throws plainly.
+ * Rejects a generated path that escapes its output directory — an absolute path, or
+ * one that climbs out with `..`. A nested path is allowed, so a generator may emit a
+ * subpackage (for example `annotation/Foo.java`); the wipe clears subdirectories too.
+ * A bad path is a generator bug, not user input, so it throws plainly.
  */
-function assertFlatGeneratedName(name: string): void {
+function assertSafeGeneratedPath(name: string): void {
+  const normalized = name.replaceAll("\\", "/");
+  const segments = normalized.split("/");
   if (
     name.length === 0 ||
-    name === "." ||
-    name === ".." ||
-    name.includes("/") ||
-    name.includes("\\")
+    normalized.startsWith("/") ||
+    /^[A-Za-z]:/.test(normalized) ||
+    segments.some(
+      (segment) => segment === "" || segment === "." || segment === "..",
+    )
   ) {
     throw new Error(
-      `Generator returned "${name}", which is not a flat filename; generated files must be plain names directly in the output directory.`,
+      `Generator returned "${name}", which escapes its output directory; a generated path must stay within it.`,
     );
   }
 }

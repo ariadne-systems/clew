@@ -3,12 +3,15 @@ The Java generator emits per-set enums and anchors code with generated annotatio
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 For the Java target, the generator emits a self-contained, tool-owned folder into its configured output directory (the generator's `outputDir`, ENT-002), which defaults to a package under `src/main/java` where the compiled, imported Java source lives.
 For each spec set it emits one enum — under a generated, do-not-edit banner carrying machine-readable `@ariadne-thread` provenance (the homepage, the connector type `req-as-code`, the generator type, and the spec set) — whose members are that set's traceables: each member's name is derived from the spec's filename, so it carries the id and slug and reads as documentation at the anchor site, and its value is the spec id, read back through an `id()` accessor, for example `SW_002_MINT_SEQUENTIAL_IDS("SW-002")`.
 A member whose spec is `deprecated` (SW-014) is marked `@Deprecated` and kept, so `javac` and editors surface a deprecation on every anchor to it, without removing the member and breaking the build.
 Anchoring is done with generated Java annotations, not wrapper functions.
 Because a Java annotation element must be an enum type (never an interface), an annotation is bound to a single set's enum; so, per spec set, the generator emits one annotation for each relation of the taxonomy (ADR-0004), named for the relation and the set — `@RealizesSoftware`, `@VerifiesSoftware`, `@ConcernsSoftware`, and so on for each set — bound to that set's enum, `@Retention(SOURCE)`, `@Repeatable`, and applicable to package, type, method, and field.
+The annotations are emitted into an `annotation` subpackage beside the enums, so the base package holds only the traceable enums; each annotation imports its enum from the parent package.
 An anchor names one member or a `{…}` list of members from a set's enum through that set's annotation, and — the annotations being `@Repeatable` — stacks a second set's annotation to also anchor across sets.
 Because an annotation's value is an enum member, a reference to a member that no longer exists is a `javac` compile error (SYS-001) — existence is enforced by the compiler, the Java counterpart of `tsc` checking the TypeScript union — and this holds for `concerns` too, even though, being a coupling rather than a behaviour, nothing exercises it.
 It also emits a `README.md` into the same folder documenting the annotations and the element each applies to, naming the relations but leaving their meaning to ADR-0004.
@@ -42,3 +45,8 @@ Re-running on unchanged spec sets produces byte-identical files (CON-012).
 - Implements [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](ARCH-003-generator-interface.md) for the Java target.
 - Emits one enum per spec set per [SW-015 — Group the scanned specs into spec sets](SW-015-group-traceables.md), and marks a `deprecated` member per [SW-014 — Generate the traceables through the configured generators](SW-014-generate-traceables.md).
 - Tool-owned and deterministic per [CON-012 — Generated files are tool-owned](CON-012-generated-files-tool-owned.md), and inert to the scan per [CON-030 — Generated output is inert to the scan](CON-030-generated-output-inert-to-scan.md).
+
+## Changes
+
+- **2026-07-03** — The anchoring annotations are emitted into an `annotation` subpackage beside the enums (each importing its enum from the parent package), rather than flat alongside them, matching the idiomatic Java layout and keeping the base package to the traceable enums.
+This relies on a generator being allowed to emit a nested (non-escaping) path within its output directory (SW-014).

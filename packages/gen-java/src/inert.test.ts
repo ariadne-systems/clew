@@ -35,10 +35,9 @@ describe("generated Java output", () => {
       const files = await generator.generate(SPEC_SETS, {
         outputDir: "src/main/java/ariadne/traceables",
       });
-      const sources: SourceFile[] = files.map((file) => ({
-        path: file.path,
-        contents: file.contents,
-      }));
+      const sources: SourceFile[] = files
+        .filter((file) => file.path.endsWith(".java"))
+        .map((file) => ({ path: file.path, contents: file.contents }));
       const emittedIds = SPEC_SETS.flatMap((specSet) =>
         specSet.specs.map((spec) => spec.id),
       );

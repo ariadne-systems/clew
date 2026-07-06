@@ -1,9 +1,10 @@
-import type {
-  AnchorLocation,
-  Relation,
-  SourceFile,
+import type { AnchorLocation, SourceFile } from "@ariadne-thread/core";
+import {
+  classifyCFamily,
+  lineOf,
+  memberIds,
+  relationOfVerb,
 } from "@ariadne-thread/core";
-import { classifyCFamily, lineOf } from "@ariadne-thread/core";
 import { realizes, SwTraceables } from "@ariadne-thread/trace";
 
 /** File extensions the TypeScript generator scans — the TypeScript and JavaScript C-family. */
@@ -44,8 +45,6 @@ export const discoverAnchors: (
 const CALL_FORM = /(^|[^A-Za-z0-9_$.])(realizes|verifies|concerns)\s*\(/g;
 /** The type marker forms — `Realizes<`, `Concerns<`. */
 const TYPE_FORM = /(^|[^A-Za-z0-9_$.])(Realizes|Concerns)\s*</g;
-/** A generated enum member encodes its id as the leading `<PREFIX>_<NUMBER>`. */
-const MEMBER_ID = /\b([A-Za-z]+)_(\d+)/g;
 
 function collectFromFile(source: SourceFile, out: AnchorLocation[]): void {
   const { masked, lineStarts } = classifyCFamily(source.contents, {
@@ -74,7 +73,7 @@ function collectForm(
   let match = form.exec(masked);
   while (match !== null) {
     const verb = match[2] ?? "";
-    const relation = relationOf(verb);
+    const relation = relationOfVerb(verb);
     const verbIndex = match.index + (match[1]?.length ?? 0);
     const line = lineOf(lineStarts, verbIndex);
     const argument = leadingArgument(
@@ -82,23 +81,11 @@ function collectForm(
       match.index + match[0].length,
       close,
     );
-    for (const id of idsIn(argument)) {
+    for (const id of memberIds(argument)) {
       out.push({ id, relation, file, line });
     }
     match = form.exec(masked);
   }
-}
-
-/** The relation a marker verb expresses; the type forms map to the same relations. */
-function relationOf(verb: string): Relation {
-  const lowered = verb.toLowerCase();
-  if (lowered === "verifies") {
-    return "verifies";
-  }
-  if (lowered === "concerns") {
-    return "concerns";
-  }
-  return "realizes";
 }
 
 /**
@@ -125,16 +112,4 @@ function leadingArgument(masked: string, start: number, close: string): string {
     index += 1;
   }
   return masked.slice(start, index);
-}
-
-/** Derives the spec ids referenced in a leading argument from the member names. */
-function idsIn(argument: string): string[] {
-  const ids: string[] = [];
-  MEMBER_ID.lastIndex = 0;
-  let match = MEMBER_ID.exec(argument);
-  while (match !== null) {
-    ids.push(`${match[1]}-${match[2]}`);
-    match = MEMBER_ID.exec(argument);
-  }
-  return ids;
 }

@@ -9,9 +9,8 @@ import {
   GENERATED_MARKER,
   generatedHeader,
   parseGeneratedTraceables,
-  toIdentifier,
+  setSymbolName,
   toMemberName,
-  toPascalCase,
 } from "@ariadne-thread/core";
 import type {
   Realizes,
@@ -294,11 +293,6 @@ function renderReadme(specSets: readonly SpecSet[]): GeneratedFile {
     "",
   ];
   return { path: "README.md", contents: lines.join("\n") };
-}
-
-/** The enum and file symbol name for a spec set, e.g. set `SW` → `SwTraceables`; always a valid identifier. */
-function setSymbolName(setName: string): string {
-  return toIdentifier(`${toPascalCase(setName)}Traceables`);
 }
 
 /** An example anchor reference (`<Enum>.<MEMBER>`) drawn from the first traceable, for the JSDoc examples. */

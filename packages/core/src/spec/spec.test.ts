@@ -72,7 +72,9 @@ function recordingGenerator(name: string): {
             `${specSet.name}: ${specSet.specs.map((t) => t.id).join(",")}`,
         )
         .join("\n");
-      return Promise.resolve([{ path: `${name}.txt`, contents: body }]);
+      return Promise.resolve([
+        { path: `${name}.txt`, contents: `${GENERATED_MARKER}\n${body}` },
+      ]);
     },
   };
   return { generator, received: () => received };
@@ -126,11 +128,11 @@ describe("spec generation", () => {
       expect(result.traceableCount).toBe(3);
       expect(result.specSetCount).toBe(2);
       expect(result.generators).toEqual([
-        { name: "fake", outputDir: ".", files: ["fake.txt"] },
+        { name: "fake", outputDir: "clew", files: ["fake.txt"] },
       ]);
     });
 
-    test("rejects a generator that returns a non-flat output path", async () => {
+    test("rejects a generator whose output path escapes the directory", async () => {
       const { configFile, outputDir } = await fixture(
         ["SW-012-a.md"],
         ["escaper"],
@@ -155,7 +157,40 @@ describe("spec generation", () => {
           resolveGenerator: (name) =>
             name === "escaper" ? escaper : undefined,
         }),
-      ).rejects.toThrow(/flat filename/i);
+      ).rejects.toThrow(/escapes/i);
+    });
+
+    test("allows a nested output path, writing it into a subdirectory", async () => {
+      const { configFile, outputDir } = await fixture(
+        ["SW-012-a.md"],
+        ["nester"],
+      );
+      const nester: Generator = {
+        name: "nester",
+        defaultOutputDir: ".",
+        sourceExtensions: [],
+        findComments: () => [],
+        discover: () => [],
+        readTraceables: () => [],
+        generate: () =>
+          Promise.resolve([
+            { path: "annotation/Sub.txt", contents: GENERATED_MARKER },
+          ]),
+      };
+
+      const result = await spec({
+        configFile,
+        outputDir,
+        resolveGenerator: (name) => (name === "nester" ? nester : undefined),
+      });
+
+      expect(result.generators[0]?.files).toEqual(["annotation/Sub.txt"]);
+      expect(
+        await readFile(
+          join(outputDir, "clew", "annotation", "Sub.txt"),
+          "utf8",
+        ),
+      ).toBe(GENERATED_MARKER);
     });
 
     test("filters by status: a planned spec is not generated; active and deprecated are", async () => {
@@ -204,8 +239,11 @@ describe("spec generation", () => {
         resolveGenerator: () => generator,
       });
 
-      const written = await readFile(join(outputDir, "fake.txt"), "utf8");
-      expect(written).toBe("SW: SW-012");
+      const written = await readFile(
+        join(outputDir, "clew", "fake.txt"),
+        "utf8",
+      );
+      expect(written).toContain("SW: SW-012");
     });
 
     test("re-running on unchanged specs produces byte-identical output", async () => {
@@ -218,11 +256,34 @@ describe("spec generation", () => {
         spec({ configFile, outputDir, resolveGenerator: () => generator });
 
       await run();
-      const first = await readFile(join(outputDir, "fake.txt"), "utf8");
+      const first = await readFile(join(outputDir, "clew", "fake.txt"), "utf8");
       await run();
-      const second = await readFile(join(outputDir, "fake.txt"), "utf8");
+      const second = await readFile(
+        join(outputDir, "clew", "fake.txt"),
+        "utf8",
+      );
 
       expect(second).toBe(first);
+    });
+
+    test("wipes a stale file from a prior run that the current run no longer emits", async () => {
+      const { configFile, outputDir } = await fixture(
+        ["SW-012-a.md"],
+        ["fake"],
+      );
+      const { generator } = recordingGenerator("fake");
+      const run = (): Promise<unknown> =>
+        spec({ configFile, outputDir, resolveGenerator: () => generator });
+
+      await run();
+      // A stale generated file a prior run left behind (marked as clew's).
+      const stale = join(outputDir, "clew", "stale.txt");
+      await writeFile(stale, GENERATED_MARKER, "utf8");
+      await run();
+
+      await expect(readFile(stale, "utf8")).rejects.toMatchObject({
+        code: "ENOENT",
+      });
     });
 
     test("invokes every configured generator, in configured order", async () => {
@@ -342,33 +403,54 @@ describe("configured spec sets", () => {
   );
 });
 
-describe("pruning stale output", () => {
+describe("reserved output directory", () => {
   verifies(ConTraceables.CON_012_GENERATED_FILES_TOOL_OWNED, () => {
-    test("removes a previously-generated file that is no longer emitted, keeping non-generated files", async () => {
+    test("a hand-written file beside the reserved `clew` directory is never touched", async () => {
       const { configFile, outputDir } = await fixture(
         ["SW-012-a.md"],
         ["fake"],
       );
       const { generator } = recordingGenerator("fake");
-      // The fake writes to the project root (defaultOutputDir "."); seed that dir.
+      // The fake writes to the project root (defaultOutputDir "."), so its reserved
+      // dir is <outputDir>/clew; a file directly in <outputDir> is outside it.
       await mkdir(outputDir, { recursive: true });
-      const stale = join(outputDir, "StaleTraceables.ts");
       const handwritten = join(outputDir, "keep.ts");
-      await writeFile(
-        stale,
-        `/*\n * THIS FILE IS ${GENERATED_MARKER} - DO NOT EDIT MANUALLY\n */\nexport enum Stale {}\n`,
-        "utf8",
-      );
       await writeFile(handwritten, "export const x = 1;\n", "utf8");
 
       await spec({ configFile, outputDir, resolveGenerator: () => generator });
+      await spec({ configFile, outputDir, resolveGenerator: () => generator });
 
-      // The stale generated file is pruned; the hand-written file and the emitted file remain.
-      await expect(readFile(stale, "utf8")).rejects.toThrow();
       expect(await readFile(handwritten, "utf8")).toContain("const x");
-      expect(await readFile(join(outputDir, "fake.txt"), "utf8")).toBe(
-        "SW: SW-012",
+      expect(
+        await readFile(join(outputDir, "clew", "fake.txt"), "utf8"),
+      ).toContain("SW: SW-012");
+    });
+
+    test("a generator returning an invalid path fails without wiping the last good output", async () => {
+      const { configFile, outputDir } = await fixture(
+        ["SW-012-a.md"],
+        ["fake"],
       );
+      const { generator } = recordingGenerator("fake");
+      const good = join(outputDir, "clew", "fake.txt");
+
+      await spec({ configFile, outputDir, resolveGenerator: () => generator });
+      expect(await readFile(good, "utf8")).toContain("SW: SW-012");
+
+      // A broken generator update that returns an escaping path.
+      const broken: Generator = {
+        ...generator,
+        generate: () =>
+          Promise.resolve([
+            { path: "../escape.ts", contents: GENERATED_MARKER },
+          ]),
+      };
+      await expect(
+        spec({ configFile, outputDir, resolveGenerator: () => broken }),
+      ).rejects.toThrow(/escapes/i);
+
+      // The previous good output survives — nothing was wiped before the failure.
+      expect(await readFile(good, "utf8")).toContain("SW: SW-012");
     });
   });
 });
