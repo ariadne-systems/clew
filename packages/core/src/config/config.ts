@@ -3,6 +3,8 @@ import {
   ArchTraceables,
   ConTraceables,
   concerns,
+  type EntTraceables,
+  type Realizes,
   realizes,
   SwTraceables,
 } from "@ariadne-thread/trace";
@@ -89,11 +91,10 @@ export type SpecSetMatcher = {
   catchAll?: boolean;
 };
 
-/** Where each kind of artifact lives, and the structural-kind prefixes. */
+/** Where each kind of artifact lives, and the story prefix. */
 export type Layout = {
   stories: { dir: string; prefix: string };
   derivedSpecs: { dir: string };
-  entities: { file: string; prefix: string };
   drafts: { dir: string };
   state: { file: string };
 };
@@ -102,7 +103,6 @@ export type Layout = {
 export const DEFAULT_LAYOUT: Layout = {
   stories: { dir: "docs/spec/stories", prefix: "STR" },
   derivedSpecs: { dir: "docs/spec/derived-specs" },
-  entities: { file: "docs/spec/domain-model.md", prefix: "ENT" },
   drafts: { dir: "docs/spec/drafts" },
   state: { file: ".ariadne/state.json" },
 };
@@ -157,7 +157,6 @@ export async function readLayout(
   const layout = asObject((await readRawConfig(file)).layout);
   const stories = asObject(layout.stories);
   const derivedSpecs = asObject(layout.derivedSpecs);
-  const entities = asObject(layout.entities);
   const drafts = asObject(layout.drafts);
   const state = asObject(layout.state);
   return {
@@ -168,19 +167,15 @@ export async function readLayout(
     derivedSpecs: {
       dir: asString(derivedSpecs.dir, DEFAULT_LAYOUT.derivedSpecs.dir),
     },
-    entities: {
-      file: asString(entities.file, DEFAULT_LAYOUT.entities.file),
-      prefix: asString(entities.prefix, DEFAULT_LAYOUT.entities.prefix),
-    },
     drafts: { dir: asString(drafts.dir, DEFAULT_LAYOUT.drafts.dir) },
     state: { file: asString(state.file, DEFAULT_LAYOUT.state.file) },
   };
 }
 
 /**
- * The set of valid id prefixes: the lens ids plus the structural-kind prefixes
- * for stories and entities (ADR-0003). This is the single source of truth that
- * mint validates a prefix against and init filters discovered ids by.
+ * The set of valid id prefixes: the lens ids plus the story prefix (ADR-0003).
+ * This is the single source of truth that mint validates a prefix against and
+ * init filters discovered ids by.
  */
 export async function readConfiguredPrefixes(
   file: string = DEFAULT_CONFIG_FILE,
@@ -191,7 +186,6 @@ export async function readConfiguredPrefixes(
   ]);
   const prefixes = new Set(lenses.map((lens) => lens.id));
   prefixes.add(layout.stories.prefix);
-  prefixes.add(layout.entities.prefix);
   return prefixes;
 }
 
@@ -206,13 +200,16 @@ export type ResolvedGenerator = {
  * The project's configuration, fully resolved: every default applied and every
  * derivation computed, so a caller reads the answer without knowing a default.
  */
-export type ResolvedConfiguration = {
-  lenses: Lens[];
-  /** The valid id prefixes: the lens ids plus the story and entity prefixes (ADR-0003). */
-  prefixes: string[];
-  layout: Layout;
-  generators: ResolvedGenerator[];
-};
+export type ResolvedConfiguration = Realizes<
+  EntTraceables.ENT_002_CONFIGURATION,
+  {
+    lenses: Lens[];
+    /** The valid id prefixes: the lens ids plus the story prefix (ADR-0003). */
+    prefixes: string[];
+    layout: Layout;
+    generators: ResolvedGenerator[];
+  }
+>;
 
 export type ResolveConfigurationOptions = {
   /**

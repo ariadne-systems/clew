@@ -3,6 +3,36 @@
     "mode": "sequential",
     "padding": 3
   },
+  "lenses": [
+    {
+      "id": "STK",
+      "description": "Stakeholder spec — what a stakeholder needs from the system."
+    },
+    {
+      "id": "SYS",
+      "description": "System spec — a capability or behaviour at the system level."
+    },
+    {
+      "id": "SW",
+      "description": "Software spec — observable, verifiable behaviour of a component."
+    },
+    {
+      "id": "ARCH",
+      "description": "Architecture spec — a structural rule or design decision."
+    },
+    {
+      "id": "NF",
+      "description": "Non-functional spec — a quality attribute such as performance or security."
+    },
+    {
+      "id": "CON",
+      "description": "Constraint — an invariant that must always hold."
+    },
+    {
+      "id": "ENT",
+      "description": "Domain entity — a data shape the system owns, with its attributes and invariants."
+    }
+  ],
   "generators": [
     {
       "type": "typescript",
@@ -21,6 +51,10 @@
     {
       "id": "SYS-001",
       "reason": "compile-checked anchoring is enforced by tsc, not by a unit test"
+    },
+    {
+      "pattern": "ENT-*",
+      "reason": "an entity's shape is anchored by its realizing type and verified by review, not by a runtime test"
     }
   ]
 }

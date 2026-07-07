@@ -71,9 +71,7 @@ describe("config output", () => {
       expect(view.lenses).toEqual(
         expect.arrayContaining([expect.objectContaining({ id: "SW" })]),
       );
-      expect(view.prefixes).toEqual(
-        expect.arrayContaining(["SW", "STR", "ENT"]),
-      );
+      expect(view.prefixes).toEqual(expect.arrayContaining(["SW", "STR"]));
       expect(view.layout.stories.dir).toBe("docs/spec/stories");
       expect(view.generators).toEqual([
         { type: "typescript", outputDir: "out-ts" },

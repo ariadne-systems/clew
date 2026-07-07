@@ -1,57 +1,20 @@
 # Domain model
 
-The canonical entities are the id-bearing list below.
-Each entity states its purpose and lists its attributes with their types.
-The Mermaid diagram is a view of the same entities; anchor code against the entity ids, never against the diagram.
-Each entity's code type is anchored to its id, so a change to the spec shape or the code shape is flagged.
+The entities clew owns, as an overview.
+Each entity is specified in its own file under the derived-specs location, where its shape is pinned and its code type is anchored to its id.
+This page is a non-normative view — like `architecture.md`, it carries no bound id of its own — that names the entities and shows how they relate.
 
 ## Entities
 
 ### ENT-001 AriadneState
 
 The tool's persistent, version-controlled state for a project.
-It is the committed record the tool keeps across invocations and shares with the team through git, analogous to a Terraform state file.
-Its shape grows only by adding new sections; existing sections are never changed in place.
-
-**Attributes**
-
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `sequences` | `Map<Prefix, Integer>` | The highest number already allocated for each id prefix. A prefix absent from the map has allocated nothing yet. |
-
-`Prefix` is a `String` id prefix (for example `STR`, `SW`) — a configured prefix: a lens id, or the story or entity prefix (ENT-002).
+Specified in [ENT-001 — AriadneState](derived-specs/ENT-001-ariadne-state.md).
 
 ### ENT-002 Configuration
 
-The tool's per-project self-description, read from `.ariadnerc.json` at the project root.
-It declares how ids are formed, the lenses the project uses, and where each kind of artifact lives.
-It is version-controlled and shared with the team through git, alongside the state.
-Its shape grows only by adding attributes or sections; existing ones are never changed in place.
-Every attribute has a documented default, so a missing file or attribute is equivalent to that default (SW-009).
-The defaults are the opinionated template (ADR-0001 D8); a project overrides only what differs.
-
-An id is `<prefix>-<number>`, where the number is zero-padded to `idGeneration.padding` and the prefix is a configured one — a `lenses[].id` for a derived spec, or `layout.stories.prefix` / `layout.entities.prefix`.
-The set of configured prefixes is the single source of truth for id validity, so no separate id pattern is configured (ADR-0003 subsumes the former `idToken.pattern`).
-
-**Attributes**
-
-| Attribute | Type | Description |
-| --- | --- | --- |
-| `idGeneration.mode` | `"sequential" \| "opaque"` | The id-generation scheme (ARCH-001). Defaults to `sequential`. |
-| `idGeneration.padding` | `Integer` | Width to which sequential id numbers are zero-padded (CON-003). Defaults to `3`. |
-| `lenses` | `List<{ id: String, description: String }>` | The derived-spec kinds (the `Lens` field) and the valid spec prefixes (ADR-0003). Each carries a one-line human definition. Defaults to `STK, SYS, SW, ARCH, NF, CON`. |
-| `layout.stories` | `{ dir: String, prefix: String }` | Where stories live and their id prefix. Defaults to `{ "docs/spec/stories", "STR" }`. |
-| `layout.derivedSpecs` | `{ dir: String }` | Where derived specs live; their prefixes are the `lenses` ids. Defaults to `docs/spec/derived-specs`. |
-| `layout.entities` | `{ file: String, prefix: String }` | The domain-model file and the entity prefix. Defaults to `{ "docs/spec/domain-model.md", "ENT" }`. |
-| `layout.drafts` | `{ dir: String }` | Where unapproved drafts live (mirrors the spec tree). Defaults to `docs/spec/drafts`. |
-| `layout.state` | `{ file: String }` | The StateStore file (CON-001). Defaults to `.ariadne/state.json`. |
-| `generators` | `List<{ type: String, outputDir?: String }>` | The language generators to run; each declares its target-language `type` and the directory it writes into, relative to the project root (SW-014). A generator's `outputDir` defaults to that generator's idiomatic location (for example `src/ariadne/traceables` for TypeScript). Optional; with none configured, nothing is generated. |
-1| `specSets` | `List<{ name: String, pattern?: String, catchAll?: Boolean }>` | Named spec sets, each matched by a regular expression over the spec's filename; one symbol set is generated per set (SW-015). Optional; with none configured, the default is one set per lens. One set may set `catchAll` to collect otherwise-unmatched specs, in which case it needs no pattern (CON-013). |
-| `ignore` | `List<String>` | Regular expressions over the spec's filename; a matching spec is excluded from every spec set and produces no symbol (CON-013). Optional. |
-| `exclude` | `List<String>` | Repository-root-relative globs (CON-018); a matching path is excluded from the code scan and produces no anchor (SW-024, SW-025). A user `exclude` is absolute in the exclusion precedence (CON-017). Optional. |
-| `unexclude` | `List<String>` | Repository-root-relative globs (CON-018) that re-include a path a built-in default (CON-016) would exclude; never overrides a user `exclude` (CON-017). Optional. |
-| `waivers` | `List<{ id?: String, pattern?: String, reason: String }>` | The committed coverage waiver list: each entry targets a spec `id` or a glob `pattern` over ids (exactly one), with a reason, and waives a missing *test* — a matching spec that is implemented but unverified is reported waived rather than an open gap (SW-027, SW-030). A spec missing its realizing code is never waived (CON-021). A waiver that waives nothing is reported as stale. Optional. |
-| `schemas` | `{ story?: String, "derived-spec"?: String }` | Per-document-type validation schema files; clew validates each document against its type's schema when it reads it (SW-036) — the pinned core merged with the project's required fields and enums (ARCH-007). Optional. |
+The tool's per-project self-description, read from `.ariadnerc.json`.
+Specified in [ENT-002 — Configuration](derived-specs/ENT-002-configuration.md).
 
 ## View
 

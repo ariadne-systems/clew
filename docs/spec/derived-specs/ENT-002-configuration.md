@@ -1,0 +1,48 @@
+**Title**
+Configuration — the tool's per-project self-description
+
+**Lens**: ENT
+
+**Status**: active
+
+**Description**
+Configuration is the tool's per-project self-description, read from `.ariadnerc.json` at the project root.
+It declares how ids are formed, the lenses the project uses, and where each kind of artifact lives.
+It is version-controlled and shared with the team through git, alongside the state.
+Its shape grows only by adding attributes or sections; existing ones are never changed in place.
+Every attribute has a documented default, so a missing file or attribute is equivalent to that default (SW-009).
+The defaults are the opinionated template (ADR-0001 D8); a project overrides only what differs.
+
+An id is `<prefix>-<number>`, where the number is zero-padded to `idGeneration.padding` and the prefix is a configured one — a `lenses[].id` for a derived spec, or `layout.stories.prefix`.
+The set of configured prefixes is the single source of truth for id validity, so no separate id pattern is configured (ADR-0003 subsumes the former `idToken.pattern`).
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `idGeneration.mode` | `"sequential" \| "opaque"` | The id-generation scheme (ARCH-001). Defaults to `sequential`. |
+| `idGeneration.padding` | `Integer` | Width to which sequential id numbers are zero-padded (CON-003). Defaults to `3`. |
+| `lenses` | `List<{ id: String, description: String }>` | The derived-spec kinds (the `Lens` field) and the valid spec prefixes (ADR-0003). Each carries a one-line human definition. Defaults to `STK, SYS, SW, ARCH, NF, CON`. |
+| `layout.stories` | `{ dir: String, prefix: String }` | Where stories live and their id prefix. Defaults to `{ "docs/spec/stories", "STR" }`. |
+| `layout.derivedSpecs` | `{ dir: String }` | Where derived specs live; their prefixes are the `lenses` ids. Defaults to `docs/spec/derived-specs`. |
+| `layout.drafts` | `{ dir: String }` | Where unapproved drafts live (mirrors the spec tree). Defaults to `docs/spec/drafts`. |
+| `layout.state` | `{ file: String }` | The StateStore file (CON-001). Defaults to `.ariadne/state.json`. |
+| `generators` | `List<{ type: String, outputDir?: String }>` | The language generators to run; each declares its target-language `type` and the directory it writes into, relative to the project root (SW-014). A generator's `outputDir` defaults to that generator's idiomatic location. Optional; with none configured, nothing is generated. |
+| `specSets` | `List<{ name: String, pattern?: String, catchAll?: Boolean }>` | Named spec sets, each matched by a regular expression over the spec's filename; one symbol set is generated per set (SW-015). Optional; with none configured, the default is one set per lens. One set may set `catchAll` to collect otherwise-unmatched specs, in which case it needs no pattern (CON-013). |
+| `ignore` | `List<String>` | Regular expressions over the spec's filename; a matching spec is excluded from every spec set and produces no symbol (CON-013). Optional. |
+| `exclude` | `List<String>` | Repository-root-relative globs (CON-018); a matching path is excluded from the code scan and produces no anchor (SW-024, SW-025). A user `exclude` is absolute in the exclusion precedence (CON-017). Optional. |
+| `unexclude` | `List<String>` | Repository-root-relative globs (CON-018) that re-include a path a built-in default (CON-016) would exclude; never overrides a user `exclude` (CON-017). Optional. |
+| `waivers` | `List<{ id?: String, pattern?: String, reason: String }>` | The committed coverage waiver list: each entry targets a spec `id` or a glob `pattern` over ids (exactly one), with a reason, and waives a missing *test* — a matching spec that is implemented but unverified is reported waived rather than an open gap (SW-027, SW-030). A spec missing its realizing code is never waived (CON-021). A waiver that waives nothing is reported as stale. Optional. |
+| `schemas` | `{ story?: String, "derived-spec"?: String }` | Per-document-type validation schema files; clew validates each document against its type's schema when it reads it (SW-036) — the pinned core merged with the project's required fields and enums (ARCH-007). Optional. |
+
+**Rationale**
+Pinning the configuration as an explicit entity fixes the one shape every command reads, and the every-attribute-has-a-default invariant is what lets a project state only what it changes.
+Anchoring the resolved-configuration code type to this id makes a divergence between the documented shape and the code shape a compile-time break rather than a silent drift.
+
+**Verification Description**
+The resolved-configuration type in the core carries the anchor to this id; removing or renaming the id fails the type-check.
+Reading a `.ariadnerc.json` yields each attribute above, and a missing file or attribute resolves to the documented default.
+
+## Relations
+
+**Related**
+
+- Shown in [the domain-model overview](../domain-model.md) — the entity list and diagram.

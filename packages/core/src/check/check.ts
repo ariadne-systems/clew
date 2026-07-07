@@ -191,7 +191,7 @@ const referenceRot: (context: CheckContext) => Promise<RawFinding[]> = realizes(
   async (context: CheckContext): Promise<RawFinding[]> => {
     const findings: RawFinding[] = [];
     const anchorsByFile = new Map<string, Set<string>>();
-    for (const file of await corpusMarkdown(context)) {
+    for (const file of corpusMarkdown(context)) {
       const absolute = join(context.projectRoot, file);
       const lines = (await readFile(absolute, "utf8")).split(/\r?\n/);
       for (const [index, line] of lines.entries()) {
@@ -490,20 +490,9 @@ function specFiles(
   return specs;
 }
 
-/** The markdown of the spec corpus: the (already-walked) spec-tree files and the domain model, project-root-relative. */
-async function corpusMarkdown(context: CheckContext): Promise<string[]> {
-  const files = [...context.specTreeFiles];
-  const entities = toRelative(
-    context.projectRoot,
-    context.layout.entities.file,
-  );
-  if (
-    !fileExcluded(entities, context.exclusion) &&
-    (await pathExists(join(context.projectRoot, entities)))
-  ) {
-    files.push(entities);
-  }
-  return files;
+/** The markdown of the spec corpus: the (already-walked) spec-tree files, project-root-relative. */
+function corpusMarkdown(context: CheckContext): string[] {
+  return [...context.specTreeFiles];
 }
 
 /** The local link targets on a line — not an external URL, not a bare `#anchor`. */

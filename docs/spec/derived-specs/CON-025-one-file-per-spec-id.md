@@ -8,7 +8,7 @@ A bound spec id is declared by exactly one file
 **Description**
 Each bound spec id is declared by exactly one file in the scanned artifact locations.
 The scan enforces this for the ids it turns into traceables: when two files declare the same lens-bearing id, it rejects them with an error naming the id and the conflicting files, rather than silently keeping one.
-A non-lens id — a story or entity — is not a traceable and is not checked by the generation scan; duplicate detection across every prefix is a corpus-integrity concern handled separately.
+A non-lens id — a story — is not a traceable and is not checked by the generation scan; duplicate detection across every prefix is a corpus-integrity concern handled separately.
 How the duplicate arose — a merge, a copy — does not matter.
 
 **Rationale**
@@ -37,3 +37,6 @@ The rejection does not depend on the order the files are visited.
 - **2026-06-27** — Scoped the scan's enforcement to traceable (lens) ids.
 A review showed that checking non-traceable ids (stories) in the generation scan made it fail on data generation never uses, and reached past configured prefixes; comprehensive cross-prefix duplicate detection belongs to a separate integrity check.
 Also recorded that a file reached twice through overlapping scan roots is not a duplicate of itself.
+- **2026-07-07** — Dropped "or entity" from the non-lens carve-out.
+Entities are no longer a built-in non-lens prefix; a project that models a domain configures an entity lens, whose ids are ordinary traceables, so only the story prefix remains non-lens.
+The treatment of a non-lens id is otherwise unchanged.

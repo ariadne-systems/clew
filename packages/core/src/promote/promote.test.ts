@@ -27,7 +27,6 @@ async function project(): Promise<Project> {
   const storiesDir = join(dir, "docs", "spec", "stories");
   const derivedDir = join(dir, "docs", "spec", "derived-specs");
   const draftsDir = join(dir, "docs", "spec", "drafts");
-  const domainModel = join(dir, "docs", "spec", "domain-model.md");
   await mkdir(join(draftsDir, "stories"), { recursive: true });
   await mkdir(join(draftsDir, "derived-specs"), { recursive: true });
   await mkdir(storiesDir, { recursive: true });
@@ -40,7 +39,6 @@ async function project(): Promise<Project> {
         stories: { dir: storiesDir, prefix: "STR" },
         derivedSpecs: { dir: derivedDir },
         drafts: { dir: draftsDir },
-        entities: { file: domainModel, prefix: "ENT" },
       },
     }),
     "utf8",
@@ -643,12 +641,12 @@ describe("atomic finalization", () => {
 
 describe("rejected drafts", () => {
   verifies(SwTraceables.SW_017_FINALIZE_DRAFTS, () => {
-    test("an entity draft fails with E_ENTITY_DRAFT_UNSUPPORTED", async () => {
+    test("a draft whose prefix is neither the story prefix nor a lens fails", async () => {
       const p = await project();
       await writeDraft(
         p.draftsDir,
         "derived-specs",
-        "ENT-TMP-3333333333-config.md",
+        "XYZ-TMP-3333333333-config.md",
         "x\n",
       );
 
@@ -656,9 +654,9 @@ describe("rejected drafts", () => {
         promote({
           configFile: p.configFile,
           stateFile: p.stateFile,
-          roots: ["ENT-TMP-3333333333"],
+          roots: ["XYZ-TMP-3333333333"],
         }),
-      ).rejects.toMatchObject({ code: ErrorCode.ENTITY_DRAFT_UNSUPPORTED });
+      ).rejects.toMatchObject({ code: ErrorCode.INVALID_TYPE });
     });
   });
 });
@@ -671,7 +669,6 @@ describe("schema validation on promotion", () => {
       const storiesDir = join(dir, "docs", "spec", "stories");
       const derivedDir = join(dir, "docs", "spec", "derived-specs");
       const draftsDir = join(dir, "docs", "spec", "drafts");
-      const domainModel = join(dir, "docs", "spec", "domain-model.md");
       await mkdir(join(draftsDir, "stories"), { recursive: true });
       await mkdir(join(draftsDir, "derived-specs"), { recursive: true });
       await mkdir(storiesDir, { recursive: true });
@@ -689,7 +686,6 @@ describe("schema validation on promotion", () => {
             stories: { dir: storiesDir, prefix: "STR" },
             derivedSpecs: { dir: derivedDir },
             drafts: { dir: draftsDir },
-            entities: { file: domainModel, prefix: "ENT" },
           },
           schemas: { story: "story.yml" },
         }),

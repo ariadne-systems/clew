@@ -30,7 +30,7 @@ A project declares its lenses in `.ariadnerc.json`, each with an `id` and a one-
 ### 1. Gather the drafts
 
 Collect the drafts to promote — the pending drafts in the configured drafts location, or the specific ones the user named.
-Read the project's configuration for the layout (where stories, derived specs, and the domain model live) and the lenses, so you know where each draft belongs and which prefixes are valid.
+Read the project's configuration for the layout (where stories and derived specs live) and the lenses, so you know where each draft belongs and which prefixes are valid.
 
 ### 2. Integrate — reconcile with the corpus (the part only an agent can do)
 
@@ -53,10 +53,9 @@ Once integration is confirmed, run `clew promote <story…>` to finalize; name t
 
 Invoke it for the story you confirmed: `clew promote <story|spec…>` finalizes those roots and their reference closure, or `clew promote all` finalizes every pending draft. A story must reference its draft specs, or they are not reached. It reports each temporary-id → bound-id mapping.
 
-Two things it does not do, which stay with you after it runs:
+One thing it does not do, which stays with you after it runs:
 
-1. **Apply** the confirmed integration edits to affected existing specs (new relations, supersession notes) — that is judgment, not mechanics.
-2. **Merge an entity draft** into the domain model — `promote` finalizes stories and derived specs (file moves); an entity draft is a content merge you make by hand, and `promote` refuses it rather than misplacing it.
+**Apply** the confirmed integration edits to affected existing specs (new relations, supersession notes) — that is judgment, not mechanics. An entity draft carries no special case: with an entity lens configured, it promotes through the ordinary derived-spec path like any other lens.
 
 ### 4. Report
 
@@ -67,5 +66,5 @@ Leave committing to the user, and remind them the state file advanced so it is c
 
 - The integration is reconciled with the user: relations, supersession, conflict, and duplication candidates presented and confirmed; no existing spec changed silently.
 - `clew promote` has finalized the confirmed story and its reference closure — each temporary id bound and reported (temp → bound), references substituted within the drafts, files moved into the spec tree.
-- The confirmed integration edits to existing specs are applied, and any entity draft is merged into the domain model by hand.
+- The confirmed integration edits to existing specs are applied.
 - The user is reminded that the state file advanced and that committing is theirs.

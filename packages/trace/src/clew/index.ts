@@ -10,14 +10,15 @@
 
 import { ArchTraceables } from "./ArchTraceables.js";
 import { ConTraceables } from "./ConTraceables.js";
+import { EntTraceables } from "./EntTraceables.js";
 import { NfTraceables } from "./NfTraceables.js";
 import { StkTraceables } from "./StkTraceables.js";
 import { SwTraceables } from "./SwTraceables.js";
 import { SysTraceables } from "./SysTraceables.js";
 
-export { ArchTraceables, ConTraceables, NfTraceables, StkTraceables, SwTraceables, SysTraceables };
+export { ArchTraceables, ConTraceables, EntTraceables, NfTraceables, StkTraceables, SwTraceables, SysTraceables };
 
-export type TraceableId = ArchTraceables | ConTraceables | NfTraceables | StkTraceables | SwTraceables | SysTraceables;
+export type TraceableId = ArchTraceables | ConTraceables | EntTraceables | NfTraceables | StkTraceables | SwTraceables | SysTraceables;
 
 /** A single id, or a non-empty list of ids — an anchor must name at least one spec. */
 export type TraceableIds = TraceableId | readonly [TraceableId, ...TraceableId[]];

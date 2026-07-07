@@ -61,7 +61,6 @@ async function project(
   const dir = await mkdtemp(join(tmpdir(), "ariadne-check-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
   const derivedDir = join(dir, "docs", "spec", "derived-specs");
-  const domainModel = join(dir, "docs", "spec", "domain-model.md");
   await mkdir(storiesDir, { recursive: true });
   await mkdir(derivedDir, { recursive: true });
   await writeFile(
@@ -70,7 +69,6 @@ async function project(
       layout: {
         stories: { dir: storiesDir, prefix: "STR" },
         derivedSpecs: { dir: derivedDir },
-        entities: { file: domainModel, prefix: "ENT" },
         drafts: { dir: join(dir, "docs", "spec", "drafts") },
       },
       generators: [{ type: "typescript", outputDir: "out" }],
@@ -396,22 +394,6 @@ describe("exclusions apply to every check", () => {
       await writeFile(
         join(p.derivedDir, "SW-001-a.md"),
         "See [gone](SW-999-missing.md).\n",
-        "utf8",
-      );
-
-      const result = await check({
-        configFile: p.configFile,
-        resolveGenerator,
-      });
-
-      expect(result.findings).toEqual([]);
-    });
-
-    test("an excluded domain model is not checked", async () => {
-      const p = await project({ exclude: ["docs/spec/domain-model.md"] });
-      await writeFile(
-        join(p.root, "docs", "spec", "domain-model.md"),
-        "See [gone](nope.md).\n",
         "utf8",
       );
 
