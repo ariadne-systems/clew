@@ -43,7 +43,7 @@ type SeenSpec = { path: string; spec: ScannedSpec };
  * Scans the configured artifact locations into the set of traceables.
  * A traceable is a lens-bearing spec id — its prefix is a configured lens
  * (ADR-0003) — tagged with that lens, so the set can be grouped into spec sets
- * for generation. A non-lens id such as a story (`STR`) or entity (`ENT`) is not
+ * for generation. A non-lens id such as a story (`STR`) is not
  * a traceable and is not scanned. A traceable id that two files declare is rejected,
  * so a duplicate never collapses silently. The scan is language-neutral: it reads
  * only the configured layout and lenses, and knows nothing of any target
@@ -144,7 +144,7 @@ const readSpecStatus: (content: string, location: string) => SpecStatus =
 
 /**
  * Records the traceable a filename declares, and rejects a duplicate. Only a
- * configured lens prefix counts, so a story, entity, or ADR contributes nothing. A
+ * configured lens prefix counts, so a story or ADR contributes nothing. A
  * second file declaring an already-seen traceable id is rejected rather than
  * overwriting the first, so a duplicate never collapses silently. The filename is
  * kept on the traceable so spec-set matchers can select on it, and the spec's

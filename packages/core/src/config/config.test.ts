@@ -126,7 +126,6 @@ describe("readLayout", () => {
 
       expect(layout.stories).toEqual({ dir: "specs/stories", prefix: "EPIC" });
       expect(layout.derivedSpecs.dir).toBe("docs/spec/derived-specs");
-      expect(layout.entities.prefix).toBe("ENT");
     });
 
     test("defaults the whole layout when unconfigured", async () => {
@@ -143,26 +142,24 @@ describe("readLayout", () => {
 
 describe("readConfiguredPrefixes", () => {
   verifies(SwTraceables.SW_009_READ_CONFIGURATION, () => {
-    test("combines the lens ids with the story and entity prefixes", async () => {
+    test("combines the lens ids with the story prefix", async () => {
       const file = await tempConfigFile({
         lenses: [{ id: "SW", description: "Software spec." }],
         layout: {
           stories: { dir: "x", prefix: "EPIC" },
-          entities: { file: "y", prefix: "DOM" },
         },
       });
 
       const prefixes = await readConfiguredPrefixes(file);
 
-      expect([...prefixes].sort()).toEqual(["DOM", "EPIC", "SW"]);
+      expect([...prefixes].sort()).toEqual(["EPIC", "SW"]);
     });
 
-    test("defaults to the default lenses plus the STR and ENT prefixes", async () => {
+    test("defaults to the default lenses plus the STR prefix", async () => {
       const prefixes = await readConfiguredPrefixes(await missingConfigFile());
 
       expect(prefixes.has("SW")).toBe(true);
       expect(prefixes.has("STR")).toBe(true);
-      expect(prefixes.has("ENT")).toBe(true);
       expect(prefixes.has("HW")).toBe(false);
     });
   });
@@ -278,7 +275,7 @@ describe("resolveConfiguration", () => {
 
         expect(resolved.lenses).toEqual([...DEFAULT_LENSES]);
         expect(resolved.prefixes).toEqual(
-          expect.arrayContaining(["SW", "CON", "STR", "ENT"]),
+          expect.arrayContaining(["SW", "CON", "STR"]),
         );
         expect(resolved.layout.stories.dir).toBe("docs/spec/stories");
         expect(resolved.generators).toEqual([]);

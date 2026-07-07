@@ -278,9 +278,7 @@ function matchesName(draft: DraftFile, name: string): boolean {
 
 /**
  * Resolves where a draft is placed from its prefix: a story to the stories
- * directory, a derived spec (a lens prefix) to the derived-specs directory. An
- * entity draft is a content merge into the domain model, not a file move, so it
- * is unsupported here.
+ * directory, a derived spec (a lens prefix) to the derived-specs directory.
  */
 function resolveTargetDir(
   prefix: string,
@@ -289,12 +287,6 @@ function resolveTargetDir(
 ): string {
   if (prefix === layout.stories.prefix) {
     return layout.stories.dir;
-  }
-  if (prefix === layout.entities.prefix) {
-    throw new AriadneError(
-      ErrorCode.ENTITY_DRAFT_UNSUPPORTED,
-      `Entity draft "${prefix}-…" must be merged into ${layout.entities.file} by hand; promote finalizes stories and derived specs only.`,
-    );
   }
   if (lensIds.has(prefix)) {
     return layout.derivedSpecs.dir;

@@ -50,9 +50,6 @@ function formatResolvedConfiguration(config: ResolvedConfiguration): string {
     `  stories: ${config.layout.stories.dir} (${config.layout.stories.prefix})`,
   );
   lines.push(`  derived specs: ${config.layout.derivedSpecs.dir}`);
-  lines.push(
-    `  entities: ${config.layout.entities.file} (${config.layout.entities.prefix})`,
-  );
   lines.push(`  drafts: ${config.layout.drafts.dir}`);
   lines.push(`  state: ${config.layout.state.file}`);
   lines.push("Generators:");

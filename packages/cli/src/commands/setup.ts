@@ -35,7 +35,7 @@ ${dirs}
 
 You can adjust these in ${result.configFile}:
   - lenses        the spec kinds you mint — ${result.lenses.join(", ")} (rename, add, or remove them)
-  - layout        where each kind of artifact lives (the directories above, plus the domain model and state files)
+  - layout        where each kind of artifact lives (the directories above, plus the state file)
   - idGeneration  the id scheme (sequential) and the number padding
 
 Next steps:

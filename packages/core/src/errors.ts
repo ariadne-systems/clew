@@ -29,8 +29,6 @@ export const ErrorCode = {
   SPEC_SET_UNMATCHED: "E_SPEC_SET_UNMATCHED",
   /** A named draft to promote was not found among the pending drafts. */
   DRAFT_NOT_FOUND: "E_DRAFT_NOT_FOUND",
-  /** An entity draft cannot be finalized by `promote`; merge it into the domain model by hand. */
-  ENTITY_DRAFT_UNSUPPORTED: "E_ENTITY_DRAFT_UNSUPPORTED",
   /** A configured `exclude` or `unexclude` glob could not be compiled. */
   INVALID_EXCLUSION_PATTERN: "E_INVALID_EXCLUSION_PATTERN",
   /** A spec declares a `**Status**` value that is not one of the recognized states. */
