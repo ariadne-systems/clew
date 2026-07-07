@@ -23,7 +23,7 @@
     "dist"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "restricted"
   },
   "dependencies": {
     "@ariadne-thread/core": "workspace:*",
