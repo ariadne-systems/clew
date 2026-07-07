@@ -96,41 +96,36 @@ jobs:
           path: packages
       - run: pnpm check:pkg
 
-  # Publish changed packages and push their git tags, on main only.
+  # Publish changed packages to npm and push their git tags, on main only.
   # Versions are bumped locally with `pnpm changeset:version` and committed; when
   # that lands on main this job runs `changeset publish` (publishes only the
   # versions not already on the registry — a no-op on commits that bumped nothing)
   # and creates one git tag per published package, which it then pushes back.
   # `needs` lists the whole verify stage, so it waits for it to pass first.
   #
-  # Registry auth uses the built-in GITHUB_TOKEN against GitHub Packages, and the
-  # same token (via the checkout credentials) pushes the tags. Both require the
-  # `permissions` below. NOTE: GitHub Packages requires the npm scope to match the
-  # repository owner. If `@ariadne-thread` is not the GitHub org/user, change the
-  # registry to npmjs.org and provide an NPM_TOKEN secret instead.
+  # Packages publish PRIVATELY (access `restricted`, per the changeset config and
+  # each package's `publishConfig`) to npmjs.org, so the `@ariadne-thread` scope
+  # need not match the GitHub owner. This needs a paid npm org and an automation
+  # `NPM_TOKEN` repo secret with publish rights to it. Tag pushes use the checkout's
+  # GITHUB_TOKEN credentials, which require `contents: write`. When the tool goes
+  # public, flip access back to `public` (changeset config + each publishConfig) and
+  # run `npm access set status=public @ariadne-thread/<pkg>` for the published ones.
   release:
     needs: [lint, typecheck, test, package-checks]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write # push git tags
-      packages: write # publish to GitHub Packages
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - name: Configure npm auth for GitHub Packages
-        run: |
-          {
-            echo "@ariadne-thread:registry=https://npm.pkg.github.com"
-            echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}"
-          } > .npmrc
+      - name: Configure npm auth for npmjs.org
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish and tag
         run: |
           git config user.email "release-bot@ariadne-thread"
           git config user.name "ariadne release"
           pnpm release
           git push origin --tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
