@@ -1,5 +1,5 @@
 ---
-"@ariadne-thread/gen-typescript": minor
+"@ariadne-thread/clew": minor
 ---
 
 Emit the TypeScript generator's traceable output as per-set string enums plus a helper module (STR-014).

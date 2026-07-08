@@ -1,7 +1,5 @@
 ---
-"@ariadne-thread/core": minor
-"@ariadne-thread/gen-typescript": minor
-"@ariadne-thread/gen-java": minor
+"@ariadne-thread/clew": minor
 ---
 
 Harden traceable generation (code-review fixes).

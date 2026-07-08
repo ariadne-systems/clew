@@ -1,8 +1,5 @@
 ---
-"@ariadne-thread/core": minor
-"@ariadne-thread/cli": minor
-"@ariadne-thread/gen-typescript": minor
-"@ariadne-thread/gen-java": minor
+"@ariadne-thread/clew": minor
 ---
 
 Add the `ariadne spec` command (STR-011).

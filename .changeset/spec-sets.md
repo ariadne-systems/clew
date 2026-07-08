@@ -1,5 +1,5 @@
 ---
-"@ariadne-thread/core": minor
+"@ariadne-thread/clew": minor
 ---
 
 Add configurable spec sets (STR-012).
