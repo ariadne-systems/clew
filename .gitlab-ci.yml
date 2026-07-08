@@ -1,9 +1,9 @@
 # CI for the ariadne-thread pnpm monorepo.
 #
-# Build runs first and the other jobs depend on it: the CLI's type-check and
-# tests resolve `@ariadne-thread/core` from its built `dist`, so core must be
-# built before they run. `pnpm -r build` builds in topological order, so core
-# is built before the cli.
+# Build runs first and the other jobs depend on it: `@ariadne-thread/clew`
+# resolves `@ariadne-thread/trace` from its built `dist`, so trace must be built
+# before clew's type-check and tests run. `pnpm -r build` builds in topological
+# order (trace before clew).
 
 variables:
   # Trust the runner's system CA store in addition to Node's bundled CAs, so

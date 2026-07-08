@@ -1,0 +1,41 @@
+{
+  "name": "@ariadne-thread/clew",
+  "version": "0.1.0",
+  "description": "clew — compile-checked, id-anchored traceability for specs and code: the CLI and its engine.",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "author": "Ariadne Systems GmbH",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/ariadne-forge/ariadne-thread-cli.git",
+    "directory": "packages/clew"
+  },
+  "sideEffects": false,
+  "bin": {
+    "clew": "./dist/cli/index.mjs",
+    "ariadne": "./dist/cli/index.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@ariadne-thread/trace": "workspace:*",
+    "commander": "^15.0.0",
+    "proper-lockfile": "^4.1.2",
+    "yaml": "^2.5.0"
+  }
+}

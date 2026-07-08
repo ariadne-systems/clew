@@ -17,9 +17,9 @@
     "check": "biome check .",
     "check:write": "biome check --write .",
     "check:refs": "node scripts/check-references.mjs",
-    "check:pkg": "pnpm -r exec publint && pnpm --filter @ariadne-thread/core --filter @ariadne-thread/gen-java --filter @ariadne-thread/gen-typescript exec attw --pack . --profile esm-only",
-    "dev": "tsx packages/cli/src/index.ts",
-    "mint": "tsx packages/cli/src/index.ts mint",
+    "check:pkg": "pnpm -r exec publint && pnpm --filter @ariadne-thread/clew exec attw --pack . --profile esm-only",
+    "dev": "tsx packages/clew/src/cli/index.ts",
+    "mint": "tsx packages/clew/src/cli/index.ts mint",
     "changeset": "changeset",
     "changeset:version": "changeset version",
     "release": "pnpm build && changeset publish && changeset tag"

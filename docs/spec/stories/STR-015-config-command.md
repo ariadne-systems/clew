@@ -55,3 +55,8 @@ Resolving the configuration is a single core behaviour the skills and the comman
 - [CON-015 — The `config` command is read-only](../derived-specs/CON-015-config-read-only.md)
 
 This story builds on the configuration readers (SW-009), mirrors the `spec` command's shape (SW-012), and reuses the configuration precondition (CON-011) and the generator interface (ARCH-003).
+
+## Changes
+
+- **2026-07-08** — Superseded in part by ADR-0007 (STR-028): the generator registry moved from the CLI (the "composition root" this story describes) into the engine, and `resolveConfiguration` now resolves a generator's default output directory through the built-in registry by default.
+The `config` command no longer builds or injects the registry; it delegates to core with no arguments. The command's behaviour and read-only contract are unchanged.
