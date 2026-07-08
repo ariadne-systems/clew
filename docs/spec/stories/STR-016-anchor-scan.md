@@ -74,3 +74,5 @@ This story is the **scan primitive only**: collecting located anchors; computing
 
 - **2026-06-29** — Updated the link text for CON-016 to its revised title (STR-024).
 Reference-only; this story's meaning is unchanged.
+- **2026-07-08** — Superseded in part by ADR-0007 (STR-028): the scan still drives discovery through the generator interface, but the concrete generators are in-tree, bound at the engine's registry, rather than injected from the CLI.
+"The core references no concrete generator type" is relaxed to "named only in the registry"; the scan's behaviour is unchanged.

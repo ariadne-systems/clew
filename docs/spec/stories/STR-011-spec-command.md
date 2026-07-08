@@ -61,3 +61,8 @@ This story builds the **skeleton** — the command, the scan, the generator inte
 - [SW-014 — Generate traceables and anchoring utilities through the configured generators](../derived-specs/SW-014-generate-traceables.md)
 - [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](../derived-specs/ARCH-003-generator-interface.md)
 - [CON-012 — Generated traceables and utilities are tool-owned and never hand-edited](../derived-specs/CON-012-generated-files-tool-owned.md)
+
+## Changes
+
+- **2026-07-08** — Superseded in part by ADR-0007 (STR-028), which revises ADR-0001 D9: the generator interface remains the seam, but the generators are no longer separate packages the core depends on across a package boundary — they are in-tree modules the engine binds at a single registry point.
+The story's mechanism — `spec` scans language-neutrally and delegates emission through the interface — is unchanged; only "the core references no concrete generator type" is relaxed to "the concrete generators are named only in the registry."

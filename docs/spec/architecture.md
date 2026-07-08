@@ -7,27 +7,27 @@ The atomic, anchored architecture rules and constraints are authored as ARCH and
 
 ## Shape
 
-The tool is a language-neutral core with pluggable, language-specific generators.
+The tool ships as a single package, `@ariadne-thread/clew`: a language-neutral engine, the in-tree language generators, and the CLI.
 
-The core deals only in traceables, ids, the index, content hashes, and resolution.
+The engine deals only in traceables, ids, the index, content hashes, and resolution.
 None of this knows a target language.
 
 A generator turns the set of traceable ids into verifiable symbols in one target language and defines how code references a symbol.
-Generators sit behind a narrow interface.
+Generators sit behind a narrow interface, one per target language, in-tree.
 Java and TypeScript are the first two.
 
-The core depends on the generator interface, never on a concrete generator.
-This boundary is the one that must not erode.
+The engine reaches every generator through the generator interface, binding the concrete generators at a single registry point (ADR-0007).
+Nothing outside the generators directory names a concrete generator; an architecture test enforces it.
 
 ## Enforcement, in three layers
 
-The core anchors ids language-neutrally.
+The engine anchors ids language-neutrally.
 A language-specific generator materializes them as verifiable symbols.
 Existence is enforced by the target language's type-checker where one exists, and by a dedicated build check otherwise.
 
 ## Code organization
 
-Domain entity types — the ENT elements of the domain model — live together in one module per package, `core/src/entities`, mirroring `domain-model.md`.
+Domain entity types — the ENT elements of the domain model — live together in one module, `clew/src/entities`, mirroring `domain-model.md`.
 Behaviour that operates on them (the store, services) lives in its own module and imports the entity types.
 This gives each domain entity one place in the code and a clear counterpart to anchor, and keeps behaviour separate from the shapes it works on.
 
@@ -64,7 +64,7 @@ flowchart TB
     dev["Developer / CI<br/>scan · generate · verify · resolve"]
     foreign["Foreign spec tools<br/>e.g. SPDD authoring"]
 
-    ariadne["ariadne<br/>language-neutral core + pluggable generators"]
+    ariadne["clew<br/>engine · in-tree generators · CLI"]
 
     repo[("Target repository<br/>specs · code · committed index — local")]
     checker["Target type-checker<br/>tsc / javac"]
@@ -89,37 +89,42 @@ flowchart TB
 
 ### Components (C3)
 
-Inside the tool: the CLI is presentation only and delegates to the language-neutral core, which reaches every generator through the generator interface and never through a concrete generator.
-That boundary is the one that must not erode (ADR-0001 D9).
+Inside the tool: the CLI is presentation only and delegates to the language-neutral engine, which reaches every generator through the generator interface, binding the concrete in-tree generators at a single registry point.
+That boundary is enforced by an architecture test (ADR-0007, revising ADR-0001 D9).
 
 ```mermaid
 flowchart TB
-    subgraph cli["@ariadne-thread/cli — presentation"]
-        cmds["commands: mint · init · …"]
-    end
-    subgraph core["@ariadne-thread/core — language-neutral"]
+    subgraph clew["@ariadne-thread/clew"]
+        cmds["cli — presentation: commands (mint · init · spec · scan · …)"]
         mintc["mint · id strategies (sequential / opaque)"]
         initc["init · reconcile"]
         store["StateStore — lock + atomic write"]
         cfg["configuration (.ariadnerc.json)"]
         engine["traceables · ids · index · hashing · resolution · scanner"]
         iface{{"generator interface"}}
+        registry["generators/registry — binds the in-tree generators"]
+        genjava["generators/java"]
+        gents["generators/typescript"]
     end
-    genjava["@ariadne-thread/gen-java"]
-    gents["@ariadne-thread/gen-typescript"]
+    trace["@ariadne-thread/trace<br/>generated traceables + anchoring utility"]
 
     cmds --> mintc
     cmds --> initc
+    cmds --> engine
     mintc --> store
     initc --> store
     mintc --> cfg
     initc --> cfg
     engine --> iface
+    engine --> registry
+    registry --> genjava
+    registry --> gents
     genjava -. implements .-> iface
     gents -. implements .-> iface
+    engine -. anchors against .-> trace
 
     classDef pkg fill:#1168bd,color:#fff,stroke:#0b4884;
     classDef gen fill:#8a8a8a,color:#fff,stroke:#5f5f5f;
-    class cmds,mintc,initc,store,cfg,engine,iface pkg;
-    class genjava,gents gen;
+    class cmds,mintc,initc,store,cfg,engine,iface,registry pkg;
+    class genjava,gents,trace gen;
 ```

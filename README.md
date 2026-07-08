@@ -1,8 +1,9 @@
 # ariadne-thread
 
 Compile-checked, id-anchored traceability that doubles as scoped agent context.
-A language-neutral core with pluggable, per-language generators, distributed via npm
-under the `@ariadne-thread` scope.
+A single package, `@ariadne-thread/clew` — a language-neutral engine, in-tree
+per-language generators behind a narrow interface, and the CLI — distributed via
+npm under the `@ariadne-thread` scope.
 
 > Status: early scaffold. No traceability logic yet — see `docs/spec` for the spec and
 > `docs/adr/ADR-0001-*` for the architecture decision.
@@ -11,12 +12,10 @@ under the `@ariadne-thread` scope.
 
 | Package | Name | Role |
 | --- | --- | --- |
-| `packages/core` | `@ariadne-thread/core` | Language-neutral core: traceables, ids, index, hashing, resolution |
-| `packages/cli` | `@ariadne-thread/cli` | Command-line interface (`ariadne`) |
-| `packages/gen-java` | `@ariadne-thread/gen-java` | Java generator |
-| `packages/gen-typescript` | `@ariadne-thread/gen-typescript` | TypeScript generator |
+| `packages/clew` | `@ariadne-thread/clew` | The tool: the language-neutral engine (traceables, ids, index, hashing, resolution), the in-tree language generators (Java, TypeScript) behind the generator interface, and the CLI (`clew`, `ariadne`) |
+| `packages/trace` | `@ariadne-thread/trace` | Generated traceables and anchoring utility (clew run on its own specs) |
 
-The core never depends on a concrete generator (ADR-0001 D9).
+The engine reaches every generator through the generator interface, binding the concrete in-tree generators at a single registry point (ADR-0007, revising ADR-0001 D9).
 
 ## Toolchain
 

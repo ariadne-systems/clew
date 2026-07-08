@@ -19,13 +19,12 @@ This document defines runtime and dependency constraints.
 
 | Package | Responsibility |
 | --- | --- |
-| `@ariadne-thread/core` | Language-neutral core: traceables, ids, index, hashing, resolution, state. Domain entity types live in `core/src/entities`. |
-| `@ariadne-thread/cli` | Bin-only CLI (`ariadne`); presentation only — each command delegates to core. |
-| `@ariadne-thread/gen-java` | Java generator, behind the generator interface. |
-| `@ariadne-thread/gen-typescript` | TypeScript generator, behind the generator interface. |
+| `@ariadne-thread/clew` | The tool: the language-neutral engine (traceables, ids, index, hashing, resolution, state; domain entity types in `clew/src/entities`), the in-tree language generators behind the generator interface (`clew/src/generators`, one per target language), and the CLI presentation layer and bin (`clew`, `ariadne`). |
+| `@ariadne-thread/trace` | The generated traceables and anchoring utility, emitted by running clew on its own specs and imported by the code under trace. |
 
-Business logic belongs only in `core`.
-The core depends on the generator interface, never on a concrete generator (ADR-0001 D9).
+The engine reaches every generator through the generator interface, binding the concrete in-tree generators at a single registry point (`clew/src/generators/registry.ts`); an architecture test enforces that nothing outside `clew/src/generators` names a concrete generator (ADR-0007, revising ADR-0001 D9).
+The CLI is presentation only — each command delegates to the engine.
+The `trace` package holds generated output only and stays separate.
 
 ---
 
@@ -43,7 +42,7 @@ Build and quality:
 Runtime:
 
 - commander, picocolors, pino (CLI)
-- proper-lockfile (core state locking)
-- yaml (core document-schema parsing) — schemas are hand-authored YAML (`.ariadnerc.json` stays JSON); justified in STR-026.
+- proper-lockfile (engine state locking)
+- yaml (engine document-schema parsing) — schemas are hand-authored YAML (`.ariadnerc.json` stays JSON); justified in STR-026.
 
 Do not introduce alternative libraries (for example tsup, ESLint, Prettier, Jest) without explicit justification.

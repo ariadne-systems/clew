@@ -62,3 +62,8 @@ Optional, if cheap
 - No scanner, mint, resolver, index, or generator logic.
 - No architecture-boundary enforcement; the rule that keeps `core` free of language-specific generators is its own ticket, modeled as an ARCH spec with its enforcement.
 - No spec tokens or SRDD wiring; that comes in the next story.
+
+## Changes
+
+- **2026-07-08** — Superseded in part by ADR-0007 (STR-028): the four-package layout this story scaffolded — `@ariadne-thread/core`, `@ariadne-thread/cli`, `@ariadne-thread/gen-java`, `@ariadne-thread/gen-typescript` — was consolidated into a single package, `@ariadne-thread/clew`, with the generators as in-tree modules behind the generator interface and the CLI as its presentation layer and bin; `@ariadne-thread/trace` remains separate.
+The scaffold's intent — a pnpm / TypeScript / ESM workspace with the toolchain and checks — stands; only the package count and names changed.
