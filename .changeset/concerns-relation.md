@@ -1,5 +1,5 @@
 ---
-"@ariadne-thread/gen-typescript": minor
+"@ariadne-thread/clew": minor
 ---
 
 Add the `concerns` relation to the generated anchoring utility (ADR-0004).

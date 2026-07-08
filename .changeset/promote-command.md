@@ -1,6 +1,5 @@
 ---
-"@ariadne-thread/core": minor
-"@ariadne-thread/cli": minor
+"@ariadne-thread/clew": minor
 ---
 
 Add the `ariadne promote` command (STR-013).

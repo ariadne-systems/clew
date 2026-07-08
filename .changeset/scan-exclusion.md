@@ -1,5 +1,5 @@
 ---
-"@ariadne-thread/core": minor
+"@ariadne-thread/clew": minor
 "@ariadne-thread/trace": minor
 ---
 

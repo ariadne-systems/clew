@@ -1,6 +1,5 @@
 ---
-"@ariadne-thread/core": minor
-"@ariadne-thread/cli": minor
+"@ariadne-thread/clew": minor
 ---
 
 Add the `clew coverage` command and core coverage computation (STR-018) — the reverse-completeness report (ADR-0005).
