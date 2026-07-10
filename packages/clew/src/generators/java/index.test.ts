@@ -28,7 +28,7 @@ const specSets: SpecSet[] = [
   },
 ];
 
-const OUTPUT = { outputDir: "src/main/java/ariadne/traceables" };
+const OUTPUT = { outputDir: "src/main/java/clew/traceables" };
 
 function fileNamed(
   files: readonly GeneratedFile[],
@@ -49,7 +49,7 @@ describe("java generator output", () => {
         const files = await createJavaGenerator().generate(specSets, OUTPUT);
         const enumFile = fileNamed(files, "SwTraceables.java");
 
-        expect(enumFile?.contents).toContain("package ariadne.traceables;");
+        expect(enumFile?.contents).toContain("package clew.traceables;");
         expect(enumFile?.contents).toContain("public enum SwTraceables {");
         expect(enumFile?.contents).toContain('SW_002_MINT_IDS("SW-002")');
         expect(enumFile?.contents).toContain("public String id() {");
@@ -70,10 +70,10 @@ describe("java generator output", () => {
           const annotation = fileNamed(files, `annotation/${name}.java`);
           expect(annotation?.contents).toContain(`public @interface ${name} {`);
           expect(annotation?.contents).toContain(
-            "package ariadne.traceables.annotation;",
+            "package clew.traceables.annotation;",
           );
           expect(annotation?.contents).toContain(
-            "import ariadne.traceables.SwTraceables;",
+            "import clew.traceables.SwTraceables;",
           );
           expect(annotation?.contents).toContain("SwTraceables[] value();");
           expect(annotation?.contents).toContain("@Retention(SOURCE)");
@@ -95,7 +95,7 @@ describe("java generator output", () => {
 
       test("declares its default output directory", () => {
         expect(createJavaGenerator().defaultOutputDir).toBe(
-          "src/main/java/ariadne/traceables",
+          "src/main/java/clew/traceables",
         );
       });
 

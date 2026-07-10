@@ -29,7 +29,7 @@ For anything beyond a trivial edit, run the `clew-context` skill first: it walks
 
 The skills write commands as `clew <command>`.
 In this repository — the tool's own source — the CLI runs through the dev runner, not a global binary.
-Resolve every `clew <command>` to this; do not probe for a global `clew`/`ariadne` binary or for `npx` / `pnpm exec`.
+Resolve every `clew <command>` to this; do not probe for a global `clew` binary or for `npx` / `pnpm exec`.
 
 - `pnpm dev <command>` runs any command — for example `pnpm dev promote`, `pnpm dev config`.
 - `pnpm mint …` is shorthand for `pnpm dev mint …`.

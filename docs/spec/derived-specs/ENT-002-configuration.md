@@ -6,7 +6,7 @@ Configuration — the tool's per-project self-description
 **Status**: active
 
 **Description**
-Configuration is the tool's per-project self-description, read from `.ariadnerc.json` at the project root.
+Configuration is the tool's per-project self-description, read from `.clewrc.json` at the project root.
 It declares how ids are formed, the lenses the project uses, and where each kind of artifact lives.
 It is version-controlled and shared with the team through git, alongside the state.
 Its shape grows only by adding attributes or sections; existing ones are never changed in place.
@@ -24,7 +24,7 @@ The set of configured prefixes is the single source of truth for id validity, so
 | `layout.stories` | `{ dir: String, prefix: String }` | Where stories live and their id prefix. Defaults to `{ "docs/spec/stories", "STR" }`. |
 | `layout.derivedSpecs` | `{ dir: String }` | Where derived specs live; their prefixes are the `lenses` ids. Defaults to `docs/spec/derived-specs`. |
 | `layout.drafts` | `{ dir: String }` | Where unapproved drafts live (mirrors the spec tree). Defaults to `docs/spec/drafts`. |
-| `layout.state` | `{ file: String }` | The StateStore file (CON-001). Defaults to `.ariadne/state.json`. |
+| `layout.state` | `{ file: String }` | The StateStore file (CON-001). Defaults to `.clew/state.json`. |
 | `generators` | `List<{ type: String, outputDir?: String }>` | The language generators to run; each declares its target-language `type` and the directory it writes into, relative to the project root (SW-014). A generator's `outputDir` defaults to that generator's idiomatic location. Optional; with none configured, nothing is generated. |
 | `specSets` | `List<{ name: String, pattern?: String, catchAll?: Boolean }>` | Named spec sets, each matched by a regular expression over the spec's filename; one symbol set is generated per set (SW-015). Optional; with none configured, the default is one set per lens. One set may set `catchAll` to collect otherwise-unmatched specs, in which case it needs no pattern (CON-013). |
 | `ignore` | `List<String>` | Regular expressions over the spec's filename; a matching spec is excluded from every spec set and produces no symbol (CON-013). Optional. |
@@ -39,7 +39,7 @@ Anchoring the resolved-configuration code type to this id makes a divergence bet
 
 **Verification Description**
 The resolved-configuration type in the core carries the anchor to this id; removing or renaming the id fails the type-check.
-Reading a `.ariadnerc.json` yields each attribute above, and a missing file or attribute resolves to the documented default.
+Reading a `.clewrc.json` yields each attribute above, and a missing file or attribute resolves to the documented default.
 
 ## Relations
 

@@ -6,7 +6,7 @@ import { readConfiguredPrefixes, readLayout } from "../config/config.js";
 import { withState } from "./state.js";
 
 export type InitOptions = {
-  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
   /** Path to the state file. Defaults to the StateStore default. */
   stateFile?: string;
@@ -27,12 +27,7 @@ export type InitResult = {
 };
 
 /** Directories never descended into while discovering artifacts. */
-const IGNORED_DIRECTORIES = new Set([
-  ".git",
-  ".ariadne",
-  "node_modules",
-  "dist",
-]);
+const IGNORED_DIRECTORIES = new Set([".git", ".clew", "node_modules", "dist"]);
 
 /**
  * A bound id at the start of an artifact filename: an uppercase prefix and a

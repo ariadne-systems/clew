@@ -1,7 +1,7 @@
 import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 import {
-  AriadneError,
+  ClewError,
   ErrorCode,
   mint,
   mintTemporary,
@@ -58,13 +58,13 @@ export const registerMint: (program: Command) => void = realizes(
           await requireConfig();
           const requestedCount = Number(count);
           if (!Number.isInteger(requestedCount)) {
-            throw new AriadneError(
+            throw new ClewError(
               ErrorCode.INVALID_COUNT,
               `count must be a whole number, got "${count}".`,
             );
           }
           if (authorWithoutTemporary(options)) {
-            throw new AriadneError(
+            throw new ClewError(
               ErrorCode.INVALID_OPTIONS,
               "`--as` applies only to temporary minting; pass `--tmp`, or drop `--as`.",
             );

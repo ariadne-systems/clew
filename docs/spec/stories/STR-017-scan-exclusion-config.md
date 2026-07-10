@@ -1,11 +1,11 @@
 **Title**
-Add configurable scan exclusion — `exclude` and `unexclude` in `.ariadnerc.json`
+Add configurable scan exclusion — `exclude` and `unexclude` in `.clewrc.json`
 
 **Business Value**
 The scan finds anchors in *all* the project's source, but not every part of a codebase carries real traceability intent.
 A project's own test infrastructure or fixtures can contain marker-shaped code that should not count, and a project's source layout can collide with a built-in exclusion (the classic `adapter/out` vs the `out` build directory).
 Letting a project declare what to exclude — and what to re-include — keeps the located set, and therefore coverage, faithful to what the project actually means to trace.
-These keys are also the shared `.ariadnerc.json` configuration contract (ADR-0005 D6), so a project's exclusion config is portable across the tools that read it.
+These keys are also the shared `.clewrc.json` configuration contract (ADR-0005 D6), so a project's exclusion config is portable across the tools that read it.
 
 **Problem / Context**
 STR-016 gave the scan a fixed set of **built-in** exclusions (CON-016): dependency, build, and generator-output directories, matched by directory name.
@@ -14,7 +14,7 @@ A project cannot exclude anything of its own (a test tree, generated fixtures) a
 And name-based matching is too blunt: a built-in like `out` silently drops a source directory named `out` wherever it appears — the failure that root-relative globs prevent.
 
 **Solution Approach**
-Read two arrays from `.ariadnerc.json` — `exclude` and `unexclude` — each a list of **repository-root-relative globs**, and apply them in the scan alongside the built-in defaults.
+Read two arrays from `.clewrc.json` — `exclude` and `unexclude` — each a list of **repository-root-relative globs**, and apply them in the scan alongside the built-in defaults.
 Glob semantics are explicit: paths are matched relative to the project root with forward slashes, a bare segment matches only at the root (`out` is `<root>/out`, not `<root>/foo/out`), and a `**/` prefix matches at any depth (`**/node_modules`).
 The built-in defaults from CON-016 are re-expressed as such globs, so they stop over-matching by name.
 Precedence is gitignore-style: for each candidate path, a user `exclude` match wins (the path is skipped); otherwise an `unexclude` match re-includes it (overriding a built-in default); otherwise a built-in default match skips it; otherwise it is scanned.
@@ -40,7 +40,7 @@ An invalid glob fails the scan fast, with a stable error naming the pattern: sil
 - Vitest covers: a user exclusion; an unexclude overriding a default; user-exclude-beats-unexclude; root-only vs `**/` depth (the `adapter/out` case); platform-normalized matching; an omitted section; and an invalid pattern failing the scan fast.
 
 **Decisions** (resolved by ADR-0005)
-- The config keys are `exclude` / `unexclude`, the shared `.ariadnerc.json` configuration contract (ADR-0005 D6).
+- The config keys are `exclude` / `unexclude`, the shared `.clewrc.json` configuration contract (ADR-0005 D6).
 - Precedence is gitignore-style with the user `exclude` absolute, so a project's explicit veto always wins and `unexclude` is only a tool against the built-in defaults.
 - Defaults become root-relative globs, fixing the name-collision blunt-matching of CON-016.
 - Exclusion is applied **before** discovery, so excluded code never reaches a generator's scan.
@@ -49,8 +49,8 @@ An invalid glob fails the scan fast, with a stable error naming the pattern: sil
 **Out of scope**
 - Coverage, the waiver list, and enforcement (later stories; ADR-0005 D4/D5) — exclusion only shapes which anchors exist, not what coverage requires.
 - Per-generator or per-language exclusion — exclusion is language-neutral, decided in the core before files reach a generator.
-- Other `.ariadnerc.json` sections beyond the scan's exclusion config — not part of clew's scan.
-- A `.gitignore`-style ignore *file*; exclusions live in `.ariadnerc.json`, the one config (ADR-0005 D6).
+- Other `.clewrc.json` sections beyond the scan's exclusion config — not part of clew's scan.
+- A `.gitignore`-style ignore *file*; exclusions live in `.clewrc.json`, the one config (ADR-0005 D6).
 
 ## Relations
 
@@ -65,7 +65,7 @@ An invalid glob fails the scan fast, with a stable error naming the pattern: sil
 
 - Refines [CON-016 — The scan excludes dependency and build directories by default](../derived-specs/CON-016-scan-builtin-exclusions.md): the built-in defaults become root-relative globs and the lowest precedence layer, which `unexclude` can override.
 - Extends [SW-022 — Scan the code into the set of anchor locations](../derived-specs/SW-022-scan-code-into-anchor-locations.md): the core walk gains the exclusion filter, applied before discovery.
-- Sibling of [SW-009 — Read the configuration](../derived-specs/SW-009-read-configuration.md): `exclude` / `unexclude` are read from the same `.ariadnerc.json`.
+- Sibling of [SW-009 — Read the configuration](../derived-specs/SW-009-read-configuration.md): `exclude` / `unexclude` are read from the same `.clewrc.json`.
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration) gains `exclude` and `unexclude` attributes (merged on promotion).
 - Builds on [STR-016 — the anchor scan](STR-016-anchor-scan.md), whose built-in exclusions (CON-016) this story makes configurable.
 

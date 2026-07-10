@@ -42,7 +42,7 @@ The tool runs fully locally when the spec lives in the repo.
 A central authority is needed only when identity must be guaranteed across a boundary a per-repo file cannot cover, such as parallel branches with heavy minting or multiple repos against one source.
 
 Running locally, the project's configuration and its first-party generators are trusted input, the way a build tool trusts its own config: the tool does not sandbox where they may write.
-Defending against a hostile `.ariadnerc.json` is a non-goal — a hostile checkout is already a compromise before the tool runs.
+Defending against a hostile `.clewrc.json` is a non-goal — a hostile checkout is already a compromise before the tool runs.
 The one write guard the core keeps is against a *buggy* generator: a generated filename must be a flat name in the output directory, never a nested or escaping path.
 
 ## Views
@@ -99,7 +99,7 @@ flowchart TB
         mintc["mint · id strategies (sequential / opaque)"]
         initc["init · reconcile"]
         store["StateStore — lock + atomic write"]
-        cfg["configuration (.ariadnerc.json)"]
+        cfg["configuration (.clewrc.json)"]
         engine["traceables · ids · index · hashing · resolution · scanner"]
         iface{{"generator interface"}}
         registry["generators/registry — binds the in-tree generators"]

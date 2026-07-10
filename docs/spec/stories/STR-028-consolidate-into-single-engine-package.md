@@ -19,7 +19,7 @@ The specs that encoded D9 have already been revised for this: SYS-008, ARCH-003,
 - Consolidate `gen-java`, `gen-typescript`, and the CLI into a single package, `@ariadne-thread/clew`.
 The generators become in-tree modules; the CLI becomes the package's presentation layer and bin.
 `@ariadne-thread/core` retires as a package name — the surviving package takes the product name.
-The bin stays `clew` / `ariadne`; `@ariadne-thread/trace` stays a separate package, because it holds generated output and folding it into the code that generates it tangles a bootstrap.
+The bin stays `clew`; `@ariadne-thread/trace` stays a separate package, because it holds generated output and folding it into the code that generates it tangles a bootstrap.
 - Keep the `Generator` interface (ARCH-003 / ARCH-004 / ARCH-006) exactly as it is, now an internal boundary rather than a package one.
 The engine's generation-agnostic logic — generation, scanning, coverage, check — still reaches every generator through the interface, never into a concrete generator's internals.
 The concrete generators are bound at a single registry point; that one file is where the engine names them, and nowhere else.
@@ -29,7 +29,7 @@ The interface being preserved keeps the future path — a config-named dynamic i
 - The change is behaviour-preserving: generator output must not move.
 
 **Acceptance Criteria**
-- The workspace has two packages: `@ariadne-thread/clew` (engine, generators, and the `clew` / `ariadne` bin) and `@ariadne-thread/trace`; `core`, `cli`, `gen-java`, and `gen-typescript` no longer exist as packages.
+- The workspace has two packages: `@ariadne-thread/clew` (engine, generators, and the `clew` bin) and `@ariadne-thread/trace`; `core`, `cli`, `gen-java`, and `gen-typescript` no longer exist as packages.
 - The `Generator` interface is unchanged, and the generation-agnostic logic reaches generators only through it; the concrete generators are bound at a single registry point.
 - Adding a target language is a new in-tree generator implementing the contract plus one registration, with no other change to the engine.
 - `clew spec`, `clew scan`, and `clew coverage` behave as before; regenerating this repo's own traceables (`clew spec`) produces no diff — the TypeScript output is byte-identical and every existing anchor still resolves.

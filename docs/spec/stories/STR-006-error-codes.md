@@ -13,7 +13,7 @@ Once the tool is open-sourced, the message text becomes a de-facto API: any cons
 There is no stable, rewording-proof way to identify a failure.
 
 **Solution Approach**
-Introduce a typed error in core — `AriadneError` — that carries a stable `code` alongside its human-readable message (ARCH-002).
+Introduce a typed error in core — `ClewError` — that carries a stable `code` alongside its human-readable message (ARCH-002).
 Domain errors originate in core and carry their code; the CLI reports failures as `error[E_INVALID_COUNT]: <message>` on stderr and exits non-zero (SW-004), so the code is the contract and the message stays free to improve.
 Codes are mnemonic, uppercase strings (for example `E_INVALID_COUNT`), minted only as real error conditions arise — never as an upfront taxonomy and never as numeric ranges.
 Each released code is stable: never reused for a different condition and never renamed (CON-006); the set grows additively, with deprecation rather than mutation.

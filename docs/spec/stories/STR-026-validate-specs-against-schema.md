@@ -12,7 +12,7 @@ The fields a spec must carry (`Title`, `Description`, `Rationale`, …) are conv
 And the structure an adopter wants differs from this project's — baking this project's fields into clew would force every adopter onto the same template.
 
 **Solution Approach**
-- Each document type (`story`, `derived-spec`) has a **schema** — a small, clew-specific shape (not JSON Schema) authored in **YAML** and referenced per type from `.ariadnerc.json`, so it is swappable and an adopter can comment it.
+- Each document type (`story`, `derived-spec`) has a **schema** — a small, clew-specific shape (not JSON Schema) authored in **YAML** and referenced per type from `.clewrc.json`, so it is swappable and an adopter can comment it.
 - Before clew uses a schema, it **validates the schema itself** against clew's own minimum contract — a well-formed shape that does not reach into the pinned core — and refuses a schema that fails, so a malformed schema fails *at the schema*, not mid-scan.
 - clew then validates each document against its schema **when it reads it** (on scan), at the same point as the existing status validation.
 - The schema is split. clew **pins only the parts it mechanically reads** — the id form (a configured prefix and a number), that ids are unique, the `**Status**` grammar and value set, and that `## Relations` links resolve — because clew depends on each, and enforces them **in code**, not from the project schema. Everything else — which `**Bold label**` fields a document must carry, and their enums — is **project-defined** in the YAML, so an adopter brings its own template. clew validates `pinned-core ∪ project-schema`.
@@ -21,7 +21,7 @@ And the structure an adopter wants differs from this project's — baking this p
 **Dependency** (justified per 004)
 This adds one library — a YAML parser (`yaml`); clew parses only JSON today.
 A schema is a hand-authored contract an adopter reads and maintains, and YAML's comments and low punctuation suit that far better than JSON.
-`.ariadnerc.json` stays JSON (machine settings); the schemas are YAML (authored contracts).
+`.clewrc.json` stays JSON (machine settings); the schemas are YAML (authored contracts).
 004 gains `yaml` on implementation.
 
 **Acceptance Criteria**

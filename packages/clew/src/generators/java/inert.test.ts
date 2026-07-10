@@ -33,7 +33,7 @@ describe("generated Java output", () => {
     test("is inert: discovery and comment detection find nothing in it", async () => {
       const generator = createJavaGenerator();
       const files = await generator.generate(SPEC_SETS, {
-        outputDir: "src/main/java/ariadne/traceables",
+        outputDir: "src/main/java/clew/traceables",
       });
       const sources: SourceFile[] = files
         .filter((file) => file.path.endsWith(".java"))

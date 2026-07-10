@@ -1,6 +1,6 @@
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Lens, SpecSetMatcher } from "../config/config.js";
-import { AriadneError, ErrorCode } from "../errors.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import { escapeRegExp } from "../text/escape-regexp.js";
 import type { ScannedSpec, SpecSet } from "./generator.js";
 
@@ -96,7 +96,7 @@ const resolveSet = realizes(
     );
     if (matched.length > 1) {
       const names = matched.map((matcher) => matcher.name).join(", ");
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.SPEC_SET_OVERLAP,
         `Spec ${spec.id} (${spec.filename}) matches more than one spec set: ${names}. Adjust the patterns so each spec matches exactly one set.`,
       );
@@ -108,7 +108,7 @@ const resolveSet = realizes(
     if (catchAllName !== undefined) {
       return catchAllName;
     }
-    throw new AriadneError(
+    throw new ClewError(
       ErrorCode.SPEC_SET_UNMATCHED,
       `Spec ${spec.id} (${spec.filename}) matches no spec set. Add a matching set, an \`ignore\` pattern, or a catch-all set.`,
     );

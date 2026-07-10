@@ -1,5 +1,5 @@
 **Title**
-Add an `ariadne promote` command that finalizes reviewed drafts into the spec tree
+Add an `clew promote` command that finalizes reviewed drafts into the spec tree
 
 **Business Value**
 Promotion has two halves: integrating a draft into the corpus (judgment) and finalizing it (mechanics — bind a real id, replace its temporary id everywhere, move it into place).
@@ -12,7 +12,7 @@ There is no command for finalize, so the agent performs it by hand each time: mi
 This is mechanical and deterministic, yet it is re-derived ad hoc every promotion and is the step most likely to break — for example forgetting that a temporary id is also referenced from a spec promoted earlier, or from a draft not promoted in the same batch.
 
 **Solution Approach**
-Add `ariadne promote`.
+Add `clew promote`.
 Given the drafts to finalize — the pending drafts in the configured drafts location, or specific ones named — for each draft it:
 - **binds** a real id by minting the draft's lens (the temporary id's prefix) without `--tmp`, which advances the state;
 - **substitutes** every resolved temporary id project-wide: every occurrence of that exact id across the spec tree and the drafts location is replaced with its bound id — in the promoted draft's body and filename, in already-promoted specs and the domain model, and in any other unpromoted draft that referenced it;
@@ -27,10 +27,10 @@ The command does only the mechanical finalize; the integration reasoning and any
 - New `SW` spec — finalize in core: bind each draft's id, substitute its temporary id project-wide, and move it into the layout.
 - New `CON` spec — after a successful promote, no occurrence of a promoted draft's temporary id remains anywhere in the project (the substitution is exhaustive).
 - Reuses and updates `CON-011` — a command requires a configuration; its enumeration (today `mint`, `init`) is generalized to also cover `spec` (which already requires config) and `promote`, so it stops being a stale list.
-- Updates the `clew-promote` skill — its Finalize section delegates the mechanical steps to `ariadne promote` instead of describing them as manual edits; the Integrate section is unchanged.
+- Updates the `clew-promote` skill — its Finalize section delegates the mechanical steps to `clew promote` instead of describing them as manual edits; the Integrate section is unchanged.
 
 **Acceptance Criteria**
-- `ariadne promote` binds a real id for each named (or pending) draft by minting the draft's lens — the temporary id's prefix — advancing the state.
+- `clew promote` binds a real id for each named (or pending) draft by minting the draft's lens — the temporary id's prefix — advancing the state.
 - Every occurrence of each resolved temporary id is replaced project-wide, including references from an already-promoted spec and from an unpromoted draft; no occurrence of the temporary id remains after the run.
 - Each draft file is moved into its configured location with its filename updated to the bound id.
 - The command reports each temporary-id → bound-id mapping and that the state advanced.
@@ -46,7 +46,7 @@ The command does only the mechanical finalize; the integration reasoning and any
 
 **Decisions** (resolved)
 - **Entity drafts** — file-based only. The command finalizes stories and derived specs (file move + rename); merging an entity draft into `domain-model.md` is a content merge, left out of the first cut (manual, or a follow-on). Keeps the command fully deterministic.
-- **Draft selection** — promote-all by default, named optional. `ariadne promote` with no arguments finalizes all pending drafts; `ariadne promote <id|path>…` finalizes only the named ones. The skill decides which drafts are integration-ready and passes them.
+- **Draft selection** — promote-all by default, named optional. `clew promote` with no arguments finalizes all pending drafts; `clew promote <id|path>…` finalizes only the named ones. The skill decides which drafts are integration-ready and passes them.
 - **Substitution scope** — across the configured spec locations (stories, derived specs, the domain model) and the drafts location, the only places a temporary id can appear. Code is not scanned; temporary ids never appear there.
 - **Failure semantics** — bind all ids first, then substitute, then move, failing fast with a clear error. Minting advances state irreversibly, so a later failure leaves the bound ids spent; that is acceptable because ids are cheap and never reused (CON-002), not a transactional rollback.
 

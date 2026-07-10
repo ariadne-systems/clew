@@ -23,7 +23,7 @@ A prefix never seen before is created automatically, with no prior registration.
 
 **Concerns**
 
-- [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
+- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)
 
 **Realizes**
 

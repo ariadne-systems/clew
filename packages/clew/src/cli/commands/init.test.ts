@@ -14,11 +14,11 @@ afterEach(() => {
 });
 
 // Creates an isolated project with an artifact tree under docs/spec and switches
-// into it, so `init` discovers ids there and writes .ariadne/state.json locally.
+// into it, so `init` discovers ids there and writes .clew/state.json locally.
 async function setupProjectDir(idFilenames: string[]): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-init-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-cli-init-"));
   await writeFile(
-    join(dir, ".ariadnerc.json"),
+    join(dir, ".clewrc.json"),
     JSON.stringify({ idGeneration: { mode: "sequential", padding: 3 } }),
     "utf8",
   );
@@ -42,8 +42,8 @@ function captureStdout(): () => string {
   return () => chunks.join("");
 }
 
-async function runAriadne(...args: string[]): Promise<void> {
-  await buildProgram().parseAsync(["node", "ariadne", ...args]);
+async function runClew(...args: string[]): Promise<void> {
+  await buildProgram().parseAsync(["node", "clew", ...args]);
 }
 
 describe("init output", () => {
@@ -52,12 +52,12 @@ describe("init output", () => {
       const dir = await setupProjectDir(["SW-005-a.md", "CON-008-b.md"]);
       const stdout = captureStdout();
 
-      await runAriadne("init");
+      await runClew("init");
 
       expect(stdout()).toContain("CON: 0 -> 8");
       expect(stdout()).toContain("SW: 0 -> 5");
       const state = JSON.parse(
-        await readFile(join(dir, ".ariadne", "state.json"), "utf8"),
+        await readFile(join(dir, ".clew", "state.json"), "utf8"),
       ) as { sequences: Record<string, number> };
       expect(state.sequences).toEqual({ SW: 5, CON: 8 });
     });
@@ -65,16 +65,16 @@ describe("init output", () => {
     test("a second run changes nothing and reports it", async () => {
       const dir = await setupProjectDir(["SW-005-a.md"]);
       const first = captureStdout();
-      await runAriadne("init");
+      await runClew("init");
       expect(first()).toContain("SW: 0 -> 5");
 
       vi.restoreAllMocks();
       const second = captureStdout();
-      await runAriadne("init");
+      await runClew("init");
 
       expect(second()).toContain("nothing changed");
       const state = JSON.parse(
-        await readFile(join(dir, ".ariadne", "state.json"), "utf8"),
+        await readFile(join(dir, ".clew", "state.json"), "utf8"),
       ) as { sequences: Record<string, number> };
       expect(state.sequences).toEqual({ SW: 5 });
     });
@@ -86,16 +86,14 @@ describe("init invalid invocation", () => {
     test("an extra positional argument exits non-zero", () => {
       const program = buildProgram().exitOverride();
 
-      expect(() =>
-        program.parse(["node", "ariadne", "init", "extra"]),
-      ).toThrow();
+      expect(() => program.parse(["node", "clew", "init", "extra"])).toThrow();
     });
 
     test("an unknown option exits non-zero", () => {
       const program = buildProgram().exitOverride();
 
       expect(() =>
-        program.parse(["node", "ariadne", "init", "--bogus"]),
+        program.parse(["node", "clew", "init", "--bogus"]),
       ).toThrow();
     });
   });
@@ -104,10 +102,10 @@ describe("init invalid invocation", () => {
 describe("configuration required", () => {
   verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
     test("init fails with code E_NO_CONFIG when no configuration is present", async () => {
-      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-init-noconfig-"));
+      const dir = await mkdtemp(join(tmpdir(), "clew-cli-init-noconfig-"));
       process.chdir(dir);
 
-      await expect(runAriadne("init")).rejects.toMatchObject({
+      await expect(runClew("init")).rejects.toMatchObject({
         code: ErrorCode.NO_CONFIG,
       });
     });

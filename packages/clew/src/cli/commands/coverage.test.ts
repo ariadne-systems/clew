@@ -18,9 +18,9 @@ afterEach(() => {
 // realizes one of them, and a waiver accepting that realized spec's missing test;
 // the other spec, anchored nowhere, stays a genuine gap.
 async function setupProjectDir(): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-coverage-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-cli-coverage-"));
   await writeFile(
-    join(dir, ".ariadnerc.json"),
+    join(dir, ".clewrc.json"),
     JSON.stringify({
       generators: [{ type: "typescript", outputDir: "out-ts" }],
       waivers: [{ id: "SW-001", reason: "verified by acceptance" }],
@@ -60,8 +60,8 @@ function captureStdout(): () => string {
   return () => chunks.join("");
 }
 
-async function runAriadne(...args: string[]): Promise<void> {
-  await buildProgram().parseAsync(["node", "ariadne", ...args]);
+async function runClew(...args: string[]): Promise<void> {
+  await buildProgram().parseAsync(["node", "clew", ...args]);
 }
 
 describe("coverage command", () => {
@@ -72,8 +72,8 @@ describe("coverage command", () => {
 
       // Coverage reads the universe back from the generated trace, so
       // generate it first.
-      await runAriadne("spec");
-      await runAriadne("coverage");
+      await runClew("spec");
+      await runClew("coverage");
 
       const out = stdout();
       expect(out).toContain(
@@ -84,7 +84,7 @@ describe("coverage command", () => {
       expect(out).toContain("SW-001  realized — verified by acceptance");
 
       const result = JSON.parse(
-        await readFile(join(dir, ".ariadne", "coverage.json"), "utf8"),
+        await readFile(join(dir, ".clew", "coverage.json"), "utf8"),
       );
       expect(result).toEqual({
         specs: [
@@ -104,7 +104,7 @@ describe("coverage command", () => {
       const program = buildProgram().exitOverride();
 
       expect(() =>
-        program.parse(["node", "ariadne", "coverage", "extra"]),
+        program.parse(["node", "clew", "coverage", "extra"]),
       ).toThrow();
     });
   });
@@ -113,12 +113,10 @@ describe("coverage command", () => {
 describe("coverage configuration required", () => {
   verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
     test("coverage fails with code E_NO_CONFIG when no configuration is present", async () => {
-      const dir = await mkdtemp(
-        join(tmpdir(), "ariadne-cli-coverage-noconfig-"),
-      );
+      const dir = await mkdtemp(join(tmpdir(), "clew-cli-coverage-noconfig-"));
       process.chdir(dir);
 
-      await expect(runAriadne("coverage")).rejects.toMatchObject({
+      await expect(runClew("coverage")).rejects.toMatchObject({
         code: ErrorCode.NO_CONFIG,
       });
     });

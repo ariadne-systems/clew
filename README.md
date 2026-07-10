@@ -12,7 +12,7 @@ npm under the `@ariadne-thread` scope.
 
 | Package | Name | Role |
 | --- | --- | --- |
-| `packages/clew` | `@ariadne-thread/clew` | The tool: the language-neutral engine (traceables, ids, index, hashing, resolution), the in-tree language generators (Java, TypeScript) behind the generator interface, and the CLI (`clew`, `ariadne`) |
+| `packages/clew` | `@ariadne-thread/clew` | The tool: the language-neutral engine (traceables, ids, index, hashing, resolution), the in-tree language generators (Java, TypeScript) behind the generator interface, and the CLI (`clew`) |
 | `packages/trace` | `@ariadne-thread/trace` | Generated traceables and anchoring utility (clew run on its own specs) |
 
 The engine reaches every generator through the generator interface, binding the concrete in-tree generators at a single registry point (ADR-0007, revising ADR-0001 D9).

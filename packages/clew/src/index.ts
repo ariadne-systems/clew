@@ -39,9 +39,9 @@ export {
 } from "./config/config.js";
 export type { SetupOptions, SetupResult } from "./config/setup.js";
 export { setup } from "./config/setup.js";
-export type { AriadneState, SequenceMap } from "./entities/ariadne-state.js";
-export type { AriadneErrorOptions } from "./errors.js";
-export { AriadneError, ErrorCode } from "./errors.js";
+export type { ClewState, SequenceMap } from "./entities/clew-state.js";
+export type { ClewErrorOptions } from "./errors.js";
+export { ClewError, ErrorCode } from "./errors.js";
 export {
   createGeneratorRegistry,
   resolveBuiltinGenerator,

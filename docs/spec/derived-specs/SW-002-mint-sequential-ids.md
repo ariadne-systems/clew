@@ -21,7 +21,7 @@ The underlying numbers come from the allocator and are never reused.
 
 **Concerns**
 
-- [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
+- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)
 
 **Realizes**
 

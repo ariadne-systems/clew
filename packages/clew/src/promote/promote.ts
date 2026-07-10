@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Layout } from "../config/config.js";
 import { readLayout, readLenses } from "../config/config.js";
-import { AriadneError, ErrorCode } from "../errors.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import {
   type FileWrite,
   TEMP_SUFFIX,
@@ -23,7 +23,7 @@ import { escapeRegExp } from "../text/escape-regexp.js";
 const ALL_DRAFTS = "all";
 
 export type PromoteOptions = {
-  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
   /** Path to the state file. Defaults to the StateStore default. */
   stateFile?: string;
@@ -156,7 +156,7 @@ const resolvePromotionSet: (
     storyPrefix: string,
   ): Promise<DraftFile[]> => {
     if (roots.length === 0) {
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.INVALID_OPTIONS,
         `promote requires at least one draft to promote, or the keyword "${ALL_DRAFTS}".`,
       );
@@ -164,7 +164,7 @@ const resolvePromotionSet: (
     // `all` makes every pending draft a root, so it must stand alone — combining it
     // with named roots would silently discard them.
     if (roots.includes(ALL_DRAFTS) && roots.length > 1) {
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.INVALID_OPTIONS,
         `"${ALL_DRAFTS}" promotes every pending draft and must be the only argument; name drafts, or pass "${ALL_DRAFTS}" alone.`,
       );
@@ -183,7 +183,7 @@ const resolvePromotionSet: (
 function resolveRoot(name: string, pending: readonly DraftFile[]): DraftFile {
   const match = pending.find((draft) => matchesName(draft, name));
   if (match === undefined) {
-    throw new AriadneError(
+    throw new ClewError(
       ErrorCode.DRAFT_NOT_FOUND,
       `No pending draft matches "${name}".`,
     );
@@ -249,9 +249,9 @@ function unresolvedReference(
   draft: DraftFile,
   reference: string,
   byTemporaryId: ReadonlyMap<string, DraftFile>,
-): AriadneError {
+): ClewError {
   const inSet = byTemporaryId.has(reference);
-  return new AriadneError(
+  return new ClewError(
     ErrorCode.UNRESOLVED_REFERENCE,
     `unresolved reference to "${reference}"`,
     {
@@ -291,7 +291,7 @@ function resolveTargetDir(
   if (lensIds.has(prefix)) {
     return layout.derivedSpecs.dir;
   }
-  throw new AriadneError(
+  throw new ClewError(
     ErrorCode.INVALID_TYPE,
     `Draft prefix "${prefix}" is not the story prefix or a configured lens.`,
   );

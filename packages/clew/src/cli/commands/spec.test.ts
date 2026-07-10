@@ -17,9 +17,9 @@ afterEach(() => {
 // generators, then switches into it so `spec` scans there and writes generated
 // files locally.
 async function setupProjectDir(idFilenames: string[]): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-spec-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-cli-spec-"));
   await writeFile(
-    join(dir, ".ariadnerc.json"),
+    join(dir, ".clewrc.json"),
     JSON.stringify({
       generators: [
         { type: "typescript", outputDir: "out-ts" },
@@ -49,8 +49,8 @@ function captureStdout(): () => string {
   return () => chunks.join("");
 }
 
-async function runAriadne(...args: string[]): Promise<void> {
-  await buildProgram().parseAsync(["node", "ariadne", ...args]);
+async function runClew(...args: string[]): Promise<void> {
+  await buildProgram().parseAsync(["node", "clew", ...args]);
 }
 
 describe("spec output", () => {
@@ -64,7 +64,7 @@ describe("spec output", () => {
         const dir = await setupProjectDir(["SW-012-a.md", "CON-012-b.md"]);
         const stdout = captureStdout();
 
-        await runAriadne("spec");
+        await runClew("spec");
 
         expect(stdout()).toContain("Scanned 2 traceables in 2 spec sets.");
         const tsDir = join(dir, "out-ts", "clew");
@@ -89,12 +89,12 @@ describe("spec output", () => {
         const generated = join(dir, "out-ts", "clew", "index.ts");
 
         captureStdout();
-        await runAriadne("spec");
+        await runClew("spec");
         const first = await readFile(generated, "utf8");
 
         vi.restoreAllMocks();
         captureStdout();
-        await runAriadne("spec");
+        await runClew("spec");
         const second = await readFile(generated, "utf8");
 
         expect(second).toBe(first);
@@ -108,16 +108,14 @@ describe("spec invalid invocation", () => {
     test("an extra positional argument exits non-zero", () => {
       const program = buildProgram().exitOverride();
 
-      expect(() =>
-        program.parse(["node", "ariadne", "spec", "extra"]),
-      ).toThrow();
+      expect(() => program.parse(["node", "clew", "spec", "extra"])).toThrow();
     });
 
     test("an unknown option exits non-zero", () => {
       const program = buildProgram().exitOverride();
 
       expect(() =>
-        program.parse(["node", "ariadne", "spec", "--bogus"]),
+        program.parse(["node", "clew", "spec", "--bogus"]),
       ).toThrow();
     });
   });
@@ -126,10 +124,10 @@ describe("spec invalid invocation", () => {
 describe("configuration required", () => {
   verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
     test("spec fails with code E_NO_CONFIG when no configuration is present", async () => {
-      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-spec-noconfig-"));
+      const dir = await mkdtemp(join(tmpdir(), "clew-cli-spec-noconfig-"));
       process.chdir(dir);
 
-      await expect(runAriadne("spec")).rejects.toMatchObject({
+      await expect(runClew("spec")).rejects.toMatchObject({
         code: ErrorCode.NO_CONFIG,
       });
     });

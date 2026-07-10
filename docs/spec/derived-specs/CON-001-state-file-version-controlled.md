@@ -21,4 +21,4 @@ The file is tracked by git, and nothing outside it holds authoritative state.
 
 **Concerns**
 
-- [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
+- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)

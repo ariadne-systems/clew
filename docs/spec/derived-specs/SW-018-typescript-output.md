@@ -6,7 +6,7 @@ The TypeScript generator emits per-set string enums and an anchoring helper modu
 **Status**: active
 
 **Description**
-For the TypeScript target, the generator emits a self-contained, tool-owned folder into its configured output directory (the generator's `outputDir`, ENT-002), which defaults to `src/ariadne/traceables` — under `src`, where the compiled, imported TypeScript source lives, since the generated files are part of the codebase.
+For the TypeScript target, the generator emits a self-contained, tool-owned folder into its configured output directory (the generator's `outputDir`, ENT-002), which defaults to `src/clew/traceables` — under `src`, where the compiled, imported TypeScript source lives, since the generated files are part of the codebase.
 For each spec set it emits one file — with a generated, do-not-edit banner carrying machine-readable `@ariadne-thread` provenance annotations (the homepage, the connector type `req-as-code`, the generator type, and the spec set) — declaring a string enum whose members are that set's traceables: each member's name is derived from the spec's filename, so it carries the id and slug and reads as documentation at the anchor site, and its value is the spec id, for example `SW_002_MINT_SEQUENTIAL_IDS = "SW-002"`.
 A member whose spec is `deprecated` (SW-014) carries a `/** @deprecated */` JSDoc comment, which `tsc` and editors surface as a deprecation on every anchor to it — a soft signal that the spec is retiring, without removing the member and breaking the build.
 It also emits a helper module that re-exports the per-set enums, unions them into a combined `TraceableId`, and exports the anchoring utility, each marker constrained to `TraceableId`.

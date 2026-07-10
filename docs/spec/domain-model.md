@@ -6,21 +6,21 @@ This page is a non-normative view — like `architecture.md`, it carries no boun
 
 ## Entities
 
-### ENT-001 AriadneState
+### ENT-001 ClewState
 
 The tool's persistent, version-controlled state for a project.
-Specified in [ENT-001 — AriadneState](derived-specs/ENT-001-ariadne-state.md).
+Specified in [ENT-001 — ClewState](derived-specs/ENT-001-clew-state.md).
 
 ### ENT-002 Configuration
 
-The tool's per-project self-description, read from `.ariadnerc.json`.
+The tool's per-project self-description, read from `.clewrc.json`.
 Specified in [ENT-002 — Configuration](derived-specs/ENT-002-configuration.md).
 
 ## View
 
 ```mermaid
 classDiagram
-    class AriadneState {
+    class ClewState {
         +Map~Prefix, Integer~ sequences
     }
     class Configuration {

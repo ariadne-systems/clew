@@ -1,6 +1,6 @@
 import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { AriadneError, ErrorCode } from "../errors.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import type { ExclusionInput, ExclusionRules } from "./exclusions.js";
 import {
   compileExclusionRules,
@@ -108,11 +108,11 @@ describe("pattern compilation", () => {
       } catch (error) {
         caught = error;
       }
-      expect(caught).toBeInstanceOf(AriadneError);
-      expect((caught as AriadneError).code).toBe(
+      expect(caught).toBeInstanceOf(ClewError);
+      expect((caught as ClewError).code).toBe(
         ErrorCode.INVALID_EXCLUSION_PATTERN,
       );
-      expect((caught as AriadneError).message).toContain("[unterminated");
+      expect((caught as ClewError).message).toContain("[unterminated");
     });
 
     test("a well-formed pattern that matches nothing is accepted as a no-op", () => {

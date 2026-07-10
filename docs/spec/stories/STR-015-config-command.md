@@ -3,7 +3,7 @@ Add a `config` command that prints the resolved project configuration
 
 **Business Value**
 Every skill and command already needs the project's *resolved* configuration — the lenses, the valid id prefixes, where artifacts live, and where each generator writes — yet that resolved view exists nowhere a caller can simply read.
-`.ariadnerc.json` is usually partial, so the resolved configuration is the file plus the tool's defaults and derivations; today each skill re-reads the file and re-applies those defaults itself, duplicating the resolution and drifting from it when a default changes.
+`.clewrc.json` is usually partial, so the resolved configuration is the file plus the tool's defaults and derivations; today each skill re-reads the file and re-applies those defaults itself, duplicating the resolution and drifting from it when a default changes.
 A `config` command lets the tool answer "what is this project's resolved configuration?" in one place, so authoring skills and humans stop re-deriving it.
 
 **Problem / Context**
@@ -13,7 +13,7 @@ Several authoring skills each do exactly that, by hand, against a config shape t
 There is no command that exposes the resolved view, and `spec` — which does print each generator's resolved output directory — only does so as a side effect of regenerating.
 
 **Solution Approach**
-Add a read-only `ariadne config` command that prints the project's resolved configuration and changes nothing.
+Add a read-only `clew config` command that prints the project's resolved configuration and changes nothing.
 The command is thin: it requires a configuration (CON-011), builds the generator registry — so a generator's default output directory can be resolved — and delegates to core, which assembles the resolved view from the section readers, the derived prefixes, and each generator's resolved output directory, then prints it; a `--json` form emits the same view machine-readably for an agent.
 Resolving the configuration is a single core behaviour the skills and the command call, rather than logic re-implemented per skill; the command adds no resolution of its own, mirroring how `spec` delegates to core.
 
@@ -23,7 +23,7 @@ Resolving the configuration is a single core behaviour the skills and the comman
 - New `SW` specs for the command surface and the resolution behaviour, and a new `CON` that the command is read-only.
 
 **Acceptance Criteria**
-- `ariadne config` prints the resolved configuration: the lenses, the valid id prefixes, the layout directories and files, and each configured generator with its resolved output directory.
+- `clew config` prints the resolved configuration: the lenses, the valid id prefixes, the layout directories and files, and each configured generator with its resolved output directory.
 - A partial or absent-section configuration still prints the resolved values — the defaults appear, not blanks.
 - `--json` prints the same resolved view as machine-readable JSON.
 - The command writes no file, advances no state, and regenerates nothing.

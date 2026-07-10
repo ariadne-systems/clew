@@ -20,7 +20,7 @@ async function fixture(
   idFilenames: string[],
   seed?: Record<string, number>,
 ): Promise<Fixture> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-init-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-init-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
   const derivedDir = join(dir, "docs", "spec", "derived-specs");
   await mkdir(storiesDir, { recursive: true });
@@ -29,7 +29,7 @@ async function fixture(
     const target = name.startsWith("STR-") ? storiesDir : derivedDir;
     await writeFile(join(target, name), "x", "utf8");
   }
-  const configFile = join(dir, ".ariadnerc.json");
+  const configFile = join(dir, ".clewrc.json");
   await writeFile(
     configFile,
     JSON.stringify({
@@ -41,9 +41,9 @@ async function fixture(
     }),
     "utf8",
   );
-  const stateFile = join(dir, ".ariadne", "state.json");
+  const stateFile = join(dir, ".clew", "state.json");
   if (seed) {
-    await mkdir(join(dir, ".ariadne"), { recursive: true });
+    await mkdir(join(dir, ".clew"), { recursive: true });
     await writeFile(stateFile, JSON.stringify({ sequences: seed }), "utf8");
   }
   return { derivedDir, stateFile, configFile };

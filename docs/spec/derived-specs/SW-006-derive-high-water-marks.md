@@ -23,7 +23,7 @@ A subsequent mint for SW yields SW-006.
 
 **Concerns**
 
-- [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
+- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
 
 **Realizes**

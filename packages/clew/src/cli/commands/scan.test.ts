@@ -16,9 +16,9 @@ afterEach(() => {
 // Creates an isolated project with a configured TypeScript generator and one
 // source file carrying markers, then switches into it so `scan` walks there.
 async function setupProjectDir(): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-scan-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-cli-scan-"));
   await writeFile(
-    join(dir, ".ariadnerc.json"),
+    join(dir, ".clewrc.json"),
     JSON.stringify({
       generators: [{ type: "typescript", outputDir: "out-ts" }],
     }),
@@ -49,8 +49,8 @@ function captureStdout(): () => string {
   return () => chunks.join("");
 }
 
-async function runAriadne(...args: string[]): Promise<void> {
-  await buildProgram().parseAsync(["node", "ariadne", ...args]);
+async function runClew(...args: string[]): Promise<void> {
+  await buildProgram().parseAsync(["node", "clew", ...args]);
 }
 
 describe("scan command", () => {
@@ -59,14 +59,14 @@ describe("scan command", () => {
       const dir = await setupProjectDir();
       const stdout = captureStdout();
 
-      await runAriadne("scan");
+      await runClew("scan");
 
       expect(stdout()).toContain("Found 2 anchors");
       expect(stdout()).toContain("SW-001 realizes src/app.ts:1");
       expect(stdout()).toContain("CON-002 verifies src/app.ts:2");
 
       const index = JSON.parse(
-        await readFile(join(dir, ".ariadne", "locations.json"), "utf8"),
+        await readFile(join(dir, ".clew", "locations.json"), "utf8"),
       );
       expect(index).toEqual({
         locations: [
@@ -79,9 +79,7 @@ describe("scan command", () => {
     test("an extra positional argument exits non-zero", () => {
       const program = buildProgram().exitOverride();
 
-      expect(() =>
-        program.parse(["node", "ariadne", "scan", "extra"]),
-      ).toThrow();
+      expect(() => program.parse(["node", "clew", "scan", "extra"])).toThrow();
     });
   });
 });
@@ -89,10 +87,10 @@ describe("scan command", () => {
 describe("scan configuration required", () => {
   verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
     test("scan fails with code E_NO_CONFIG when no configuration is present", async () => {
-      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-scan-noconfig-"));
+      const dir = await mkdtemp(join(tmpdir(), "clew-cli-scan-noconfig-"));
       process.chdir(dir);
 
-      await expect(runAriadne("scan")).rejects.toMatchObject({
+      await expect(runClew("scan")).rejects.toMatchObject({
         code: ErrorCode.NO_CONFIG,
       });
     });

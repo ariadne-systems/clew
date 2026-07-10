@@ -16,12 +16,12 @@ afterEach(() => {
 });
 
 // Creates an isolated project directory with a known config and switches into
-// it, so the mint command's core defaults (.ariadnerc.json, .ariadne/state.json)
+// it, so the mint command's core defaults (.clewrc.json, .clew/state.json)
 // resolve there rather than against the repository.
 async function setupProjectDir(): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-mint-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-cli-mint-"));
   await writeFile(
-    join(dir, ".ariadnerc.json"),
+    join(dir, ".clewrc.json"),
     JSON.stringify({
       idGeneration: { mode: "sequential", padding: 3 },
     }),
@@ -42,8 +42,8 @@ function captureStdout(): () => string {
   return () => chunks.join("");
 }
 
-async function runAriadne(...args: string[]): Promise<void> {
-  await buildProgram().parseAsync(["node", "ariadne", ...args]);
+async function runClew(...args: string[]): Promise<void> {
+  await buildProgram().parseAsync(["node", "clew", ...args]);
 }
 
 describe("output", () => {
@@ -54,7 +54,7 @@ describe("output", () => {
         await setupProjectDir();
         const stdout = captureStdout();
 
-        await runAriadne("mint", "SW");
+        await runClew("mint", "SW");
 
         expect(stdout()).toBe("SW-001\n");
       });
@@ -63,7 +63,7 @@ describe("output", () => {
         await setupProjectDir();
         const stdout = captureStdout();
 
-        await runAriadne("mint", "SW", "3");
+        await runClew("mint", "SW", "3");
 
         expect(stdout()).toBe("SW-001\nSW-002\nSW-003\n");
       });
@@ -77,7 +77,7 @@ describe("invalid input", () => {
       await setupProjectDir();
       const stdout = captureStdout();
 
-      await expect(runAriadne("mint", "SW", "0")).rejects.toMatchObject({
+      await expect(runClew("mint", "SW", "0")).rejects.toMatchObject({
         code: ErrorCode.INVALID_COUNT,
       });
 
@@ -88,7 +88,7 @@ describe("invalid input", () => {
       await setupProjectDir();
       const stdout = captureStdout();
 
-      await expect(runAriadne("mint", "SW", "abc")).rejects.toMatchObject({
+      await expect(runClew("mint", "SW", "abc")).rejects.toMatchObject({
         code: ErrorCode.INVALID_COUNT,
         message: expect.stringMatching(/count must be a whole number/i),
       });
@@ -100,24 +100,24 @@ describe("invalid input", () => {
       const dir = await setupProjectDir();
       const stdout = captureStdout();
 
-      await expect(runAriadne("mint", "sw")).rejects.toMatchObject({
+      await expect(runClew("mint", "sw")).rejects.toMatchObject({
         code: ErrorCode.INVALID_TYPE,
       });
 
       expect(stdout()).toBe("");
-      expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
+      expect(existsSync(join(dir, ".clew", "state.json"))).toBe(false);
     });
 
     test("--as without --tmp is rejected with code E_INVALID_OPTIONS and nothing is minted", async () => {
       const dir = await setupProjectDir();
       const stdout = captureStdout();
 
-      await expect(
-        runAriadne("mint", "--as", "TS", "SW"),
-      ).rejects.toMatchObject({ code: ErrorCode.INVALID_OPTIONS });
+      await expect(runClew("mint", "--as", "TS", "SW")).rejects.toMatchObject({
+        code: ErrorCode.INVALID_OPTIONS,
+      });
 
       expect(stdout()).toBe("");
-      expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
+      expect(existsSync(join(dir, ".clew", "state.json"))).toBe(false);
     });
   });
 });
@@ -133,7 +133,7 @@ describe("temporary mode", () => {
         await setupProjectDir();
         const stdout = captureStdout();
 
-        await runAriadne("mint", "--tmp", "SW", "3");
+        await runClew("mint", "--tmp", "SW", "3");
 
         expect(stdout()).toBe("SW-TMP-001\nSW-TMP-002\nSW-TMP-003\n");
       });
@@ -142,7 +142,7 @@ describe("temporary mode", () => {
         await setupProjectDir();
         const stdout = captureStdout();
 
-        await runAriadne("mint", "-t", "SW");
+        await runClew("mint", "-t", "SW");
 
         expect(stdout()).toBe("SW-TMP-001\n");
       });
@@ -151,7 +151,7 @@ describe("temporary mode", () => {
         await setupProjectDir();
         const stdout = captureStdout();
 
-        await runAriadne("mint", "--tmp", "--as", "TS", "SW", "2");
+        await runClew("mint", "--tmp", "--as", "TS", "SW", "2");
 
         expect(stdout()).toBe("SW-TMP-TS-001\nSW-TMP-TS-002\n");
       });
@@ -161,7 +161,7 @@ describe("temporary mode", () => {
         vi.stubEnv("CLEW_DRAFT_AUTHOR", "ENV");
         const stdout = captureStdout();
 
-        await runAriadne("mint", "--tmp", "SW");
+        await runClew("mint", "--tmp", "SW");
 
         expect(stdout()).toBe("SW-TMP-ENV-001\n");
       });
@@ -171,7 +171,7 @@ describe("temporary mode", () => {
         vi.stubEnv("CLEW_DRAFT_AUTHOR", "");
         const stdout = captureStdout();
 
-        await runAriadne("mint", "--tmp", "SW");
+        await runClew("mint", "--tmp", "SW");
 
         expect(stdout()).toBe("SW-TMP-001\n");
       });
@@ -180,16 +180,16 @@ describe("temporary mode", () => {
         const dir = await setupProjectDir();
         captureStdout();
 
-        await runAriadne("mint", "-t", "SW", "2");
+        await runClew("mint", "-t", "SW", "2");
 
-        expect(existsSync(join(dir, ".ariadne", "state.json"))).toBe(false);
+        expect(existsSync(join(dir, ".clew", "state.json"))).toBe(false);
       });
 
       test("a malformed type is rejected with code E_INVALID_TYPE in temporary mode and nothing is minted", async () => {
         await setupProjectDir();
         const stdout = captureStdout();
 
-        await expect(runAriadne("mint", "-t", "sw")).rejects.toMatchObject({
+        await expect(runClew("mint", "-t", "sw")).rejects.toMatchObject({
           code: ErrorCode.INVALID_TYPE,
         });
 
@@ -202,11 +202,11 @@ describe("temporary mode", () => {
 describe("configuration required", () => {
   verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
     test("mint fails with code E_NO_CONFIG when no configuration is present", async () => {
-      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-mint-noconfig-"));
+      const dir = await mkdtemp(join(tmpdir(), "clew-cli-mint-noconfig-"));
       process.chdir(dir);
       const stdout = captureStdout();
 
-      await expect(runAriadne("mint", "SW")).rejects.toMatchObject({
+      await expect(runClew("mint", "SW")).rejects.toMatchObject({
         code: ErrorCode.NO_CONFIG,
       });
 

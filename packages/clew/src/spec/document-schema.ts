@@ -5,7 +5,7 @@ import {
   SwTraceables,
   SysTraceables,
 } from "@ariadne-thread/trace";
-import { AriadneError, ErrorCode } from "../errors.js";
+import { ClewError, ErrorCode } from "../errors.js";
 
 /** How a project-field violation is treated: `warn` reports without stopping, `fail` rejects. */
 export type SchemaSeverity = "warn" | "fail";
@@ -188,15 +188,11 @@ function rejectUnknownKeys(
   }
 }
 
-function invalidSchema(location: string, reason: string): AriadneError {
-  return new AriadneError(
-    ErrorCode.INVALID_SCHEMA,
-    `invalid schema: ${reason}`,
-    {
-      location,
-      help: "a schema may set only `onError` and `fields`; it cannot redefine clew's id form or the **Status** values",
-    },
-  );
+function invalidSchema(location: string, reason: string): ClewError {
+  return new ClewError(ErrorCode.INVALID_SCHEMA, `invalid schema: ${reason}`, {
+    location,
+    help: "a schema may set only `onError` and `fields`; it cannot redefine clew's id form or the **Status** values",
+  });
 }
 
 /** A `**Bold label**` field line: the label, and its inline value when written `**Label**: value`. */
@@ -320,7 +316,7 @@ export const splitOnSchemaFailure: (
       (violation) => violation.severity === "fail",
     );
     if (failures.length > 0) {
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.SCHEMA_VIOLATION,
         "document does not conform to its schema",
         {

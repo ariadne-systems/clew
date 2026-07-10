@@ -3,7 +3,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import { readLayout, readLenses } from "../config/config.js";
-import { AriadneError, ErrorCode } from "../errors.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import type { DocumentSchema, DocumentType } from "./document-schema.js";
 import { validateOnLoad } from "./document-schema.js";
 import { loadSchemas } from "./document-schema-loader.js";
@@ -14,17 +14,12 @@ import { SPEC_STATUSES } from "./generator.js";
 type Schemas = ReadonlyMap<DocumentType, DocumentSchema>;
 
 export type ScanOptions = {
-  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
 };
 
 /** Directories never descended into while scanning artifacts. */
-const IGNORED_DIRECTORIES = new Set([
-  ".git",
-  ".ariadne",
-  "node_modules",
-  "dist",
-]);
+const IGNORED_DIRECTORIES = new Set([".git", ".clew", "node_modules", "dist"]);
 
 /**
  * A markdown spec filename: a bound id at the start — an uppercase prefix and a
@@ -125,7 +120,7 @@ const readSpecStatus: (content: string, location: string) => SpecStatus =
         return "planned";
       }
       if (!(SPEC_STATUSES as readonly string[]).includes(value)) {
-        throw new AriadneError(
+        throw new ClewError(
           ErrorCode.INVALID_SPEC_STATUS,
           `unrecognized spec status "${value}"`,
           {
@@ -186,7 +181,7 @@ const recordTraceable: (
         return;
       }
       const [first, second] = [existing.path, filePath].sort();
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.DUPLICATE_SPEC_ID,
         `spec id "${id}" is declared by more than one file`,
         {

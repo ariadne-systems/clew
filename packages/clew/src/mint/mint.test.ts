@@ -18,10 +18,10 @@ async function tempPaths(
   idGeneration?: { mode?: string; padding?: number },
   lenses?: Array<{ id: string; description: string }>,
 ): Promise<Paths> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-mint-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-mint-"));
   const draftsDir = join(dir, "drafts");
   await mkdir(draftsDir, { recursive: true });
-  const configFile = join(dir, ".ariadnerc.json");
+  const configFile = join(dir, ".clewrc.json");
   // Point the drafts location at an isolated dir so temporary minting's
   // per-author scan does not read the real corpus.
   const config: Record<string, unknown> = {

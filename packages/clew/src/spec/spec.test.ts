@@ -20,7 +20,7 @@ async function fixture(
   generators: string[],
   extraConfig: Record<string, unknown> = {},
 ): Promise<Fixture> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-spec-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-spec-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
   const derivedDir = join(dir, "docs", "spec", "derived-specs");
   await mkdir(storiesDir, { recursive: true });
@@ -31,7 +31,7 @@ async function fixture(
     // drops only `planned` specs, which individual tests write explicitly.
     await writeFile(join(target, name), "**Status**: active\n", "utf8");
   }
-  const configFile = join(dir, ".ariadnerc.json");
+  const configFile = join(dir, ".clewrc.json");
   await writeFile(
     configFile,
     JSON.stringify({

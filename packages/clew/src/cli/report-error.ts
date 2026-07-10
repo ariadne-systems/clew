@@ -1,5 +1,5 @@
 import { realizes, SwTraceables } from "@ariadne-thread/trace";
-import { AriadneError } from "../index.js";
+import { ClewError } from "../index.js";
 
 /**
  * Formats a failure for stderr in the compiler-diagnostic convention. A coded
@@ -12,7 +12,7 @@ import { AriadneError } from "../index.js";
 export const formatError: (error: unknown) => string = realizes(
   SwTraceables.SW_004_ERROR_REPORTING,
   (error: unknown): string => {
-    if (error instanceof AriadneError) {
+    if (error instanceof ClewError) {
       const lines = [`error[${error.code}]: ${error.message}`];
       if (error.location !== undefined) {
         lines.push(`  --> ${error.location}`);

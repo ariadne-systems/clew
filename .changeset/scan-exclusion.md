@@ -3,7 +3,7 @@
 "@ariadne-thread/trace": minor
 ---
 
-Add configurable scan exclusion — `exclude` and `unexclude` in `.ariadnerc.json` (STR-017).
+Add configurable scan exclusion — `exclude` and `unexclude` in `.clewrc.json` (STR-017).
 
 The code scan now reads two glob arrays from configuration and applies them alongside the built-in defaults, which become repository-root-relative globs.
 A bare segment matches only at the root, a leading `**` matches at any depth, and matching is case-sensitive — so a source directory whose name collides with a build convention is no longer dropped wherever it appears.

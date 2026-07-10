@@ -7,7 +7,7 @@ import { describe, expect, test } from "vitest";
 import { mint, setup } from "../index.js";
 
 async function tempDir(): Promise<string> {
-  return mkdtemp(join(tmpdir(), "ariadne-setup-"));
+  return mkdtemp(join(tmpdir(), "clew-setup-"));
 }
 
 describe("setup", () => {
@@ -19,7 +19,7 @@ describe("setup", () => {
     () => {
       test("scaffolds the default configuration and layout directories", async () => {
         const dir = await tempDir();
-        const configFile = join(dir, ".ariadnerc.json");
+        const configFile = join(dir, ".clewrc.json");
 
         const result = await setup({ configFile });
 
@@ -46,7 +46,7 @@ describe("setup", () => {
 
       test("never overwrites an existing configuration", async () => {
         const dir = await tempDir();
-        const configFile = join(dir, ".ariadnerc.json");
+        const configFile = join(dir, ".clewrc.json");
         await writeFile(configFile, '{"custom":true}', "utf8");
 
         const result = await setup({ configFile });
@@ -57,8 +57,8 @@ describe("setup", () => {
 
       test("the written configuration round-trips: a default lens mints against it", async () => {
         const dir = await tempDir();
-        const configFile = join(dir, ".ariadnerc.json");
-        const stateFile = join(dir, ".ariadne", "state.json");
+        const configFile = join(dir, ".clewrc.json");
+        const stateFile = join(dir, ".clew", "state.json");
         await setup({ configFile });
 
         const ids = await mint("SW", 1, { configFile, stateFile });

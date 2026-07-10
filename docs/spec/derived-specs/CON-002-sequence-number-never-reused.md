@@ -21,4 +21,4 @@ Discarding in-memory state while keeping the persisted file continues after the 
 
 **Concerns**
 
-- [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
+- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)

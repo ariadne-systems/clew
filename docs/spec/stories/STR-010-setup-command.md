@@ -1,5 +1,5 @@
 **Title**
-Add an `ariadne setup` command and require a configuration before minting
+Add an `clew setup` command and require a configuration before minting
 
 **Business Value**
 The project configuration is otherwise invisible — its defaults live only in the tool's code — and without an explicit setup the user's very first `mint` commits to a lens set they never chose.
@@ -10,8 +10,8 @@ An enforced `setup` makes the first interaction a deliberate moment: the standar
 `init` (STR-008) adopts an *existing* artifact tree; it does not scaffold a new one or guide the choice.
 
 **Solution Approach**
-Add `ariadne setup`: it writes `.ariadnerc.json` with the default lenses and layout (ENT-002), creates the configured layout directories, and prints a short confirmation and next steps.
-Make a configuration required: `mint` and `init` fail when no `.ariadnerc.json` is present, directing the user to run `ariadne setup` first (CON-011).
+Add `clew setup`: it writes `.clewrc.json` with the default lenses and layout (ENT-002), creates the configured layout directories, and prints a short confirmation and next steps.
+Make a configuration required: `mint` and `init` fail when no `.clewrc.json` is present, directing the user to run `clew setup` first (CON-011).
 `setup` never overwrites an existing configuration (CON-010), so it is safe to re-run — and an adopter runs it, edits the lenses to match their existing prefixes, then `init`.
 The requirement is a command-level precondition; the core config readers still default an absent value within a present configuration (SW-009 unchanged). The action is thin and delegates the write to core (SW-011); rich, interactive guidance is the `clew-setup` skill's job, not the command's (ADR-0003).
 
@@ -22,10 +22,10 @@ The requirement is a command-level precondition; the core config readers still d
 - Code: a new `setup` command and core config scaffolding; a config-presence guard shared by `mint` and `init`; a stable error code for the absent-configuration condition (STR-006).
 
 **Acceptance Criteria**
-- `ariadne setup` in a project with no `.ariadnerc.json` writes one containing the default lenses and layout, and creates the configured layout directories.
-- The written configuration round-trips: a subsequent `ariadne mint <LENS>` for a default lens succeeds.
-- Run where a `.ariadnerc.json` already exists, `setup` leaves the file unchanged and reports that a configuration already exists.
-- In a project with no configuration, `ariadne mint` and `ariadne init` fail with an explicit error naming `ariadne setup`, a non-zero exit, and no allocation or change.
+- `clew setup` in a project with no `.clewrc.json` writes one containing the default lenses and layout, and creates the configured layout directories.
+- The written configuration round-trips: a subsequent `clew mint <LENS>` for a default lens succeeds.
+- Run where a `.clewrc.json` already exists, `setup` leaves the file unchanged and reports that a configuration already exists.
+- In a project with no configuration, `clew mint` and `clew init` fail with an explicit error naming `clew setup`, a non-zero exit, and no allocation or change.
 - On success `setup` prints a concise summary and next steps to stdout; an unrecognized argument or option is rejected with a non-zero exit.
 - Vitest covers: scaffolding into an empty project (config + directories created), the no-overwrite behaviour, the round-trip (mint a default lens after setup), and `mint`/`init` failing toward `setup` when no configuration is present.
 

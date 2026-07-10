@@ -7,12 +7,12 @@ Computing those high-water marks by hand from the files is error-prone and is ex
 A command that derives the marks from the artifacts makes bootstrap and recovery a single, reproducible step, and keeps state and artifacts from drifting silently.
 
 **Problem / Context**
-`ariadne mint` (STR-005) is authoritative only when `.ariadne/state.json` already reflects every allocated id.
+`clew mint` (STR-005) is authoritative only when `.clew/state.json` already reflects every allocated id.
 On an existing project, or after the state file is lost or hand-edited, there is no command to establish or restore it; the per-prefix high-water marks must be read off the files by hand.
 This was just done manually to seed STR, SW, CON, ARCH, and NF — which is precisely the drift-prone step the tool should own rather than the user.
 
 **Solution Approach**
-Add an `ariadne init` command that discovers the ids present in the project's artifacts, computes the highest number per prefix, and writes them as the StateStore's high-water marks.
+Add an `clew init` command that discovers the ids present in the project's artifacts, computes the highest number per prefix, and writes them as the StateStore's high-water marks.
 Reconciliation only ever raises a mark to cover a discovered id; it never lowers an existing mark, because a number once allocated is never handed out again (CON-002, CON-009).
 Discovery reads the artifact tree, a stable filesystem facility; the broader code-annotation scanning that the index will use is informative here, not required.
 The command is idempotent: running it again on an unchanged project leaves the state unchanged.

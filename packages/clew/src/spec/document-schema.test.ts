@@ -6,7 +6,7 @@ import {
   verifies,
 } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { AriadneError } from "../errors.js";
+import { ClewError } from "../errors.js";
 import {
   type DocumentSchema,
   type DocumentType,
@@ -48,7 +48,7 @@ describe("schemaFromParsed", () => {
       test("rejects a schema that redefines the id form", () => {
         expect(() =>
           schemaFromParsed({ id: { pattern: "x" } }, "s.yml"),
-        ).toThrow(AriadneError);
+        ).toThrow(ClewError);
       });
 
       test("rejects an enum on the Status field (the value set is clew's)", () => {
@@ -134,9 +134,7 @@ describe("splitOnSchemaFailure", () => {
       const violations = [
         { severity: "fail" as const, field: "Title", message: "missing" },
       ];
-      expect(() => splitOnSchemaFailure(violations, "d.md")).toThrow(
-        AriadneError,
-      );
+      expect(() => splitOnSchemaFailure(violations, "d.md")).toThrow(ClewError);
     });
 
     test("returns warn violations without throwing", () => {
@@ -163,7 +161,7 @@ describe("validateOnLoad", () => {
     test("throws when a derived spec fails its schema", () => {
       expect(() =>
         validateOnLoad("**Lens**: SW\n", "derived-spec", schemas, "SW-001.md"),
-      ).toThrow(AriadneError);
+      ).toThrow(ClewError);
     });
 
     test("a type with no configured schema validates trivially", () => {

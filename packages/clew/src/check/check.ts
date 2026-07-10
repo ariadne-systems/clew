@@ -67,7 +67,7 @@ export type CheckOptions = {
    * none and always run.
    */
   resolveGenerator?: (name: string) => Generator | undefined;
-  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
   /** Project root the code checks walk. Defaults to the config file's directory, else cwd. */
   projectRoot?: string;

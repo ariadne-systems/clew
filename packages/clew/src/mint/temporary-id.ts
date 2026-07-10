@@ -1,5 +1,5 @@
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
-import { AriadneError, ErrorCode } from "../errors.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import { escapeRegExp } from "../text/escape-regexp.js";
 
 /** The reserved infix marking a temporary, unbound id: the `TMP` in `<TYPE>-TMP-[<AUTHOR>-]<NNN>`. */
@@ -14,13 +14,13 @@ export const assertValidAuthor: (author: string) => void = realizes(
   ConTraceables.CON_023_TEMPORARY_AUTHOR_LETTER_LED,
   (author: string): void => {
     if (!AUTHOR_PATTERN.test(author)) {
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.INVALID_AUTHOR,
         `Author "${author}" must be letter-led and uppercase (${AUTHOR_SEGMENT}); a bare number or lower-case author is rejected.`,
       );
     }
     if (author === TEMPORARY_MARKER) {
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.INVALID_AUTHOR,
         `Author "${author}" must not be the reserved "${TEMPORARY_MARKER}" marker.`,
       );

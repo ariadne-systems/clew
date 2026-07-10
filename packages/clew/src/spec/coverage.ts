@@ -66,7 +66,7 @@ export type CoverageResult = {
 };
 
 /** Default location of the written coverage result. */
-export const DEFAULT_COVERAGE_FILE = ".ariadne/coverage.json";
+export const DEFAULT_COVERAGE_FILE = ".clew/coverage.json";
 
 /**
  * Classifies each traceable by whether code **realizes** it and a test
@@ -139,7 +139,7 @@ export type ReadUniverseOptions = {
    * in-tree generator registry; a test injects a fake (ADR-0007).
    */
   resolveGenerator?: (name: string) => Generator | undefined;
-  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
   /** Project root the generator output directories resolve against. Defaults to the cwd. */
   projectRoot?: string;

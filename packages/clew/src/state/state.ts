@@ -2,15 +2,15 @@ import { mkdir, readFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { ConTraceables, NfTraceables, realizes } from "@ariadne-thread/trace";
 import lockfile from "proper-lockfile";
-import type { AriadneState, SequenceMap } from "../entities/ariadne-state.js";
-import { AriadneError, ErrorCode } from "../errors.js";
+import type { ClewState, SequenceMap } from "../entities/clew-state.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import { writeFileAtomic } from "../fs/atomic-write.js";
 
 /** Default location of the committed state file. */
-export const DEFAULT_STATE_FILE = ".ariadne/state.json";
+export const DEFAULT_STATE_FILE = ".clew/state.json";
 
 export type WithStateOptions = {
-  /** Path to the state file. Defaults to `.ariadne/state.json`. */
+  /** Path to the state file. Defaults to `.clew/state.json`. */
   file?: string;
 };
 
@@ -21,7 +21,7 @@ const LOCK_OPTIONS = {
 
 const loadState = realizes(
   ConTraceables.CON_001_STATE_FILE_VERSION_CONTROLLED,
-  async (file: string): Promise<AriadneState> => {
+  async (file: string): Promise<ClewState> => {
     let raw: string;
     try {
       raw = await readFile(file, "utf8");
@@ -45,11 +45,11 @@ const loadState = realizes(
 
 const saveState = realizes(
   NfTraceables.NF_002_ATOMIC_STATE_WRITE,
-  async (file: string, state: AriadneState): Promise<void> => {
+  async (file: string, state: ClewState): Promise<void> => {
     try {
       await writeFileAtomic(file, `${JSON.stringify(state, null, 2)}\n`);
     } catch (error) {
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.STATE_WRITE_FAILED,
         `Failed to write the state file ${file}.`,
         { cause: error },
@@ -65,12 +65,12 @@ const saveState = realizes(
  * If `run` throws, the state is not saved. Sections `run` did not touch are preserved.
  */
 export const withState: <T>(
-  run: (state: AriadneState) => T | Promise<T>,
+  run: (state: ClewState) => T | Promise<T>,
   options?: WithStateOptions,
 ) => Promise<T> = realizes(
   NfTraceables.NF_001_STATE_ACCESS_MUTUALLY_EXCLUSIVE,
   async <T>(
-    run: (state: AriadneState) => T | Promise<T>,
+    run: (state: ClewState) => T | Promise<T>,
     options: WithStateOptions = {},
   ): Promise<T> => {
     const file = options.file ?? DEFAULT_STATE_FILE;

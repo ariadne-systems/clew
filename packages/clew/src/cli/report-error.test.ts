@@ -1,14 +1,11 @@
 import { SwTraceables, verifies } from "@ariadne-thread/trace";
 import { expect, test } from "vitest";
-import { AriadneError, ErrorCode } from "../index.js";
+import { ClewError, ErrorCode } from "../index.js";
 import { formatError } from "./report-error.js";
 
 verifies(SwTraceables.SW_004_ERROR_REPORTING, () => {
   test("a coded error is rendered as error[CODE]: message", () => {
-    const error = new AriadneError(
-      ErrorCode.INVALID_COUNT,
-      "count must be > 0",
-    );
+    const error = new ClewError(ErrorCode.INVALID_COUNT, "count must be > 0");
 
     expect(formatError(error)).toBe(
       "error[E_INVALID_COUNT]: count must be > 0",
@@ -16,7 +13,7 @@ verifies(SwTraceables.SW_004_ERROR_REPORTING, () => {
   });
 
   test("a coded error renders location, note, and help beneath the summary", () => {
-    const error = new AriadneError(
+    const error = new ClewError(
       ErrorCode.INVALID_SPEC_STATUS,
       'unrecognized spec status "actives"',
       {
@@ -37,7 +34,7 @@ verifies(SwTraceables.SW_004_ERROR_REPORTING, () => {
   });
 
   test("each help line renders as its own = help:", () => {
-    const error = new AriadneError(
+    const error = new ClewError(
       ErrorCode.SCHEMA_VIOLATION,
       "document does not conform to its schema",
       {

@@ -33,7 +33,7 @@ Turning the report into a pass/fail — the **gate** — is a separate concern a
 - **Reporting, not enforcement** — A3 computes and reports coverage and always exits 0. Turning it into a pass/fail gate (scope, exit code, ratchet) is a separate later story; calculation and policy have different lifespans.
 - **Universe = the `spec` command's traceables** (SW-013); coverage does not filter by lens.
 - **No transitive coverage** (ADR-0005, as narrowed).
-- **Waivers live in `.ariadnerc.json`** (ENT-002), like `exclude` / `unexclude`.
+- **Waivers live in `.clewrc.json`** (ENT-002), like `exclude` / `unexclude`.
 - **Eligible relations** — `realizes` and `verifies`; not `concerns`.
 
 **Out of scope**

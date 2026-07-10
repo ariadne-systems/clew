@@ -22,7 +22,7 @@ The metaphor fits an agent-derivation tool: you derive specs *through* a lens.
 
 The set of lenses is **project configuration**.
 Each lens is `{ id, description }`: `id` is the former type/prefix (SW, CON, …); `description` is a one-line, human-facing definition of what the lens means.
-This becomes a `lenses` section in `.ariadnerc.json`, an attribute of the Configuration entity (ENT-002).
+This becomes a `lenses` section in `.clewrc.json`, an attribute of the Configuration entity (ENT-002).
 
 The configured lens set is the **single source of truth for valid id prefixes**.
 It drives mint prefix validation — subsuming `idToken.pattern`'s prefix role — and scopes `init` discovery to lens prefixes, so non-lens files such as ADRs are no longer miscounted as ids.
@@ -48,7 +48,7 @@ A `lens` field separate from the id prefix: two sources of truth for one vocabul
 
 A broad but mostly mechanical rename of `Type` to `Lens` across every derived spec and the schema.
 
-`.ariadnerc.json` gains a `lenses` section; the schema's static enums give way to config; `idToken.pattern` is largely subsumed (a valid id is a configured lens followed by a number of the configured width).
+`.clewrc.json` gains a `lenses` section; the schema's static enums give way to config; `idToken.pattern` is largely subsumed (a valid id is a configured lens followed by a number of the configured width).
 
 `init` gains a precise prefix allowlist, fixing the ADR-style false positive flagged in STR-008.
 

@@ -1,5 +1,5 @@
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
-import { AriadneError, ErrorCode } from "../errors.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import { withState } from "../state/state.js";
 import type { IdStrategy } from "./id-strategy.js";
 
@@ -30,7 +30,7 @@ export class SequentialIdStrategy implements IdStrategy {
 
   async mint(type: string, count: number): Promise<string[]> {
     if (!Number.isInteger(count) || count < 1) {
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.INVALID_COUNT,
         `Mint count must be a positive integer, got ${count}.`,
       );

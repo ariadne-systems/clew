@@ -1,12 +1,12 @@
 **Title**
-AriadneState — the tool's persistent, version-controlled state
+ClewState — the tool's persistent, version-controlled state
 
 **Lens**: ENT
 
 **Status**: active
 
 **Description**
-AriadneState is the tool's persistent, version-controlled state for a project.
+ClewState is the tool's persistent, version-controlled state for a project.
 It is the committed record the tool keeps across invocations and shares with the team through git, analogous to a Terraform state file.
 Its shape grows only by adding new sections; existing sections are never changed in place.
 
@@ -21,7 +21,7 @@ Pinning the state as an explicit entity fixes the one shape the StateStore persi
 Anchoring the code type to this id makes a divergence between the documented shape and the persisted shape a compile-time break rather than a silent drift.
 
 **Verification Description**
-The `AriadneState` type in the core owns the `sequences` map and carries the anchor to this id; removing or renaming the id fails the type-check.
+The `ClewState` type in the core owns the `sequences` map and carries the anchor to this id; removing or renaming the id fails the type-check.
 The StateStore round-trips the entity, preserving sections it does not own.
 
 ## Relations

@@ -16,8 +16,8 @@ afterEach(() => {
 // Creates an isolated project with the given configuration and switches into it,
 // so `config` resolves against it.
 async function setupProjectDir(config: unknown): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-config-"));
-  await writeFile(join(dir, ".ariadnerc.json"), JSON.stringify(config), "utf8");
+  const dir = await mkdtemp(join(tmpdir(), "clew-cli-config-"));
+  await writeFile(join(dir, ".clewrc.json"), JSON.stringify(config), "utf8");
   process.chdir(dir);
   return dir;
 }
@@ -33,8 +33,8 @@ function captureStdout(): () => string {
   return () => chunks.join("");
 }
 
-async function runAriadne(...args: string[]): Promise<void> {
-  await buildProgram().parseAsync(["node", "ariadne", ...args]);
+async function runClew(...args: string[]): Promise<void> {
+  await buildProgram().parseAsync(["node", "clew", ...args]);
 }
 
 // The recursive file listing of a directory, sorted, as a snapshot of its state.
@@ -49,14 +49,14 @@ describe("config output", () => {
       await setupProjectDir({ generators: [{ type: "typescript" }] });
       const stdout = captureStdout();
 
-      await runAriadne("config");
+      await runClew("config");
 
       const output = stdout();
       expect(output).toContain("SW:");
       expect(output).toContain("Prefixes:");
       expect(output).toContain("docs/spec/stories");
       // No `outputDir` configured, so the typescript generator's own default shows.
-      expect(output).toContain("typescript -> src/ariadne/traceables");
+      expect(output).toContain("typescript -> src/clew/traceables");
     });
 
     test("--json prints the same resolved view as machine-readable JSON", async () => {
@@ -65,7 +65,7 @@ describe("config output", () => {
       });
       const stdout = captureStdout();
 
-      await runAriadne("config", "--json");
+      await runClew("config", "--json");
 
       const view = JSON.parse(stdout());
       expect(view.lenses).toEqual(
@@ -86,7 +86,7 @@ describe("config invalid invocation", () => {
       const program = buildProgram().exitOverride();
 
       expect(() =>
-        program.parse(["node", "ariadne", "config", "extra"]),
+        program.parse(["node", "clew", "config", "extra"]),
       ).toThrow();
     });
 
@@ -94,7 +94,7 @@ describe("config invalid invocation", () => {
       const program = buildProgram().exitOverride();
 
       expect(() =>
-        program.parse(["node", "ariadne", "config", "--bogus"]),
+        program.parse(["node", "clew", "config", "--bogus"]),
       ).toThrow();
     });
   });
@@ -103,10 +103,10 @@ describe("config invalid invocation", () => {
 describe("configuration required", () => {
   verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
     test("config fails with code E_NO_CONFIG when no configuration is present", async () => {
-      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-config-noconfig-"));
+      const dir = await mkdtemp(join(tmpdir(), "clew-cli-config-noconfig-"));
       process.chdir(dir);
 
-      await expect(runAriadne("config")).rejects.toMatchObject({
+      await expect(runClew("config")).rejects.toMatchObject({
         code: ErrorCode.NO_CONFIG,
       });
     });
@@ -120,16 +120,16 @@ describe("config is read-only", () => {
         generators: [{ type: "typescript", outputDir: "out-ts" }],
       });
       const filesBefore = await listFiles(dir);
-      const configBefore = await readFile(join(dir, ".ariadnerc.json"), "utf8");
+      const configBefore = await readFile(join(dir, ".clewrc.json"), "utf8");
 
       captureStdout();
-      await runAriadne("config");
+      await runClew("config");
       vi.restoreAllMocks();
       captureStdout();
-      await runAriadne("config", "--json");
+      await runClew("config", "--json");
 
       expect(await listFiles(dir)).toEqual(filesBefore);
-      expect(await readFile(join(dir, ".ariadnerc.json"), "utf8")).toBe(
+      expect(await readFile(join(dir, ".clewrc.json"), "utf8")).toBe(
         configBefore,
       );
     });

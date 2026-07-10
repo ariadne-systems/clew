@@ -19,7 +19,7 @@ This document defines runtime and dependency constraints.
 
 | Package | Responsibility |
 | --- | --- |
-| `@ariadne-thread/clew` | The tool: the language-neutral engine (traceables, ids, index, hashing, resolution, state; domain entity types in `clew/src/entities`), the in-tree language generators behind the generator interface (`clew/src/generators`, one per target language), and the CLI presentation layer and bin (`clew`, `ariadne`). |
+| `@ariadne-thread/clew` | The tool: the language-neutral engine (traceables, ids, index, hashing, resolution, state; domain entity types in `clew/src/entities`), the in-tree language generators behind the generator interface (`clew/src/generators`, one per target language), and the CLI presentation layer and bin (`clew`). |
 | `@ariadne-thread/trace` | The generated traceables and anchoring utility, emitted by running clew on its own specs and imported by the code under trace. |
 
 The engine reaches every generator through the generator interface, binding the concrete in-tree generators at a single registry point (`clew/src/generators/registry.ts`); an architecture test enforces that nothing outside `clew/src/generators` names a concrete generator (ADR-0007, revising ADR-0001 D9).
@@ -43,6 +43,6 @@ Runtime:
 
 - commander, picocolors, pino (CLI)
 - proper-lockfile (engine state locking)
-- yaml (engine document-schema parsing) — schemas are hand-authored YAML (`.ariadnerc.json` stays JSON); justified in STR-026.
+- yaml (engine document-schema parsing) — schemas are hand-authored YAML (`.clewrc.json` stays JSON); justified in STR-026.
 
 Do not introduce alternative libraries (for example tsup, ESLint, Prettier, Jest) without explicit justification.

@@ -15,7 +15,7 @@ A command whose purpose is to *describe* the project must not change it; a descr
 Keeping `config` side-effect-free makes it the safe, repeatable way to read the resolved configuration, separate from the commands that act on the project.
 
 **Verification Description**
-Running `ariadne config`, with or without `--json`, creates, modifies, and deletes no file, advances no id state, and triggers no generation.
+Running `clew config`, with or without `--json`, creates, modifies, and deletes no file, advances no id state, and triggers no generation.
 Run twice in succession, the project is byte-for-byte unchanged.
 
 ## Relations

@@ -21,4 +21,4 @@ Many sessions run against the same state produce a result consistent with serial
 
 **Concerns**
 
-- [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
+- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)

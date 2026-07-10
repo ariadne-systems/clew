@@ -1,9 +1,9 @@
 **Title**
-Add an `ariadne spec` command that generates traceables via language-specific generators
+Add an `clew spec` command that generates traceables via language-specific generators
 
 **Business Value**
 The tool's promise is compile-checked traceability, but nothing yet turns a spec into the verifiable symbol that binds code to it.
-`ariadne spec` is that step: it scans the specs for their ids and has the configured language generators materialize each id as a symbol — and the utility files around it — that the target compiler can check, so deleting or renaming a spec breaks the build of the code that references it.
+`clew spec` is that step: it scans the specs for their ids and has the configured language generators materialize each id as a symbol — and the utility files around it — that the target compiler can check, so deleting or renaming a spec breaks the build of the code that references it.
 This is the mechanism the whole approach rests on; without it, ids are just text and the trace is unenforced.
 
 **Problem / Context**
@@ -13,7 +13,7 @@ The generator packages (`gen-java`, `gen-typescript`) are scaffolds, and the gen
 So the forward link — declared in a spec, implemented in code, enforced by the type-checker — cannot be established.
 
 **Solution Approach**
-Add `ariadne spec`.
+Add `clew spec`.
 It **scans** the configured artifacts for their traceable ids, language-neutrally: that is the core's job — read the specs, and produce the set of traceables (at least each id, and the content it was anchored against, for later currency checks).
 It then **delegates** emission to each configured generator through a narrow generator interface: the core hands the generator the set of traceables, and the generator produces the verifiable symbols and the accompanying **anchoring utility** — the helpers, constrained to those symbols, that let code mark a type, a value, or a test against a spec id — in its target language, and defines how code references a symbol.
 The core depends only on the interface, never on a concrete generator — the boundary that must not erode (ADR-0001 D9).
@@ -32,7 +32,7 @@ This story builds the **skeleton** — the command, the scan, the generator inte
 - The generator packages (`gen-java`, `gen-typescript`) implement the interface as skeletons.
 
 **Acceptance Criteria**
-- `ariadne spec` scans the configured artifacts and, for each configured generator, produces the traceable symbols and utility files for every spec id found.
+- `clew spec` scans the configured artifacts and, for each configured generator, produces the traceable symbols and utility files for every spec id found.
 - The emitted symbol set matches the spec ids one-to-one: an id removed from the specs removes its symbol on the next run; an id added adds one.
 - The core selects and invokes generators through the interface only — it contains no language-specific emission and references no concrete generator type.
 - Re-running with unchanged specs produces identical output (idempotent).

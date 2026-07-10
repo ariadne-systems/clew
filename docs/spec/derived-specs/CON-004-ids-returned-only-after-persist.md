@@ -23,4 +23,4 @@ After a successful mint, the returned ids correspond exactly to the advance reco
 
 **Concerns**
 
-- [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
+- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)

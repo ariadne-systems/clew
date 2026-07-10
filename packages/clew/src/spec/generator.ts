@@ -4,7 +4,7 @@ import {
   type Realizes,
   realizes,
 } from "@ariadne-thread/trace";
-import { AriadneError, ErrorCode } from "../errors.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import type { CommentSpan } from "../text/c-family-lexer.js";
 
 /**
@@ -227,7 +227,7 @@ export function resolveGeneratorOrThrow(
 ): Generator {
   const generator = resolveGenerator(name);
   if (generator === undefined) {
-    throw new AriadneError(
+    throw new ClewError(
       ErrorCode.UNKNOWN_GENERATOR,
       `Configured generator "${name}" is not registered; remove it from \`generators\` or install a generator that provides it.`,
     );

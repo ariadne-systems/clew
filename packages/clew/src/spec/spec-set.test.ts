@@ -1,6 +1,6 @@
 import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import type { AriadneError, ScannedSpec, SpecSetMatcher } from "../index.js";
+import type { ClewError, ScannedSpec, SpecSetMatcher } from "../index.js";
 import { ErrorCode, groupIntoSpecSets, lensMatchers } from "../index.js";
 
 const specs: ScannedSpec[] = [
@@ -20,7 +20,7 @@ function thrownCode(run: () => unknown): string {
   try {
     run();
   } catch (error) {
-    return (error as AriadneError).code;
+    return (error as ClewError).code;
   }
   throw new Error("expected the call to throw");
 }

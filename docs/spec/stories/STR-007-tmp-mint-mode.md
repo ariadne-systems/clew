@@ -1,5 +1,5 @@
 **Title**
-Add an unbound `--tmp` mode to `ariadne mint` for preparing drafts
+Add an unbound `--tmp` mode to `clew mint` for preparing drafts
 
 **Business Value**
 An agent prepares a story and its dependent specs before anyone approves them — sometimes several drafts over hours or days.
@@ -7,12 +7,12 @@ Binding real sequential ids that early wastes numbers on drafts that may still c
 Unbound temporary ids let preparation happen freely, with real ids minted only at approval.
 
 **Problem / Context**
-`ariadne mint <type> <count>` (STR-005) allocates bound, sequential ids from the StateStore; every mint advances the persisted high-water mark.
+`clew mint <type> <count>` (STR-005) allocates bound, sequential ids from the StateStore; every mint advances the persisted high-water mark.
 There is no way to obtain a working id handle without binding it.
 An agent drafting in advance therefore either burns sequential numbers on unapproved work or invents ad-hoc placeholders that collide across independent drafts.
 
 **Solution Approach**
-Add a `--tmp` mode (short `-t`) to the existing `mint` command: `ariadne mint --tmp <type> <count>`.
+Add a `--tmp` mode (short `-t`) to the existing `mint` command: `clew mint --tmp <type> <count>`.
 In this mode the command produces `count` temporary ids of the form `<TYPE>-TMP-<opaque>`, where the opaque suffix is a crypto-random token (SW-005).
 Temporary minting touches no state: it opens no StateStore session, takes no lock, and advances no sequence; nothing is bound (CON-007).
 Because the suffix is opaque, independently generated temporary ids do not collide, so an agent may prepare many drafts in advance and concurrently without coordination.
@@ -24,7 +24,7 @@ The default `mint` behaviour is unchanged; the flag selects a distinct, stateles
 Where draft files live, and how temporary ids are later replaced by bound ids at approval, are workflow concerns handled by the drafting skill, not this command.
 
 **Acceptance Criteria**
-- `ariadne mint --tmp SW 3` prints three ids of the form `SW-TMP-<opaque>`, one per line to stdout.
+- `clew mint --tmp SW 3` prints three ids of the form `SW-TMP-<opaque>`, one per line to stdout.
 - The opaque suffixes are all distinct within a single call. Cross-call uniqueness follows by construction from the crypto-random token; it is a property of the token, not something a deterministic test asserts by drawing random tokens.
 - `--tmp` minting touches no state: no StateStore session, no lock, and no sequence is advanced; the prefix's bound high-water mark is unchanged afterwards.
 - `-t` is accepted as the short form of `--tmp`.

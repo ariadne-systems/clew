@@ -114,7 +114,7 @@ So an uncovered spec is a real gap, not an artefact of altitude, and the list do
 
 ### D6 — The configuration and outputs are a stable shared contract
 
-clew and a other tooling operate on the same repository and the same `.ariadnerc.json`.
+clew and a other tooling operate on the same repository and the same `.clewrc.json`.
 The companion reads its own sections; clew reads its `idGeneration` / `generators` / `lenses` / `layout` sections; both read the shared `exclude` / `unexclude` with identical semantics.
 The scan's outputs — a code-locations index and a coverage result — use shared `locations.json` / `coverage.json` shapes.
 Other tooling converges onto clew's vocabulary — `realizes` / `verifies`, lenses, the marker grammar — rather than the reverse.

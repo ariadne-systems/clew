@@ -5,7 +5,7 @@ import {
   verifies,
 } from "@ariadne-thread/trace";
 import { expect, test } from "vitest";
-import { AriadneError, ErrorCode } from "./index.js";
+import { ClewError, ErrorCode } from "./index.js";
 
 verifies(ConTraceables.CON_006_ERROR_CODE_STABILITY, () => {
   test("the released error codes keep their stable string values", () => {
@@ -37,18 +37,18 @@ verifies(
     SysTraceables.SYS_006_DIAGNOSTIC_CLARITY,
   ],
   () => {
-    test("an AriadneError carries its code and message", () => {
-      const error = new AriadneError(ErrorCode.INVALID_COUNT, "bad count");
+    test("an ClewError carries its code and message", () => {
+      const error = new ClewError(ErrorCode.INVALID_COUNT, "bad count");
 
       expect(error.code).toBe("E_INVALID_COUNT");
       expect(error.message).toBe("bad count");
       expect(error).toBeInstanceOf(Error);
     });
 
-    test("an AriadneError preserves the underlying cause", () => {
+    test("an ClewError preserves the underlying cause", () => {
       const cause = new Error("disk full");
 
-      const error = new AriadneError(
+      const error = new ClewError(
         ErrorCode.STATE_WRITE_FAILED,
         "write failed",
         {

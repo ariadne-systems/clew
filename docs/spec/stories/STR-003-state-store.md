@@ -12,19 +12,19 @@ That state must be durable, shared through git, and safe against concurrent acce
 There is no such store today, and no fixed shape for the state.
 
 **Solution Approach**
-Model the state as the domain entity AriadneState (ENT-001): a map of sections, the first being `sequences`.
-Add a StateStore in `@ariadne-thread/core` that owns the persistence of that entity in a committed JSON file (default `.ariadne/state.json`).
-A session opens by acquiring a cross-process lock (proper-lockfile) and reading the file into an AriadneState, hands that state to the caller to read and mutate, then saves it atomically (temp file plus rename) and releases the lock.
+Model the state as the domain entity ClewState (ENT-001): a map of sections, the first being `sequences`.
+Add a StateStore in `@ariadne-thread/core` that owns the persistence of that entity in a committed JSON file (default `.clew/state.json`).
+A session opens by acquiring a cross-process lock (proper-lockfile) and reading the file into an ClewState, hands that state to the caller to read and mutate, then saves it atomically (temp file plus rename) and releases the lock.
 A save preserves every section, including ones the caller did not touch.
 The store carries no domain logic — it knows the entity's shape, not what any section means.
 
 **Acceptance Criteria**
 - A session acquires the lock and reads the current state on open, and releases the lock on close, including on error.
-- The state file is JSON shaped as the AriadneState entity (a map of sections) and is committed to the repository.
+- The state file is JSON shaped as the ClewState entity (a map of sections) and is committed to the repository.
 - A save preserves every existing top-level section, not only the ones the caller changed.
 - A crash midway through a save cannot leave the file corrupted (atomic write).
 - Two sessions cannot hold the store at the same time; concurrent access is serialized.
-- A missing file is treated as an empty AriadneState.
+- A missing file is treated as an empty ClewState.
 - The store exposes only load, mutate, and save of the entity; it carries no domain logic.
 - Vitest covers open/lock/read, atomic save, section preservation, the missing-file case, and serialized concurrent access.
 
@@ -42,4 +42,4 @@ The store carries no domain logic — it knows the entity's shape, not what any 
 
 **Persists**
 
-- [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
+- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)

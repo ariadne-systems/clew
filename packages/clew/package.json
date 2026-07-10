@@ -12,8 +12,7 @@
   },
   "sideEffects": false,
   "bin": {
-    "clew": "./dist/cli/index.mjs",
-    "ariadne": "./dist/cli/index.mjs"
+    "clew": "./dist/cli/index.mjs"
   },
   "exports": {
     ".": {

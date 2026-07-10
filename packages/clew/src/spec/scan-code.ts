@@ -26,7 +26,7 @@ export type ScanCodeOptions = {
    * registry point (ADR-0007), exactly as generation does.
    */
   resolveGenerator?: (name: string) => Generator | undefined;
-  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
   /** Project root the scan walks. Defaults to the process cwd. */
   projectRoot?: string;
@@ -116,7 +116,7 @@ const collectSources: (
 );
 
 /** Default location of the written locations index. */
-export const DEFAULT_LOCATIONS_FILE = ".ariadne/locations.json";
+export const DEFAULT_LOCATIONS_FILE = ".clew/locations.json";
 
 /**
  * Writes the anchor locations as the locations index, in the shared

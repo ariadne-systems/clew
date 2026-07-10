@@ -40,8 +40,8 @@ async function project(
   generators: unknown,
   extra: Record<string, unknown> = {},
 ): Promise<{ root: string; configFile: string }> {
-  const root = await mkdtemp(join(tmpdir(), "ariadne-scan-"));
-  const configFile = join(root, ".ariadnerc.json");
+  const root = await mkdtemp(join(tmpdir(), "clew-scan-"));
+  const configFile = join(root, ".clewrc.json");
   await writeFile(configFile, JSON.stringify({ generators, ...extra }), "utf8");
   for (const [relative, contents] of Object.entries(files)) {
     const absolute = join(root, relative);
@@ -182,7 +182,7 @@ describe("code scan", () => {
         { projectRoot: root },
       );
       const first = JSON.parse(
-        await readFile(join(root, ".ariadne/locations.json"), "utf8"),
+        await readFile(join(root, ".clew/locations.json"), "utf8"),
       );
       expect(first).toEqual({
         locations: [
@@ -200,7 +200,7 @@ describe("code scan", () => {
         { projectRoot: root },
       );
       const second = JSON.parse(
-        await readFile(join(root, ".ariadne/locations.json"), "utf8"),
+        await readFile(join(root, ".clew/locations.json"), "utf8"),
       );
       expect(second).toEqual({
         locations: [

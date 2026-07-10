@@ -56,7 +56,7 @@ export const createJavaGenerator: () => Generator = realizes(
   (): Generator => {
     return {
       name: GENERATOR_TYPE,
-      defaultOutputDir: "src/main/java/ariadne/traceables",
+      defaultOutputDir: "src/main/java/clew/traceables",
       sourceExtensions: SOURCE_EXTENSIONS,
       generate(
         specSets: readonly SpecSet[],

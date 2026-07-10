@@ -1,12 +1,12 @@
 **Title**
-The numeric padding is configured in `.ariadnerc.json`
+The numeric padding is configured in `.clewrc.json`
 
 **Lens**: CON
 
 **Status**: active
 
 **Description**
-The width to which sequential numbers are zero-padded is read from `.ariadnerc.json`.
+The width to which sequential numbers are zero-padded is read from `.clewrc.json`.
 It is not hard-coded.
 A configured width of 3 renders the number 7 as `007`.
 

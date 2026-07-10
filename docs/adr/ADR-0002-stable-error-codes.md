@@ -14,7 +14,7 @@ There is no stable, rewording-proof way to identify a failure programmatically, 
 
 ## Decision
 
-A failure is represented by a typed error, `AriadneError`, that carries a machine-readable `code` alongside its human-readable message (ARCH-002).
+A failure is represented by a typed error, `ClewError`, that carries a machine-readable `code` alongside its human-readable message (ARCH-002).
 Domain errors originate in the language-neutral core and carry their code; the CLI renders a failure as `error[<CODE>]: <message>` on stderr and exits non-zero (SW-004).
 
 Codes are **mnemonic, uppercase strings** (for example `E_INVALID_COUNT`), not numeric.

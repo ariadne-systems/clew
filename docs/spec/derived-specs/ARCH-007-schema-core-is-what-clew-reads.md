@@ -8,7 +8,7 @@ A document schema pins only what clew reads; the rest is project-defined
 **Description**
 A document schema's enforced contract is split by one line: clew pins only the parts it mechanically reads, and the project supplies the rest.
 The pinned core is exactly what clew depends on — the id form (a configured prefix and a number), that ids are unique, the `**Status**` grammar and value set, and that `## Relations` links resolve — and clew enforces it in code, not from a project file.
-Everything else — which `**Bold label**` fields a document must carry, and their enums — is project-defined in a YAML schema referenced from `.ariadnerc.json`, so an adopter's own authoring template is enforced without any change to clew.
+Everything else — which `**Bold label**` fields a document must carry, and their enums — is project-defined in a YAML schema referenced from `.clewrc.json`, so an adopter's own authoring template is enforced without any change to clew.
 clew validates the union; the core is non-negotiable, the rest is the project's.
 
 **Rationale**

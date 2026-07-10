@@ -6,7 +6,7 @@ The tool exposes a `setup` command that delegates to core
 **Status**: active
 
 **Description**
-The tool exposes a `setup` command, invoked as `ariadne setup`, taking no positional arguments.
+The tool exposes a `setup` command, invoked as `clew setup`, taking no positional arguments.
 The command's action carries no scaffolding logic of its own: it delegates to core's configuration scaffolding (SW-011) and reports what it wrote.
 On success it writes a concise summary and next steps to standard output; on failure the error goes to standard error and the process exits non-zero, like every command.
 An unrecognized argument or option is rejected with a non-zero exit.
@@ -16,7 +16,7 @@ The CLI surface — which commands exist and how each is invoked — is a contra
 Anchoring the `setup` command's shape as its own spec gives that contract a stable id to check the command registration against, and keeps the command thin: a registration point that dispatches to core.
 
 **Verification Description**
-`ariadne setup` is a registered subcommand and runs with no positional arguments.
+`clew setup` is a registered subcommand and runs with no positional arguments.
 An unknown option or an extra argument is rejected with a non-zero exit.
 The command performs no scaffolding itself; it delegates to core and surfaces the result and any error through the standard streams.
 

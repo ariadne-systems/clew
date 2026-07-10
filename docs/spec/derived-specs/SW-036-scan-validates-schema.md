@@ -6,7 +6,7 @@ The scan validates each document against its schema
 **Status**: active
 
 **Description**
-When the scan reads a spec or story, it validates the document against its type's schema — the pinned core (the id form, uniqueness, the `**Status**` grammar and value set, and that `## Relations` links resolve) merged with the project's required fields and enums from the YAML schema referenced in `.ariadnerc.json`.
+When the scan reads a spec or story, it validates the document against its type's schema — the pinned core (the id form, uniqueness, the `**Status**` grammar and value set, and that `## Relations` links resolve) merged with the project's required fields and enums from the YAML schema referenced in `.clewrc.json`.
 A `**Bold label**` field is matched against the schema case-insensitively.
 The schema-declared fields that are present must appear in the schema's declared order; a field the schema does not declare is ignored and may appear anywhere between them.
 A violation is collected with the document's location: a pinned-core violation always fails the scan; a project-field violation follows the configured severity — `fail` rejects, `warn` reports and continues.

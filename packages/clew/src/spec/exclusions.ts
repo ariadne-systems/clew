@@ -1,5 +1,5 @@
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
-import { AriadneError, ErrorCode } from "../errors.js";
+import { ClewError, ErrorCode } from "../errors.js";
 
 /**
  * The built-in default exclusions, as repository-root-relative globs. A bare
@@ -15,7 +15,7 @@ const DEFAULT_GLOBS: readonly string[] = [
   "**/dist",
   "**/build",
   "**/coverage",
-  ".ariadne",
+  ".clew",
 ];
 
 /** A compiled exclusion glob: a full-path matcher and per-segment matchers for descent analysis. */
@@ -114,7 +114,7 @@ function compileOrThrow(glob: string, which: string): CompiledGlob {
   try {
     return compileGlob(glob);
   } catch (error) {
-    throw new AriadneError(
+    throw new ClewError(
       ErrorCode.INVALID_EXCLUSION_PATTERN,
       `Invalid glob "${glob}" in \`${which}\`: ${(error as Error).message}.`,
     );

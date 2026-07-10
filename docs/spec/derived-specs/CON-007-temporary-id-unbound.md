@@ -23,7 +23,7 @@ Temporary generation acquires no lock and writes no state file.
 
 **Concerns**
 
-- [ENT-001 — AriadneState](../domain-model.md#ent-001-ariadnestate)
+- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)
 
 ## Changes
 

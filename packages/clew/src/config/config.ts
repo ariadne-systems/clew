@@ -8,12 +8,12 @@ import {
   realizes,
   SwTraceables,
 } from "@ariadne-thread/trace";
-import { AriadneError, ErrorCode } from "../errors.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import { resolveBuiltinGenerator } from "../generators/registry.js";
 import type { Generator } from "../spec/generator.js";
 
 /** Default location of the project configuration file. */
-export const DEFAULT_CONFIG_FILE = ".ariadnerc.json";
+export const DEFAULT_CONFIG_FILE = ".clewrc.json";
 
 /** Default zero-padding width when the configuration does not state one. */
 export const DEFAULT_PADDING: number = concerns(
@@ -37,7 +37,7 @@ export type GeneratorConfig = {
 /** The id-generation scheme chosen by configuration. */
 export type IdGenerationMode = "sequential" | "opaque";
 
-/** The `idGeneration` section of `.ariadnerc.json`. */
+/** The `idGeneration` section of `.clewrc.json`. */
 export type IdGenerationConfig = {
   mode: IdGenerationMode;
   /** Width to which sequential numbers are zero-padded. */
@@ -105,11 +105,11 @@ export const DEFAULT_LAYOUT: Layout = {
   stories: { dir: "docs/spec/stories", prefix: "STR" },
   derivedSpecs: { dir: "docs/spec/derived-specs" },
   drafts: { dir: "docs/spec/drafts" },
-  state: { file: ".ariadne/state.json" },
+  state: { file: ".clew/state.json" },
 };
 
 /**
- * Reads the `idGeneration` section from `.ariadnerc.json`.
+ * Reads the `idGeneration` section from `.clewrc.json`.
  * A missing file, section, or value falls back to the default.
  */
 export async function readIdGenerationConfig(
@@ -219,7 +219,7 @@ export type ResolveConfigurationOptions = {
    * to the in-tree generator registry; a test injects a fake (ADR-0007).
    */
   resolveGenerator?: (name: string) => Generator | undefined;
-  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
 };
 
@@ -271,7 +271,7 @@ function resolveOutputDir(
   }
   const generator = resolveGenerator(config.type);
   if (generator === undefined) {
-    throw new AriadneError(
+    throw new ClewError(
       ErrorCode.UNKNOWN_GENERATOR,
       `Configured generator "${config.type}" is not registered; remove it from \`generators\` or install a generator that provides it.`,
     );
@@ -471,7 +471,7 @@ export const requireConfig: (file?: string) => Promise<void> = realizes(
   ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG,
   async (file: string = DEFAULT_CONFIG_FILE): Promise<void> => {
     if (!(await configExists(file))) {
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.NO_CONFIG,
         `No configuration found at ${file}. Run \`clew setup\` to create one.`,
       );
@@ -479,7 +479,7 @@ export const requireConfig: (file?: string) => Promise<void> = realizes(
   },
 );
 
-/** Reads and parses `.ariadnerc.json`; a missing file resolves to an empty config. */
+/** Reads and parses `.clewrc.json`; a missing file resolves to an empty config. */
 const readRawConfig = realizes(
   SwTraceables.SW_009_READ_CONFIGURATION,
   async (file: string): Promise<Record<string, unknown>> => {

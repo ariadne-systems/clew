@@ -20,7 +20,7 @@ type Fixture = {
 // derived-specs/) and writes a config whose `layout` points at those
 // directories, so `scan` reads the locations from configuration.
 async function fixture(idFilenames: string[]): Promise<Fixture> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-scan-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-scan-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
   const derivedDir = join(dir, "docs", "spec", "derived-specs");
   await mkdir(storiesDir, { recursive: true });
@@ -29,7 +29,7 @@ async function fixture(idFilenames: string[]): Promise<Fixture> {
     const target = name.startsWith("STR-") ? storiesDir : derivedDir;
     await writeFile(join(target, name), "x", "utf8");
   }
-  const configFile = join(dir, ".ariadnerc.json");
+  const configFile = join(dir, ".clewrc.json");
   await writeFile(
     configFile,
     JSON.stringify({
@@ -248,11 +248,11 @@ describe("duplicate ids", () => {
     });
 
     test("a file is not a duplicate of itself when the two scan roots overlap", async () => {
-      const dir = await mkdtemp(join(tmpdir(), "ariadne-scan-"));
+      const dir = await mkdtemp(join(tmpdir(), "clew-scan-"));
       const specDir = join(dir, "docs", "spec");
       await mkdir(specDir, { recursive: true });
       await writeFile(join(specDir, "SW-013-x.md"), "x", "utf8");
-      const configFile = join(dir, ".ariadnerc.json");
+      const configFile = join(dir, ".clewrc.json");
       await writeFile(
         configFile,
         JSON.stringify({
@@ -280,7 +280,7 @@ describe("scan-time schema validation", () => {
       specBody: string,
       onError = "fail",
     ): Promise<string> {
-      const dir = await mkdtemp(join(tmpdir(), "ariadne-scan-"));
+      const dir = await mkdtemp(join(tmpdir(), "clew-scan-"));
       const derivedDir = join(dir, "docs", "spec", "derived-specs");
       await mkdir(derivedDir, { recursive: true });
       await writeFile(
@@ -289,7 +289,7 @@ describe("scan-time schema validation", () => {
         "utf8",
       );
       await writeFile(join(derivedDir, "SW-001-a.md"), specBody, "utf8");
-      const configFile = join(dir, ".ariadnerc.json");
+      const configFile = join(dir, ".clewrc.json");
       await writeFile(
         configFile,
         JSON.stringify({
@@ -332,12 +332,12 @@ describe("scan-time schema validation", () => {
     });
 
     test("a malformed schema is rejected, naming it", async () => {
-      const dir = await mkdtemp(join(tmpdir(), "ariadne-scan-"));
+      const dir = await mkdtemp(join(tmpdir(), "clew-scan-"));
       const derivedDir = join(dir, "docs", "spec", "derived-specs");
       await mkdir(derivedDir, { recursive: true });
       await writeFile(join(dir, "ds.yml"), "id:\n  pattern: x\n", "utf8");
       await writeFile(join(derivedDir, "SW-001-a.md"), "**Title**\n", "utf8");
-      const configFile = join(dir, ".ariadnerc.json");
+      const configFile = join(dir, ".clewrc.json");
       await writeFile(
         configFile,
         JSON.stringify({

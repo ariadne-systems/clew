@@ -235,7 +235,7 @@ describe("coverage result output", () => {
     ],
     () => {
       test("writes coverage.json in the shared shape and replaces it wholesale", async () => {
-        const root = await mkdtemp(join(tmpdir(), "ariadne-coverage-"));
+        const root = await mkdtemp(join(tmpdir(), "clew-coverage-"));
 
         const file = await writeCoverageResult(result, { projectRoot: root });
         expect(JSON.parse(await readFile(file, "utf8"))).toEqual({
@@ -310,7 +310,7 @@ describe("readUniverse", () => {
     ],
     () => {
       test("reads only generated files back — a stray, unmarked file in the output dir is ignored", async () => {
-        const dir = await mkdtemp(join(tmpdir(), "ariadne-universe-"));
+        const dir = await mkdtemp(join(tmpdir(), "clew-universe-"));
         const outputDir = join(dir, "out");
         // Generated files live in clew's reserved subdirectory of the output dir.
         const clewDir = join(outputDir, "clew");
@@ -327,7 +327,7 @@ describe("readUniverse", () => {
           "utf8",
         );
         await writeFile(
-          join(dir, ".ariadnerc.json"),
+          join(dir, ".clewrc.json"),
           JSON.stringify({ generators: [{ type: "fake", outputDir: "out" }] }),
           "utf8",
         );
@@ -351,7 +351,7 @@ describe("readUniverse", () => {
 
         const universe = await readUniverse({
           resolveGenerator: () => fake,
-          configFile: join(dir, ".ariadnerc.json"),
+          configFile: join(dir, ".clewrc.json"),
           projectRoot: dir,
         });
 

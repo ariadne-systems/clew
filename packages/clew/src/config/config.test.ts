@@ -37,15 +37,15 @@ function fakeGenerator(name: string, defaultOutputDir: string): Generator {
 }
 
 async function tempConfigFile(contents: unknown): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-config-"));
-  const file = join(dir, ".ariadnerc.json");
+  const dir = await mkdtemp(join(tmpdir(), "clew-config-"));
+  const file = join(dir, ".clewrc.json");
   await writeFile(file, JSON.stringify(contents), "utf8");
   return file;
 }
 
 async function missingConfigFile(): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-config-"));
-  return join(dir, ".ariadnerc.json");
+  const dir = await mkdtemp(join(tmpdir(), "clew-config-"));
+  return join(dir, ".clewrc.json");
 }
 
 describe("readIdGenerationConfig", () => {
@@ -135,7 +135,7 @@ describe("readLayout", () => {
         dir: "docs/spec/stories",
         prefix: "STR",
       });
-      expect(layout.state.file).toBe(".ariadne/state.json");
+      expect(layout.state.file).toBe(".clew/state.json");
     });
   });
 });

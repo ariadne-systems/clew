@@ -10,7 +10,7 @@ import {
   readIdGenerationConfig,
   readLayout,
 } from "../config/config.js";
-import { AriadneError, ErrorCode } from "../errors.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import { walkFiles } from "../fs/walk-files.js";
 import type { IdStrategy } from "./id-strategy.js";
 import { OpaqueIdStrategy } from "./opaque-id-strategy.js";
@@ -24,7 +24,7 @@ import {
 } from "./temporary-id.js";
 
 export type MintOptions = {
-  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
   /** Path to the state file. Defaults to the StateStore default. */
   stateFile?: string;
@@ -85,7 +85,7 @@ export const mintTemporary: (
     assertTypeNotReserved(type);
     assertPrefixConfigured(type, prefixes);
     if (!Number.isInteger(count) || count < 1) {
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.INVALID_COUNT,
         `Mint count must be a positive integer, got ${count}.`,
       );
@@ -145,9 +145,9 @@ const assertPrefixConfigured = realizes(
   ConTraceables.CON_005_ID_PREFIX_MUST_BE_CONFIGURED,
   (type: string, prefixes: Set<string>): void => {
     if (!prefixes.has(type)) {
-      throw new AriadneError(
+      throw new ClewError(
         ErrorCode.INVALID_TYPE,
-        `Type "${type}" is not a configured prefix; declare it as a lens (or a layout prefix) in .ariadnerc.json.`,
+        `Type "${type}" is not a configured prefix; declare it as a lens (or a layout prefix) in .clewrc.json.`,
       );
     }
   },
@@ -161,7 +161,7 @@ const assertPrefixConfigured = realizes(
  */
 function assertTypeNotReserved(type: string): void {
   if (typeUsesReservedMarker(type)) {
-    throw new AriadneError(
+    throw new ClewError(
       ErrorCode.RESERVED_TYPE,
       `Type "${type}" uses the reserved "${TEMPORARY_MARKER}" marker; choose a type that does not contain "${TEMPORARY_MARKER}" as a "-"-delimited segment.`,
     );

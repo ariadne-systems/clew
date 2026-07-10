@@ -41,7 +41,7 @@ You can adjust these in ${result.configFile}:
 Next steps:
   1. Edit ${result.configFile} to fit your project — at least review the lenses.
   2. Run \`clew mint <LENS>\` to allocate your first id (for example \`clew mint SW\`).
-  3. Commit ${result.configFile} and .ariadne/state.json so the team shares them.
+  3. Commit ${result.configFile} and .clew/state.json so the team shares them.
 `,
         );
       });

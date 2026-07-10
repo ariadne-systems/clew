@@ -11,7 +11,7 @@ The skeleton generator (STR-011) emits the symbols and helpers in a single throw
 We need the generator's full, documented output: one generated file per spec set — structured like the reference Java/TypeScript traceable files (a generated-do-not-edit header, the set's symbols) — built on a mechanism that makes a removed id a compile error.
 
 **Solution Approach**
-Running `ariadne spec` generates a self-contained folder in the project — tool-owned, regenerated, never hand-edited — holding both the symbols and the means to anchor against them.
+Running `clew spec` generates a self-contained folder in the project — tool-owned, regenerated, never hand-edited — holding both the symbols and the means to anchor against them.
 The helpers are *emitted*, not shipped: nothing lives in the tool's codebase as a hand-written package, and the consuming project imports only generated code.
 The mechanism is a generated string enum per set plus type-constrained helpers, checked by `tsc` — not decorators:
 

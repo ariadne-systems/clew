@@ -11,7 +11,7 @@ import { describe, expect, test } from "vitest";
 import { withState } from "../index.js";
 
 async function tempStateFile(): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-state-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-state-"));
   return join(dir, "state.json");
 }
 

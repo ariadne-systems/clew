@@ -61,7 +61,7 @@ export const createTypeScriptGenerator: () => Generator = realizes(
   (): Generator => {
     return {
       name: GENERATOR_TYPE,
-      defaultOutputDir: "src/ariadne/traceables",
+      defaultOutputDir: "src/clew/traceables",
       sourceExtensions: SOURCE_EXTENSIONS,
       generate(
         specSets: readonly SpecSet[],

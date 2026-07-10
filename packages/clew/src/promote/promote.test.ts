@@ -23,7 +23,7 @@ type Project = {
 // configuration. State is unseeded, so the first bound id for a prefix
 // is number 1.
 async function project(): Promise<Project> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-promote-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-promote-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
   const derivedDir = join(dir, "docs", "spec", "derived-specs");
   const draftsDir = join(dir, "docs", "spec", "drafts");
@@ -31,7 +31,7 @@ async function project(): Promise<Project> {
   await mkdir(join(draftsDir, "derived-specs"), { recursive: true });
   await mkdir(storiesDir, { recursive: true });
   await mkdir(derivedDir, { recursive: true });
-  const configFile = join(dir, ".ariadnerc.json");
+  const configFile = join(dir, ".clewrc.json");
   await writeFile(
     configFile,
     JSON.stringify({
@@ -45,7 +45,7 @@ async function project(): Promise<Project> {
   );
   return {
     configFile,
-    stateFile: join(dir, ".ariadne", "state.json"),
+    stateFile: join(dir, ".clew", "state.json"),
     storiesDir,
     derivedDir,
     draftsDir,
@@ -665,7 +665,7 @@ describe("schema validation on promotion", () => {
   verifies(SysTraceables.SYS_015_VALIDATE_ARTIFACTS_ON_LOAD, () => {
     // A project whose `story` schema requires a `Title` field with `fail` severity.
     async function storySchemaProject(): Promise<Project> {
-      const dir = await mkdtemp(join(tmpdir(), "ariadne-promote-"));
+      const dir = await mkdtemp(join(tmpdir(), "clew-promote-"));
       const storiesDir = join(dir, "docs", "spec", "stories");
       const derivedDir = join(dir, "docs", "spec", "derived-specs");
       const draftsDir = join(dir, "docs", "spec", "drafts");
@@ -678,7 +678,7 @@ describe("schema validation on promotion", () => {
         "onError: fail\nfields:\n  Title:\n    required: true\n",
         "utf8",
       );
-      const configFile = join(dir, ".ariadnerc.json");
+      const configFile = join(dir, ".clewrc.json");
       await writeFile(
         configFile,
         JSON.stringify({
@@ -693,7 +693,7 @@ describe("schema validation on promotion", () => {
       );
       return {
         configFile,
-        stateFile: join(dir, ".ariadne", "state.json"),
+        stateFile: join(dir, ".clew", "state.json"),
         storiesDir,
         derivedDir,
         draftsDir,

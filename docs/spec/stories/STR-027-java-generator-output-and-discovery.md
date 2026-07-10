@@ -56,4 +56,4 @@ The generated enum exposes its spec id through an `id()` accessor, as the skelet
 - Parallels [STR-014 — Emit the TypeScript generator's traceable output](STR-014-typescript-generator.md) — the same completion, for the Java target.
 - Implements [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](../derived-specs/ARCH-003-generator-interface.md) and [ARCH-004 — Generation and reading back are dual operations](../derived-specs/ARCH-004-generator-discovers-markers.md) for Java.
 - Uses [ARCH-006 — Comment detection is a generator capability](../derived-specs/ARCH-006-pluggable-comment-finders.md) — Java comment identification through the shared C-family lexer.
-- Builds on the skeleton generators from [STR-011 — the `ariadne spec` command](STR-011-spec-command.md).
+- Builds on the skeleton generators from [STR-011 — the `clew spec` command](STR-011-spec-command.md).

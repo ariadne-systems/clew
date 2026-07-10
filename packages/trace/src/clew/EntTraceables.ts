@@ -10,6 +10,6 @@
  */
 
 export enum EntTraceables {
-  ENT_001_ARIADNE_STATE = "ENT-001",
+  ENT_001_CLEW_STATE = "ENT-001",
   ENT_002_CONFIGURATION = "ENT-002",
 }

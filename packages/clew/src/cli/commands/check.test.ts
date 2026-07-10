@@ -17,8 +17,8 @@ afterEach(() => {
 // Creates an isolated project (default layout) and switches into it, so `check`
 // runs against the local corpus.
 async function setupProjectDir(): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-check-"));
-  await writeFile(join(dir, ".ariadnerc.json"), JSON.stringify({}), "utf8");
+  const dir = await mkdtemp(join(tmpdir(), "clew-cli-check-"));
+  await writeFile(join(dir, ".clewrc.json"), JSON.stringify({}), "utf8");
   await mkdir(join(dir, "docs", "spec", "derived-specs"), { recursive: true });
   await mkdir(join(dir, "docs", "spec", "stories"), { recursive: true });
   process.chdir(dir);
@@ -36,7 +36,7 @@ function captureStream(stream: "stdout" | "stderr"): () => string {
   return () => chunks.join("");
 }
 
-async function runAriadne(...args: string[]): Promise<void> {
+async function runClew(...args: string[]): Promise<void> {
   await buildProgram().parseAsync(["node", "clew", ...args]);
 }
 
@@ -46,7 +46,7 @@ describe("check output", () => {
       await setupProjectDir();
       const stdout = captureStream("stdout");
 
-      await runAriadne("check");
+      await runClew("check");
 
       expect(stdout()).toContain("check: OK");
       expect(process.exitCode ?? 0).toBe(0);
@@ -61,7 +61,7 @@ describe("check output", () => {
       );
       const stderr = captureStream("stderr");
 
-      await runAriadne("check");
+      await runClew("check");
 
       expect(stderr()).toContain("reference-rot");
       expect(process.exitCode).toBe(1);
@@ -72,10 +72,10 @@ describe("check output", () => {
 describe("configuration required", () => {
   verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
     test("check fails with E_NO_CONFIG when no configuration is present", async () => {
-      const dir = await mkdtemp(join(tmpdir(), "ariadne-cli-check-noconfig-"));
+      const dir = await mkdtemp(join(tmpdir(), "clew-cli-check-noconfig-"));
       process.chdir(dir);
 
-      await expect(runAriadne("check")).rejects.toMatchObject({
+      await expect(runClew("check")).rejects.toMatchObject({
         code: ErrorCode.NO_CONFIG,
       });
     });

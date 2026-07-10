@@ -6,7 +6,7 @@ The tool exposes a `promote` command that delegates to core
 **Status**: active
 
 **Description**
-The tool exposes a `promote` command, invoked as `ariadne promote <draft…>` or `ariadne promote all`.
+The tool exposes a `promote` command, invoked as `clew promote <draft…>` or `clew promote all`.
 Each argument names a draft to root the promotion at — a story (the common case, which carries its specs through its references) or a spec — and the keyword `all` promotes every pending draft and must be given alone.
 At least one argument is required: invoked with none, the command is an error, never a finalize of whatever happens to be pending; `all` mixed with a named draft is likewise an error (CON-028).
 The command's action carries no binding, substitution, or move logic of its own: it delegates to core's finalize (SW-017), which resolves the named roots' reference closure, binds each draft's id, substitutes its temporary id within the drafts, and moves it into the layout, and it reports each temporary-id → bound-id mapping.
@@ -18,7 +18,7 @@ The CLI surface — which commands exist and how each is invoked — is a contra
 Anchoring the `promote` command's shape as its own spec gives that contract a stable id to check the command registration against, and keeps the command thin: a registration point that dispatches to core.
 
 **Verification Description**
-`ariadne promote` is a registered subcommand requiring at least one draft argument or the keyword `all`; invoked with no argument it errors with a non-zero exit.
+`clew promote` is a registered subcommand requiring at least one draft argument or the keyword `all`; invoked with no argument it errors with a non-zero exit.
 An unknown option is rejected with a non-zero exit.
 The command performs no binding, substitution, or move itself; it delegates to core and surfaces the result and any error through the standard streams.
 

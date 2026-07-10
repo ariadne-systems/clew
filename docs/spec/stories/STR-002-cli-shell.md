@@ -1,5 +1,5 @@
 **Title**
-Establish the `ariadne` CLI shell that prints help
+Establish the `clew` CLI shell that prints help
 
 **Business Value**
 The CLI is how the agent and humans drive the tool.
@@ -13,7 +13,7 @@ This story delivers the shell only — no business commands.
 **Solution Approach**
 Keep commander.
 Give the program a name, a description, and a version kept in sync with the CLI package's own `package.json` rather than a duplicated literal.
-Make a bare `ariadne` and `ariadne --help` print the same usage.
+Make a bare `clew` and `clew --help` print the same usage.
 Provide a single place where future commands are registered, so each one is added in its own module and wired in one line.
 Define output conventions: human output to stdout, diagnostics and errors to stderr; exit 0 on success, non-zero on error.
 
@@ -24,9 +24,9 @@ Each later command lives in its own `src/commands/<name>.ts` as a `register<Name
 This story adds only `index.ts` and `program.ts`; the `commands/` directory arrives with the first command.
 
 **Acceptance Criteria**
-- `ariadne --help` and `ariadne -h` print usage: program name, description, version, and a (currently empty) commands section.
-- `ariadne` with no arguments prints the same help and exits 0.
-- `ariadne --version` prints the CLI version, sourced from its `package.json`, not a hard-coded literal.
+- `clew --help` and `clew -h` print usage: program name, description, version, and a (currently empty) commands section.
+- `clew` with no arguments prints the same help and exits 0.
+- `clew --version` prints the CLI version, sourced from its `package.json`, not a hard-coded literal.
 - An unknown command or option prints a helpful message to stderr and exits with a non-zero code.
 - The CLI exposes a single registration point for subcommands; no business commands are registered yet.
 - Output convention holds: help and version go to stdout, errors go to stderr.

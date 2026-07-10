@@ -38,7 +38,7 @@ async function generate(
   sets: readonly SpecSet[],
 ): Promise<readonly GeneratedFile[]> {
   return createTypeScriptGenerator().generate(sets, {
-    outputDir: "src/ariadne/traceables",
+    outputDir: "src/clew/traceables",
   });
 }
 
@@ -58,7 +58,7 @@ describe("typescript generator output", () => {
     () => {
       test("declares its default output directory", () => {
         expect(createTypeScriptGenerator().defaultOutputDir).toBe(
-          "src/ariadne/traceables",
+          "src/clew/traceables",
         );
       });
 
@@ -136,7 +136,7 @@ describe("typescript generator output", () => {
           },
         ];
         const files = await generator.generate(sets, {
-          outputDir: "src/ariadne/traceables",
+          outputDir: "src/clew/traceables",
         });
 
         // Read every emitted file back; only the enum members are traceables, so

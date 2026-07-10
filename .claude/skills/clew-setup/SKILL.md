@@ -1,6 +1,6 @@
 ---
 name: clew-setup
-description: "Set up a project for clew — establish .ariadnerc.json, help the user choose the project's lenses (spec kinds) and layout, and orient them toward their first ids. Use when starting clew in a project, when a command reports no configuration (error[E_NO_CONFIG]), or when the user asks to 'set up', 'initialize', or 'configure' clew. Not spec authoring (see clew-draft)."
+description: "Set up a project for clew — establish .clewrc.json, help the user choose the project's lenses (spec kinds) and layout, and orient them toward their first ids. Use when starting clew in a project, when a command reports no configuration (error[E_NO_CONFIG]), or when the user asks to 'set up', 'initialize', or 'configure' clew. Not spec authoring (see clew-draft)."
 ---
 
 # clew-setup
@@ -19,14 +19,14 @@ Do not hand-write what the command scaffolds.
 ## What you must not do
 
 - Do not author spec content or per-lens derivation guidance — that is the companion `clew-draft` skill's job. This skill only establishes the configuration and orients.
-- Do not regenerate or overwrite an existing configuration. If the user wants changes, edit `.ariadnerc.json`; do not recreate it.
+- Do not regenerate or overwrite an existing configuration. If the user wants changes, edit `.clewrc.json`; do not recreate it.
 - Do not commit. Leave commits to the user, and remind them what to commit.
 
 ## Procedure
 
 ### 1. Read the situation
 
-Check whether `.ariadnerc.json` already exists, and whether the project already has spec artifacts (for example an existing `docs/spec` tree or other id-bearing files).
+Check whether `.clewrc.json` already exists, and whether the project already has spec artifacts (for example an existing `docs/spec` tree or other id-bearing files).
 
 - Configuration present → report it; only adjust on request (step 4).
 - No configuration, no artifacts → greenfield (step 2, then 3a).
@@ -46,8 +46,8 @@ For example, a safety- or compliance-driven project may want a dedicated verific
 
 **3a. Greenfield.**
 Run `clew setup`.
-It writes `.ariadnerc.json` with the default lenses and layout and creates the layout directories.
-If the user chose to customize, edit the `lenses` and `layout` sections of `.ariadnerc.json` to match — before any id is minted.
+It writes `.clewrc.json` with the default lenses and layout and creates the layout directories.
+If the user chose to customize, edit the `lenses` and `layout` sections of `.clewrc.json` to match — before any id is minted.
 
 **3b. Adoption (existing artifacts).**
 Run `clew setup` to write the configuration, then edit its `lenses` to match the prefixes the existing artifacts already use, and its `layout` to point at where those artifacts live.
@@ -57,7 +57,7 @@ Then run `clew init` to seed the state from the existing artifacts, so minting c
 
 Confirm what was created or found.
 Point the user to their next step: `clew mint <LENS>` to allocate an id (for example `clew mint SW`), and the companion `clew-draft` skill to draft a story and its specs.
-Remind them to commit `.ariadnerc.json` and the state file so the team shares the same configuration and id allocations.
+Remind them to commit `.clewrc.json` and the state file so the team shares the same configuration and id allocations.
 
 ## Notes
 
@@ -66,7 +66,7 @@ Remind them to commit `.ariadnerc.json` and the state file so the team shares th
 
 ## Done when
 
-- `.ariadnerc.json` exists with the project's chosen lenses and layout, and the layout directories are created.
+- `.clewrc.json` exists with the project's chosen lenses and layout, and the layout directories are created.
 - For an adopted project, the state is seeded (`clew init`) so minting continues past the ids already in use.
 - The user knows their next step (`clew mint <LENS>`, then the `clew-draft` skill) and what to commit.
 - No existing configuration was overwritten, and nothing is committed.

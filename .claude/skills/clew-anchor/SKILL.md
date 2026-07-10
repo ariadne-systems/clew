@@ -34,7 +34,7 @@ Skip a relation the code does not actually hold; do not anchor for the sake of a
 
 The markers live in a generated folder whose location is the project's choice, and each target language has its own folder — so read it, never assume a path.
 
-- Read `.ariadnerc.json` → `generators`. Each entry has a `type` (the target language) and an `outputDir`. Take the entry for the language you are editing.
+- Read `.clewrc.json` → `generators`. Each entry has a `type` (the target language) and an `outputDir`. Take the entry for the language you are editing.
 - That entry's `outputDir` is that language's traceables folder; if it has no `outputDir`, the generator's own default applies. Different generators write to different folders.
 - The folder holds the generated verifiable symbols for that language (which name the available spec ids) and, where the language supports it, a helper or utility the generator emits.
 

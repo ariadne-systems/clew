@@ -55,7 +55,7 @@ export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
  * what the condition means, and a help line naming the concrete fix. Any of them
  * may be omitted — a trivial failure carries none, so it renders as a single line.
  */
-export interface AriadneErrorOptions extends ErrorOptions {
+export interface ClewErrorOptions extends ErrorOptions {
   /** Where the failure was found — a file path, optionally `:line`. Rendered as `--> location`. */
   location?: string;
   /** What the condition means or why it matters. Rendered as `= note: ...`. */
@@ -72,16 +72,16 @@ export interface AriadneErrorOptions extends ErrorOptions {
  * user needs to locate and fix the failure, rendered in the compiler convention.
  */
 @realizes(ArchTraceables.ARCH_002_STABLE_ERROR_CODES)
-export class AriadneError extends Error {
+export class ClewError extends Error {
   readonly code: ErrorCode;
   readonly location?: string;
   readonly note?: string;
   readonly help?: string | readonly string[];
 
-  constructor(code: ErrorCode, message: string, options?: AriadneErrorOptions) {
+  constructor(code: ErrorCode, message: string, options?: ClewErrorOptions) {
     super(message, options);
     this.code = code;
-    this.name = "AriadneError";
+    this.name = "ClewError";
     this.location = options?.location;
     this.note = options?.note;
     this.help = options?.help;

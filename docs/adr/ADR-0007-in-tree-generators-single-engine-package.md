@@ -41,7 +41,7 @@ The generators become in-tree modules (`clew/src/generators/{typescript,java}`).
 
 `@ariadne-thread/core` retires as a package name.
 "Core" described a role — the language-neutral engine *behind* a thin CLI and pluggable generators — and this ADR dissolves that role, so the surviving single package takes the product's name, Clew.
-The bin stays `clew` / `ariadne`; the scope stays `@ariadne-thread`.
+The bin stays `clew`; the scope stays `@ariadne-thread`.
 Nothing imports the engine as a library once the generators fold in, so there is no import-stability reason to keep the old name.
 
 The system goes from five packages to two: `clew` (engine and bin) and `trace` (generated traceables).

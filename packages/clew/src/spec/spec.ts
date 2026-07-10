@@ -22,7 +22,7 @@ export type SpecOptions = {
    * registry point (ADR-0007).
    */
   resolveGenerator?: (name: string) => Generator | undefined;
-  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
   /** Project root the output directory is resolved against. Defaults to the process cwd. */
   outputDir?: string;

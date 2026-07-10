@@ -58,13 +58,13 @@ const resolveGenerator = (name: string): Generator | undefined =>
 async function project(
   extraConfig: Record<string, unknown> = {},
 ): Promise<Project> {
-  const dir = await mkdtemp(join(tmpdir(), "ariadne-check-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-check-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
   const derivedDir = join(dir, "docs", "spec", "derived-specs");
   await mkdir(storiesDir, { recursive: true });
   await mkdir(derivedDir, { recursive: true });
   await writeFile(
-    join(dir, ".ariadnerc.json"),
+    join(dir, ".clewrc.json"),
     JSON.stringify({
       layout: {
         stories: { dir: storiesDir, prefix: "STR" },
@@ -77,7 +77,7 @@ async function project(
     "utf8",
   );
   return {
-    configFile: join(dir, ".ariadnerc.json"),
+    configFile: join(dir, ".clewrc.json"),
     root: dir,
     storiesDir,
     derivedDir,

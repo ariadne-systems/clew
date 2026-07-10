@@ -11,7 +11,7 @@ import {
 } from "./config.js";
 
 export type SetupOptions = {
-  /** Path to `.ariadnerc.json`. Defaults to the configuration default. */
+  /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
 };
 
@@ -28,7 +28,7 @@ export type SetupResult = {
 
 /**
  * Scaffolds the default configuration and layout: writes
- * `.ariadnerc.json` with the default lenses and layout and creates the
+ * `.clewrc.json` with the default lenses and layout and creates the
  * configured layout directories, relative to the configuration's directory.
  * An existing configuration is never overwritten, so setup is safe to
  * re-run.
