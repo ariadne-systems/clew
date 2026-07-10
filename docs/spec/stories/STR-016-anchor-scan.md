@@ -56,18 +56,18 @@ This story is the **scan primitive only**: collecting located anchors; computing
 
 **Realizes**
 
-- [ARCH-004 — Discovery is delegated to language-specific generators behind the generator interface — the dual of generation](../derived-specs/ARCH-004-generator-discovers-markers.md)
-- [SW-022 — Scan the code into the set of anchor locations](../derived-specs/SW-022-scan-code-into-anchor-locations.md)
-- [SW-021 — Discover anchors in TypeScript via a lightweight lexical scan](../derived-specs/SW-021-discover-anchors-typescript.md)
-- [SW-023 — The tool exposes a `scan` command that reports the code's anchor locations](../derived-specs/SW-023-scan-command.md)
-- [CON-016 — The scan excludes dependency and build directories by default](../derived-specs/CON-016-scan-builtin-exclusions.md)
+- [ARCH-004 — Discovery is delegated to language-specific generators behind the generator interface — the dual of generation](../specs/ARCH-004-generator-discovers-markers.md)
+- [SW-022 — Scan the code into the set of anchor locations](../specs/SW-022-scan-code-into-anchor-locations.md)
+- [SW-021 — Discover anchors in TypeScript via a lightweight lexical scan](../specs/SW-021-discover-anchors-typescript.md)
+- [SW-023 — The tool exposes a `scan` command that reports the code's anchor locations](../specs/SW-023-scan-command.md)
+- [CON-016 — The scan excludes dependency and build directories by default](../specs/CON-016-scan-builtin-exclusions.md)
 
 **Related (existing corpus)**
 
-- Dual of [SW-013 — Scan the configured artifacts into the set of traceables](../derived-specs/SW-013-scan-traceables.md) and [SW-014 — Generate traceables through the configured generators](../derived-specs/SW-014-generate-traceables.md) — the *declare* side; this story is the *check* side.
-- Extends [ARCH-003 — Generation behind a narrow generator interface](../derived-specs/ARCH-003-generator-interface.md): the interface gains the dual `discover` operation.
-- TypeScript discovery is the sibling of [SW-018 — TypeScript generator output](../derived-specs/SW-018-typescript-output.md) (the emit side of the same markers).
-- Built-in exclusion relates to [CON-012 — Generated files are tool-owned](../derived-specs/CON-012-generated-files-tool-owned.md).
+- Dual of [SW-013 — Scan the configured artifacts into the set of traceables](../specs/SW-013-scan-traceables.md) and [SW-014 — Generate traceables through the configured generators](../specs/SW-014-generate-traceables.md) — the *declare* side; this story is the *check* side.
+- Extends [ARCH-003 — Generation behind a narrow generator interface](../specs/ARCH-003-generator-interface.md): the interface gains the dual `discover` operation.
+- TypeScript discovery is the sibling of [SW-018 — TypeScript generator output](../specs/SW-018-typescript-output.md) (the emit side of the same markers).
+- Built-in exclusion relates to [CON-012 — Generated files are tool-owned](../specs/CON-012-generated-files-tool-owned.md).
 - Picks up the *check* side deferred by [STR-011 — the `spec` command](STR-011-spec-command.md).
 
 ## Changes

@@ -8,7 +8,7 @@ A story has no anchors, so it is never a traceable, never Covered, and nothing m
 A declared status makes "what is built versus backlog" visible at the story level — the unit a person, and an ALM tool, actually reason about.
 
 **Problem / Context**
-The `**Status**` field exists for derived specs (`planned` / `active` / `deprecated`), where it gates traceable generation and coverage carries the built-vs-in-progress distinction.
+The `**Status**` field exists for specs (`planned` / `active` / `deprecated`), where it gates traceable generation and coverage carries the built-vs-in-progress distinction.
 Stories are not traceables — the scan skips non-lens prefixes — so a story gets no status today and no done-signal.
 006 §4 already frames the `**Status**` field as the work-item's state, file-based now and mapped from an ALM connector later; a story *is* the work item, so a story status is that field used for its original purpose.
 
@@ -38,16 +38,16 @@ The declared field declares *intent*; that later check enforces *truth* — whic
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](../derived-specs/SYS-005-spec-lifecycle.md)
+- [SYS-005 — The system supports drafting, allocating, and finalizing specs](../specs/SYS-005-spec-lifecycle.md)
 
 **Realizes** (new specs)
 
-- [CON-TMP-STAT-001 — A story's status carries explicit terminal states a spec lacks](../derived-specs/CON-TMP-STAT-001-story-status-terminal-states.md)
-- [SW-TMP-STAT-001 — The tool reads each story's implementation status](../derived-specs/SW-TMP-STAT-001-read-story-status.md)
-- [SW-TMP-STAT-002 — The tool exposes a `clew status` command that lists each story's status](../derived-specs/SW-TMP-STAT-002-status-command.md)
+- [CON-TMP-STAT-001 — A story's status carries explicit terminal states a spec lacks](../specs/CON-TMP-STAT-001-story-status-terminal-states.md)
+- [SW-TMP-STAT-001 — The tool reads each story's implementation status](../specs/SW-TMP-STAT-001-read-story-status.md)
+- [SW-TMP-STAT-002 — The tool exposes a `clew status` command that lists each story's status](../specs/SW-TMP-STAT-002-status-command.md)
 
 **Related**
 
-- Parallels [CON-022 — A spec's status is one of the declared values](../derived-specs/CON-022-valid-status.md) — the same idea for a derived spec, whose value set differs (no `done`; `deprecated` instead).
-- Parallels [SW-031 — The spec scan reads each spec's implementation state](../derived-specs/SW-031-scan-spec-status.md) — the reader for a spec's status; a story's is read the same way but onto the story, not a traceable.
+- Parallels [CON-022 — A spec's status is one of the declared values](../specs/CON-022-valid-status.md) — the same idea for a spec, whose value set differs (no `done`; `deprecated` instead).
+- Parallels [SW-031 — The spec scan reads each spec's implementation state](../specs/SW-031-scan-spec-status.md) — the reader for a spec's status; a story's is read the same way but onto the story, not a traceable.
 - Defers its integrity check to [STR-024 — The tool runs its deterministic integrity checks as one `clew check` command](STR-024-clew-check-suite.md).

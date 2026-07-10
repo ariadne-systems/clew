@@ -7,7 +7,7 @@ They carry the same authority as `003-developer-guidelines.md` (per `000`, addit
 
 ## 1. Change Tracking
 
-Every change to a spec already in the corpus — a story or a derived spec that has been promoted into the spec tree — must be recorded in a `## Changes` section at the end of that spec.
+Every change to a spec already in the corpus — a story or a spec that has been promoted into the spec tree — must be recorded in a `## Changes` section at the end of that spec.
 
 Each entry states **when** the change was made and **why**.
 Record the date as an absolute ISO date (`YYYY-MM-DD`), not a relative one.

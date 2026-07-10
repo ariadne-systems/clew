@@ -6,7 +6,7 @@ A promoted spec never contains a temporary id
 **Status**: active
 
 **Description**
-After a successful promotion, no spec in the promoted tree — the stories and derived-specs locations and the domain model — contains a temporary id.
+After a successful promotion, no spec in the promoted tree — the stories and specs locations and the domain model — contains a temporary id.
 Promotion holds this by **refusing to finalize** when a draft to be promoted references a temporary id the promotion does not bind: a `-TMP-` marker (CON-008) whose id is not among the drafts being promoted.
 It does **not** rewrite an already-promoted spec to clear such a reference; the promoted corpus stays free of temporary ids because promotion never admits one, not because it cleans one up.
 

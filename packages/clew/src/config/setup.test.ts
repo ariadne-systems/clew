@@ -38,9 +38,7 @@ describe("setup", () => {
         ]);
         expect(config.layout.stories.prefix).toBe("STR");
         expect(existsSync(join(dir, "docs", "spec", "stories"))).toBe(true);
-        expect(existsSync(join(dir, "docs", "spec", "derived-specs"))).toBe(
-          true,
-        );
+        expect(existsSync(join(dir, "docs", "spec", "specs"))).toBe(true);
         expect(existsSync(join(dir, "docs", "spec", "drafts"))).toBe(true);
       });
 

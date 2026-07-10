@@ -40,6 +40,6 @@ Document every code in one place so users and support can look it up, and record
 
 **Realizes**
 
-- [ARCH-002 — Errors are identified by a stable, typed code](../derived-specs/ARCH-002-stable-error-codes.md)
-- [SW-004 — Errors are reported with their code](../derived-specs/SW-004-error-reporting.md)
-- [CON-006 — An error code is stable: never reused or renamed once released](../derived-specs/CON-006-error-code-stability.md)
+- [ARCH-002 — Errors are identified by a stable, typed code](../specs/ARCH-002-stable-error-codes.md)
+- [SW-004 — Errors are reported with their code](../specs/SW-004-error-reporting.md)
+- [CON-006 — An error code is stable: never reused or renamed once released](../specs/CON-006-error-code-stability.md)

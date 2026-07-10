@@ -41,7 +41,7 @@
   ],
   "schemas": {
     "story": "docs/spec/schemas/story.schema.yaml",
-    "derived-spec": "docs/spec/schemas/derived-spec.schema.yaml"
+    "spec": "docs/spec/schemas/spec.schema.yaml"
   },
   "waivers": [
     {

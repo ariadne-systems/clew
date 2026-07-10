@@ -125,7 +125,7 @@ describe("readLayout", () => {
       const layout = await readLayout(file);
 
       expect(layout.stories).toEqual({ dir: "specs/stories", prefix: "EPIC" });
-      expect(layout.derivedSpecs.dir).toBe("docs/spec/derived-specs");
+      expect(layout.specs.dir).toBe("docs/spec/specs");
     });
 
     test("defaults the whole layout when unconfigured", async () => {

@@ -150,7 +150,7 @@ describe("validateOnLoad", () => {
   verifies(SysTraceables.SYS_015_VALIDATE_ARTIFACTS_ON_LOAD, () => {
     const schemas = new Map<DocumentType, DocumentSchema>([
       [
-        "derived-spec",
+        "spec",
         {
           onError: "fail",
           fields: new Map([["title", { label: "Title", required: true }]]),
@@ -158,9 +158,9 @@ describe("validateOnLoad", () => {
       ],
     ]);
 
-    test("throws when a derived spec fails its schema", () => {
+    test("throws when a spec fails its schema", () => {
       expect(() =>
-        validateOnLoad("**Lens**: SW\n", "derived-spec", schemas, "SW-001.md"),
+        validateOnLoad("**Lens**: SW\n", "spec", schemas, "SW-001.md"),
       ).toThrow(ClewError);
     });
 
@@ -170,9 +170,9 @@ describe("validateOnLoad", () => {
       ).toEqual([]);
     });
 
-    test("a conformant derived spec yields no warnings", () => {
+    test("a conformant spec yields no warnings", () => {
       expect(
-        validateOnLoad("**Title**\n", "derived-spec", schemas, "SW-001.md"),
+        validateOnLoad("**Title**\n", "spec", schemas, "SW-001.md"),
       ).toEqual([]);
     });
   });

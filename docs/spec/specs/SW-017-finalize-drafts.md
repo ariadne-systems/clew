@@ -11,7 +11,7 @@ Before binding any id, it refuses the promotion when that closure reaches a temp
 Otherwise, for each draft in the set it:
 - binds its id by minting the draft's lens, which is the prefix of the draft's temporary id, in bound (non-temporary) mode, advancing the state (SW-002, CON-002);
 - substitutes the resolved temporary id within the drafts location — the promoted drafts and any still-unpromoted draft that references them — leaving the already-promoted spec tree and the domain model untouched (CON-014);
-- moves the draft file into its configured location — a story to `layout.stories.dir`, a derived spec to `layout.derivedSpecs.dir` (ENT-002) — renamed to the bound id.
+- moves the draft file into its configured location — a story to `layout.stories.dir`, a spec to `layout.specs.dir` (ENT-002) — renamed to the bound id.
 It returns each temporary-id → bound-id mapping.
 Finalizing is the mechanical half of promotion; deciding what a draft means for the corpus — relations, supersession, conflicts — is not part of it, and it does not commit.
 

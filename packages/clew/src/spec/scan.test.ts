@@ -17,12 +17,12 @@ type Fixture = {
 };
 
 // Lays out an artifact tree (stories under stories/, other specs under
-// derived-specs/) and writes a config whose `layout` points at those
+// specs/) and writes a config whose `layout` points at those
 // directories, so `scan` reads the locations from configuration.
 async function fixture(idFilenames: string[]): Promise<Fixture> {
   const dir = await mkdtemp(join(tmpdir(), "clew-scan-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
-  const derivedDir = join(dir, "docs", "spec", "derived-specs");
+  const derivedDir = join(dir, "docs", "spec", "specs");
   await mkdir(storiesDir, { recursive: true });
   await mkdir(derivedDir, { recursive: true });
   for (const name of idFilenames) {
@@ -36,7 +36,7 @@ async function fixture(idFilenames: string[]): Promise<Fixture> {
       idGeneration: { mode: "sequential", padding: 3 },
       layout: {
         stories: { dir: storiesDir, prefix: "STR" },
-        derivedSpecs: { dir: derivedDir },
+        specs: { dir: derivedDir },
       },
     }),
     "utf8",
@@ -216,7 +216,7 @@ describe("duplicate ids", () => {
       const { storiesDir, derivedDir, configFile } = await fixture([]);
       // The same traceable id in both roots. `stories/` is walked first, so its
       // file is seen first; the message must still be sorted, putting the
-      // `derived-specs` path (which sorts before `stories`) ahead of it.
+      // `specs` path (which sorts before `stories`) ahead of it.
       await writeFile(join(storiesDir, "SW-013-z.md"), "x", "utf8");
       await writeFile(join(derivedDir, "SW-013-a.md"), "x", "utf8");
 
@@ -259,7 +259,7 @@ describe("duplicate ids", () => {
           idGeneration: { mode: "sequential", padding: 3 },
           layout: {
             stories: { dir: specDir, prefix: "STR" },
-            derivedSpecs: { dir: specDir },
+            specs: { dir: specDir },
           },
         }),
         "utf8",
@@ -274,14 +274,14 @@ describe("duplicate ids", () => {
 
 describe("scan-time schema validation", () => {
   verifies(SysTraceables.SYS_015_VALIDATE_ARTIFACTS_ON_LOAD, () => {
-    // A project whose `derived-spec` schema requires a `Title` field at the given
-    // severity, with one derived spec carrying the supplied body.
+    // A project whose `spec` schema requires a `Title` field at the given
+    // severity, with one spec carrying the supplied body.
     async function schemaProject(
       specBody: string,
       onError = "fail",
     ): Promise<string> {
       const dir = await mkdtemp(join(tmpdir(), "clew-scan-"));
-      const derivedDir = join(dir, "docs", "spec", "derived-specs");
+      const derivedDir = join(dir, "docs", "spec", "specs");
       await mkdir(derivedDir, { recursive: true });
       await writeFile(
         join(dir, "ds.yml"),
@@ -298,16 +298,16 @@ describe("scan-time schema validation", () => {
               dir: join(dir, "docs", "spec", "stories"),
               prefix: "STR",
             },
-            derivedSpecs: { dir: derivedDir },
+            specs: { dir: derivedDir },
           },
-          schemas: { "derived-spec": "ds.yml" },
+          schemas: { spec: "ds.yml" },
         }),
         "utf8",
       );
       return configFile;
     }
 
-    test("a derived spec missing a fail-severity required field rejects the scan", async () => {
+    test("a spec missing a fail-severity required field rejects the scan", async () => {
       const configFile = await schemaProject("**Lens**: SW\n");
 
       await expect(scan({ configFile })).rejects.toMatchObject({
@@ -315,7 +315,7 @@ describe("scan-time schema validation", () => {
       });
     });
 
-    test("a conformant derived spec scans", async () => {
+    test("a conformant spec scans", async () => {
       const configFile = await schemaProject("**Title**\n\n**Lens**: SW\n");
 
       const specs = await scan({ configFile });
@@ -333,7 +333,7 @@ describe("scan-time schema validation", () => {
 
     test("a malformed schema is rejected, naming it", async () => {
       const dir = await mkdtemp(join(tmpdir(), "clew-scan-"));
-      const derivedDir = join(dir, "docs", "spec", "derived-specs");
+      const derivedDir = join(dir, "docs", "spec", "specs");
       await mkdir(derivedDir, { recursive: true });
       await writeFile(join(dir, "ds.yml"), "id:\n  pattern: x\n", "utf8");
       await writeFile(join(derivedDir, "SW-001-a.md"), "**Title**\n", "utf8");
@@ -346,9 +346,9 @@ describe("scan-time schema validation", () => {
               dir: join(dir, "docs", "spec", "stories"),
               prefix: "STR",
             },
-            derivedSpecs: { dir: derivedDir },
+            specs: { dir: derivedDir },
           },
-          schemas: { "derived-spec": "ds.yml" },
+          schemas: { spec: "ds.yml" },
         }),
         "utf8",
       );

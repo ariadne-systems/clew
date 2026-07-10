@@ -33,14 +33,14 @@ Detection is a read-only check folded into the existing scan walk: the first fil
 
 **Realizes**
 
-- [SYS-003 — The system allocates unique, stable, persistent spec ids](../derived-specs/SYS-003-stable-spec-identity.md)
+- [SYS-003 — The system allocates unique, stable, persistent spec ids](../specs/SYS-003-stable-spec-identity.md)
 
 **Realizes** (new specs)
 
-- [CON-025 — A bound spec id is declared by exactly one file](../derived-specs/CON-025-one-file-per-spec-id.md)
+- [CON-025 — A bound spec id is declared by exactly one file](../specs/CON-025-one-file-per-spec-id.md)
 
 **Related**
 
-- Refines [SW-013 — Scan the configured artifacts into the set of scanned specs](../derived-specs/SW-013-scan-traceables.md) — it now rejects a duplicate id instead of collapsing it.
-- Complements [CON-002 — A sequence number is never reused](../derived-specs/CON-002-sequence-number-never-reused.md) — allocation never reuses within a state file; this catches a duplicate that arises outside one, such as a branch merge.
-- Mirrors [CON-013 — Each scanned spec belongs to exactly one spec set](../derived-specs/CON-013-spec-set-partition.md) — the same fail-fast-on-an-ambiguous-corpus discipline.
+- Refines [SW-013 — Scan the configured artifacts into the set of scanned specs](../specs/SW-013-scan-traceables.md) — it now rejects a duplicate id instead of collapsing it.
+- Complements [CON-002 — A sequence number is never reused](../specs/CON-002-sequence-number-never-reused.md) — allocation never reuses within a state file; this catches a duplicate that arises outside one, such as a branch merge.
+- Mirrors [CON-013 — Each scanned spec belongs to exactly one spec set](../specs/CON-013-spec-set-partition.md) — the same fail-fast-on-an-ambiguous-corpus discipline.

@@ -18,7 +18,7 @@ afterEach(() => {
 async function setupProjectDir(): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "clew-cli-promote-"));
   await writeFile(join(dir, ".clewrc.json"), JSON.stringify({}), "utf8");
-  const draftsDir = join(dir, "docs", "spec", "drafts", "derived-specs");
+  const draftsDir = join(dir, "docs", "spec", "drafts", "specs");
   await mkdir(draftsDir, { recursive: true });
   await writeFile(
     join(draftsDir, "SW-TMP-deadbeef01-scan.md"),
@@ -54,7 +54,7 @@ describe("promote output", () => {
 
       expect(stdout()).toContain("SW-TMP-deadbeef01 -> SW-001");
       const moved = await readFile(
-        join(dir, "docs", "spec", "derived-specs", "SW-001-scan.md"),
+        join(dir, "docs", "spec", "specs", "SW-001-scan.md"),
         "utf8",
       );
       expect(moved).toBe("Spec SW-001\n");

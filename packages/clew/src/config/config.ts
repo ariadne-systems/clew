@@ -44,7 +44,7 @@ export type IdGenerationConfig = {
   padding: number;
 };
 
-/** A lens: a derived-spec kind and a valid spec prefix, with a human definition (ADR-0003). */
+/** A lens: a spec kind and a valid spec prefix, with a human definition (ADR-0003). */
 export type Lens = {
   id: string;
   description: string;
@@ -95,7 +95,7 @@ export type SpecSetMatcher = {
 /** Where each kind of artifact lives, and the story prefix. */
 export type Layout = {
   stories: { dir: string; prefix: string };
-  derivedSpecs: { dir: string };
+  specs: { dir: string };
   drafts: { dir: string };
   state: { file: string };
 };
@@ -103,7 +103,7 @@ export type Layout = {
 /** The default layout — the opinionated template (ADR-0001 D8). */
 export const DEFAULT_LAYOUT: Layout = {
   stories: { dir: "docs/spec/stories", prefix: "STR" },
-  derivedSpecs: { dir: "docs/spec/derived-specs" },
+  specs: { dir: "docs/spec/specs" },
   drafts: { dir: "docs/spec/drafts" },
   state: { file: ".clew/state.json" },
 };
@@ -125,7 +125,7 @@ export async function readIdGenerationConfig(
 }
 
 /**
- * Reads the `lenses` section: the project's derived-spec kinds (ADR-0003).
+ * Reads the `lenses` section: the project's spec kinds (ADR-0003).
  * A missing or empty section falls back to the default lens set.
  */
 export async function readLenses(
@@ -157,7 +157,7 @@ export async function readLayout(
 ): Promise<Layout> {
   const layout = asObject((await readRawConfig(file)).layout);
   const stories = asObject(layout.stories);
-  const derivedSpecs = asObject(layout.derivedSpecs);
+  const specs = asObject(layout.specs);
   const drafts = asObject(layout.drafts);
   const state = asObject(layout.state);
   return {
@@ -165,8 +165,8 @@ export async function readLayout(
       dir: asString(stories.dir, DEFAULT_LAYOUT.stories.dir),
       prefix: asString(stories.prefix, DEFAULT_LAYOUT.stories.prefix),
     },
-    derivedSpecs: {
-      dir: asString(derivedSpecs.dir, DEFAULT_LAYOUT.derivedSpecs.dir),
+    specs: {
+      dir: asString(specs.dir, DEFAULT_LAYOUT.specs.dir),
     },
     drafts: { dir: asString(drafts.dir, DEFAULT_LAYOUT.drafts.dir) },
     state: { file: asString(state.file, DEFAULT_LAYOUT.state.file) },
@@ -396,11 +396,11 @@ export async function readUnexclude(
 }
 
 /** The configured per-document-type schema files: a document type mapped to its schema file path. */
-export type SchemaConfig = { story?: string; "derived-spec"?: string };
+export type SchemaConfig = { story?: string; spec?: string };
 
 /**
  * Reads the `schemas` section: a per-document-type validation schema file,
- * keyed by `story` or `derived-spec`. A missing or malformed section yields no
+ * keyed by `story` or `spec`. A missing or malformed section yields no
  * configured schemas — only the pinned core is enforced.
  */
 export async function readSchemas(
@@ -411,8 +411,8 @@ export async function readSchemas(
   if (typeof raw.story === "string") {
     config.story = raw.story;
   }
-  if (typeof raw["derived-spec"] === "string") {
-    config["derived-spec"] = raw["derived-spec"];
+  if (typeof raw["spec"] === "string") {
+    config["spec"] = raw["spec"];
   }
   return config;
 }

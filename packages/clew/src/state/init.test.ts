@@ -12,7 +12,7 @@ type Fixture = {
 };
 
 // Lays out an artifact tree under <dir>/docs/spec (stories under stories/, other
-// specs under derived-specs/) and writes a config whose `layout` points at those
+// specs under specs/) and writes a config whose `layout` points at those
 // directories, so `init` reads the locations from configuration.
 // Optionally seeds the state so the never-lower and idempotency cases can start
 // from a mark.
@@ -22,7 +22,7 @@ async function fixture(
 ): Promise<Fixture> {
   const dir = await mkdtemp(join(tmpdir(), "clew-init-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
-  const derivedDir = join(dir, "docs", "spec", "derived-specs");
+  const derivedDir = join(dir, "docs", "spec", "specs");
   await mkdir(storiesDir, { recursive: true });
   await mkdir(derivedDir, { recursive: true });
   for (const name of idFilenames) {
@@ -36,7 +36,7 @@ async function fixture(
       idGeneration: { mode: "sequential", padding: 3 },
       layout: {
         stories: { dir: storiesDir, prefix: "STR" },
-        derivedSpecs: { dir: derivedDir },
+        specs: { dir: derivedDir },
       },
     }),
     "utf8",

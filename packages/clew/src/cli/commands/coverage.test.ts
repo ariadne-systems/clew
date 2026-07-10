@@ -27,7 +27,7 @@ async function setupProjectDir(): Promise<string> {
     }),
     "utf8",
   );
-  const specsDir = join(dir, "docs", "spec", "derived-specs");
+  const specsDir = join(dir, "docs", "spec", "specs");
   await mkdir(specsDir, { recursive: true });
   await writeFile(
     join(specsDir, "SW-001-a.md"),

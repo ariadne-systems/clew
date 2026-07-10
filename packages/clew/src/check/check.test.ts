@@ -52,7 +52,7 @@ const tsGenerator: Generator = {
 const resolveGenerator = (name: string): Generator | undefined =>
   name === "typescript" ? tsGenerator : undefined;
 
-// Lays out an empty spec corpus (stories, derived specs) with a config whose
+// Lays out an empty spec corpus (stories, specs) with a config whose
 // layout points at those directories, so `check` reads its locations from
 // configuration.
 async function project(
@@ -60,7 +60,7 @@ async function project(
 ): Promise<Project> {
   const dir = await mkdtemp(join(tmpdir(), "clew-check-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
-  const derivedDir = join(dir, "docs", "spec", "derived-specs");
+  const derivedDir = join(dir, "docs", "spec", "specs");
   await mkdir(storiesDir, { recursive: true });
   await mkdir(derivedDir, { recursive: true });
   await writeFile(
@@ -68,7 +68,7 @@ async function project(
     JSON.stringify({
       layout: {
         stories: { dir: storiesDir, prefix: "STR" },
-        derivedSpecs: { dir: derivedDir },
+        specs: { dir: derivedDir },
         drafts: { dir: join(dir, "docs", "spec", "drafts") },
       },
       generators: [{ type: "typescript", outputDir: "out" }],
@@ -124,7 +124,7 @@ describe("the check suite", () => {
         expect(result.findings).toEqual([
           {
             check: "reference-rot",
-            file: "docs/spec/derived-specs/SW-001-a.md",
+            file: "docs/spec/specs/SW-001-a.md",
             line: 2,
             message: 'link to "SW-099-missing.md" resolves to nothing',
           },
@@ -135,7 +135,7 @@ describe("the check suite", () => {
         const p = await project();
         await writeFile(
           join(p.storiesDir, "STR-001-x.md"),
-          "Realizes [SW-001 — a](../derived-specs/SW-001-a.md).\n",
+          "Realizes [SW-001 — a](../specs/SW-001-a.md).\n",
           "utf8",
         );
         await writeFile(join(p.derivedDir, "SW-001-a.md"), "Spec a\n", "utf8");
@@ -220,7 +220,7 @@ describe("corpus invariant checks", () => {
         ).toEqual([
           {
             check: "invalid-status",
-            file: "docs/spec/derived-specs/SW-001-a.md",
+            file: "docs/spec/specs/SW-001-a.md",
             line: 3,
             message:
               'unrecognized status "in-progress"; expected one of planned, active, deprecated',
@@ -389,7 +389,7 @@ describe("exclusions apply to every check", () => {
   verifies(SwTraceables.SW_024_EXCLUDE_MATCHING_PATHS, () => {
     test("an excluded spec file is not checked", async () => {
       const p = await project({
-        exclude: ["docs/spec/derived-specs/SW-001-a.md"],
+        exclude: ["docs/spec/specs/SW-001-a.md"],
       });
       await writeFile(
         join(p.derivedDir, "SW-001-a.md"),
@@ -407,11 +407,11 @@ describe("exclusions apply to every check", () => {
 
     test("a link to an excluded target is not validated", async () => {
       const p = await project({
-        exclude: ["docs/spec/derived-specs/SW-002-b.md"],
+        exclude: ["docs/spec/specs/SW-002-b.md"],
       });
       await writeFile(
         join(p.storiesDir, "STR-001-x.md"),
-        "See [b](../derived-specs/SW-002-b.md#no-such-heading).\n",
+        "See [b](../specs/SW-002-b.md#no-such-heading).\n",
         "utf8",
       );
       await writeFile(join(p.derivedDir, "SW-002-b.md"), "## Real\n", "utf8");
@@ -429,7 +429,7 @@ describe("exclusions apply to every check", () => {
 describe("the document-schema check", () => {
   verifies(SysTraceables.SYS_015_VALIDATE_ARTIFACTS_ON_LOAD, () => {
     test("reports a document's project-field violation as a finding", async () => {
-      const p = await project({ schemas: { "derived-spec": "ds.yml" } });
+      const p = await project({ schemas: { spec: "ds.yml" } });
       await writeFile(
         join(p.root, "ds.yml"),
         "onError: warn\nfields:\n  Title:\n    required: true\n",
@@ -450,9 +450,7 @@ describe("the document-schema check", () => {
         (f) => f.check === "document-schema",
       );
       expect(schemaFindings).toHaveLength(1);
-      expect(schemaFindings[0]?.file).toBe(
-        "docs/spec/derived-specs/SW-001-a.md",
-      );
+      expect(schemaFindings[0]?.file).toBe("docs/spec/specs/SW-001-a.md");
       expect(schemaFindings[0]?.message).toContain(
         'warn: missing required field "Title"',
       );

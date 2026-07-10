@@ -54,7 +54,7 @@ export async function scan(options: ScanOptions = {}): Promise<ScannedSpec[]> {
     loadSchemas(options.configFile, projectRoot),
   ]);
   const lensIds = new Set(lenses.map((lens) => lens.id));
-  const dirs = [layout.stories.dir, layout.derivedSpecs.dir];
+  const dirs = [layout.stories.dir, layout.specs.dir];
   // Each traceable id mapped to where it was found, so a second file declaring it
   // is rejected — and the same file reached twice (overlapping roots) is not.
   const seen = new Map<string, SeenSpec>();
@@ -191,9 +191,9 @@ const recordTraceable: (
       );
     }
     const content = await readFile(filePath, "utf8");
-    // Validate the derived spec against its schema as it is read; a fail-severity
+    // Validate the spec against its schema as it is read; a fail-severity
     // violation throws, warnings are surfaced by `clew check`.
-    validateOnLoad(content, "derived-spec", schemas, filePath);
+    validateOnLoad(content, "spec", schemas, filePath);
     const status = readSpecStatus(content, filePath);
     seen.set(id, {
       path: filePath,

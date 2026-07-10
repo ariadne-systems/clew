@@ -13,16 +13,16 @@ Its shape grows only by adding attributes or sections; existing ones are never c
 Every attribute has a documented default, so a missing file or attribute is equivalent to that default (SW-009).
 The defaults are the opinionated template (ADR-0001 D8); a project overrides only what differs.
 
-An id is `<prefix>-<number>`, where the number is zero-padded to `idGeneration.padding` and the prefix is a configured one — a `lenses[].id` for a derived spec, or `layout.stories.prefix`.
+An id is `<prefix>-<number>`, where the number is zero-padded to `idGeneration.padding` and the prefix is a configured one — a `lenses[].id` for a spec, or `layout.stories.prefix`.
 The set of configured prefixes is the single source of truth for id validity, so no separate id pattern is configured (ADR-0003 subsumes the former `idToken.pattern`).
 
 | Attribute | Type | Description |
 | --- | --- | --- |
 | `idGeneration.mode` | `"sequential" \| "opaque"` | The id-generation scheme (ARCH-001). Defaults to `sequential`. |
 | `idGeneration.padding` | `Integer` | Width to which sequential id numbers are zero-padded (CON-003). Defaults to `3`. |
-| `lenses` | `List<{ id: String, description: String }>` | The derived-spec kinds (the `Lens` field) and the valid spec prefixes (ADR-0003). Each carries a one-line human definition. Defaults to `STK, SYS, SW, ARCH, NF, CON`. |
+| `lenses` | `List<{ id: String, description: String }>` | The spec kinds (the `Lens` field) and the valid spec prefixes (ADR-0003). Each carries a one-line human definition. Defaults to `STK, SYS, SW, ARCH, NF, CON`. |
 | `layout.stories` | `{ dir: String, prefix: String }` | Where stories live and their id prefix. Defaults to `{ "docs/spec/stories", "STR" }`. |
-| `layout.derivedSpecs` | `{ dir: String }` | Where derived specs live; their prefixes are the `lenses` ids. Defaults to `docs/spec/derived-specs`. |
+| `layout.specs` | `{ dir: String }` | Where specs live; their prefixes are the `lenses` ids. Defaults to `docs/spec/specs`. |
 | `layout.drafts` | `{ dir: String }` | Where unapproved drafts live (mirrors the spec tree). Defaults to `docs/spec/drafts`. |
 | `layout.state` | `{ file: String }` | The StateStore file (CON-001). Defaults to `.clew/state.json`. |
 | `generators` | `List<{ type: String, outputDir?: String }>` | The language generators to run; each declares its target-language `type` and the directory it writes into, relative to the project root (SW-014). A generator's `outputDir` defaults to that generator's idiomatic location. Optional; with none configured, nothing is generated. |
@@ -31,7 +31,7 @@ The set of configured prefixes is the single source of truth for id validity, so
 | `exclude` | `List<String>` | Repository-root-relative globs (CON-018); a matching path is excluded from the code scan and produces no anchor (SW-024, SW-025). A user `exclude` is absolute in the exclusion precedence (CON-017). Optional. |
 | `unexclude` | `List<String>` | Repository-root-relative globs (CON-018) that re-include a path a built-in default (CON-016) would exclude; never overrides a user `exclude` (CON-017). Optional. |
 | `waivers` | `List<{ id?: String, pattern?: String, reason: String }>` | The committed coverage waiver list: each entry targets a spec `id` or a glob `pattern` over ids (exactly one), with a reason, and waives a missing *test* — a matching spec that is implemented but unverified is reported waived rather than an open gap (SW-027, SW-030). A spec missing its realizing code is never waived (CON-021). A waiver that waives nothing is reported as stale. Optional. |
-| `schemas` | `{ story?: String, "derived-spec"?: String }` | Per-document-type validation schema files; clew validates each document against its type's schema when it reads it (SW-036) — the pinned core merged with the project's required fields and enums (ARCH-007). Optional. |
+| `schemas` | `{ story?: String, "spec"?: String }` | Per-document-type validation schema files; clew validates each document against its type's schema when it reads it (SW-036) — the pinned core merged with the project's required fields and enums (ARCH-007). Optional. |
 
 **Rationale**
 Pinning the configuration as an explicit entity fixes the one shape every command reads, and the every-attribute-has-a-default invariant is what lets a project state only what it changes.

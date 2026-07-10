@@ -8,5 +8,5 @@ test("help output names the program", () => {
 
 test("an unknown option exits non-zero", () => {
   const program = buildProgram().exitOverride();
-  expect(() => program.parse(["node", "ariadne", "--bogus"])).toThrow();
+  expect(() => program.parse(["node", "clew", "--bogus"])).toThrow();
 });

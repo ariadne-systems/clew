@@ -28,7 +28,7 @@ async function setupProjectDir(idFilenames: string[]): Promise<string> {
     }),
     "utf8",
   );
-  const specDir = join(dir, "docs", "spec", "derived-specs");
+  const specDir = join(dir, "docs", "spec", "specs");
   await mkdir(specDir, { recursive: true });
   for (const name of idFilenames) {
     // Specs must be `active` to be generated; the status filter drops `planned`.

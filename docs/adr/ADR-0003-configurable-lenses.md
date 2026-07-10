@@ -6,8 +6,8 @@
 
 ## Context
 
-Every derived spec carries a `Type` (SW, CON, ARCH, NF, …).
-The valid set is hard-coded twice in `derived-spec.schema.json` — once as the `id.components.prefix` enum and again as the `Type` field enum — while prefix validity at mint time is enforced separately by a configured regular expression (`idToken.pattern`, CON-005).
+Every spec carries a `Type` (SW, CON, ARCH, NF, …).
+The valid set is hard-coded twice in `spec.schema.json` — once as the `id.components.prefix` enum and again as the `Type` field enum — while prefix validity at mint time is enforced separately by a configured regular expression (`idToken.pattern`, CON-005).
 So the spec-type vocabulary lives in three places, and in none of them is it project-configurable or self-describing.
 
 The tool is agent-driven: an agent derives the specs of each type.
@@ -46,7 +46,7 @@ A `lens` field separate from the id prefix: two sources of truth for one vocabul
 
 ## Consequences
 
-A broad but mostly mechanical rename of `Type` to `Lens` across every derived spec and the schema.
+A broad but mostly mechanical rename of `Type` to `Lens` across every spec and the schema.
 
 `.clewrc.json` gains a `lenses` section; the schema's static enums give way to config; `idToken.pattern` is largely subsumed (a valid id is a configured lens followed by a number of the configured width).
 

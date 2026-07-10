@@ -89,7 +89,7 @@ type CheckContext = {
   generators: readonly Generator[];
   /** The compiled exclusion rules every check honours. */
   exclusion: ExclusionRules;
-  /** The spec-tree markdown files (stories, derived specs), walked once and shared by the corpus checks. */
+  /** The spec-tree markdown files (stories, specs), walked once and shared by the corpus checks. */
   specTreeFiles: readonly string[];
   /** The loaded per-document-type schemas; an empty map when none is configured. */
   schemas: ReadonlyMap<DocumentType, DocumentSchema>;
@@ -396,7 +396,7 @@ function commentSpecIdFindings(
 }
 
 /**
- * The document-schema member: each story and derived spec satisfies its type's
+ * The document-schema member: each story and spec satisfies its type's
  * schema — its project-required fields are present and its inline values are in
  * range. Both severities are reported here, since `check` is the standing
  * gate; the scan and promote block on `fail`. With no schema configured, nothing is
@@ -416,7 +416,7 @@ const documentSchema: (context: CheckContext) => Promise<RawFinding[]> =
         // directory it sits in.
         const type: DocumentType = basename(file).startsWith(`${storyPrefix}-`)
           ? "story"
-          : "derived-spec";
+          : "spec";
         const schema = context.schemas.get(type);
         if (schema !== undefined) {
           const content = await readFile(
@@ -452,7 +452,7 @@ function withinSpecTree(dir: string, specTreeDirs: readonly string[]): boolean {
 }
 
 /**
- * The markdown files in the spec-tree directories (stories, derived specs), as
+ * The markdown files in the spec-tree directories (stories, specs), as
  * project-root-relative forward-slash paths — walked from the project root and
  * honouring the exclusions, the same walk and root the code check uses, so every
  * check names its file the same way.
@@ -462,7 +462,7 @@ async function specTreeMarkdown(
 ): Promise<string[]> {
   const specTreeDirs = [
     context.layout.stories.dir,
-    context.layout.derivedSpecs.dir,
+    context.layout.specs.dir,
   ].map((dir) => toRelative(context.projectRoot, dir));
   return walkProject(context.projectRoot, {
     descend: (dir) =>

@@ -11,7 +11,7 @@ import { ClewError, ErrorCode } from "../errors.js";
 export type SchemaSeverity = "warn" | "fail";
 
 /** A document type that carries a schema. */
-export type DocumentType = "story" | "derived-spec";
+export type DocumentType = "story" | "spec";
 
 /** A project-defined rule for one document field. */
 export interface FieldRule {

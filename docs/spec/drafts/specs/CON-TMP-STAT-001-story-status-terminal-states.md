@@ -26,4 +26,4 @@ A story's status produces no traceable and leaves coverage unchanged.
 
 **Related**
 
-- Parallels [CON-022 — A spec's status is one of the declared values](CON-022-valid-status.md) — the same fail-fast rule for a derived spec, whose value set differs: `planned`/`active`/`deprecated`, with no `done` or `dropped` because coverage carries done and `deprecated` carries retirement.
+- Parallels [CON-022 — A spec's status is one of the declared values](CON-022-valid-status.md) — the same fail-fast rule for a spec, whose value set differs: `planned`/`active`/`deprecated`, with no `done` or `dropped` because coverage carries done and `deprecated` carries retirement.

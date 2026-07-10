@@ -44,16 +44,16 @@ The generated enum exposes its spec id through an `id()` accessor, as the skelet
 
 **Realizes**
 
-- [SYS-008 — The system supports arbitrary target languages through pluggable generators](../derived-specs/SYS-008-language-neutral-extensibility.md)
+- [SYS-008 — The system supports arbitrary target languages through pluggable generators](../specs/SYS-008-language-neutral-extensibility.md)
 
 **Realizes** (new specs)
 
-- [SW-037 — The Java generator emits per-set enums and anchors code with generated annotations](../derived-specs/SW-037-java-annotation-anchored-output.md)
-- [SW-038 — Discover anchors in Java via a lexical scan](../derived-specs/SW-038-discover-anchors-java.md)
+- [SW-037 — The Java generator emits per-set enums and anchors code with generated annotations](../specs/SW-037-java-annotation-anchored-output.md)
+- [SW-038 — Discover anchors in Java via a lexical scan](../specs/SW-038-discover-anchors-java.md)
 
 **Related**
 
 - Parallels [STR-014 — Emit the TypeScript generator's traceable output](STR-014-typescript-generator.md) — the same completion, for the Java target.
-- Implements [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](../derived-specs/ARCH-003-generator-interface.md) and [ARCH-004 — Generation and reading back are dual operations](../derived-specs/ARCH-004-generator-discovers-markers.md) for Java.
-- Uses [ARCH-006 — Comment detection is a generator capability](../derived-specs/ARCH-006-pluggable-comment-finders.md) — Java comment identification through the shared C-family lexer.
+- Implements [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](../specs/ARCH-003-generator-interface.md) and [ARCH-004 — Generation and reading back are dual operations](../specs/ARCH-004-generator-discovers-markers.md) for Java.
+- Uses [ARCH-006 — Comment detection is a generator capability](../specs/ARCH-006-pluggable-comment-finders.md) — Java comment identification through the shared C-family lexer.
 - Builds on the skeleton generators from [STR-011 — the `clew spec` command](STR-011-spec-command.md).

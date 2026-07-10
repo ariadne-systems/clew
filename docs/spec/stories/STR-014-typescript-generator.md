@@ -51,6 +51,6 @@ This implements, for the TypeScript target, the generator contract the core depe
 
 **Realizes**
 
-- [SW-018 — The TypeScript generator emits per-set string enums and an anchoring helper module](../derived-specs/SW-018-typescript-output.md)
+- [SW-018 — The TypeScript generator emits per-set string enums and an anchoring helper module](../specs/SW-018-typescript-output.md)
 
 This story refines `ARCH-003` and `SW-014` for the TypeScript target and builds on the `spec` command skeleton (`STR-011`).

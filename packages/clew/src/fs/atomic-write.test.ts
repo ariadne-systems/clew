@@ -5,7 +5,7 @@ import { describe, expect, test } from "vitest";
 import { writeFileAtomic, writeFilesAtomic } from "./atomic-write.js";
 
 async function tempDir(): Promise<string> {
-  return mkdtemp(join(tmpdir(), "ariadne-atomic-"));
+  return mkdtemp(join(tmpdir(), "clew-atomic-"));
 }
 
 describe("atomic file writes", () => {

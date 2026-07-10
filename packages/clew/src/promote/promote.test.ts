@@ -18,17 +18,17 @@ type Project = {
   draftsDir: string;
 };
 
-// Lays out an empty project (stories, derived specs, drafts) with a config whose
+// Lays out an empty project (stories, specs, drafts) with a config whose
 // layout points at those directories, so `promote` reads its locations from
 // configuration. State is unseeded, so the first bound id for a prefix
 // is number 1.
 async function project(): Promise<Project> {
   const dir = await mkdtemp(join(tmpdir(), "clew-promote-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
-  const derivedDir = join(dir, "docs", "spec", "derived-specs");
+  const derivedDir = join(dir, "docs", "spec", "specs");
   const draftsDir = join(dir, "docs", "spec", "drafts");
   await mkdir(join(draftsDir, "stories"), { recursive: true });
-  await mkdir(join(draftsDir, "derived-specs"), { recursive: true });
+  await mkdir(join(draftsDir, "specs"), { recursive: true });
   await mkdir(storiesDir, { recursive: true });
   await mkdir(derivedDir, { recursive: true });
   const configFile = join(dir, ".clewrc.json");
@@ -37,7 +37,7 @@ async function project(): Promise<Project> {
     JSON.stringify({
       layout: {
         stories: { dir: storiesDir, prefix: "STR" },
-        derivedSpecs: { dir: derivedDir },
+        specs: { dir: derivedDir },
         drafts: { dir: draftsDir },
       },
     }),
@@ -106,13 +106,13 @@ describe("finalizing drafts", () => {
         const p = await project();
         await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "SW-TMP-001-solo.md",
           "Spec SW-TMP-001\n",
         );
         await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "CON-TMP-TS-002-author.md",
           "Spec CON-TMP-TS-002\n",
         );
@@ -140,14 +140,14 @@ describe("finalizing drafts", () => {
         const p = await project();
         await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "SW-TMP-deadbeef01-scan.md",
           "Spec SW-TMP-deadbeef01\n",
         );
         // A draft not in the promoted set that references the one being promoted.
         const unpromoted = await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "CON-TMP-cafe123456-rule.md",
           "Relates to SW-TMP-deadbeef01.\n",
         );
@@ -171,23 +171,13 @@ describe("finalizing drafts", () => {
       test("a temporary id that is a string-prefix of another is substituted without corrupting the longer one", async () => {
         const p = await project();
         // The two temporary ids share a prefix: `SW-TMP-1` is the head of `SW-TMP-10`.
-        await writeDraft(
-          p.draftsDir,
-          "derived-specs",
-          "SW-TMP-1-low.md",
-          "low\n",
-        );
-        await writeDraft(
-          p.draftsDir,
-          "derived-specs",
-          "SW-TMP-10-high.md",
-          "high\n",
-        );
+        await writeDraft(p.draftsDir, "specs", "SW-TMP-1-low.md", "low\n");
+        await writeDraft(p.draftsDir, "specs", "SW-TMP-10-high.md", "high\n");
         // A still-unpromoted draft references both; the shorter id's substitution
         // must not rewrite a substring of the longer one.
         const ref = await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "CON-TMP-aaaa000099-ref.md",
           "See SW-TMP-10 and SW-TMP-1.\n",
         );
@@ -212,7 +202,7 @@ describe("finalizing drafts", () => {
         const p = await project();
         const from = await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "SW-TMP-001-note.txt",
           "Spec SW-TMP-001\n",
         );
@@ -263,13 +253,13 @@ describe("resolving the promotion set", () => {
         // The spec references its sibling — fine, because the story lists both.
         await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "SW-TMP-bbbb000002-behaviour.md",
           "Spec SW-TMP-bbbb000002, held by CON-TMP-cccc000003\n",
         );
         await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "CON-TMP-cccc000003-rule.md",
           "Spec CON-TMP-cccc000003\n",
         );
@@ -302,13 +292,13 @@ describe("resolving the promotion set", () => {
         );
         await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "SW-TMP-bbbb000002-a.md",
           "Spec SW-TMP-bbbb000002, held by CON-TMP-cccc000003\n",
         );
         await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "CON-TMP-cccc000003-b.md",
           "Spec CON-TMP-cccc000003\n",
         );
@@ -340,7 +330,7 @@ describe("resolving the promotion set", () => {
         const p = await project();
         await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "CON-TMP-aaaa000001-followon.md",
           "A follow-on spec referencing only bound ids: SYS-005.\n",
         );
@@ -370,13 +360,13 @@ describe("resolving the promotion set", () => {
         // A spec named directly that references another, still-unbound draft.
         await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "SW-TMP-aaaa000001-a.md",
           "Spec SW-TMP-aaaa000001, held by CON-TMP-bbbb000002\n",
         );
         await writeDraft(
           p.draftsDir,
-          "derived-specs",
+          "specs",
           "CON-TMP-bbbb000002-b.md",
           "Spec CON-TMP-bbbb000002\n",
         );
@@ -411,12 +401,7 @@ describe("resolving the promotion set", () => {
           "STR-TMP-1111111111-a.md",
           "a\n",
         );
-        await writeDraft(
-          p.draftsDir,
-          "derived-specs",
-          "SW-TMP-2222222222-b.md",
-          "b\n",
-        );
+        await writeDraft(p.draftsDir, "specs", "SW-TMP-2222222222-b.md", "b\n");
 
         const result = await promote({
           configFile: p.configFile,
@@ -468,12 +453,7 @@ describe("resolving the promotion set", () => {
 
       test("a named root that does not exist fails with E_DRAFT_NOT_FOUND", async () => {
         const p = await project();
-        await writeDraft(
-          p.draftsDir,
-          "derived-specs",
-          "SW-TMP-deadbeef01-x.md",
-          "x\n",
-        );
+        await writeDraft(p.draftsDir, "specs", "SW-TMP-deadbeef01-x.md", "x\n");
 
         await expect(
           promote({
@@ -521,7 +501,7 @@ describe("the promoted tree is never rewritten", () => {
       const p = await project();
       await writeDraft(
         p.draftsDir,
-        "derived-specs",
+        "specs",
         "SW-TMP-001-scan.md",
         "Spec SW-TMP-001\n",
       );
@@ -553,7 +533,7 @@ describe("atomic finalization", () => {
       const p = await project();
       const draftPath = await writeDraft(
         p.draftsDir,
-        "derived-specs",
+        "specs",
         "SW-TMP-001-x.md",
         "Spec SW-TMP-001\n",
       );
@@ -561,7 +541,7 @@ describe("atomic finalization", () => {
       // if the run aborts.
       const ref = await writeDraft(
         p.draftsDir,
-        "derived-specs",
+        "specs",
         "CON-TMP-cafe000099-ref.md",
         "See SW-TMP-001.\n",
       );
@@ -591,7 +571,7 @@ describe("atomic finalization", () => {
       const p = await project();
       await writeDraft(
         p.draftsDir,
-        "derived-specs",
+        "specs",
         "SW-TMP-001-x.md",
         "Spec SW-TMP-001\n",
       );
@@ -612,7 +592,7 @@ describe("atomic finalization", () => {
       const p = await project();
       await writeDraft(
         p.draftsDir,
-        "derived-specs",
+        "specs",
         "SW-TMP-001-x.md",
         "Spec SW-TMP-001\n",
       );
@@ -620,7 +600,7 @@ describe("atomic finalization", () => {
       // temporary id, but the suffix marks it as not a draft.
       const leftover = await writeDraft(
         p.draftsDir,
-        "derived-specs",
+        "specs",
         "SW-TMP-009-y.md.tmp",
         "leftover\n",
       );
@@ -645,7 +625,7 @@ describe("rejected drafts", () => {
       const p = await project();
       await writeDraft(
         p.draftsDir,
-        "derived-specs",
+        "specs",
         "XYZ-TMP-3333333333-config.md",
         "x\n",
       );
@@ -667,10 +647,10 @@ describe("schema validation on promotion", () => {
     async function storySchemaProject(): Promise<Project> {
       const dir = await mkdtemp(join(tmpdir(), "clew-promote-"));
       const storiesDir = join(dir, "docs", "spec", "stories");
-      const derivedDir = join(dir, "docs", "spec", "derived-specs");
+      const derivedDir = join(dir, "docs", "spec", "specs");
       const draftsDir = join(dir, "docs", "spec", "drafts");
       await mkdir(join(draftsDir, "stories"), { recursive: true });
-      await mkdir(join(draftsDir, "derived-specs"), { recursive: true });
+      await mkdir(join(draftsDir, "specs"), { recursive: true });
       await mkdir(storiesDir, { recursive: true });
       await mkdir(derivedDir, { recursive: true });
       await writeFile(
@@ -684,7 +664,7 @@ describe("schema validation on promotion", () => {
         JSON.stringify({
           layout: {
             stories: { dir: storiesDir, prefix: "STR" },
-            derivedSpecs: { dir: derivedDir },
+            specs: { dir: derivedDir },
             drafts: { dir: draftsDir },
           },
           schemas: { story: "story.yml" },

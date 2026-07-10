@@ -11,7 +11,7 @@ Load the governance contract before working, in numerical order:
 @.claude/.ai-project-context/006-spec-conventions.md
 
 The contract is general; the task enters per session.
-For this project the task is a story in `docs/spec/stories/` and its linked specs in `docs/spec/derived-specs/`.
+For this project the task is a story in `docs/spec/stories/` and its linked specs in `docs/spec/specs/`.
 Those specs are the source of truth for what to build and for traceability.
 
 This is a TypeScript project.

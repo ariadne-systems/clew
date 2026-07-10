@@ -56,16 +56,16 @@ An invalid glob fails the scan fast, with a stable error naming the pattern: sil
 
 **Realizes**
 
-- [SW-025 — Read the scan's `exclude` and `unexclude` patterns from configuration](../derived-specs/SW-025-read-exclusion-patterns.md)
-- [SW-024 — A path matching the configured patterns is excluded from the scan and the checks](../derived-specs/SW-024-exclude-matching-paths.md)
-- [CON-017 — Scan exclusion precedence — a user `exclude` is absolute, `unexclude` overrides only the defaults](../derived-specs/CON-017-exclusion-precedence.md)
-- [CON-018 — Exclusion patterns are repository-root-relative globs](../derived-specs/CON-018-root-relative-globs.md)
+- [SW-025 — Read the scan's `exclude` and `unexclude` patterns from configuration](../specs/SW-025-read-exclusion-patterns.md)
+- [SW-024 — A path matching the configured patterns is excluded from the scan and the checks](../specs/SW-024-exclude-matching-paths.md)
+- [CON-017 — Scan exclusion precedence — a user `exclude` is absolute, `unexclude` overrides only the defaults](../specs/CON-017-exclusion-precedence.md)
+- [CON-018 — Exclusion patterns are repository-root-relative globs](../specs/CON-018-root-relative-globs.md)
 
 **Related (existing corpus)**
 
-- Refines [CON-016 — The scan excludes dependency and build directories by default](../derived-specs/CON-016-scan-builtin-exclusions.md): the built-in defaults become root-relative globs and the lowest precedence layer, which `unexclude` can override.
-- Extends [SW-022 — Scan the code into the set of anchor locations](../derived-specs/SW-022-scan-code-into-anchor-locations.md): the core walk gains the exclusion filter, applied before discovery.
-- Sibling of [SW-009 — Read the configuration](../derived-specs/SW-009-read-configuration.md): `exclude` / `unexclude` are read from the same `.clewrc.json`.
+- Refines [CON-016 — The scan excludes dependency and build directories by default](../specs/CON-016-scan-builtin-exclusions.md): the built-in defaults become root-relative globs and the lowest precedence layer, which `unexclude` can override.
+- Extends [SW-022 — Scan the code into the set of anchor locations](../specs/SW-022-scan-code-into-anchor-locations.md): the core walk gains the exclusion filter, applied before discovery.
+- Sibling of [SW-009 — Read the configuration](../specs/SW-009-read-configuration.md): `exclude` / `unexclude` are read from the same `.clewrc.json`.
 - [ENT-002 — Configuration](../domain-model.md#ent-002-configuration) gains `exclude` and `unexclude` attributes (merged on promotion).
 - Builds on [STR-016 — the anchor scan](STR-016-anchor-scan.md), whose built-in exclusions (CON-016) this story makes configurable.
 

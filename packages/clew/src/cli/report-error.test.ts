@@ -17,7 +17,7 @@ verifies(SwTraceables.SW_004_ERROR_REPORTING, () => {
       ErrorCode.INVALID_SPEC_STATUS,
       'unrecognized spec status "actives"',
       {
-        location: "docs/spec/derived-specs/ARCH-003.md",
+        location: "docs/spec/specs/ARCH-003.md",
         note: "a spec's status must be a recognized state",
         help: "set **Status** to planned, active, or deprecated",
       },
@@ -26,7 +26,7 @@ verifies(SwTraceables.SW_004_ERROR_REPORTING, () => {
     expect(formatError(error)).toBe(
       [
         'error[E_INVALID_SPEC_STATUS]: unrecognized spec status "actives"',
-        "  --> docs/spec/derived-specs/ARCH-003.md",
+        "  --> docs/spec/specs/ARCH-003.md",
         "  = note: a spec's status must be a recognized state",
         "  = help: set **Status** to planned, active, or deprecated",
       ].join("\n"),
@@ -38,7 +38,7 @@ verifies(SwTraceables.SW_004_ERROR_REPORTING, () => {
       ErrorCode.SCHEMA_VIOLATION,
       "document does not conform to its schema",
       {
-        location: "docs/spec/derived-specs/ARCH-003.md",
+        location: "docs/spec/specs/ARCH-003.md",
         help: [
           "fix the reported fields",
           "run `clew check` to see all validation issues at once",
@@ -49,7 +49,7 @@ verifies(SwTraceables.SW_004_ERROR_REPORTING, () => {
     expect(formatError(error)).toBe(
       [
         "error[E_SCHEMA_VIOLATION]: document does not conform to its schema",
-        "  --> docs/spec/derived-specs/ARCH-003.md",
+        "  --> docs/spec/specs/ARCH-003.md",
         "  = help: fix the reported fields",
         "  = help: run `clew check` to see all validation issues at once",
       ].join("\n"),

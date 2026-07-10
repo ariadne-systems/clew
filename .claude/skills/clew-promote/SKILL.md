@@ -30,7 +30,7 @@ A project declares its lenses in `.clewrc.json`, each with an `id` and a one-lin
 ### 1. Gather the drafts
 
 Collect the drafts to promote — the pending drafts in the configured drafts location, or the specific ones the user named.
-Read the project's configuration for the layout (where stories and derived specs live) and the lenses, so you know where each draft belongs and which prefixes are valid.
+Read the project's configuration for the layout (where stories and specs live) and the lenses, so you know where each draft belongs and which prefixes are valid.
 
 ### 2. Integrate — reconcile with the corpus (the part only an agent can do)
 
@@ -55,7 +55,7 @@ Invoke it for the story you confirmed: `clew promote <story|spec…>` finalizes 
 
 One thing it does not do, which stays with you after it runs:
 
-**Apply** the confirmed integration edits to affected existing specs (new relations, supersession notes) — that is judgment, not mechanics. An entity draft carries no special case: with an entity lens configured, it promotes through the ordinary derived-spec path like any other lens.
+**Apply** the confirmed integration edits to affected existing specs (new relations, supersession notes) — that is judgment, not mechanics. An entity draft carries no special case: with an entity lens configured, it promotes through the ordinary spec path like any other lens.
 
 ### 4. Report
 

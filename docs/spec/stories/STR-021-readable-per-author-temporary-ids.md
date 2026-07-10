@@ -39,16 +39,16 @@ Statelessness (CON-007) is preserved: the per-author draft counter is **not** th
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](../derived-specs/SYS-005-spec-lifecycle.md)
+- [SYS-005 — The system supports drafting, allocating, and finalizing specs](../specs/SYS-005-spec-lifecycle.md)
 
 **Realizes** (new specs — temporary ids, bound on promotion)
 
-- [SW-032 — Temporary minting numbers ids per author, the author resolved from `--as` or the environment](../derived-specs/SW-032-temporary-minting-per-author-numbering.md)
-- [CON-023 — A temporary id's author postfix is letter-led, never bare digits](../derived-specs/CON-023-temporary-author-letter-led.md)
+- [SW-032 — Temporary minting numbers ids per author, the author resolved from `--as` or the environment](../specs/SW-032-temporary-minting-per-author-numbering.md)
+- [CON-023 — A temporary id's author postfix is letter-led, never bare digits](../specs/CON-023-temporary-author-letter-led.md)
 
 **Related**
 
-- Revises [SW-005 — Mint temporary, unbound ids](../derived-specs/SW-005-mint-temporary-ids.md) — the temporary id form (now an optional author postfix) and its uniqueness mechanism (per-author / solo sequence).
-- Amends [CON-007 — A temporary id is unbound and consumes no sequence number](../derived-specs/CON-007-temporary-id-unbound.md) — the next-number scan is a read of the drafts location; the draft counter is not the bound high-water mark.
-- Extends [SW-008 — The tool exposes a `mint` command that delegates to core](../derived-specs/SW-008-mint-command.md) — adds the `--as` option.
+- Revises [SW-005 — Mint temporary, unbound ids](../specs/SW-005-mint-temporary-ids.md) — the temporary id form (now an optional author postfix) and its uniqueness mechanism (per-author / solo sequence).
+- Amends [CON-007 — A temporary id is unbound and consumes no sequence number](../specs/CON-007-temporary-id-unbound.md) — the next-number scan is a read of the drafts location; the draft counter is not the bound high-water mark.
+- Extends [SW-008 — The tool exposes a `mint` command that delegates to core](../specs/SW-008-mint-command.md) — adds the `--as` option.
 - Supersedes part of [STR-007 — Add an unbound `--tmp` mode](../stories/STR-007-tmp-mint-mode.md) — its opaque-form solution approach.

@@ -48,7 +48,7 @@ const BOUND_ID_IN_FILENAME = /^([A-Z]+)-(\d+)(?:[-.]|$)/;
 export async function init(options: InitOptions = {}): Promise<InitResult> {
   const layout = await readLayout(options.configFile);
   const prefixes = await readConfiguredPrefixes(options.configFile);
-  const dirs = [layout.stories.dir, layout.derivedSpecs.dir];
+  const dirs = [layout.stories.dir, layout.specs.dir];
   const discovered = await discoverHighWaterMarks(dirs, prefixes);
   return withState((state) => reconcile(state.sequences, discovered), {
     file: options.stateFile,

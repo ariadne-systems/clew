@@ -46,7 +46,7 @@ export const setup: (options?: SetupOptions) => Promise<SetupResult> = realizes(
     const root = dirname(configFile);
     const directories = [
       DEFAULT_LAYOUT.stories.dir,
-      DEFAULT_LAYOUT.derivedSpecs.dir,
+      DEFAULT_LAYOUT.specs.dir,
       DEFAULT_LAYOUT.drafts.dir,
     ];
     // Create the layout directories before writing the config, so a config on disk

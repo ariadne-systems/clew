@@ -12,7 +12,7 @@ The fields a spec must carry (`Title`, `Description`, `Rationale`, …) are conv
 And the structure an adopter wants differs from this project's — baking this project's fields into clew would force every adopter onto the same template.
 
 **Solution Approach**
-- Each document type (`story`, `derived-spec`) has a **schema** — a small, clew-specific shape (not JSON Schema) authored in **YAML** and referenced per type from `.clewrc.json`, so it is swappable and an adopter can comment it.
+- Each document type (`story`, `spec`) has a **schema** — a small, clew-specific shape (not JSON Schema) authored in **YAML** and referenced per type from `.clewrc.json`, so it is swappable and an adopter can comment it.
 - Before clew uses a schema, it **validates the schema itself** against clew's own minimum contract — a well-formed shape that does not reach into the pinned core — and refuses a schema that fails, so a malformed schema fails *at the schema*, not mid-scan.
 - clew then validates each document against its schema **when it reads it** (on scan), at the same point as the existing status validation.
 - The schema is split. clew **pins only the parts it mechanically reads** — the id form (a configured prefix and a number), that ids are unique, the `**Status**` grammar and value set, and that `## Relations` links resolve — because clew depends on each, and enforces them **in code**, not from the project schema. Everything else — which `**Bold label**` fields a document must carry, and their enums — is **project-defined** in the YAML, so an adopter brings its own template. clew validates `pinned-core ∪ project-schema`.
@@ -44,18 +44,18 @@ A schema is a hand-authored contract an adopter reads and maintains, and YAML's 
 
 **Realizes**
 
-- [SYS-015 — The system validates each artifact against its declared schema when it reads it](../derived-specs/SYS-015-validate-artifacts-on-load.md)
+- [SYS-015 — The system validates each artifact against its declared schema when it reads it](../specs/SYS-015-validate-artifacts-on-load.md)
 
 **Realizes** (new specs)
 
-- [ARCH-007 — A document schema pins only what clew reads; the rest is project-defined](../derived-specs/ARCH-007-schema-core-is-what-clew-reads.md)
-- [SW-036 — The scan validates each document against its schema](../derived-specs/SW-036-scan-validates-schema.md)
-- [CON-031 — A document that violates its schema is rejected, or warned per config](../derived-specs/CON-031-reject-schema-violation.md)
-- [CON-032 — A schema is validated against clew's minimum contract before it is used](../derived-specs/CON-032-validate-schema-before-use.md)
+- [ARCH-007 — A document schema pins only what clew reads; the rest is project-defined](../specs/ARCH-007-schema-core-is-what-clew-reads.md)
+- [SW-036 — The scan validates each document against its schema](../specs/SW-036-scan-validates-schema.md)
+- [CON-031 — A document that violates its schema is rejected, or warned per config](../specs/CON-031-reject-schema-violation.md)
+- [CON-032 — A schema is validated against clew's minimum contract before it is used](../specs/CON-032-validate-schema-before-use.md)
 
 **Related**
 
 - Supersedes the ad-hoc "a promoted spec has its required fields" check of [STR-024 — The tool runs its deterministic integrity checks as one `clew check` command](STR-024-clew-check-suite.md) — structural conformance becomes this scan-time validation; STR-024 is adjusted to defer to it.
-- Generalizes [SW-031 — The spec scan reads each spec's implementation state](../derived-specs/SW-031-scan-spec-status.md) and [CON-022 — A spec's status is one of the declared values](../derived-specs/CON-022-valid-status.md) — the status read and value check are an instance of the pinned core.
-- Distinct from [SYS-013 — The system publishes stable, machine-readable schemas for its configuration and results](../derived-specs/SYS-013-shared-schemas.md) — that publishes schemas for clew's own *output*; this validates *input* documents.
+- Generalizes [SW-031 — The spec scan reads each spec's implementation state](../specs/SW-031-scan-spec-status.md) and [CON-022 — A spec's status is one of the declared values](../specs/CON-022-valid-status.md) — the status read and value check are an instance of the pinned core.
+- Distinct from [SYS-013 — The system publishes stable, machine-readable schemas for its configuration and results](../specs/SYS-013-shared-schemas.md) — that publishes schemas for clew's own *output*; this validates *input* documents.
 - Adds a schema reference per document type to ENT-002 (Configuration) — an integration edit on promotion.

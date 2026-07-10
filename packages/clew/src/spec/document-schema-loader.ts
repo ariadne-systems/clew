@@ -6,7 +6,7 @@ import type { DocumentSchema, DocumentType } from "./document-schema.js";
 import { schemaFromParsed } from "./document-schema.js";
 
 /** The document types that may carry a schema, in a stable order. */
-const DOCUMENT_TYPES: readonly DocumentType[] = ["story", "derived-spec"];
+const DOCUMENT_TYPES: readonly DocumentType[] = ["story", "spec"];
 
 /**
  * Loads and self-validates the configured per-document-type schemas, resolving each

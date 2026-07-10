@@ -35,7 +35,7 @@ A project declares its lenses in `.clewrc.json`, each with an `id` and a one-lin
 
 ## Reading the project
 
-- Read `.clewrc.json` for the `layout` (where stories and derived specs live) and the `lenses`.
+- Read `.clewrc.json` for the `layout` (where stories and specs live) and the `lenses`.
 - Find how the project binds code to specs — its **trace markers** (for example `realizes`, `verifies`, and `concerns` in the code, or the project's equivalent). Infer the convention from existing code; do not assume a language.
 - Prefer the tool's index or resolver if it exists (`clew --help`) for "what relates to this id" — that is the intended, faster path. Until it exists, read the spec files and grep the code directly.
 

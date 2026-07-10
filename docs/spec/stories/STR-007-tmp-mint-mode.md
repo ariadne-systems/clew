@@ -43,10 +43,10 @@ Where draft files live, and how temporary ids are later replaced by bound ids at
 
 **Realizes**
 
-- [SW-008 — The tool exposes a `mint` command that delegates to core](../derived-specs/SW-008-mint-command.md)
-- [SW-005 — Mint temporary, unbound ids](../derived-specs/SW-005-mint-temporary-ids.md)
-- [CON-007 — A temporary id is unbound and consumes no sequence number](../derived-specs/CON-007-temporary-id-unbound.md)
-- [CON-008 — The `-TMP-` marker is reserved and a type may not use it](../derived-specs/CON-008-tmp-marker-reserved.md)
+- [SW-008 — The tool exposes a `mint` command that delegates to core](../specs/SW-008-mint-command.md)
+- [SW-005 — Mint temporary, unbound ids](../specs/SW-005-mint-temporary-ids.md)
+- [CON-007 — A temporary id is unbound and consumes no sequence number](../specs/CON-007-temporary-id-unbound.md)
+- [CON-008 — The `-TMP-` marker is reserved and a type may not use it](../specs/CON-008-tmp-marker-reserved.md)
 
 ## Changes
 

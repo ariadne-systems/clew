@@ -22,7 +22,7 @@ async function setupProjectDir(idFilenames: string[]): Promise<string> {
     JSON.stringify({ idGeneration: { mode: "sequential", padding: 3 } }),
     "utf8",
   );
-  const specDir = join(dir, "docs", "spec", "derived-specs");
+  const specDir = join(dir, "docs", "spec", "specs");
   await mkdir(specDir, { recursive: true });
   for (const name of idFilenames) {
     await writeFile(join(specDir, name), "x", "utf8");

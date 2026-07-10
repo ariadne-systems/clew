@@ -56,11 +56,11 @@ This story builds the **skeleton** — the command, the scan, the generator inte
 
 **Realizes**
 
-- [SW-012 — The tool exposes a `spec` command that delegates to core](../derived-specs/SW-012-spec-command.md)
-- [SW-013 — Scan the configured artifacts into the set of traceables](../derived-specs/SW-013-scan-traceables.md)
-- [SW-014 — Generate traceables and anchoring utilities through the configured generators](../derived-specs/SW-014-generate-traceables.md)
-- [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](../derived-specs/ARCH-003-generator-interface.md)
-- [CON-012 — Generated traceables and utilities are tool-owned and never hand-edited](../derived-specs/CON-012-generated-files-tool-owned.md)
+- [SW-012 — The tool exposes a `spec` command that delegates to core](../specs/SW-012-spec-command.md)
+- [SW-013 — Scan the configured artifacts into the set of traceables](../specs/SW-013-scan-traceables.md)
+- [SW-014 — Generate traceables and anchoring utilities through the configured generators](../specs/SW-014-generate-traceables.md)
+- [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](../specs/ARCH-003-generator-interface.md)
+- [CON-012 — Generated traceables and utilities are tool-owned and never hand-edited](../specs/CON-012-generated-files-tool-owned.md)
 
 ## Changes
 

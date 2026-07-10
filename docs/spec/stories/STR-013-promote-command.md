@@ -16,7 +16,7 @@ Add `clew promote`.
 Given the drafts to finalize — the pending drafts in the configured drafts location, or specific ones named — for each draft it:
 - **binds** a real id by minting the draft's lens (the temporary id's prefix) without `--tmp`, which advances the state;
 - **substitutes** every resolved temporary id project-wide: every occurrence of that exact id across the spec tree and the drafts location is replaced with its bound id — in the promoted draft's body and filename, in already-promoted specs and the domain model, and in any other unpromoted draft that referenced it;
-- **moves** each draft into its place per the configured layout (a story to the stories directory, a derived spec to the derived-specs directory), renaming the file to its bound id.
+- **moves** each draft into its place per the configured layout (a story to the stories directory, a spec to the specs directory), renaming the file to its bound id.
 
 It reports each temporary-id → bound-id mapping and that the state advanced.
 It requires a configuration (CON-011), like every command, and it does not commit.
@@ -41,22 +41,22 @@ The command does only the mechanical finalize; the integration reasoning and any
 **Out of scope**
 - The *integrate* half of promotion — relations, supersession, conflict, and duplication reasoning — stays in the `clew-promote` skill; the command never decides what a draft means for the corpus.
 - Applying the confirmed integration edits to affected existing specs (new relations, supersession notes) — judgment, stays with the agent.
-- Merging an entity draft into the domain model — a content merge, not a file move; the first cut finalizes file-based drafts (stories and derived specs), and entity-draft promotion stays manual (a possible follow-on).
+- Merging an entity draft into the domain model — a content merge, not a file move; the first cut finalizes file-based drafts (stories and specs), and entity-draft promotion stays manual (a possible follow-on).
 - Committing — left to the user, as everywhere.
 
 **Decisions** (resolved)
-- **Entity drafts** — file-based only. The command finalizes stories and derived specs (file move + rename); merging an entity draft into `domain-model.md` is a content merge, left out of the first cut (manual, or a follow-on). Keeps the command fully deterministic.
+- **Entity drafts** — file-based only. The command finalizes stories and specs (file move + rename); merging an entity draft into `domain-model.md` is a content merge, left out of the first cut (manual, or a follow-on). Keeps the command fully deterministic.
 - **Draft selection** — promote-all by default, named optional. `clew promote` with no arguments finalizes all pending drafts; `clew promote <id|path>…` finalizes only the named ones. The skill decides which drafts are integration-ready and passes them.
-- **Substitution scope** — across the configured spec locations (stories, derived specs, the domain model) and the drafts location, the only places a temporary id can appear. Code is not scanned; temporary ids never appear there.
+- **Substitution scope** — across the configured spec locations (stories, specs, the domain model) and the drafts location, the only places a temporary id can appear. Code is not scanned; temporary ids never appear there.
 - **Failure semantics** — bind all ids first, then substitute, then move, failing fast with a clear error. Minting advances state irreversibly, so a later failure leaves the bound ids spent; that is acceptable because ids are cheap and never reused (CON-002), not a transactional rollback.
 
 ## Relations
 
 **Realizes**
 
-- [SW-016 — The tool exposes a `promote` command that delegates to core](../derived-specs/SW-016-promote-command.md)
-- [SW-017 — Finalize reviewed drafts into the spec tree](../derived-specs/SW-017-finalize-drafts.md)
-- [CON-014 — Promotion substitutes a draft's temporary id exhaustively](../derived-specs/CON-014-exhaustive-substitution.md)
+- [SW-016 — The tool exposes a `promote` command that delegates to core](../specs/SW-016-promote-command.md)
+- [SW-017 — Finalize reviewed drafts into the spec tree](../specs/SW-017-finalize-drafts.md)
+- [CON-014 — Promotion substitutes a draft's temporary id exhaustively](../specs/CON-014-exhaustive-substitution.md)
 
 This story depends on the existing `mint` allocation (STR-004) and the configured layout (ENT-002), and revises the `clew-promote` skill.
 

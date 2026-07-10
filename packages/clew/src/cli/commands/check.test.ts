@@ -19,7 +19,7 @@ afterEach(() => {
 async function setupProjectDir(): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "clew-cli-check-"));
   await writeFile(join(dir, ".clewrc.json"), JSON.stringify({}), "utf8");
-  await mkdir(join(dir, "docs", "spec", "derived-specs"), { recursive: true });
+  await mkdir(join(dir, "docs", "spec", "specs"), { recursive: true });
   await mkdir(join(dir, "docs", "spec", "stories"), { recursive: true });
   process.chdir(dir);
   return dir;
@@ -55,7 +55,7 @@ describe("check output", () => {
     test("a dangling link is reported to stderr and exits non-zero", async () => {
       const dir = await setupProjectDir();
       await writeFile(
-        join(dir, "docs", "spec", "derived-specs", "SW-001-a.md"),
+        join(dir, "docs", "spec", "specs", "SW-001-a.md"),
         "See [gone](SW-099-missing.md).\n",
         "utf8",
       );

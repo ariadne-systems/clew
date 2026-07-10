@@ -32,7 +32,7 @@ If the project has no configuration yet (`error[E_NO_CONFIG]`), use the `clew-se
 Read the project's configuration to learn:
 
 - the **lenses** — the spec kinds you may mint, each with a description of what it means; these are the only valid spec prefixes.
-- the **layout** — where stories, derived specs, and drafts live, and the story prefix.
+- the **layout** — where stories, specs, and drafts live, and the story prefix.
 
 Use these as the source of truth: mint only configured lenses, and write drafts to the configured drafts location.
 
@@ -48,7 +48,7 @@ For each lens you intend to use, confirm you can derive it:
 1. **Understand the work item** — what the story is and why it matters. Ask the user where the description is unclear.
 2. **Draft the story first** — temp-mint the story id (`clew mint --tmp <story-prefix>`) and write the story draft (title, business value, problem/context, solution approach, acceptance criteria, out of scope) into the configured drafts location.
 3. **Build the context** — run the `clew-context` skill against the draft story. It maps the existing specs the story relates to, what it may affect or supersede, and the gaps it should fill, so the specs you write next are grounded in the corpus rather than invented in isolation.
-4. **Create the specs** — using that context, decide which specs the story needs (only configured lenses), temp-mint each (`clew mint --tmp <LENS>`), and write them into the drafts location, mirroring the spec tree (a derived-specs area). Cross-reference by id, wire the relations the context surfaced (what each realizes or concerns, and links to the related existing specs), and follow the project's existing specs as the template.
+4. **Create the specs** — using that context, decide which specs the story needs (only configured lenses), temp-mint each (`clew mint --tmp <LENS>`), and write them into the drafts location, mirroring the spec tree (a specs area). Cross-reference by id, wire the relations the context surfaced (what each realizes or concerns, and links to the related existing specs), and follow the project's existing specs as the template.
 5. **Stop for review** — present the drafts, the ids used, and the context findings (related specs, supersession/conflict candidates), so the user sees how the new work sits in the corpus. Do not promote or commit.
 
 ## Every spec pins a decision — no hollow specs

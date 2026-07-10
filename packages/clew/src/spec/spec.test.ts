@@ -22,7 +22,7 @@ async function fixture(
 ): Promise<Fixture> {
   const dir = await mkdtemp(join(tmpdir(), "clew-spec-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
-  const derivedDir = join(dir, "docs", "spec", "derived-specs");
+  const derivedDir = join(dir, "docs", "spec", "specs");
   await mkdir(storiesDir, { recursive: true });
   await mkdir(derivedDir, { recursive: true });
   for (const name of idFilenames) {
@@ -37,7 +37,7 @@ async function fixture(
     JSON.stringify({
       layout: {
         stories: { dir: storiesDir, prefix: "STR" },
-        derivedSpecs: { dir: derivedDir },
+        specs: { dir: derivedDir },
       },
       generators,
       ...extraConfig,

@@ -278,7 +278,7 @@ function matchesName(draft: DraftFile, name: string): boolean {
 
 /**
  * Resolves where a draft is placed from its prefix: a story to the stories
- * directory, a derived spec (a lens prefix) to the derived-specs directory.
+ * directory, a spec (a lens prefix) to the specs directory.
  */
 function resolveTargetDir(
   prefix: string,
@@ -289,7 +289,7 @@ function resolveTargetDir(
     return layout.stories.dir;
   }
   if (lensIds.has(prefix)) {
-    return layout.derivedSpecs.dir;
+    return layout.specs.dir;
   }
   throw new ClewError(
     ErrorCode.INVALID_TYPE,
