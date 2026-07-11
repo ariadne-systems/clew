@@ -108,7 +108,7 @@ describe("typescript anchor discovery", () => {
         ]);
       });
 
-      test("round-trips: discovery recovers exactly the ids the markers name (ADR-0005 D2)", () => {
+      test("round-trips: discovery recovers exactly the ids the markers name", () => {
         const source = [
           "const a = realizes(SwTraceables.SW_050_A, 1);",
           "verifies(ConTraceables.CON_051_B, () => {});",

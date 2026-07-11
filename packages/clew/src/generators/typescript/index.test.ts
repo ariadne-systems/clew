@@ -113,7 +113,7 @@ describe("typescript generator output", () => {
         expect((sw?.contents.match(/@deprecated/g) ?? []).length).toBe(1);
       });
 
-      test("reads its emitted traceables back, round-tripping ids and deprecation (ARCH-004)", async () => {
+      test("reads its emitted traceables back, round-tripping ids and deprecation", async () => {
         const generator = createTypeScriptGenerator();
         const sets: SpecSet[] = [
           {

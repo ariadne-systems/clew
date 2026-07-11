@@ -86,7 +86,7 @@ describe("java anchor discovery", () => {
         ]);
       });
 
-      test("round-trips: discovery recovers exactly the ids the annotations name (ADR-0005 D2)", () => {
+      test("round-trips: discovery recovers exactly the ids the annotations name", () => {
         const source = [
           "@RealizesSw(SwTraceables.SW_050_A)",
           "@VerifiesCon(ConTraceables.CON_051_B)",
