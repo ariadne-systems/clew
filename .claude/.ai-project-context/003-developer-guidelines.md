@@ -84,3 +84,15 @@ If compliance with any guideline is technically impossible:
 4. Ensure the deviation does not violate higher architectural constraints.
 
 Silent deviation is prohibited.
+
+---
+
+## 8. Comments
+
+- The spec a symbol anchors to (`realizes` / `verifies` / `concerns`) is the single source of its intent.
+Do not restate the spec's description or rationale in a comment: that duplicates the spec and rots when the spec changes, and the anchor already points a reader to the intent.
+- A comment earns its place only by carrying what the spec and the code's own names do not — a non-obvious implementation mechanic, a local invariant the code relies on, or a subtlety a reader would otherwise miss.
+A comment that only paraphrases the spec, or restates what the code plainly does, is deleted.
+- Never write a spec id in a comment; the anchor is the sole reference (enforced by `clew check`'s spec-id-in-comment member).
+This section extends that rule from ids to spec content.
+- Prefer few load-bearing comments over matching a high surrounding comment density; where existing code over-comments, do not propagate it.
