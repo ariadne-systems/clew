@@ -3,7 +3,7 @@ Setup ignores the tool's regenerated output and keeps state tracked
 
 **Lens**: SW
 
-**Status**: planned
+**Status**: active
 
 **Description**
 Setup ensures the project's `.gitignore` excludes the tool's regenerated output — the scan locations index (`.clew/locations.json`) and the coverage report (`.clew/coverage.json`) — while keeping the state file (`.clew/state.json`) tracked (CON-001).
@@ -30,3 +30,7 @@ Setup appends only the missing entries and leaves an existing `.gitignore` other
 - Keeps tracked the state file of [CON-001 — The tool's state is a single version-controlled file](CON-001-state-file-version-controlled.md).
 - Ignores the outputs of [SW-023 — The `scan` command reports the code's anchor locations](SW-023-scan-command.md) and [SW-028 — Emit the coverage result](SW-028-emit-coverage-result.md).
 - Extends the scaffolding of [SW-011 — Scaffold the default configuration and layout](SW-011-scaffold-default-config.md); appends without overwriting, honouring [CON-010 — Setup never overwrites an existing configuration](CON-010-setup-never-overwrites.md).
+
+## Changes
+
+- **2026-07-10** — Set active: implementation of STR-029 began.

@@ -3,7 +3,7 @@ Setup selects the target generator and writes it to the configuration
 
 **Lens**: SW
 
-**Status**: planned
+**Status**: active
 
 **Description**
 Setup accepts the target generator as a `--generator <type>` option and writes the chosen generator into the scaffolded configuration's `generators` section (ENT-002), so a generator is configured from the first run.
@@ -31,3 +31,7 @@ Making the generator a setup-time choice closes that gap at the one moment the p
 - Revises the surface of [SW-010 — The tool exposes a `setup` command that delegates to core](SW-010-setup-command.md): the command gains the `--generator` option.
 - The written generator is consumed by [SW-014 — Generate traceables through the configured generators](SW-014-generate-traceables.md).
 - Writes the `generators` section of [ENT-002 — Configuration](../domain-model.md#ent-002-configuration).
+
+## Changes
+
+- **2026-07-10** — Set active: implementation of STR-029 began.

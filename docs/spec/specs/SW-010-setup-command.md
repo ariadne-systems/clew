@@ -7,6 +7,7 @@ The tool exposes a `setup` command that delegates to core
 
 **Description**
 The tool exposes a `setup` command, invoked as `clew setup`, taking no positional arguments.
+It accepts a `--generator <type>` option that selects the target generator to scaffold; an unknown value is rejected before anything is written (SW-039).
 The command's action carries no scaffolding logic of its own: it delegates to core's configuration scaffolding (SW-011) and reports what it wrote.
 On success it writes a concise summary and next steps to standard output; on failure the error goes to standard error and the process exits non-zero, like every command.
 An unrecognized argument or option is rejected with a non-zero exit.
@@ -19,9 +20,15 @@ Anchoring the `setup` command's shape as its own spec gives that contract a stab
 `clew setup` is a registered subcommand and runs with no positional arguments.
 An unknown option or an extra argument is rejected with a non-zero exit.
 The command performs no scaffolding itself; it delegates to core and surfaces the result and any error through the standard streams.
+The `--generator <type>` option is registered and its value forwarded to core.
 
 ## Relations
 
 **Realizes**
 
 - [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+
+## Changes
+
+- **2026-07-10** — The command surface gained a `--generator <type>` option, forwarded to core, which scaffolds the chosen generator (STR-029, SW-039).
+The command stays thin; only its recognized-option set grew, so "no positional arguments" still holds.

@@ -3,7 +3,7 @@ Setup waives the stakeholder lens from test coverage by default
 
 **Lens**: SW
 
-**Status**: planned
+**Status**: active
 
 **Description**
 Setup writes a default coverage waiver for the stakeholder lens — a `waivers` entry with the pattern `STK-*` and a reason — into the scaffolded configuration, so a stakeholder spec is reported waived rather than as an open coverage gap.
@@ -30,3 +30,7 @@ A re-run leaves an existing `waivers` list unchanged.
 - Realizes the waiver half of [SYS-012 — Coverage policy and waivers](SYS-012-coverage-policy-and-waivers.md); the waiver is applied by [SW-027 — Apply the coverage waivers](SW-027-apply-waivers.md) and matched by [SW-030 — A waiver matches by id or pattern](SW-030-waiver-match-by-id-or-pattern.md).
 - Never waives a missing realization — [CON-021 — A missing realization is never waivable](CON-021-missing-realize-never-waivable.md).
 - Writes the `waivers` section of [ENT-002 — Configuration](../domain-model.md#ent-002-configuration); appends only into a fresh configuration, honouring [CON-010 — Setup never overwrites an existing configuration](CON-010-setup-never-overwrites.md).
+
+## Changes
+
+- **2026-07-10** — Set active: implementation of STR-029 began.
