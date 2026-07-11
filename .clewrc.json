@@ -43,6 +43,7 @@
     "story": "docs/spec/schemas/story.schema.yaml",
     "spec": "docs/spec/schemas/spec.schema.yaml"
   },
+  "exclude": ["notes"],
   "waivers": [
     {
       "pattern": "STK-*",

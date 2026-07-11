@@ -7,8 +7,8 @@ import { createTypeScriptGenerator } from "./typescript/index.js";
  * Builds the registry of the in-tree language generators, keyed by the name a
  * project lists under `generators`. This is the single point where the engine
  * names its concrete generators; every other module reaches a generator only
- * through the generator interface (ARCH-003). Adding a target language is a new
- * in-tree generator plus an entry here — no other change to the engine (ADR-0007).
+ * through the generator interface. Adding a target language is a new in-tree
+ * generator plus an entry here — no other change to the engine (ADR-0007).
  */
 export const createGeneratorRegistry: () => Map<string, Generator> = realizes(
   [

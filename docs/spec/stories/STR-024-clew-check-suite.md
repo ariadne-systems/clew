@@ -53,7 +53,7 @@ Judgment-adjacent checks are deliberately excluded or kept as soft warnings (see
 - [SYS-014 — The system detects a spec reference that bypasses the anchor](../specs/SYS-014-detect-references-bypassing-anchor.md)
 - [SW-033 — clew reports a spec id found in a code comment](../specs/SW-033-flag-spec-id-in-comment.md)
 - [CON-026 — A spec id appears in code only inside its anchor](../specs/CON-026-spec-id-only-in-anchor.md)
-- [CON-029 — Every relation link resolves to an existing spec](../specs/CON-029-relation-link-resolves.md)
+- [CON-029 — Every document link resolves to an existing target](../specs/CON-029-document-link-resolves.md)
 - [ARCH-006 — Comment detection is a generator capability](../specs/ARCH-006-pluggable-comment-finders.md)
 - [CON-030 — Generated output is inert to the scan and the checks](../specs/CON-030-generated-output-inert-to-scan.md)
 
@@ -72,3 +72,6 @@ Judgment-adjacent checks are deliberately excluded or kept as soft warnings (see
 Comment detection moves from a separate core-owned registry onto the language generator (ARCH-006, ARCH-003), reusing the generator's lexer; the spec-id-in-comment check now ranges over the same source set as the anchor scan through one shared, exclusion-aware walk (SW-024); and generator output is no longer auto-excluded but kept inert by a new constraint (CON-030), which supersedes CON-016's automatic output-directory exclusion.
 
 - **2026-06-29** — The deferred document-schema validation is now promoted as STR-026; the suite's deferral points to it, with no hand-rolled required-fields check.
+
+- **2026-07-10** — Retargeted the CON-029 link after that spec was renamed `relation-link-resolves` → `document-link-resolves` and broadened to every document link (STR-030).
+Reference-only; this story's meaning is unchanged.

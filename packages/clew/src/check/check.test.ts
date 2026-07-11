@@ -88,7 +88,7 @@ describe("the check suite", () => {
   verifies(
     [
       ArchTraceables.ARCH_005_CHECKS_ARE_ONE_SUITE,
-      ConTraceables.CON_029_RELATION_LINK_RESOLVES,
+      ConTraceables.CON_029_DOCUMENT_LINK_RESOLVES,
     ],
     () => {
       test("a clean corpus yields no findings", async () => {
@@ -185,6 +185,79 @@ describe("the check suite", () => {
         });
 
         expect(result.findings).toEqual([]);
+      });
+
+      test("a dangling link in a document outside the spec tree is reported", async () => {
+        const p = await project();
+        const adrDir = join(p.root, "docs", "adr");
+        await mkdir(adrDir, { recursive: true });
+        await writeFile(
+          join(adrDir, "ADR-001-x.md"),
+          "See [gone](./missing.md).\n",
+          "utf8",
+        );
+
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
+
+        expect(
+          result.findings.filter((f) => f.check === "reference-rot"),
+        ).toEqual([
+          {
+            check: "reference-rot",
+            file: "docs/adr/ADR-001-x.md",
+            line: 1,
+            message: 'link to "./missing.md" resolves to nothing',
+          },
+        ]);
+      });
+
+      test("an @-include resolves, and a dangling one is reported", async () => {
+        const p = await project();
+        await writeFile(join(p.root, "docs", "GOV.md"), "target\n", "utf8");
+        await writeFile(
+          join(p.root, "INDEX.md"),
+          "@docs/GOV.md\n@docs/missing.md\n",
+          "utf8",
+        );
+
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
+
+        expect(
+          result.findings.filter((f) => f.check === "reference-rot"),
+        ).toEqual([
+          {
+            check: "reference-rot",
+            file: "INDEX.md",
+            line: 2,
+            message: 'link to "docs/missing.md" resolves to nothing',
+          },
+        ]);
+      });
+
+      test("a link inside the drafts location is not reported", async () => {
+        const p = await project();
+        const draftsStories = join(p.root, "docs", "spec", "drafts", "stories");
+        await mkdir(draftsStories, { recursive: true });
+        await writeFile(
+          join(draftsStories, "STR-TMP-001-x.md"),
+          "Realizes [SW-TMP-001 — y](../specs/SW-TMP-001-y.md).\n",
+          "utf8",
+        );
+
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
+
+        expect(
+          result.findings.filter((f) => f.check === "reference-rot"),
+        ).toEqual([]);
       });
     },
   );

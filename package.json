@@ -16,7 +16,7 @@
     "format:check": "biome format .",
     "check": "biome check .",
     "check:write": "biome check --write .",
-    "check:refs": "node scripts/check-references.mjs",
+    "check:specs": "tsx packages/clew/src/cli/index.ts check",
     "check:pkg": "pnpm -r exec publint && pnpm --filter @ariadne-thread/clew exec attw --pack . --profile esm-only",
     "dev": "tsx packages/clew/src/cli/index.ts",
     "mint": "tsx packages/clew/src/cli/index.ts mint",

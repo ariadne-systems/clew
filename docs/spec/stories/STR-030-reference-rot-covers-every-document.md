@@ -49,7 +49,7 @@ CON-029 is therefore revised — broadened from spec-relation links to every doc
 
 **Realizes**
 
-- Revises and delivers [CON-029 — Every relation link resolves to an existing spec](../specs/CON-029-relation-link-resolves.md) — broadened to every document link.
+- Revises and delivers [CON-029 — Every document link resolves to an existing target](../specs/CON-029-document-link-resolves.md) — broadened to every document link.
 - Fulfills [ARCH-005 — Deterministic integrity checks are one shipped `clew check` suite](../specs/ARCH-005-checks-are-one-suite.md) — the repo-local reference script is retired.
 
 **Related (existing corpus)**
@@ -57,3 +57,8 @@ CON-029 is therefore revised — broadened from spec-relation links to every doc
 - Runs under [SW-034 — clew exposes a `check` command that runs the integrity-check suite](../specs/SW-034-check-command.md).
 - Reuses the exclusion model of [CON-016 — The scan excludes dependency and build directories by default](../specs/CON-016-scan-builtin-exclusions.md) and [CON-017 — Exclusion precedence](../specs/CON-017-exclusion-precedence.md).
 - Leaves untouched the temporary-id guarantee of [CON-027 — A promoted spec never contains a temporary id](../specs/CON-027-no-temporary-id-in-promoted-corpus.md).
+
+## Changes
+
+- **2026-07-10** — Retargeted the CON-029 link to its renamed file (`relation-link-resolves` → `document-link-resolves`) as the story's implementation began.
+Reference-only; the story's meaning is unchanged.

@@ -180,22 +180,17 @@ export function formatCheckReport(result: CheckResult): string {
 /** A markdown link's local target — `[text](./x.md#frag)` captures `./x.md#frag`. */
 const LINK = /\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
 
-/**
- * The reference-rot member: every link a spec or story makes resolves to
- * a file that exists, and a `#fragment` to a heading in that file. It is
- * type-agnostic — it confirms the link lands on a real node, not what relation it
- * expresses — so it needs none of the project's relation vocabulary.
- */
+/** The reference-rot member: every link and `@`-include in the document corpus resolves to an existing target. */
 const referenceRot: (context: CheckContext) => Promise<RawFinding[]> = realizes(
-  ConTraceables.CON_029_RELATION_LINK_RESOLVES,
+  ConTraceables.CON_029_DOCUMENT_LINK_RESOLVES,
   async (context: CheckContext): Promise<RawFinding[]> => {
     const findings: RawFinding[] = [];
     const anchorsByFile = new Map<string, Set<string>>();
-    for (const file of corpusMarkdown(context)) {
+    for (const file of await documentMarkdown(context)) {
       const absolute = join(context.projectRoot, file);
       const lines = (await readFile(absolute, "utf8")).split(/\r?\n/);
       for (const [index, line] of lines.entries()) {
-        for (const target of localLinks(line)) {
+        for (const target of localReferences(line)) {
           const finding = await brokenLink(
             context,
             { file, absolute, line: index + 1 },
@@ -490,9 +485,19 @@ function specFiles(
   return specs;
 }
 
-/** The markdown of the spec corpus: the (already-walked) spec-tree files, project-root-relative. */
-function corpusMarkdown(context: CheckContext): string[] {
-  return [...context.specTreeFiles];
+/** Every non-excluded markdown document in the project, project-root-relative, excepting the drafts location. */
+async function documentMarkdown(
+  context: Pick<CheckContext, "projectRoot" | "layout" | "exclusion">,
+): Promise<string[]> {
+  const draftsDir = toRelative(context.projectRoot, context.layout.drafts.dir);
+  const withinDrafts = (path: string): boolean =>
+    path === draftsDir || path.startsWith(`${draftsDir}/`);
+  return walkProject(context.projectRoot, {
+    descend: (dir) =>
+      !withinDrafts(dir) && shouldDescend(dir, context.exclusion),
+    accept: (path) =>
+      path.endsWith(".md") && !fileExcluded(path, context.exclusion),
+  });
 }
 
 /** The local link targets on a line — not an external URL, not a bare `#anchor`. */
@@ -504,6 +509,18 @@ function* localLinks(line: string): IterableIterator<string> {
       !target.startsWith("#") &&
       !/^[a-z][a-z0-9+.-]*:/i.test(target)
     ) {
+      yield target;
+    }
+  }
+}
+
+/** The local reference targets on a line — markdown links and `@`-includes. */
+function* localReferences(line: string): IterableIterator<string> {
+  yield* localLinks(line);
+  const trimmed = line.trim();
+  if (trimmed.startsWith("@")) {
+    const target = trimmed.slice(1).replace(/^import\s+/, "");
+    if (target.includes("/") && /^[\w./-]+\.[a-z]+$/i.test(target)) {
       yield target;
     }
   }
