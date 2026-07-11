@@ -109,7 +109,6 @@ describe("typescript generator output", () => {
         expect(sw?.contents).toContain(
           '  /** @deprecated */\n  SW_018_OUTPUT = "SW-018",',
         );
-        // The active member carries no deprecation; only the deprecated one does.
         expect(sw?.contents).toContain('  SW_016_PROMOTE = "SW-016",');
         expect((sw?.contents.match(/@deprecated/g) ?? []).length).toBe(1);
       });
@@ -139,8 +138,7 @@ describe("typescript generator output", () => {
           outputDir: "src/clew/traceables",
         });
 
-        // Read every emitted file back; only the enum members are traceables, so
-        // the helper module and README contribute none.
+        // Only the enum members are traceables; the helper module and README contribute none.
         const universe = generator.readTraceables(files);
 
         expect(universe).toEqual([

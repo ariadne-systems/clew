@@ -49,12 +49,12 @@ describe("generated TypeScript output", () => {
         specSet.specs.map((spec) => spec.id),
       );
 
-      // No anchor: the marker definitions and the JSDoc `@example` markers in the
-      // generated helper module are never discovered as uses.
+      // The marker definitions and JSDoc `@example` markers in the helper module
+      // are not discovered as anchors.
       expect(generator.discover(sources)).toEqual([]);
 
-      // No emitted spec id appears in any comment: ids live only in member names
-      // (underscore form) and string values, never in a comment.
+      // Emitted ids live only in member names (underscore form) and string values,
+      // never in a comment.
       for (const source of sources) {
         for (const span of generator.findComments(source.contents)) {
           for (const id of emittedIds) {

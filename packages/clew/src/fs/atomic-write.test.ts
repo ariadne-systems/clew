@@ -62,8 +62,7 @@ describe("atomic file writes", () => {
       ]),
     ).rejects.toThrow();
 
-    // The first file was staged but never renamed into place, and its temporary —
-    // and the one whose write threw — were both removed.
+    // The first file was staged but never renamed into place.
     await expect(readFile(good, "utf8")).rejects.toThrow();
     const entries = await readdir(dir, { recursive: true });
     expect(entries.filter((name) => name.endsWith(".tmp"))).toEqual([]);

@@ -164,7 +164,6 @@ describe("finalizing drafts", () => {
         expect(
           await readFile(join(p.derivedDir, "SW-001-scan.md"), "utf8"),
         ).toBe("Spec SW-001\n");
-        // The unpromoted draft now points at the bound id and is still a draft.
         expect(await readFile(unpromoted, "utf8")).toBe("Relates to SW-001.\n");
       });
 
@@ -275,7 +274,6 @@ describe("resolving the promotion set", () => {
           "STR-001",
           "SW-001",
         ]);
-        // The story's references resolve to the bound ids in the moved file.
         expect(
           await readFile(join(p.storiesDir, "STR-001-story.md"), "utf8"),
         ).toBe("Realizes SW-001 and CON-001.\n");
@@ -351,7 +349,6 @@ describe("resolving the promotion set", () => {
         expect(result.promoted.map((entry) => entry.boundId)).toEqual([
           "CON-001",
         ]);
-        // The unrelated draft is untouched and still a draft.
         expect(await readFile(other, "utf8")).toBe("Unrelated story.\n");
       });
 
@@ -519,7 +516,6 @@ describe("the promoted tree is never rewritten", () => {
         roots: ["SW-TMP-001"],
       });
 
-      // The promoted spec is untouched — its example token is not rewritten.
       expect(await readFile(promotedSpec, "utf8")).toBe(
         "An example temporary id is `SW-TMP-001`.\n",
       );
@@ -558,8 +554,6 @@ describe("atomic finalization", () => {
         }),
       ).rejects.toThrow();
 
-      // Nothing changed: the reference still points at the temporary id, the draft
-      // is still a draft, and the occupant is intact.
       expect(await readFile(ref, "utf8")).toBe("See SW-TMP-001.\n");
       expect(await readFile(draftPath, "utf8")).toBe("Spec SW-TMP-001\n");
       expect(await readFile(join(p.derivedDir, "SW-001-x.md"), "utf8")).toBe(

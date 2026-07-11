@@ -218,7 +218,6 @@ describe("spec generation", () => {
         resolveGenerator: () => generator,
       });
 
-      // The planned spec is filtered out; active and deprecated become traceables.
       expect(result.traceableCount).toBe(2);
       expect(received()?.flatMap((set) => set.specs.map((t) => t.id))).toEqual([
         "SW-001",
@@ -449,7 +448,6 @@ describe("reserved output directory", () => {
         spec({ configFile, outputDir, resolveGenerator: () => broken }),
       ).rejects.toThrow(/escapes/i);
 
-      // The previous good output survives — nothing was wiped before the failure.
       expect(await readFile(good, "utf8")).toContain("SW: SW-012");
     });
   });

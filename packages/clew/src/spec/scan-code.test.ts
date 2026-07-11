@@ -119,9 +119,6 @@ describe("code scan", () => {
         projectRoot: root,
       });
 
-      // Dependency and build directories are excluded by default; the generator's
-      // output directory is not — generated output is inert, so it is scanned like
-      // any other source unless the project lists it under `exclude`.
       expect([...result.anchors.map((anchor) => anchor.id)].sort()).toEqual([
         "SW-100",
         "SW-400",
@@ -210,7 +207,6 @@ describe("code scan", () => {
     });
   });
 
-  // Anchor the architectural dual so the interface decision is verified by use.
   verifies(ArchTraceables.ARCH_004_GENERATOR_DISCOVERS_MARKERS, () => {
     test("the core reaches discovery only through the generator interface", async () => {
       const generator = contentGenerator("gen/out");

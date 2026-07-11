@@ -4,8 +4,7 @@ import { join } from "node:path";
 import { ArchTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 
-// Collects the engine's production sources (every `.ts` under src, excluding test
-// files), so the boundary check below reads exactly what ships.
+// Every production `.ts` under src, excluding test files.
 async function collectSourceFiles(dir: string): Promise<string[]> {
   const entries: Dirent[] = await readdir(dir, { withFileTypes: true });
   const files: string[] = [];
@@ -22,11 +21,8 @@ async function collectSourceFiles(dir: string): Promise<string[]> {
 
 describe("generators are reached only through the interface", () => {
   verifies(ArchTraceables.ARCH_003_GENERATOR_INTERFACE, () => {
-    // ADR-0007: the concrete generators live in-tree, bound at a single registry
-    // point (src/generators/registry.ts). Every engine and CLI module reaches a
-    // generator through the `Generator` interface; nothing outside the generators
-    // directory names a concrete generator factory, so the concrete set is bound
-    // in exactly one place and never leaks into the generation-agnostic core.
+    // The closed set of concrete generator factory names that no module outside
+    // src/generators may reference.
     test("no module outside src/generators names a concrete generator", async () => {
       const srcRoot = import.meta.dirname;
       const generatorsDir = join(srcRoot, "generators");
@@ -53,10 +49,8 @@ describe("generators are reached only through the interface", () => {
 });
 
 describe("only the CLI layer touches the process and argument parsing", () => {
-  // ADR-0007: the CLI (src/cli) is the presentation layer; the engine is free of
-  // presentation concerns, so nothing outside src/cli reads or writes the process
-  // (stdout / stderr / exit / argv) or parses arguments (commander). The property
-  // holds in fact; this guards it from silently regressing.
+  // Presentation tokens only src/cli may reference: the process (stdout/stderr/
+  // exit/argv) and commander argument parsing.
   test("no module outside src/cli references process or commander", async () => {
     const srcRoot = import.meta.dirname;
     const cliDir = join(srcRoot, "cli");

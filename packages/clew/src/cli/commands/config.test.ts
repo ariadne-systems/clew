@@ -37,7 +37,6 @@ async function runClew(...args: string[]): Promise<void> {
   await buildProgram().parseAsync(["node", "clew", ...args]);
 }
 
-// The recursive file listing of a directory, sorted, as a snapshot of its state.
 async function listFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { recursive: true });
   return entries.sort();
