@@ -32,18 +32,15 @@ const IGNORED_DIRECTORIES = new Set([".git", ".clew", "node_modules", "dist"]);
 /**
  * A bound id at the start of an artifact filename: an uppercase prefix and a
  * number as a whole segment (e.g. `PREFIX-007-...` or `PREFIX-005.md`). The number must
- * close the segment, so a temporary id (`PREFIX-TMP-...`) does not match — a
- * temporary id is unbound and must never advance a high-water mark.
+ * close the segment, so a temporary id (`PREFIX-TMP-...`) does not match.
  */
 const BOUND_ID_IN_FILENAME = /^([A-Z]+)-(\d+)(?:[-.]|$)/;
 
 /**
- * Initializes the StateStore from existing artifacts: scans the
- * configured layout directories, takes the highest number per
- * configured prefix, and reconciles those into the state's high-water marks.
- * Only configured prefixes are counted, so non-lens files such as ADRs are
- * ignored. Reconciliation only ever raises a mark, never lowers one,
- * so re-initializing an unchanged project changes nothing.
+ * Initializes the StateStore from existing artifacts: scans the configured
+ * layout directories and reconciles the highest number per configured prefix
+ * into the state's high-water marks. Only configured prefixes are counted, so
+ * non-lens files such as ADRs are ignored.
  */
 export async function init(options: InitOptions = {}): Promise<InitResult> {
   const layout = await readLayout(options.configFile);
@@ -55,7 +52,6 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
   });
 }
 
-/** Raises each prefix's mark to the discovered maximum, never lowering it. */
 const reconcile = realizes(
   ConTraceables.CON_009_RECONCILE_NEVER_LOWERS,
   (
@@ -77,8 +73,7 @@ const reconcile = realizes(
 
 /**
  * Walks the given artifact directories and returns the highest number seen per
- * configured prefix. A directory that does not exist is skipped, so a
- * project missing one of its configured locations still initializes.
+ * configured prefix. A directory that does not exist is skipped.
  */
 const discoverHighWaterMarks = realizes(
   SwTraceables.SW_006_DERIVE_HIGH_WATER_MARKS,

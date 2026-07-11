@@ -1,14 +1,10 @@
 import type { ConTraceables, Realizes } from "@ariadne-thread/trace";
 import { ArchTraceables, realizes } from "@ariadne-thread/trace";
 
-// This module owns the released error-code set, realizing the stability constraint.
 type _Anchors = Realizes<ConTraceables.CON_006_ERROR_CODE_STABILITY, unknown>;
 
 /**
- * Stable, mnemonic error codes.
- * A released code is never reused for a different condition and never renamed;
- * new codes are added as real error conditions arise. The full set
- * is documented in `docs/errors.md`.
+ * Stable, mnemonic error codes. The full set is documented in `docs/errors.md`.
  */
 export const ErrorCode = {
   /** The requested mint count is not a positive whole number. */
@@ -66,10 +62,8 @@ export interface ClewErrorOptions extends ErrorOptions {
 
 /**
  * A failure carrying a stable, machine-readable code in addition to its
- * human-readable message. The code is the failure's identity and is
- * what consumers branch on; the message is the one-line summary and may be
- * reworded. The optional `location`/`note`/`help` carry the diagnostic context a
- * user needs to locate and fix the failure, rendered in the compiler convention.
+ * human-readable message. The optional `location`/`note`/`help` carry the
+ * diagnostic context a user needs to locate and fix the failure.
  */
 @realizes(ArchTraceables.ARCH_002_STABLE_ERROR_CODES)
 export class ClewError extends Error {

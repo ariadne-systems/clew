@@ -25,9 +25,7 @@ const IGNORED_DIRECTORIES = new Set([".git", ".clew", "node_modules", "dist"]);
  * A markdown spec filename: a bound id at the start — an uppercase prefix and a
  * number as a whole segment (e.g. `SW-NNN-scan.md` or `SW-NNN.md`) — and the
  * `.md` extension at the end. The number must close the id segment, so a
- * temporary id (`SW-TMP-...`) does not match; the `.md` anchor keeps a non-spec
- * file out and keeps the scan coherent with the `.md`-anchored default lens
- * matchers, so every scanned traceable groups (no silent drop).
+ * temporary id (`SW-TMP-...`) does not match.
  */
 const SPEC_FILENAME = /^([A-Z]+)-(\d+)(?:-.*)?\.md$/;
 
@@ -37,13 +35,9 @@ type SeenSpec = { path: string; spec: ScannedSpec };
 /**
  * Scans the configured artifact locations into the set of traceables.
  * A traceable is a lens-bearing spec id — its prefix is a configured lens
- * (ADR-0003) — tagged with that lens, so the set can be grouped into spec sets
- * for generation. A non-lens id such as a story (`STR`) is not
- * a traceable and is not scanned. A traceable id that two files declare is rejected,
- * so a duplicate never collapses silently. The scan is language-neutral: it reads
- * only the configured layout and lenses, and knows nothing of any target
- * language. An id added to the specs appears in the set; an id removed disappears
- * from it. The result is sorted by id so generation downstream is deterministic.
+ * (ADR-0003) — tagged with that lens. A non-lens id such as a story (`STR`) is not
+ * a traceable and is not scanned. A traceable id that two files declare is rejected.
+ * The result is sorted by id.
  */
 export async function scan(options: ScanOptions = {}): Promise<ScannedSpec[]> {
   const projectRoot =
@@ -69,7 +63,7 @@ export async function scan(options: ScanOptions = {}): Promise<ScannedSpec[]> {
 /**
  * Walks an artifact directory and records each distinct bound id it finds,
  * keyed by id so a spec is counted once. A directory that does not exist is
- * skipped, so a project missing one of its configured locations still scans.
+ * skipped.
  */
 async function collectTraceables(
   dir: string,
@@ -101,15 +95,14 @@ async function collectTraceables(
 /**
  * A spec's `**Status**` field. The value is the rest of the line, trimmed — so a
  * line with trailing text (e.g. `**Status**: active (was planned)`) captures the
- * whole thing and is rejected as unrecognized, rather than failing to
- * match and silently falling through to `planned`.
+ * whole thing and is rejected as unrecognized.
  */
 const STATUS_FIELD = /^\*\*Status\*\*:[ \t]*(.+?)[ \t]*$/m;
 
 /**
  * Reads a spec's implementation state from its `**Status**` field: the
  * declared value, or `planned` when the field is absent. An unrecognized
- * value is rejected rather than silently dropping the spec out of enforcement.
+ * value is rejected.
  */
 const readSpecStatus: (content: string, location: string) => SpecStatus =
   realizes(
@@ -140,10 +133,8 @@ const readSpecStatus: (content: string, location: string) => SpecStatus =
 /**
  * Records the traceable a filename declares, and rejects a duplicate. Only a
  * configured lens prefix counts, so a story or ADR contributes nothing. A
- * second file declaring an already-seen traceable id is rejected rather than
- * overwriting the first, so a duplicate never collapses silently. The filename is
- * kept on the traceable so spec-set matchers can select on it, and the spec's
- * `**Status**` is read onto it.
+ * second file declaring an already-seen traceable id is rejected. The filename is
+ * kept on the traceable, and the spec's `**Status**` is read onto it.
  */
 const recordTraceable: (
   filePath: string,

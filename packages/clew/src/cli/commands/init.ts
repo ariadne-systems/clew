@@ -2,13 +2,7 @@ import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 import { init, requireConfig } from "../../index.js";
 
-/**
- * Registers the `clew init` command surface.
- * The action stays thin: it delegates discovery and reconciliation to core's
- * `init()`, which reads the artifact locations from configuration,
- * and reports what it recorded to stdout. Any error propagates to the
- * bin entry, which writes it to stderr and exits non-zero.
- */
+/** Registers the `clew init` command surface. */
 export const registerInit: (program: Command) => void = realizes(
   SwTraceables.SW_007_INIT_COMMAND,
   (program: Command): void => {

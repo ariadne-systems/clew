@@ -40,11 +40,9 @@ export type MintTemporaryOptions = MintOptions & {
 };
 
 /**
- * Mints `count` ids for `type`, in the scheme selected by configuration.
- * Before any allocation, the type is rejected if it uses the reserved temporary
- * marker or is not a configured prefix, so a bad prefix fails
- * fast and nothing is allocated. The minting code depends only on the IdStrategy
- * interface; the concrete strategy is chosen by `createIdStrategy`.
+ * Mints `count` ids for `type` in the scheme selected by configuration.
+ * The type is rejected — for a reserved marker or an unconfigured prefix —
+ * before any allocation.
  */
 export async function mint(
   type: string,
@@ -137,9 +135,7 @@ const createIdStrategy = realizes(
 
 /**
  * Rejects a type whose prefix is not a configured prefix — a lens id, or the
- * story or entity prefix — before any allocation. The configured
- * prefixes are the single source of truth for id validity (ADR-0003); no id
- * pattern is consulted.
+ * story or entity prefix — before any allocation.
  */
 const assertPrefixConfigured = realizes(
   ConTraceables.CON_005_ID_PREFIX_MUST_BE_CONFIGURED,
@@ -153,12 +149,7 @@ const assertPrefixConfigured = realizes(
   },
 );
 
-/**
- * Rejects a type that uses the reserved temporary marker as a segment,
- * before any id is produced. This keeps `-TMP-` out of every bound id and leaves
- * each temporary id with exactly one marker, so the two are never confused and a
- * temporary id parses unambiguously.
- */
+/** Rejects a type that uses the reserved temporary marker as a segment, before any id is produced. */
 function assertTypeNotReserved(type: string): void {
   if (typeUsesReservedMarker(type)) {
     throw new ClewError(

@@ -11,16 +11,7 @@ import {
   writeCoverageResult,
 } from "../../index.js";
 
-/**
- * Registers the `clew coverage` command surface. The action stays thin:
- * it requires a configuration, gathers the universe (the generated traceables,
- * read back through the configured generators), the code anchors (the
- * generator-driven code scan), and the committed waivers, then
- * delegates to core to compute coverage, reconcile the waivers, and write
- * `coverage.json`. It prints the report and is **informational** — it always
- * exits 0, whether or not gaps exist; the pass/fail gate is a later story. Any
- * error propagates to the bin entry, which writes it to stderr and exits non-zero.
- */
+/** Registers the `clew coverage` command surface. Always exits 0 — the report is informational. */
 export const registerCoverage: (program: Command) => void = realizes(
   SwTraceables.SW_029_COVERAGE_COMMAND,
   (program: Command): void => {

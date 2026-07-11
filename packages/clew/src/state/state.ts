@@ -14,7 +14,7 @@ export type WithStateOptions = {
   file?: string;
 };
 
-// Wait for a held lock rather than failing immediately, so sessions serialize.
+// Wait for a held lock rather than failing immediately.
 const LOCK_OPTIONS = {
   retries: { retries: 50, factor: 1.2, minTimeout: 5, maxTimeout: 100 },
 };

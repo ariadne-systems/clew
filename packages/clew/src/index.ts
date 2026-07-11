@@ -119,9 +119,8 @@ export type {
 export { classifyCFamily, lineOf } from "./text/c-family-lexer.js";
 
 // Module-level anchors — the high-altitude system capabilities this package
-// realizes, anchored at module altitude (fine-grained behaviours are anchored at
-// their own call sites). A `clew-context` ascent up the file/module tree surfaces
-// these for an agent working anywhere in the package.
+// realizes, anchored at module altitude; fine-grained behaviours are anchored at
+// their own call sites.
 type _Anchors =
   | Realizes<SysTraceables.SYS_001_COMPILE_CHECKED_ANCHORING, unknown>
   | Realizes<SysTraceables.SYS_002_REVERSE_TRACEABILITY_COVERAGE, unknown>
@@ -141,7 +140,7 @@ type _Anchors =
 
 const CORE_VERSION = "0.0.0";
 
-// Placeholder export for the scaffold so downstream packages have something to import.
+// Placeholder export for the scaffold.
 export function coreVersion(): string {
   return CORE_VERSION;
 }

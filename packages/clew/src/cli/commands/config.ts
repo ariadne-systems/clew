@@ -3,15 +3,7 @@ import type { Command } from "commander";
 import type { ResolvedConfiguration } from "../../index.js";
 import { requireConfig, resolveConfiguration } from "../../index.js";
 
-/**
- * Registers the `clew config` command surface.
- * The action stays thin: it requires a configuration and delegates to core's
- * `resolveConfiguration()`, which assembles the resolved
- * view. It then writes that view to stdout: human-readable by default, or as
- * JSON with `--json` for an agent. The command resolves nothing itself and
- * changes nothing. Any error propagates to the bin entry, which writes
- * it to stderr and exits non-zero.
- */
+/** Registers the `clew config` command surface. Human-readable by default, or JSON with `--json`. */
 export const registerConfig: (program: Command) => void = realizes(
   [SwTraceables.SW_020_CONFIG_COMMAND, ConTraceables.CON_015_CONFIG_READ_ONLY],
   (program: Command): void => {

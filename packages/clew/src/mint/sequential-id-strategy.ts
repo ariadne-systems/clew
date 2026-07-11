@@ -35,10 +35,9 @@ export class SequentialIdStrategy implements IdStrategy {
         `Mint count must be a positive integer, got ${count}.`,
       );
     }
-    // Allocate inside the locked session; the high-water mark is persisted so a
-    // number is never reused. withState saves before it
-    // resolves, so the numbers are only formatted and returned once the advance
-    // is durably persisted.
+    // Allocate inside the locked session; withState persists the advanced
+    // high-water mark before it resolves, so numbers are formatted and returned
+    // only once the advance is durable.
     const numbers = await withState(
       (state) => allocateConsecutive(state.sequences, type, count),
       { file: this.#stateFile },

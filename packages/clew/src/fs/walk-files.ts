@@ -19,10 +19,7 @@ export interface WalkPolicy {
 /**
  * Walks `projectRoot`, returning the project-root-relative, forward-slash paths of
  * the files `policy.accept` admits, descending only where `policy.descend` allows.
- * A missing root is treated as empty. This is the single, policy-driven project walk
- * the code scan and the integrity checks share, so they never differ on what the
- * project's source is; the exclusion semantics live in the policy the caller passes,
- * not in the walk.
+ * A missing root is treated as empty.
  */
 export async function walkProject(
   projectRoot: string,
@@ -60,8 +57,7 @@ export async function walkProject(
 
 /**
  * Recursively lists the files (not directories) under `dir`, treating a missing
- * directory as empty. The single recursive directory walk used wherever a tree of
- * drafts or specs is scanned.
+ * directory as empty.
  */
 export async function walkFiles(dir: string): Promise<WalkedFile[]> {
   const files: WalkedFile[] = [];

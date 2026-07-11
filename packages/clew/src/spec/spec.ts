@@ -17,9 +17,7 @@ import { groupIntoSpecSets, lensMatchers } from "./spec-set.js";
 export type SpecOptions = {
   /**
    * Resolves a configured generator name to its implementation. Defaults to the
-   * in-tree generator registry; a test injects a fake. The engine reaches every
-   * generator through this resolver, the concrete generators bound at the single
-   * registry point (ADR-0007).
+   * in-tree generator registry.
    */
   resolveGenerator?: (name: string) => Generator | undefined;
   /** Path to `.clewrc.json`. Defaults to the configuration default. */
@@ -50,11 +48,8 @@ export type SpecResult = {
  * Generates the traceables and anchoring utilities from the specs.
  * It scans the configured artifacts into the traceable set, groups them
  * into spec sets (by lens, the default), and drives each configured generator
- * through the generator interface only — the core performs no language-specific
- * emission and references no concrete generator. Generation is
- * deterministic: the scan and grouping are sorted, so an unchanged spec set
- * yields byte-identical output, and clew's reserved output directory is wiped and
- * regenerated on each run.
+ * through the generator interface. The scan and grouping are sorted, and clew's
+ * reserved output directory is wiped and regenerated on each run.
  */
 export const spec: (options?: SpecOptions) => Promise<SpecResult> = realizes(
   SwTraceables.SW_014_GENERATE_TRACEABLES,
@@ -63,7 +58,6 @@ export const spec: (options?: SpecOptions) => Promise<SpecResult> = realizes(
     const resolveGenerator =
       options.resolveGenerator ?? resolveBuiltinGenerator;
     const projectRoot = options.outputDir ?? ".";
-    // These reads are independent; run them concurrently rather than serially.
     const [traceables, matchers, ignorePatterns, generatorConfigs] =
       await Promise.all([
         scan({ configFile }),
@@ -71,8 +65,7 @@ export const spec: (options?: SpecOptions) => Promise<SpecResult> = realizes(
         readIgnore(configFile),
         readGenerators(configFile),
       ]);
-    // Only `active` and `deprecated` specs become traceables; a `planned` spec is
-    // filtered out here.
+    // Only `active` and `deprecated` specs become traceables.
     const generated = traceables.filter(
       (traceable) =>
         traceable.status === "active" || traceable.status === "deprecated",
@@ -80,7 +73,7 @@ export const spec: (options?: SpecOptions) => Promise<SpecResult> = realizes(
     const specSets = groupIntoSpecSets(generated, matchers, ignorePatterns);
 
     // Generate and validate every generator's output before replacing any
-    // directory, so a bad path fails before the previous output is touched.
+    // directory.
     const produced: {
       name: string;
       outputDir: string;
@@ -105,8 +98,7 @@ export const spec: (options?: SpecOptions) => Promise<SpecResult> = realizes(
       });
     }
 
-    // Group files by reserved directory (two generators may share one); the
-    // directories are independent, so replace them concurrently.
+    // Group files by reserved directory (two generators may share one).
     const filesByRoot = new Map<string, GeneratedFile[]>();
     for (const { writeRoot, files } of produced) {
       const bucket = filesByRoot.get(writeRoot) ?? [];
@@ -183,7 +175,6 @@ async function writeGeneratedFile(
  * Rejects a generated path that escapes its output directory — an absolute path, or
  * one that climbs out with `..`. A nested path is allowed, so a generator may emit a
  * subpackage (for example `annotation/Foo.java`); the wipe clears subdirectories too.
- * A bad path is a generator bug, not user input, so it throws plainly.
  */
 function assertSafeGeneratedPath(name: string): void {
   const normalized = name.replaceAll("\\", "/");

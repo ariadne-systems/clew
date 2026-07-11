@@ -30,8 +30,7 @@ export type SetupResult = {
  * Scaffolds the default configuration and layout: writes
  * `.clewrc.json` with the default lenses and layout and creates the
  * configured layout directories, relative to the configuration's directory.
- * An existing configuration is never overwritten, so setup is safe to
- * re-run.
+ * An existing configuration is never overwritten.
  */
 export const setup: (options?: SetupOptions) => Promise<SetupResult> = realizes(
   [

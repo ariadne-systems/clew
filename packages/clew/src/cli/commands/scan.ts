@@ -2,14 +2,7 @@ import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 import { requireConfig, scanCode, writeLocationsIndex } from "../../index.js";
 
-/**
- * Registers the `clew scan` command surface — the *check* side, dual to
- * `spec` (the *declare* side). The action stays thin: it requires a configuration
- * and delegates to core's `scanCode()`, which
- * drives each generator's discover through the interface. It reports the located
- * anchors to stdout and writes the locations index. Any error propagates to the
- * bin entry, which writes it to stderr and exits non-zero.
- */
+/** Registers the `clew scan` command surface — the *check* side, dual to `spec` (the *declare* side). */
 export const registerScan: (program: Command) => void = realizes(
   SwTraceables.SW_023_SCAN_COMMAND,
   (program: Command): void => {

@@ -24,8 +24,7 @@ import { setSymbolName, toMemberName } from "../../spec/identifiers.js";
 import { classifyCFamily } from "../../text/c-family-lexer.js";
 import { discoverAnchors, SOURCE_EXTENSIONS } from "./discover.js";
 
-// Module-level anchors — a concrete language generator behind the neutral
-// interface is what makes the tool language-neutral and polyglot in practice.
+// Module-level anchors.
 type _Anchors =
   | Realizes<SysTraceables.SYS_008_LANGUAGE_NEUTRAL_EXTENSIBILITY, unknown>
   | Realizes<StkTraceables.STK_008_POLYGLOT_APPLICABILITY, unknown>;
@@ -47,8 +46,7 @@ const GENERATOR_TYPE = "typescript";
  * each takes one member or a non-empty list, constrained to that union, so a
  * reference to a removed member fails to type-check (ADR-0001 D1). A plain (non-`const`) enum is used so the output survives per-file
  * transpilers and bundlers, and a `README.md` documents the markers for an author
- * (or agent) anchoring code. The output is deterministic and tool-owned;
- * the helpers are emitted, not shipped. File names are relative to the project's
+ * (or agent) anchoring code. File names are relative to the project's
  * configured output directory, which the core resolves.
  */
 export const createTypeScriptGenerator: () => Generator = realizes(
@@ -228,8 +226,7 @@ function renderHelperModule(specSets: readonly SpecSet[]): GeneratedFile {
 
 /**
  * Emits the README documenting the markers for the TypeScript target.
- * The marker API is the same every run, so the file is deterministic; an example
- * uses a real member when one exists.
+ * An example uses a real member when one exists.
  */
 function renderReadme(specSets: readonly SpecSet[]): GeneratedFile {
   const example = exampleMember(specSets) ?? "YourTraceables.YOUR_SPEC_ID";

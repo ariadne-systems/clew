@@ -10,8 +10,7 @@ import { registerScan } from "./commands/scan.js";
 import { registerSetup } from "./commands/setup.js";
 import { registerSpec } from "./commands/spec.js";
 
-// Builds the root `clew` command. This is the single place where
-// subcommands are registered as they are added.
+// The single place where subcommands are registered.
 export function buildProgram(): Command {
   const program = new Command();
 

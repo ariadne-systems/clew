@@ -11,9 +11,8 @@ const DOCUMENT_TYPES: readonly DocumentType[] = ["story", "spec"];
 /**
  * Loads and self-validates the configured per-document-type schemas, resolving each
  * schema file under the project root and parsing its YAML. A document
- * type with no configured schema is absent from the map, so only the pinned core
- * applies to it. A malformed or overreaching schema is rejected with its path, before
- * any document is validated against it.
+ * type with no configured schema is absent from the map. A malformed or overreaching
+ * schema is rejected with its path, before any document is validated against it.
  */
 export async function loadSchemas(
   configFile: string | undefined,

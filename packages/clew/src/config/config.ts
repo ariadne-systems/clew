@@ -173,11 +173,7 @@ export async function readLayout(
   };
 }
 
-/**
- * The set of valid id prefixes: the lens ids plus the story prefix (ADR-0003).
- * This is the single source of truth that mint validates a prefix against and
- * init filters discovered ids by.
- */
+/** The set of valid id prefixes: the lens ids plus the story prefix (ADR-0003). */
 export async function readConfiguredPrefixes(
   file: string = DEFAULT_CONFIG_FILE,
 ): Promise<Set<string>> {
@@ -199,7 +195,7 @@ export type ResolvedGenerator = {
 
 /**
  * The project's configuration, fully resolved: every default applied and every
- * derivation computed, so a caller reads the answer without knowing a default.
+ * derivation computed.
  */
 export type ResolvedConfiguration = Realizes<
   EntTraceables.ENT_002_CONFIGURATION,
@@ -214,8 +210,7 @@ export type ResolvedConfiguration = Realizes<
 
 export type ResolveConfigurationOptions = {
   /**
-   * Resolves a configured generator name to its implementation, so a generator's
-   * default output directory can be read through the generator interface. Defaults
+   * Resolves a configured generator name to its implementation. Defaults
    * to the in-tree generator registry; a test injects a fake (ADR-0007).
    */
   resolveGenerator?: (name: string) => Generator | undefined;
@@ -228,8 +223,7 @@ export type ResolveConfigurationOptions = {
  * It composes the independently-defaulted section readers — the lenses, the
  * layout, and the derived prefixes (ADR-0003) — with each configured generator's
  * resolved output directory: the configured `outputDir`, or, when absent, the
- * generator's own default read through the generator interface — the generators
- * from the in-tree registry, resolved through that interface (ADR-0007).
+ * generator's own default read through the generator interface (ADR-0007).
  */
 export const resolveConfiguration: (
   options?: ResolveConfigurationOptions,
@@ -257,10 +251,9 @@ export const resolveConfiguration: (
 
 /**
  * Resolves a configured generator's output directory: the configured `outputDir`
- * when set, otherwise the generator's own default — the same rule the `spec`
- * command applies. The generator is only consulted when no directory is
- * configured; a configured generator that resolves to nothing fails fast with a
- * stable code.
+ * when set, otherwise the generator's own default. The generator is only consulted
+ * when no directory is configured; a configured generator that resolves to nothing
+ * fails fast with a stable code.
  */
 function resolveOutputDir(
   config: GeneratorConfig,
@@ -282,10 +275,8 @@ function resolveOutputDir(
 /**
  * Reads the `generators` section: the language generators to run, each with its
  * target-language `type` and an optional `outputDir`. An entry may be a
- * bare type string (shorthand for `{ type }`) or an object. Each type is resolved
- * to a concrete generator outside the core, so the core never depends on a
- * concrete generator. A missing section yields an empty list — nothing
- * to generate.
+ * bare type string (shorthand for `{ type }`) or an object. A missing section
+ * yields an empty list — nothing to generate.
  */
 export async function readGenerators(
   file: string = DEFAULT_CONFIG_FILE,

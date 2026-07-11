@@ -85,9 +85,7 @@ export const promote: (options: PromoteOptions) => Promise<PromoteResult> =
         return { promoted: [] };
       }
 
-      // Validate each story being promoted against its schema before binding any
-      // id, so a malformed story fails the promotion rather than entering the
-      // corpus.
+      // Validate each story against its schema before binding any id.
       const projectRoot =
         options.configFile === undefined ? "." : dirname(options.configFile);
       const schemas = await loadSchemas(options.configFile, projectRoot);
@@ -102,8 +100,7 @@ export const promote: (options: PromoteOptions) => Promise<PromoteResult> =
         }
       }
 
-      // Resolve every target before binding any id, so nothing is spent on a
-      // draft that cannot be placed.
+      // Resolve every target before binding any id.
       const targets = set.map((draft) => ({
         draft,
         targetDir: resolveTargetDir(draft.prefix, layout, lensIds),
@@ -197,8 +194,6 @@ function resolveRoot(name: string, pending: readonly DraftFile[]): DraftFile {
  * references are validated against the set, never followed, so naming a spec
  * never reaches past it. Every draft in the set must reference only drafts the
  * set includes; one that references outside it fails rather than being pulled in.
- * So a story must itself reference each of its specs, and a follow-on spec named
- * directly must reference only already-bound ids.
  */
 async function gatherSet(
   seeds: readonly DraftFile[],

@@ -21,9 +21,7 @@ import { resolveGeneratorOrThrow } from "./generator.js";
 export type ScanCodeOptions = {
   /**
    * Resolves a configured generator name to its implementation. Defaults to the
-   * in-tree generator registry; a test injects a fake. The scan reaches every
-   * generator through this resolver, the concrete generators bound at the single
-   * registry point (ADR-0007), exactly as generation does.
+   * in-tree generator registry.
    */
   resolveGenerator?: (name: string) => Generator | undefined;
   /** Path to `.clewrc.json`. Defaults to the configuration default. */
@@ -45,14 +43,13 @@ export type ScanCodeResult = {
  * exclusions — the built-in defaults and the project's configured `exclude` /
  * `unexclude` — and the generators read their own marker grammar back
  * out. The same id may appear at many locations; every one is recorded. The
- * result is sorted so a run is deterministic.
+ * result is sorted.
  */
 export const scanCode: (options?: ScanCodeOptions) => Promise<ScanCodeResult> =
   realizes(
     SwTraceables.SW_022_SCAN_CODE_INTO_ANCHOR_LOCATIONS,
     async (options: ScanCodeOptions = {}): Promise<ScanCodeResult> => {
       const projectRoot = options.projectRoot ?? ".";
-      // These reads are independent; run them concurrently rather than serially.
       const [generatorConfigs, exclude, unexclude] = await Promise.all([
         readGenerators(options.configFile),
         readExclude(options.configFile),
@@ -87,8 +84,7 @@ export const scanCode: (options?: ScanCodeOptions) => Promise<ScanCodeResult> =
  * scans, applying the exclusions before discovery: an excluded file is
  * not read, and an excluded directory is not descended into — unless an
  * `unexclude` re-includes a path beneath it. A directory that does not exist is
- * skipped. Paths are recorded relative to the project root with forward slashes,
- * so they are stable across platforms.
+ * skipped. Paths are recorded relative to the project root with forward slashes.
  */
 const collectSources: (
   projectRoot: string,
@@ -121,10 +117,8 @@ export const DEFAULT_LOCATIONS_FILE = ".clew/locations.json";
 /**
  * Writes the anchor locations as the locations index, in the shared
  * `locations.json` shape (ADR-0005 D6). The write is atomic — to a temporary file,
- * then renamed into place — so an interrupted scan leaves the previous
- * index intact, never a partial one a later coverage run would trust as complete.
- * A run replaces any existing index wholesale; the scan is full, not incremental.
- * Returns the path written.
+ * then renamed into place. A run replaces any existing index wholesale. Returns
+ * the path written.
  */
 export const writeLocationsIndex: (
   result: ScanCodeResult,

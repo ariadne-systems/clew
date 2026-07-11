@@ -2,13 +2,7 @@ import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 import { setup } from "../../index.js";
 
-/**
- * Registers the `clew setup` command surface.
- * The action stays thin: it delegates scaffolding to core's `setup()`
- * and reports what it wrote. An existing configuration is left untouched.
- * Any error propagates to the bin entry, which writes it to stderr
- * and exits non-zero.
- */
+/** Registers the `clew setup` command surface. An existing configuration is left untouched. */
 export const registerSetup: (program: Command) => void = realizes(
   SwTraceables.SW_010_SETUP_COMMAND,
   (program: Command): void => {

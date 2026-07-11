@@ -24,7 +24,7 @@ import {
   resolveGeneratorOrThrow,
 } from "./generator.js";
 
-// Module-level anchor — this module realizes the coverage-policy capability.
+// Module-level anchor.
 type _Anchors = Realizes<
   SysTraceables.SYS_012_COVERAGE_POLICY_AND_WAIVERS,
   unknown
@@ -71,13 +71,8 @@ export const DEFAULT_COVERAGE_FILE = ".clew/coverage.json";
 /**
  * Classifies each traceable by whether code **realizes** it and a test
  * **verifies** it: Covered (both), Realized (realize only), Verified
- * (verify only), None (neither). Only `realizes` and `verifies` decide the status;
- * a `concerns` anchor contributes to neither, so a concerns-only spec is None. The
- * universe is the generated traceables read back through the generator — the
- * `active` and `deprecated` specs; a `planned` spec was never generated and is
- * absent. A `deprecated` traceable is not classified: its status is `deprecated`,
- * so the report lists it without counting it. The lens is the id's prefix. The
- * result is sorted by id.
+ * (verify only), None (neither). A `deprecated` traceable is not classified: its
+ * status is `deprecated`. The lens is the id's prefix. The result is sorted by id.
  */
 export const computeCoverage: (
   universe: readonly GeneratedTraceable[],
@@ -136,7 +131,7 @@ function statusOf(realized: boolean, verified: boolean): CoverageStatus {
 export type ReadUniverseOptions = {
   /**
    * Resolves a configured generator name to its implementation. Defaults to the
-   * in-tree generator registry; a test injects a fake (ADR-0007).
+   * in-tree generator registry.
    */
   resolveGenerator?: (name: string) => Generator | undefined;
   /** Path to `.clewrc.json`. Defaults to the configuration default. */
@@ -150,10 +145,7 @@ export type ReadUniverseOptions = {
  * configured generator it reads that generator's output
  * directory and asks the generator to read its own emitted enum members back, then
  * merges them by id (a member any generator marks deprecated is deprecated). The
- * universe is therefore the *generated* set — `active` and `deprecated` specs, the
- * `spec` command's output — not a re-scan of the spec files, so a spec's status is
- * resolved once at generation and an ALM-sourced status is never re-queried per
- * coverage run. The result is sorted by id.
+ * result is sorted by id.
  */
 export const readUniverse: (
   options?: ReadUniverseOptions,
@@ -167,7 +159,6 @@ export const readUniverse: (
     const resolveGenerator =
       options.resolveGenerator ?? resolveBuiltinGenerator;
     const generatorConfigs = await readGenerators(options.configFile);
-    // Each configured generator's output is independent; read them concurrently.
     const perGenerator = await Promise.all(
       generatorConfigs.map(async (config) => {
         const generator = resolveGeneratorOrThrow(
@@ -185,9 +176,8 @@ export const readUniverse: (
         return generator.readTraceables(files);
       }),
     );
-    // Merge by id across generators. A member any generator marks deprecated is
-    // deprecated (the union of deprecation) — intentional, not a consistency check;
-    // detecting divergent generated trees is a separate concern.
+    // Merge by id across generators; a member any generator marks deprecated is
+    // deprecated (the union of deprecation).
     const deprecatedById = new Map<string, boolean>();
     for (const traceable of perGenerator.flat()) {
       deprecatedById.set(
@@ -202,11 +192,10 @@ export const readUniverse: (
 );
 
 /**
- * Reads a generator's reserved output directory — recursively, so a file emitted
- * into a subpackage is included — into the source files of its own extensions that
- * the tool actually generated. Only files carrying GENERATED_MARKER are returned, so
- * a hand-written or stray file cannot inject phantom traceables. The reads run
- * concurrently; a missing directory yields no files.
+ * Reads a generator's reserved output directory — recursively — into the source
+ * files of its own extensions that the tool actually generated. Only files carrying
+ * GENERATED_MARKER are returned. The reads run concurrently; a missing directory
+ * yields no files.
  */
 async function readGeneratedFiles(
   dir: string,
@@ -256,11 +245,8 @@ const waiverMatches: (waiver: Waiver, id: string) => boolean = realizes(
 /**
  * Reconciles the computed coverage against the committed waiver list. A
  * spec that a waiver waives is reported **waived** — carrying its reason — rather
- * than as an open gap. A waiver waives only a missing test: it applies to a spec
- * that is Realized (implemented, not verified) and matches it by id or pattern; a
- * spec missing its realizing code — None or verify-only — is never waived. A
- * waiver that waives nothing — it matches no Realized spec — is reported as a
- * **stale waiver**. The stale waivers are sorted by target.
+ * than as an open gap. A waiver that waives nothing — it matches no Realized spec —
+ * is reported as a **stale waiver**. The stale waivers are sorted by target.
  */
 export const reconcileWaivers: (
   coverage: readonly SpecCoverage[],
@@ -275,8 +261,6 @@ export const reconcileWaivers: (
     waivers: readonly Waiver[],
   ): CoverageResult => {
     const specs: CoverageEntry[] = coverage.map((spec) => {
-      // Only a Realized spec — implemented but untested — is waivable; a spec
-      // missing its realizing code is never waived.
       if (spec.status !== "realized") {
         return spec;
       }

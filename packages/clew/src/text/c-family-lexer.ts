@@ -34,9 +34,7 @@ export interface ClassifiedSource {
  * literal blanked — newlines preserved so positions stay accurate, the view a marker
  * scan reads — and the comment spans, the view the spec-id-in-comment check reads.
  * `dialect` enables the forms a language actually has, so a `/` inside a Java string
- * is never read as a regex and a backtick is never read as a template. One lexer and
- * two views mean discovery and comment detection never disagree about what is code
- * (ADR-0005 D3).
+ * is never read as a regex and a backtick is never read as a template.
  */
 export function classifyCFamily(
   source: string,
@@ -292,7 +290,7 @@ function scanRegex(
  * Whether a `/` at this point begins a regex literal: true at the start of input
  * or after a punctuator that cannot end an expression. After a value (identifier,
  * number, closing bracket, string) a `/` is division. A regex in keyword position
- * (e.g. after `return`) is the known gap of a lexical scan, not an AST (ADR-0005 D3).
+ * (e.g. after `return`) is the known gap of a lexical scan, not an AST.
  */
 function startsRegex(previous: string): boolean {
   return previous === "" || "([{,;:?=+-*/%&|^!~<>".includes(previous);

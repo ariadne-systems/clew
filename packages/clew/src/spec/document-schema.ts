@@ -53,9 +53,8 @@ const PINNED_STATUS_LABEL = "status";
  * Validates a parsed schema against clew's minimum contract and returns it
  * normalized. The shape must be recognized — an `onError` of `warn`/`fail`
  * and `fields` of label → `{ required?, enum? }` — and it may not reach into the
- * pinned core: no `id` (the id form is clew's), and no `enum` on the
- * `Status` field (the status value set is clew's). A schema that fails is rejected
- * with its location, before any document is validated against it.
+ * pinned core: no `id`, and no `enum` on the `Status` field. A schema that fails is
+ * rejected with its location, before any document is validated against it.
  */
 export const schemaFromParsed: (
   parsed: unknown,
@@ -203,8 +202,7 @@ const FIELD_LINE = /^\*\*([^*]+)\*\*(?::[ \t]*(.*?))?[ \t]*$/;
  * a violation per missing required field, per inline value outside a field's
  * `enum`, and per schema-declared field that appears out of the declared order.
  * A field label is matched case-insensitively; a field the schema does not declare
- * is ignored, so it may sit anywhere. The pinned core (id, uniqueness,
- * `**Status**`, relation links) is enforced elsewhere; this is the project-field layer.
+ * is ignored, so it may sit anywhere.
  */
 export const validateDocument: (
   content: string,
@@ -336,8 +334,7 @@ export const splitOnSchemaFailure: (
 /**
  * Validates one document of `type` against the loaded schemas as it is read.
  * A `fail`-severity violation throws; `warn` violations are returned for the caller
- * to report. A type with no configured schema validates trivially — only the pinned
- * core, enforced elsewhere, applies.
+ * to report. A type with no configured schema validates trivially.
  */
 export const validateOnLoad: (
   content: string,

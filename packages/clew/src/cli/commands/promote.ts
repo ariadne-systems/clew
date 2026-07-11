@@ -2,15 +2,7 @@ import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
 import { promote, requireConfig } from "../../index.js";
 
-/**
- * Registers the `clew promote` command surface.
- * The action stays thin: it requires a configuration and delegates the mechanical
- * finalize to core's `promote()`, then reports each temporary-id → bound-id mapping
- * to stdout. At least one root — a story or spec, or `all` — is required; commander
- * rejects the no-argument form. Any error propagates to the bin entry, which writes
- * it to stderr and exits non-zero. Integration reasoning stays with the
- * `clew-promote` skill, not here.
- */
+/** Registers the `clew promote` command surface. */
 export const registerPromote: (program: Command) => void = realizes(
   SwTraceables.SW_016_PROMOTE_COMMAND,
   (program: Command): void => {

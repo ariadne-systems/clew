@@ -4,10 +4,6 @@ import { ClewError, ErrorCode } from "../errors.js";
 /**
  * The built-in default exclusions, as repository-root-relative globs. A bare
  * segment matches only at the root; a leading `**` matches at any depth.
- * Dependency and build directories recur per module, so they use a leading `**`; the
- * tool's own state directory is root-only. A generator's output directory is not
- * excluded by default — generated output is inert to the scan, so a project
- * that wants it skipped lists it under `exclude` like any other path.
  */
 const DEFAULT_GLOBS: readonly string[] = [
   "**/node_modules",
@@ -43,7 +39,7 @@ export type ExclusionInput = {
  * Compiles the exclusion rules from the configured patterns and the generator
  * output directories. Every pattern is compiled up front; an
  * uncompilable `exclude` or `unexclude` glob fails fast with a stable error
- * naming it, rather than silently degrading to a pattern that never matches.
+ * naming it.
  */
 export const compileExclusionRules: (input: ExclusionInput) => ExclusionRules =
   realizes(
@@ -66,8 +62,7 @@ export const compileExclusionRules: (input: ExclusionInput) => ExclusionRules =
  * Whether a path is excluded, by precedence: a user `exclude` match —
  * on the path or any ancestor directory — wins; otherwise an `unexclude` match
  * re-includes it; otherwise a built-in default match excludes it; otherwise it is
- * included. Matching an ancestor counts, so a file under an excluded directory is
- * excluded unless an `unexclude` re-includes it.
+ * included. Matching an ancestor counts.
  */
 export const fileExcluded: (path: string, rules: ExclusionRules) => boolean =
   realizes(
@@ -88,8 +83,7 @@ export const fileExcluded: (path: string, rules: ExclusionRules) => boolean =
  * Whether the walk should descend into a directory. A directory a user
  * `exclude` matches is never descended (the veto is absolute). A directory a
  * built-in default would exclude is descended only when some `unexclude` could
- * match a path beneath it — otherwise it is pruned, so a tree like `node_modules`
- * is never walked when nothing re-includes into it. Files inside a descended tree
+ * match a path beneath it — otherwise it is pruned. Files inside a descended tree
  * still get the per-file decision.
  */
 export const shouldDescend: (

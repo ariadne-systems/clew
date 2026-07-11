@@ -10,18 +10,14 @@ import {
 
 type MintCommandOptions = { tmp?: boolean; as?: string };
 
-/**
- * Whether `--as` was given without `--tmp`. Author namespacing applies only to
- * temporary minting, so this combination is rejected rather than silently ignored.
- */
+/** Whether `--as` was given without `--tmp`. */
 function authorWithoutTemporary(options: MintCommandOptions): boolean {
   return options.as !== undefined && !options.tmp;
 }
 
 /**
- * Resolves the draft author: the `--as` option, then `CLEW_DRAFT_AUTHOR`. An unset
- * value is the solo default; a present-but-empty flag or env var counts as unset, so
- * it falls back rather than failing author validation downstream.
+ * Resolves the draft author: the `--as` option, then `CLEW_DRAFT_AUTHOR`.
+ * A present-but-empty flag or env var counts as unset.
  */
 function resolveAuthor(options: MintCommandOptions): string | undefined {
   const configuredAuthor = options.as ?? process.env.CLEW_DRAFT_AUTHOR;
@@ -31,15 +27,7 @@ function resolveAuthor(options: MintCommandOptions): string | undefined {
   return configuredAuthor;
 }
 
-/**
- * Registers the `clew mint` command surface.
- * The action stays thin: it delegates allocation and validation to core's
- * `mint()` and prints each minted id on its own line to stdout.
- * With `--tmp` it delegates to core's `mintTemporary()` for unbound ids that
- * touch no state; the default bound behaviour is unchanged.
- * Any error propagates to the bin entry, which writes it to stderr and exits
- * non-zero.
- */
+/** Registers the `clew mint` command surface. `--tmp` allocates unbound ids that touch no state. */
 export const registerMint: (program: Command) => void = realizes(
   [SwTraceables.SW_008_MINT_COMMAND, SwTraceables.SW_003_MINT_COMMAND_OUTPUT],
   (program: Command): void => {

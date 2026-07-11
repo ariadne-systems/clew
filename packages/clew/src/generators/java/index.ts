@@ -43,8 +43,7 @@ const ANNOTATION_TARGETS = "{PACKAGE, TYPE, METHOD, FIELD}";
  * reference to a removed member a compile error; anchoring uses real
  * annotations on a package/type/method/field, not wrapper functions. The package is
  * derived from the configured output directory so the files compile where they land,
- * and a `README.md` documents the annotations. The output is deterministic and
- * tool-owned.
+ * and a `README.md` documents the annotations.
  */
 export const createJavaGenerator: () => Generator = realizes(
   [

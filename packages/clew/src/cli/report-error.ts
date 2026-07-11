@@ -1,14 +1,7 @@
 import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import { ClewError } from "../index.js";
 
-/**
- * Formats a failure for stderr in the compiler-diagnostic convention. A coded
- * failure leads with `error[<CODE>]: <summary>` so a consumer can identify it by
- * its stable code without parsing the prose, followed — when present — by a
- * `--> location` pointer and `= note:` / `= help:` lines. A failure carrying none
- * of these renders as the single summary line; any other error falls back to its
- * message.
- */
+/** Formats a failure for stderr in the compiler-diagnostic convention (`error[<CODE>]:`, `--> location`, `= note:` / `= help:`). */
 export const formatError: (error: unknown) => string = realizes(
   SwTraceables.SW_004_ERROR_REPORTING,
   (error: unknown): string => {

@@ -8,14 +8,9 @@ import { ClewError, ErrorCode } from "../errors.js";
 import type { CommentSpan } from "../text/c-family-lexer.js";
 
 /**
- * The language emission seam.
- * Emitting the traceable symbols and the anchoring utility for a target language
- * is the job of a language-specific generator, chosen by configuration and
- * implemented behind this narrow interface. The core depends only on this
- * interface, never on a concrete generator — the boundary that must not erode
- * (ADR-0001 D9). It is the sibling of the id-generation seam (IdStrategy):
- * same shape, but for language emission rather than the id's variable
- * part.
+ * The language emission seam: emitting the traceable symbols and the anchoring
+ * utility for a target language is the job of a language-specific generator,
+ * chosen by configuration and implemented behind this narrow interface.
  */
 
 /**
@@ -28,9 +23,7 @@ export type SpecStatus = (typeof SPEC_STATUSES)[number];
 
 /**
  * A single scanned spec: its id, its lens (its prefix), the filename it was
- * declared in, and its implementation state. The filename is what spec-set
- * matchers match against, so a grouping can select on the descriptive slug, not
- * only the sparse id (whose only matchable part is the lens prefix).
+ * declared in, and its implementation state.
  */
 export interface ScannedSpec {
   readonly id: string;
@@ -42,8 +35,7 @@ export interface ScannedSpec {
 
 /**
  * A configured grouping of scanned specs a generator emits as one symbol set.
- * Grouping is by lens by default; the configurable grouping
- * rules are the follow-on story and are not built here.
+ * Grouping is by lens by default.
  */
 export interface SpecSet {
   /** The set's name; the lens id when grouping by lens (the default). */
@@ -55,9 +47,7 @@ export interface SpecSet {
  * A file a generator produces. The path is a relative path within the project's
  * configured output directory — a plain filename, or a nested one such as
  * a subpackage (`annotation/Foo.java`), but never an escaping path; the core joins
- * it under that directory, creating subdirectories, and writes the bytes, so the
- * generator decides filenames and the core decides the location, and the core
- * carries no language knowledge.
+ * it under that directory, creating subdirectories, and writes the bytes.
  */
 export interface GeneratedFile {
   readonly path: string;
@@ -81,8 +71,8 @@ export interface SourceFile {
 /**
  * A located anchor the scan found: the spec id, the relation it was anchored
  * with, and where — a project-root-relative file path and a 1-based line number.
- * There is no column: the location is file-and-line, matching the shared
- * locations shape (ADR-0005 D6). The same id may occur at many locations.
+ * There is no column: the location is file-and-line. The same id may occur at
+ * many locations.
  */
 export interface AnchorLocation {
   readonly id: string;
@@ -93,9 +83,7 @@ export interface AnchorLocation {
 
 /**
  * A traceable read back from a generator's emitted output — a generated enum
- * member: its spec id and whether the member is marked deprecated. This
- * is the coverage universe: the generator that wrote the enum reads it
- * back, so coverage measures the generated set without re-scanning the specs.
+ * member: its spec id and whether the member is marked deprecated.
  */
 export interface GeneratedTraceable {
   readonly id: string;
@@ -147,19 +135,14 @@ export interface Generator
   discover(sources: readonly SourceFile[]): readonly AnchorLocation[];
   /**
    * Reads the traceables this generator emitted back from its generated output —
-   * the coverage universe, beside `discover`. The component
-   * that wrote the enum members reads them back, so coverage is measured against
-   * the generated set, not a re-scan of the specs; a member marked deprecated
-   * is reported as such. The emitted members round-trip: generate then
+   * the coverage universe, beside `discover`. A member marked deprecated is
+   * reported as such. The emitted members round-trip: generate then
    * readTraceables recovers exactly the ids emitted (ADR-0005 D2).
    */
   readTraceables(files: readonly SourceFile[]): readonly GeneratedTraceable[];
   /**
    * Identifies the comment spans in a source file of this generator's language —
-   * the seam the spec-id-in-comment check reads through. It is the same
-   * per-language lexical knowledge as discover, exposed as the comment view rather
-   * than the code view, so a stray spec id in a comment is found wherever the
-   * generator already scans for anchors, with no separate comment scanner in the core.
+   * the seam the spec-id-in-comment check reads through.
    */
   findComments(content: string): readonly CommentSpan[];
 }
@@ -167,15 +150,13 @@ export interface Generator
 /**
  * The marker every generated file's banner carries. The core uses it to
  * recognize its own output: it refuses to wipe a reserved output directory that
- * holds any file without this marker, so a mis-pointed directory is never cleared.
+ * holds any file without this marker.
  */
 export const GENERATED_MARKER = "GENERATED BY CLEW";
 
 /**
  * The reserved subdirectory clew owns within a generator's configured output
- * directory. clew writes only into `<configured>/clew` and wipes it whole each run,
- * so stale files are impossible and hand-written code in the configured directory
- * is never touched.
+ * directory. clew writes only into `<configured>/clew` and wipes it whole each run.
  */
 export const GENERATED_SUBDIR = "clew";
 
@@ -185,11 +166,9 @@ const HOMEPAGE = "https://ariadne-thread.io";
 /**
  * The generated-file banner shared by every generator: a do-not-edit warning
  * (carrying GENERATED_MARKER), a regenerate hint, and `@clew` provenance
- * annotations. A per-set file also carries its spec set. The banner is static, so
- * regeneration stays byte-identical. The lines are a `/* … *\/` block —
- * valid in both TypeScript and Java — so all generators share one provenance
- * format. The caller wraps these lines in nothing further; it returns the full
- * comment.
+ * annotations. A per-set file also carries its spec set. The lines are a
+ * `/* … *\/` block, valid in both TypeScript and Java. The caller wraps these
+ * lines in nothing further; it returns the full comment.
  */
 export const generatedHeader: (
   generatorType: string,
@@ -218,8 +197,6 @@ export const generatedHeader: (
 /**
  * Resolves a configured generator name to its implementation, failing fast with a
  * stable code when the configuration names one that is not registered (ADR-0001 D9).
- * Shared by generation, the code scan, and coverage so the resolution policy and
- * its error message stay in one place.
  */
 export function resolveGeneratorOrThrow(
   name: string,
@@ -237,8 +214,7 @@ export function resolveGeneratorOrThrow(
 
 /**
  * Maps each generator's source extensions to the generator that owns them — the
- * first generator to claim an extension wins. Lets a consumer pick the generator for
- * a file by its extension, the dual of selecting a generator's files by extension.
+ * first generator to claim an extension wins.
  */
 export function generatorsByExtension(
   generators: readonly Generator[],

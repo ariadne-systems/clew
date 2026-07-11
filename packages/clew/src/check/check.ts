@@ -60,11 +60,9 @@ export type Finding = {
 
 export type CheckOptions = {
   /**
-   * Resolves a configured generator name to its implementation, injected so the
-   * core depends on no concrete generator (ADR-0001 D9), exactly as the scan does.
-   * The spec-id-in-comment check reads each source through its generator's comment
-   * detection, so it runs only when a resolver is supplied; the corpus checks need
-   * none and always run.
+   * Resolves a configured generator name to its implementation. The
+   * spec-id-in-comment check runs only when a resolver is supplied; the corpus
+   * checks need none and always run.
    */
   resolveGenerator?: (name: string) => Generator | undefined;
   /** Path to `.clewrc.json`. Defaults to the configuration default. */
@@ -115,11 +113,7 @@ function suite(): readonly CheckModule[] {
   ];
 }
 
-/**
- * Runs the deterministic integrity-check suite over the corpus and returns every
- * finding. The suite is one list of check modules: the runner resolves the corpus
- * once, runs each module, and tags each finding with the check that produced it.
- */
+/** Runs the check suite: resolves the corpus once, runs each module, and tags each finding with the check that produced it. */
 export const check: (options?: CheckOptions) => Promise<CheckResult> = realizes(
   ArchTraceables.ARCH_005_CHECKS_ARE_ONE_SUITE,
   async (options: CheckOptions = {}): Promise<CheckResult> => {
@@ -207,11 +201,7 @@ const referenceRot: (context: CheckContext) => Promise<RawFinding[]> = realizes(
   },
 );
 
-/**
- * The reference-rot finding for one link target, or undefined when it resolves. A
- * link to an excluded path is skipped: an excluded path is invisible to every check,
- * so its existence and headings are neither read nor validated.
- */
+/** The reference-rot finding for one link target, or undefined when it resolves. A link to an excluded path is skipped. */
 async function brokenLink(
   context: CheckContext,
   at: { file: string; absolute: string; line: number },
@@ -251,11 +241,7 @@ async function brokenLink(
   return undefined;
 }
 
-/**
- * The invalid-status member: a spec's `**Status**`, when present, is one
- * of the recognized values. An unrecognized value would silently drop the spec out
- * of generation, so it is reported rather than guessed.
- */
+/** The invalid-status member: a spec's `**Status**`, when present, is one of the recognized values. */
 const invalidStatus: (context: CheckContext) => Promise<RawFinding[]> =
   realizes(
     ConTraceables.CON_022_VALID_STATUS,
@@ -284,11 +270,7 @@ const invalidStatus: (context: CheckContext) => Promise<RawFinding[]> =
     },
   );
 
-/**
- * The duplicate-id member: a bound id is declared by exactly one file.
- * This is the comprehensive detection deferred from the generation scan — across
- * every prefix, not only the lens ids generation gates on.
- */
+/** The duplicate-id member: a bound id is declared by exactly one file — across every prefix, not only the lens ids generation gates on. */
 const duplicateId: (context: CheckContext) => Promise<RawFinding[]> = realizes(
   ConTraceables.CON_025_ONE_FILE_PER_SPEC_ID,
   async (context: CheckContext): Promise<RawFinding[]> => {
@@ -313,13 +295,7 @@ const duplicateId: (context: CheckContext) => Promise<RawFinding[]> = realizes(
   },
 );
 
-/**
- * The spec-id-in-comment member: a spec id may live in code only inside an anchor
- * — the underscore form the compiler checks — never in a comment or a name. It
- * scans each source file's comments, found by the per-language finder, for a
- * hyphenated spec-id token of a configured prefix; the underscore anchor form
- * never matches, so a real anchor never trips.
- */
+/** The spec-id-in-comment member: scans each source file's comments for a hyphenated spec-id token of a configured prefix; the underscore anchor form never matches, so a real anchor never trips. */
 const specIdInComment: (context: CheckContext) => Promise<RawFinding[]> =
   realizes(
     [
@@ -390,13 +366,7 @@ function commentSpecIdFindings(
   return findings;
 }
 
-/**
- * The document-schema member: each story and spec satisfies its type's
- * schema — its project-required fields are present and its inline values are in
- * range. Both severities are reported here, since `check` is the standing
- * gate; the scan and promote block on `fail`. With no schema configured, nothing is
- * checked beyond the pinned core the other members already enforce.
- */
+/** The document-schema member: both severities are reported here (the scan and promote block on `fail`); with no schema configured, nothing is checked here. */
 const documentSchema: (context: CheckContext) => Promise<RawFinding[]> =
   realizes(
     SysTraceables.SYS_015_VALIDATE_ARTIFACTS_ON_LOAD,
@@ -430,7 +400,7 @@ const documentSchema: (context: CheckContext) => Promise<RawFinding[]> =
     },
   );
 
-/** A path made project-root-relative with forward slashes, so findings and exclusion matching name a file one way. */
+/** A path made project-root-relative with forward slashes. */
 function toRelative(projectRoot: string, target: string): string {
   const rel = isAbsolute(target) ? relative(projectRoot, target) : target;
   return rel.replaceAll("\\", "/").replace(/^\.\//, "").replace(/\/+$/, "");
@@ -446,12 +416,7 @@ function withinSpecTree(dir: string, specTreeDirs: readonly string[]): boolean {
   );
 }
 
-/**
- * The markdown files in the spec-tree directories (stories, specs), as
- * project-root-relative forward-slash paths — walked from the project root and
- * honouring the exclusions, the same walk and root the code check uses, so every
- * check names its file the same way.
- */
+/** The markdown files in the spec-tree directories (stories, specs), as project-root-relative forward-slash paths, honouring the exclusions. */
 async function specTreeMarkdown(
   context: Pick<CheckContext, "projectRoot" | "layout" | "exclusion">,
 ): Promise<string[]> {

@@ -7,9 +7,7 @@ import type { ScannedSpec, SpecSet } from "./generator.js";
 /**
  * The default matchers: one per configured lens, each selecting that lens's
  * markdown specs by their filename (e.g. lens `SW` → `^SW-.*\.md$`, matching
- * `SW-NNN-command.md`). This expresses the default "group by lens" through the
- * same matcher mechanism as any other grouping, rather than a dedicated code
- * path.
+ * `SW-NNN-command.md`).
  */
 export function lensMatchers(lenses: readonly Lens[]): SpecSetMatcher[] {
   return lenses.map((lens) => ({
@@ -33,9 +31,8 @@ type CompiledMatcher = {
  *   otherwise it is an unmatched error.
  *
  * Nothing is grouped into two sets or dropped silently. Empty sets are omitted,
- * and both the sets and their members are sorted, so the output is deterministic
- * and reproducible. With the default lens matchers every scanned
- * spec carries a lens and so matches exactly one set.
+ * and both the sets and their members are sorted. With the default lens matchers
+ * every scanned spec carries a lens and so matches exactly one set.
  */
 export const groupIntoSpecSets: (
   specs: readonly ScannedSpec[],
