@@ -56,7 +56,8 @@ Then run `clew init` to seed the state from the existing artifacts, so minting c
 ### 4. Orient
 
 Confirm what was created or found.
-Point the user to their next step: `clew mint <LENS>` to allocate an id (for example `clew mint SW`), and the companion `clew-draft` skill to draft a story and its specs.
+If the project's technology contract (`004`) is still an empty stub, point the user at the `clew-workspace` skill to establish the stack and prepare the workspace setup.
+Otherwise point them to their next step: `clew mint <LENS>` to allocate an id (for example `clew mint SW`), and the companion `clew-draft` skill to draft a story and its specs.
 Remind them to commit `.clewrc.json` and the state file so the team shares the same configuration and id allocations.
 
 ## Notes
@@ -68,5 +69,5 @@ Remind them to commit `.clewrc.json` and the state file so the team shares the s
 
 - `.clewrc.json` exists with the project's chosen lenses and layout, and the layout directories are created.
 - For an adopted project, the state is seeded (`clew init`) so minting continues past the ids already in use.
-- The user knows their next step (`clew mint <LENS>`, then the `clew-draft` skill) and what to commit.
+- The user knows their next step (the `clew-workspace` skill if the `004` is still a stub, else `clew mint <LENS>` and the `clew-draft` skill) and what to commit.
 - No existing configuration was overwritten, and nothing is committed.
