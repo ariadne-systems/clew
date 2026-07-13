@@ -1,9 +1,15 @@
 import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
+import {
+  ArchTraceables,
+  ConTraceables,
+  SwTraceables,
+  verifies,
+} from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
+import type { HarnessAdapter, MethodMaterials } from "../harness/harness.js";
 import { mint, setup } from "../index.js";
 
 async function tempDir(): Promise<string> {
@@ -116,6 +122,73 @@ describe("setup selects the generator", () => {
       );
 
       expect(await readFile(configFile, "utf8")).toBe('{"custom":true}');
+    });
+
+    test("re-running with --generator fills an empty generators, touching nothing else", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+      await setup({ configFile });
+      const before = JSON.parse(await readFile(configFile, "utf8")) as Record<
+        string,
+        unknown
+      >;
+
+      const result = await setup({ configFile, generator: "typescript" });
+
+      expect(result.created).toBe(false);
+      expect(result.generator).toBe("typescript");
+      const after = JSON.parse(await readFile(configFile, "utf8")) as Record<
+        string,
+        unknown
+      >;
+      expect(after["generators"]).toEqual([{ type: "typescript" }]);
+      expect({ ...after, generators: [] }).toEqual({
+        ...before,
+        generators: [],
+      });
+    });
+
+    test("re-running with --generator never replaces an already-configured generator", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+      await setup({ configFile, generator: "typescript" });
+      const before = await readFile(configFile, "utf8");
+
+      const result = await setup({ configFile, generator: "typescript" });
+
+      expect(result.created).toBe(false);
+      expect(result.generator).toBeNull();
+      expect(await readFile(configFile, "utf8")).toBe(before);
+    });
+  });
+});
+
+describe("setup seeds the architecture overview", () => {
+  verifies(SwTraceables.SW_046_SETUP_SEEDS_ARCHITECTURE_OVERVIEW, () => {
+    test("seeds a marked architecture skeleton in the docs tree", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+
+      await setup({ configFile });
+
+      const doc = await readFile(
+        join(dir, "docs", "spec", "architecture.md"),
+        "utf8",
+      );
+      expect(doc).toContain("# Architecture");
+      expect(doc).toContain("ARCH and CON specs");
+    });
+
+    test("never overwrites an existing architecture overview", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+      const docPath = join(dir, "docs", "spec", "architecture.md");
+      await setup({ configFile });
+      await writeFile(docPath, "my architecture\n", "utf8");
+
+      await setup({ configFile });
+
+      expect(await readFile(docPath, "utf8")).toBe("my architecture\n");
     });
   });
 });
@@ -232,6 +305,163 @@ describe("setup waives the stakeholder lens", () => {
       expect(config.waivers).toHaveLength(1);
       expect(config.waivers[0]?.pattern).toBe("STK-*");
       expect(config.waivers[0]?.reason).toBeTruthy();
+    });
+  });
+});
+
+describe("setup emits the agent-facing method", () => {
+  verifies(
+    [
+      SwTraceables.SW_043_SETUP_EMITS_METHOD_SCAFFOLD,
+      SwTraceables.SW_044_SETUP_SEEDS_PROJECT_STUBS,
+    ],
+    () => {
+      test("emits the governance and skills and records the agent", async () => {
+        const dir = await tempDir();
+        const configFile = join(dir, ".clewrc.json");
+
+        const result = await setup({ configFile });
+
+        expect(result.agent).toBe("claude");
+        expect(
+          existsSync(
+            join(dir, ".claude/.ai-project-context/000-agent-instructions.md"),
+          ),
+        ).toBe(true);
+        expect(
+          existsSync(join(dir, ".claude/skills/clew-setup/SKILL.md")),
+        ).toBe(true);
+        const config = JSON.parse(await readFile(configFile, "utf8")) as {
+          agent: string;
+        };
+        expect(config.agent).toBe("claude");
+      });
+
+      test("seeds the project stubs as skeletons", async () => {
+        const dir = await tempDir();
+        const configFile = join(dir, ".clewrc.json");
+
+        await setup({ configFile });
+
+        const stub = await readFile(
+          join(dir, ".claude/.ai-project-context/004-technology-contract.md"),
+          "utf8",
+        );
+        expect(stub).toContain("PROJECT STUB");
+      });
+
+      test("rejects an unknown agent before writing anything", async () => {
+        const dir = await tempDir();
+        const configFile = join(dir, ".clewrc.json");
+
+        await expect(setup({ configFile, agent: "emacs" })).rejects.toThrow(
+          /emacs/,
+        );
+
+        expect(existsSync(configFile)).toBe(false);
+      });
+
+      test("re-running preserves a hand-edited method file and leaves the config unchanged", async () => {
+        const dir = await tempDir();
+        const configFile = join(dir, ".clewrc.json");
+        await setup({ configFile });
+        const before = await readFile(configFile, "utf8");
+        const baseline = join(
+          dir,
+          ".claude/.ai-project-context/000-agent-instructions.md",
+        );
+        await writeFile(baseline, "hand edit\n", "utf8");
+
+        const result = await setup({ configFile });
+
+        expect(result.created).toBe(false);
+        expect(await readFile(configFile, "utf8")).toBe(before);
+        expect(await readFile(baseline, "utf8")).toContain("hand edit");
+        expect(result.methodPreserved).toContain(
+          ".claude/.ai-project-context/000-agent-instructions.md",
+        );
+      });
+
+      test("a re-run preserves an edited method file and does not re-seed a deleted stub", async () => {
+        const dir = await tempDir();
+        const configFile = join(dir, ".clewrc.json");
+        await setup({ configFile });
+        const stubPath = join(
+          dir,
+          ".claude/.ai-project-context/004-technology-contract.md",
+        );
+        await rm(stubPath);
+        const baseline = join(
+          dir,
+          ".claude/.ai-project-context/000-agent-instructions.md",
+        );
+        await writeFile(baseline, "hand edit\n", "utf8");
+
+        const result = await setup({ configFile });
+
+        expect(result.created).toBe(false);
+        expect(existsSync(stubPath)).toBe(false);
+        expect(await readFile(baseline, "utf8")).toContain("hand edit");
+      });
+    },
+  );
+});
+
+describe("setup emits through the harness-adapter interface", () => {
+  verifies(ArchTraceables.ARCH_008_METHOD_BEHIND_HARNESS_ADAPTER, () => {
+    test("drives the injected adapter with the materials, and the adapter is the sole writer of harness output", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+      const received: MethodMaterials[] = [];
+      const fake: HarnessAdapter = {
+        name: "fake",
+        async emit(materials: MethodMaterials) {
+          received.push(materials);
+          return { written: ["fake/marker.md"], seeded: [], preserved: [] };
+        },
+      };
+
+      const result = await setup({
+        configFile,
+        agent: "fake",
+        resolveHarness: (name) => (name === "fake" ? fake : undefined),
+      });
+
+      expect(result.agent).toBe("fake");
+      expect(received).toHaveLength(1);
+      expect(received[0]?.baselines.length).toBeGreaterThan(0);
+      expect(received[0]?.skills.length).toBeGreaterThan(0);
+      expect(existsSync(join(dir, ".claude"))).toBe(false);
+    });
+  });
+});
+
+describe("setup seeds the ADR practice", () => {
+  verifies(SwTraceables.SW_045_SETUP_SEEDS_ADR_PRACTICE, () => {
+    test("writes a tool-owned ADR template under docs/adr", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+
+      await setup({ configFile });
+
+      const template = await readFile(
+        join(dir, "docs/adr/ADR-template.md"),
+        "utf8",
+      );
+      expect(template).toContain("GENERATED BY CLEW");
+      expect(template).toContain("ADR-NNNN");
+    });
+
+    test("re-emits the template but never overwrites a project's own ADR", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+      await setup({ configFile });
+      const mine = join(dir, "docs/adr/ADR-0001-mine.md");
+      await writeFile(mine, "my decision\n", "utf8");
+
+      await setup({ configFile });
+
+      expect(await readFile(mine, "utf8")).toBe("my decision\n");
     });
   });
 });

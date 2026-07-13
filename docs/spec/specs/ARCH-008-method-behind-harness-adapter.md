@@ -3,7 +3,7 @@ The agent-facing method is emitted through a harness-adapter interface
 
 **Lens**: ARCH
 
-**Status**: planned
+**Status**: active
 
 **Description**
 Emitting the agent-facing method — the generic governance baselines and the clew skills — for a target harness is the job of a harness-specific adapter, chosen by configuration and implemented behind a narrow interface.
@@ -36,3 +36,7 @@ Adding a harness is a new adapter implementing the contract plus its registratio
 
 - Sibling of [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](ARCH-003-generator-interface.md): the same in-tree-implementation-behind-an-interface pattern, on the harness axis.
 - Realizes [ADR-0008 — The agent-facing method is emitted through per-harness adapters](../../adr/ADR-0008-harness-adapter-for-agent-facing-method.md).
+
+## Changes
+
+- **2026-07-12** — Set active: implementation of STR-031 began.

@@ -8,6 +8,7 @@ The tool exposes a `setup` command that delegates to core
 **Description**
 The tool exposes a `setup` command, invoked as `clew setup`, taking no positional arguments.
 It accepts a `--generator <type>` option that selects the target generator to scaffold; an unknown value is rejected before anything is written (SW-039).
+It accepts a `--agent <harness>` option selecting the harness the method scaffold is emitted for (SW-043); an unknown value is rejected.
 The command's action carries no scaffolding logic of its own: it delegates to core's configuration scaffolding (SW-011) and reports what it wrote.
 On success it writes a concise summary and next steps to standard output; on failure the error goes to standard error and the process exits non-zero, like every command.
 An unrecognized argument or option is rejected with a non-zero exit.
@@ -32,3 +33,6 @@ The `--generator <type>` option is registered and its value forwarded to core.
 
 - **2026-07-10** — The command surface gained a `--generator <type>` option, forwarded to core, which scaffolds the chosen generator (STR-029, SW-039).
 The command stays thin; only its recognized-option set grew, so "no positional arguments" still holds.
+
+- **2026-07-12** — The command surface gained a `--agent <harness>` option, forwarded to core, which emits the method scaffold for the chosen harness (STR-031, SW-043).
+Still thin; only the recognized-option set grew.

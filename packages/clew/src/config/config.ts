@@ -27,6 +27,9 @@ export const DEFAULT_MODE: IdGenerationMode = concerns(
   "sequential",
 );
 
+/** The harness the method scaffold targets when the configuration records none. */
+export const DEFAULT_AGENT = "claude";
+
 /** A configured generator: its target-language `type` and, optionally, where it writes. */
 export type GeneratorConfig = {
   type: string;
@@ -205,6 +208,8 @@ export type ResolvedConfiguration = Realizes<
     prefixes: string[];
     layout: Layout;
     generators: ResolvedGenerator[];
+    /** The harness the method scaffold was emitted for. */
+    agent: string;
   }
 >;
 
@@ -235,17 +240,19 @@ export const resolveConfiguration: (
     const { configFile } = options;
     const resolveGenerator =
       options.resolveGenerator ?? resolveBuiltinGenerator;
-    const [lenses, prefixes, layout, generatorConfigs] = await Promise.all([
-      readLenses(configFile),
-      readConfiguredPrefixes(configFile),
-      readLayout(configFile),
-      readGenerators(configFile),
-    ]);
+    const [lenses, prefixes, layout, generatorConfigs, agent] =
+      await Promise.all([
+        readLenses(configFile),
+        readConfiguredPrefixes(configFile),
+        readLayout(configFile),
+        readGenerators(configFile),
+        readAgent(configFile),
+      ]);
     const generators = generatorConfigs.map((config) => ({
       type: config.type,
       outputDir: resolveOutputDir(config, resolveGenerator),
     }));
-    return { lenses, prefixes: [...prefixes], layout, generators };
+    return { lenses, prefixes: [...prefixes], layout, generators, agent };
   },
 );
 
@@ -435,6 +442,17 @@ export async function readWaivers(
     }
     return [];
   });
+}
+
+/**
+ * Reads the `agent` field: the harness the method scaffold targets, recorded by
+ * setup so a re-run re-emits for the same one. A missing field falls back to the default.
+ */
+export async function readAgent(
+  file: string = DEFAULT_CONFIG_FILE,
+): Promise<string> {
+  const raw = (await readRawConfig(file)).agent;
+  return typeof raw === "string" && raw.length > 0 ? raw : DEFAULT_AGENT;
 }
 
 /** Whether a configuration file exists at `file`. */

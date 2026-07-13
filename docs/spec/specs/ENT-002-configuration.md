@@ -32,6 +32,7 @@ The set of configured prefixes is the single source of truth for id validity, so
 | `unexclude` | `List<String>` | Repository-root-relative globs (CON-018) that re-include a path a built-in default (CON-016) would exclude; never overrides a user `exclude` (CON-017). Optional. |
 | `waivers` | `List<{ id?: String, pattern?: String, reason: String }>` | The committed coverage waiver list: each entry targets a spec `id` or a glob `pattern` over ids (exactly one), with a reason, and waives a missing *test* — a matching spec that is implemented but unverified is reported waived rather than an open gap (SW-027, SW-030). A spec missing its realizing code is never waived (CON-021). A waiver that waives nothing is reported as stale. Optional. |
 | `schemas` | `{ story?: String, "spec"?: String }` | Per-document-type validation schema files; clew validates each document against its type's schema when it reads it (SW-036) — the pinned core merged with the project's required fields and enums (ARCH-007). Optional. |
+| `agent` | `String` | The agent harness the method scaffold was emitted for; setup records it so a re-run re-emits for the same one (SW-043). Defaults to `claude`. Optional. |
 
 **Rationale**
 Pinning the configuration as an explicit entity fixes the one shape every command reads, and the every-attribute-has-a-default invariant is what lets a project state only what it changes.
@@ -46,3 +47,8 @@ Reading a `.clewrc.json` yields each attribute above, and a missing file or attr
 **Related**
 
 - Shown in [the domain-model overview](../domain-model.md) — the entity list and diagram.
+
+## Changes
+
+- **2026-07-12** — Added the `agent` attribute recording the harness the method scaffold was emitted for (STR-031, SW-043), so a re-run re-emits for the same one.
+Additive; the entity's shape grew by one attribute, none changed in place.

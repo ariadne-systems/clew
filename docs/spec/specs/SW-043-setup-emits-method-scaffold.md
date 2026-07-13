@@ -3,7 +3,7 @@ Setup emits the method scaffold through the configured harness adapter
 
 **Lens**: SW
 
-**Status**: planned
+**Status**: active
 
 **Description**
 Setup emits the agent-facing method — the governance baselines (`000`–`003`, `006`) and the clew skills — through the harness adapter configured for the project, resolved via the interface (ARCH-008).
@@ -31,3 +31,7 @@ Re-running with no `--agent` re-emits for the recorded harness; `clew setup --ag
 - Emits through the interface defined by [ARCH-008 — The agent-facing method is emitted through a harness-adapter interface](ARCH-008-method-behind-harness-adapter.md).
 - The emitted files' ownership is governed by [CON-033 — The method scaffold is tool-owned; project files are never overwritten](CON-033-method-scaffold-tool-owned.md).
 - Extends the scaffolding of [SW-011 — Scaffold the default configuration and layout](SW-011-scaffold-default-config.md); records the `agent` attribute of [ENT-002 — Configuration](../domain-model.md#ent-002-configuration).
+
+## Changes
+
+- **2026-07-12** — Set active: implementation of STR-031 began.

@@ -45,6 +45,26 @@ fields:
     required: true
 `;
 
+/** Where setup seeds the project architecture overview, relative to the project root. */
+export const ARCHITECTURE_DOC_FILE = "docs/spec/architecture.md";
+
+/** The narrative architecture overview setup seeds once; the project fills it, and the enforceable rules live as ARCH/CON specs. */
+export const DEFAULT_ARCHITECTURE_DOC: string = `# Architecture
+
+<!-- Fill this in for your project. clew scaffolds the shape; the content is yours, and clew never overwrites it. -->
+
+This document is the narrative framing for the project — it explains the shape.
+The atomic, enforceable architecture rules are authored as ARCH and CON specs; those specs are what the code is checked against.
+
+## Shape
+
+Describe the modules, their responsibilities, and how they compose.
+
+## Dependency direction
+
+State the dependencies that must hold, and the ones that must never.
+`;
+
 /** The default coverage waiver setup writes. */
 export const DEFAULT_WAIVERS: readonly Waiver[] = [
   {

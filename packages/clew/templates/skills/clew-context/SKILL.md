@@ -1,0 +1,128 @@
+---
+name: clew-context
+description: "Build the context around a story being drafted or promoted — the specs it relates to (directly, via the code's call graph, and via the high-altitude specs that govern its file/module), candidate supersession or obsolescence, conflicts, cross-relations ranked by code distance, and gaps — so specs are authored and integrated with full awareness of what already exists. The same walk grounds a change to existing code: an anchor is a checked claim, not a proof of correctness, so read the spec it points at and work from its intent. Use after a draft story is created and before its specs are written, at promotion when the context has not already been built, and before changing code in an anchored area. Read-only analysis; it does not author specs (see clew-draft) or finalize them (see clew-promote)."
+---
+
+# clew-context
+
+Build the context for a story being drafted or promoted — or for a change to existing code in an anchored area — so the work is grounded in what already exists rather than created in a vacuum.
+This is read-only analysis — it produces understanding; it does not write or change specs or code.
+
+The core idea: the story's *stated* relations are what its author had in mind, but the *code* around the area often anchors specs that are just as relevant. The strongest signal is the gap between the two — especially a spec the code points at that has been abandoned.
+
+Relevance reaches a piece of code two ways, and this skill walks both: **across** the call graph (the behaviours it interacts with — usually `SW`), and **up** the file/module tree (the high-altitude specs that govern where it lives — usually `STK`/`SYS`, anchored coarsely at the file or `index.ts` level). The first is the execution-path expansion; the second is the containment ascent.
+
+If you already built this context for these drafts earlier in the session, reuse it rather than rebuilding.
+
+## An anchor is a claim, not a proof
+
+The build checks only that an anchor's spec id **exists** — never that the code is **correct**.
+`realizes` and `verifies` are *stated*, not *proven*: an anchor records that someone asserted this code implements or exercises the spec, not that it does. Do not rely on it as evidence the code is right.
+
+So when you change code that realizes a spec, **read that spec first** and make the change from its **intent**, not from the code's current behaviour.
+Where the code has drifted from the intent, the anchor was masking that drift — and reasoning from the intent, rather than preserving what the code happens to do, is what surfaces the bug.
+
+## What a lens is
+
+A **lens** is a kind of spec — a viewpoint the system is described through: a software behaviour (`SW`), a constraint (`CON`), an architecture decision (`ARCH`), and so on.
+A project declares its lenses in `.clewrc.json`, each with an `id` and a one-line `description`; the `id` is also the prefix of the ids minted for that kind (lens `SW` → `SW-001`, `SW-002`, …).
+
+## When to use
+
+- During drafting (`clew-draft`): **after the draft story exists but before its specs are written**, so spec creation is grounded in the corpus.
+- During promotion (`clew-promote`): **only if this context has not already been built** for these drafts.
+- Before **changing code anchored to a spec**: read that spec and work from its intent, treating the anchor as a claim, not a proof (see *An anchor is a claim, not a proof*).
+
+## Reading the project
+
+- Read `.clewrc.json` for the `layout` (where stories and specs live) and the `lenses`.
+- Find how the project binds code to specs — its **trace markers** (for example `realizes`, `verifies`, and `concerns` in the code, or the project's equivalent). Infer the convention from existing code; do not assume a language.
+- Prefer the tool's index or resolver if it exists (`clew --help`) for "what relates to this id" — that is the intended, faster path. Until it exists, read the spec files and grep the code directly.
+
+## What you must not do
+
+- Read-only: do not write, move, or modify any spec or code.
+- Do not decide supersession, obsolescence, or conflict resolution — surface candidates; the user (and the promotion step) decide.
+- Do not commit.
+
+## Procedure
+
+### 1. Read the subject
+
+Read the draft story and any specs drafted for it so far.
+Identify its area: the feature, the entities, the lenses it touches, and any code it names.
+
+### 2. Linked specs — what the corpus already says
+
+From the story's area, gather the specs already related to it by the corpus's own relations (realizes, concerns, …), following them transitively up to **2 levels** with a cycle guard.
+Tag these `linked` — this is what the author wrote down.
+
+### 3. Code anchors
+
+If the story touches existing code, identify the anchor locations — the code the work will touch or extend:
+
+- explicit code references in the story (file paths, symbols);
+- symbols named in the acceptance criteria that exist in the codebase;
+- the code surrounding the trace markers of the `linked` specs.
+
+If anchors are ambiguous (the story discusses a concept without naming code), ask the user to nominate one or two rather than guessing — a weak anchor produces noisy expansion.
+If there is no relevant code yet (greenfield, or a spec-only phase), skip steps 4–5 and note it; the corpus analysis alone still applies.
+
+### 4. Execution-path expansion — what the code has decided
+
+From each anchor, walk the call graph and collect the project's trace markers:
+
+- read the anchor and collect its markers;
+- walk **callers 1 level** and **callees up to 2 levels**, collecting markers along the way;
+- stop at framework/library boundaries — do not chase into third-party code;
+- cap at about **8 files per anchor**, and prefer breadth (more immediate neighbours) over depth.
+
+Each spec found this way that was not already `linked` is tagged `path` — relevant via the code, though the story never named it.
+
+### 5. Containment ascent — what governs where the code lives
+
+The call graph finds the specs a piece of code *interacts with*; it does not find the high-altitude specs that *govern the region it lives in*. Those — typically `STK` and `SYS` — are anchored coarsely, at the **file or module** level, so they are reached by climbing the containment tree, not by following calls.
+
+From each anchor, ascend its file/module hierarchy and collect the anchors at each level:
+
+- the anchor's **own file** — its file-scope anchors (for example a `type _Anchors = Realizes<…>` alias);
+- each ancestor directory's **`index.ts`** — the module's entry, where a module-level anchor lives — up to the package root;
+- stop at the package root; do not climb out of the package.
+
+Each spec found this way is tagged `governing` — the high-altitude intent (a stakeholder need or system capability) that holds over the code, though neither the story nor the call graph named it. Surface these as the "why": an agent changing a file that ascends to `STK-003` (low authoring friction) is told the constraint its change must respect.
+
+### 6. Cross-relations — ranked by code distance
+
+For specs that share a code location, rank the coupling so attention goes to the highest-impact first:
+
+- **same anchor site** — strongest; changing the traced behaviour likely affects all of them at once;
+- **same method** — strong;
+- **same class** — moderate;
+- **same file or area** — informational.
+
+Flag the locations where the planned work might affect other specs.
+
+### 7. Supersession, conflicts, gaps
+
+- **Supersession / obsolescence** — specs the story would replace, or that are already marked obsolete or superseded. A `path` spec that is obsolete is the strongest possible signal that a design direction was tried and abandoned; surface it prominently, never silently drop it.
+- **Conflicts** — existing specs the story's direction would contradict.
+- **Gaps** — behaviour the story implies that no spec covers; this tells the drafting step which specs (and which lenses) to create.
+
+### 8. Summarize
+
+Present the context map:
+
+- the acceptance criteria carried from the story;
+- `linked` specs vs `path` specs (with where each `path` spec was found);
+- `governing` specs from the containment ascent — the high-altitude `STK`/`SYS` intent over the area;
+- obsolete / superseded-on-path called out prominently;
+- cross-relations, ranked by code distance;
+- the gaps.
+
+This summary is what the drafting step authors against and the promotion step integrates with.
+
+## Done when
+
+- The context map is presented: `linked` vs `path` specs (with where each `path` spec was found), `governing` specs from the containment ascent, supersession/obsolescence and conflict candidates, cross-relations ranked by code distance, and the gaps.
+- Obsolete or superseded specs found on the call path are called out, never silently dropped.
+- Nothing is written, moved, or committed — the analysis stays read-only.

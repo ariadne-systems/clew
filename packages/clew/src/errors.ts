@@ -19,6 +19,8 @@ export const ErrorCode = {
   NO_CONFIG: "E_NO_CONFIG",
   /** The configuration names a generator that is not registered. */
   UNKNOWN_GENERATOR: "E_UNKNOWN_GENERATOR",
+  /** The requested harness (agent) is not a registered adapter. */
+  UNKNOWN_HARNESS: "E_UNKNOWN_HARNESS",
   /** A traceable matches more than one configured spec set. */
   SPEC_SET_OVERLAP: "E_SPEC_SET_OVERLAP",
   /** A traceable matches no configured spec set and no ignore pattern. */

@@ -1,0 +1,88 @@
+---
+name: clew-draft
+description: "Draft a story and the specs it needs in a clew project — choose the lenses, temp-mint ids, and write the drafts into the configured drafts location, ready for review and (on approval) promotion. Use when the user wants to draft or author a new story or spec, or prepare specs before approval — e.g. 'draft a story', 'write the specs for', 'author a spec'. Not promotion (see clew-promote) or code anchoring (see clew-anchor)."
+---
+
+# clew-draft
+
+Draft a story and the specs it needs, using clew to allocate ids, and write them as reviewable drafts.
+This is the authoring workflow: it produces drafts with **temporary** ids and stops for review; it binds real ids and moves drafts into the spec tree only when the user approves promotion.
+
+## What a lens is
+
+A **lens** is a kind of spec — a viewpoint the system is described through: a software behaviour (`SW`), a constraint (`CON`), an architecture decision (`ARCH`), and so on.
+A project declares its lenses in `.clewrc.json`, each with an `id` and a one-line `description`; the `id` is also the prefix of the ids minted for that kind (lens `SW` → `SW-001`, `SW-002`, …).
+
+## When to use
+
+- The user wants to draft or author a new story and its specs.
+- The user wants to prepare specs before they are approved.
+
+If the project has no configuration yet (`error[E_NO_CONFIG]`), use the `clew-setup` skill first; drafting needs the project's lenses and layout.
+
+## What you must not do
+
+- Do not allocate bound ids while drafting. Use temporary ids (`clew mint --tmp <LENS>`); they touch no state, so unapproved drafts never consume real id numbers.
+- Do not promote (bind ids, move drafts into the spec tree) until the user approves.
+- Do not commit. Leave commits to the user.
+- Do not invent a derivation method for a lens you have no guidance for — stop and ask (see Lens coverage).
+
+## Read the project's configuration first
+
+Read the project's configuration to learn:
+
+- the **lenses** — the spec kinds you may mint, each with a description of what it means; these are the only valid spec prefixes.
+- the **layout** — where stories, specs, and drafts live, and the story prefix.
+
+Use these as the source of truth: mint only configured lenses, and write drafts to the configured drafts location.
+
+## Lens coverage (before deriving)
+
+For each lens you intend to use, confirm you can derive it:
+
+- The default lenses (`STK`, `SYS`, `SW`, `ARCH`, `NF`, `CON`) are covered in "Deriving through each lens" below.
+- For a project-defined lens not covered there, derive from its configured `description`. If that is too thin to author confidently, stop and ask the user what the lens should contain rather than inventing it.
+
+## Procedure
+
+1. **Understand the work item** — what the story is and why it matters. Ask the user where the description is unclear.
+2. **Draft the story first** — temp-mint the story id (`clew mint --tmp <story-prefix>`) and write the story draft (title, business value, problem/context, solution approach, acceptance criteria, out of scope) into the configured drafts location.
+3. **Build the context** — run the `clew-context` skill against the draft story. It maps the existing specs the story relates to, what it may affect or supersede, and the gaps it should fill, so the specs you write next are grounded in the corpus rather than invented in isolation.
+4. **Create the specs** — using that context, decide which specs the story needs (only configured lenses), temp-mint each (`clew mint --tmp <LENS>`), and write them into the drafts location, mirroring the spec tree (a specs area). Cross-reference by id, wire the relations the context surfaced (what each realizes or concerns, and links to the related existing specs), and follow the project's existing specs as the template.
+5. **Stop for review** — present the drafts, the ids used, and the context findings (related specs, supersession/conflict candidates), so the user sees how the new work sits in the corpus. Do not promote or commit.
+
+## Every spec pins a decision — no hollow specs
+
+A spec must pin a **decision**: something a reader could not derive from the code and the title alone. Before writing one, name what it requires and — where there is a real choice — what it **excludes**. Drop or fold a candidate that fails this:
+
+- It only restates what the code or the component name obviously does.
+- It is a generic umbrella that would fit many sibling artifacts equally (an "X schema" stamped on every record).
+
+Write the spec's **title as that decision**, and give the file a **slug that is the title tightened** — the slug, not the title, becomes the generated traceable an agent reads cold at every anchor (`006`), so the two must tell the same story. Prefer a slug like `concerns-not-coverage` over `compute-coverage`.
+
+Be skeptical of speccing a pure data holder or DTO; it rarely carries a decision worth a spec of its own.
+
+## Deriving through each lens
+
+The configured `description` says what a lens means in this project; the notes below are how to author it well. Keep each spec to one concern, with a verification a test or review can check.
+
+- **Story** (story prefix, e.g. `STR`): the work item — title, business value, problem/context, solution approach, acceptance criteria, out of scope, and the specs it realizes.
+- **SW** (software spec): one observable, verifiable behaviour of a component — what the system does, with a verification a test can run.
+- **CON** (constraint): an invariant that must always hold — stated as a rule, with a verification that confirms it holds and that violating it is rejected.
+- **ARCH** (architecture spec): a structural rule or design decision, with its rationale.
+- **NF** (non-functional spec): a quality attribute such as performance or security, with a measurable verification where possible.
+- **STK / SYS** (stakeholder / system spec): a need or capability at the stakeholder or system level, traceable down to the software specs that realize it.
+- **ENT** (entity, if the project configures an entity lens): a domain shape — its purpose and its attributes with types; authored as its own spec file like any other lens, with its code type anchored to its id.
+
+## On approval, hand off to promotion
+
+Drafting stops at review.
+When the user approves the drafts, use the `clew-promote` skill to promote them — it reasons about how the new story and specs fit the existing corpus (relations, supersession, conflicts) and then finalizes them with bound ids in the spec tree.
+Promotion is its own step because that integration is judgment over the whole spec graph, not a file move.
+
+## Done when
+
+- A story draft and its spec drafts exist in the configured drafts location, each with a **temporary** id.
+- Every draft uses only configured lenses and cross-references the related specs the context surfaced.
+- The drafts, the ids used, and the context findings are presented to the user for review.
+- Nothing is promoted, no bound id is minted, and nothing is committed.

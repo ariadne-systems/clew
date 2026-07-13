@@ -48,6 +48,32 @@ describe("generators are reached only through the interface", () => {
   });
 });
 
+describe("harness adapters are reached only through the interface", () => {
+  verifies(ArchTraceables.ARCH_008_METHOD_BEHIND_HARNESS_ADAPTER, () => {
+    // The closed set of concrete adapter factory names that no module outside
+    // src/harness may reference.
+    test("no module outside src/harness names a concrete adapter", async () => {
+      const srcRoot = import.meta.dirname;
+      const harnessDir = join(srcRoot, "harness");
+      const sources = await collectSourceFiles(srcRoot);
+      const concreteFactories = ["createClaudeHarness"];
+
+      const offenders: string[] = [];
+      for (const source of sources) {
+        if (source.startsWith(harnessDir)) {
+          continue;
+        }
+        const contents = await readFile(source, "utf8");
+        if (concreteFactories.some((factory) => contents.includes(factory))) {
+          offenders.push(source);
+        }
+      }
+
+      expect(offenders).toEqual([]);
+    });
+  });
+});
+
 describe("only the CLI layer touches the process and argument parsing", () => {
   // Presentation tokens only src/cli may reference: the process (stdout/stderr/
   // exit/argv) and commander argument parsing.
