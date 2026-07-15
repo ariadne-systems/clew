@@ -18,7 +18,7 @@ A project declares its lenses in `.clewrc.json`, each with an `id` and a one-lin
 - The user wants to draft or author a new story and its specs.
 - The user wants to prepare specs before they are approved.
 
-If the project has no configuration yet (`error[E_NO_CONFIG]`), use the `clew-setup` skill first; drafting needs the project's lenses and layout.
+If the project has no configuration yet (`error[E_NO_CONFIG]`), run `clew setup` first; drafting needs the project's lenses and layout.
 
 ## What you must not do
 

@@ -57,17 +57,19 @@ Created the layout directories:
 ${dirs}
 
 ${scaffoldNote}You can adjust these in ${result.configFile}:
-  - lenses        the spec kinds you mint — ${result.lenses.join(", ")} (rename, add, or remove them)
+  - lenses        the spec kinds ids are minted under — ${result.lenses.join(", ")} (rename, add, or remove them)
   - layout        where each kind of artifact lives (the directories above, plus the state file)
 ${generatorLine}
   - agent         ${result.agent} — its method (governance + skills) was emitted, and the project stubs + ADR template seeded
   - waivers       a default STK-* waiver (stakeholder needs are verified by acceptance, not a test)
 
 Next steps:
-  1. Edit ${result.configFile} to fit your project — at least review the lenses.
-  2. Fill in docs/spec/architecture.md — your modules and the dependency directions that must hold.
-  3. Draft your first story with the clew-draft skill; your agent mints the ids as it promotes.
-  4. Run \`clew check\` to verify traceability, then commit ${result.configFile} and .clew/state.json so the team shares them.
+  1. Review the lenses in ${result.configFile} — they are your spec kinds, fixed once ids exist under them.
+  2. Put any existing documentation (architecture, tech notes, ADRs, diagrams) into a setup/ directory. Then run the clew-setup skill: it reads setup/, establishes your stack (004) and architecture with you, and drafts your first setup story.
+  3. Review and promote that story (the clew-promote skill), then let your agent set up the workspace and run \`clew check\`.
+  4. Commit ${result.configFile} and .clew/state.json so the team shares them.
+
+The skills allocate ids as they draft and promote — you never mint by hand.
 `,
         );
       });
