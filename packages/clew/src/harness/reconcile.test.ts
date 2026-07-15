@@ -55,4 +55,30 @@ describe("reconciling a method file", () => {
     expect(written).toContain("sha256:");
     expect(written).toContain("fresh body");
   });
+
+  test("keeps YAML frontmatter at line 1 — the marker goes after it", async () => {
+    const path = await tempFile();
+    const skill = "---\nname: clew-x\ndescription: y\n---\n\n# Body\n";
+
+    expect(await reconcileMethodFile(path, skill)).toBe("written");
+    const written = await readFile(path, "utf8");
+    expect(written.startsWith("---\n")).toBe(true);
+    expect(written.indexOf("sha256:")).toBeGreaterThan(
+      written.indexOf("---\nname"),
+    );
+    expect(written.indexOf("<!--")).toBeGreaterThan(written.lastIndexOf("---"));
+  });
+
+  test("a pristine frontmatter file round-trips; an edit is preserved", async () => {
+    const path = await tempFile();
+    const skill = "---\nname: clew-x\n---\n\n# Body\n";
+    await reconcileMethodFile(path, skill);
+
+    expect(await reconcileMethodFile(path, skill)).toBe("written");
+
+    const marked = await readFile(path, "utf8");
+    await writeFile(path, marked.replace("# Body", "# Edited body"), "utf8");
+    expect(await reconcileMethodFile(path, skill)).toBe("preserved");
+    expect(await readFile(path, "utf8")).toContain("# Edited body");
+  });
 });

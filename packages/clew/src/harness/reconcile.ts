@@ -3,38 +3,45 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { METHOD_MARKER } from "./harness.js";
 
-/** Separates the marker line from the body it protects. */
-const MARKER_SEPARATOR = "\n\n";
+/** The marker line at the start of any line, together with the blank line after it — how `mark` inserts it and `unmarked` removes it. */
+const MARKER_LINE = new RegExp(`^<!-- ${METHOD_MARKER}[^\\n]*-->\\n\\n`, "m");
 
-/** The marker a tool-emitted method file carries: the tool tag, a content hash of the body, and a note that edits are the project's to keep. */
-export function methodMarker(bodyHash: string): string {
-  return `<!-- ${METHOD_MARKER} · sha256:${bodyHash} · safe to edit; a re-run updates this file only while it is unedited. -->`;
+/** The marker a tool-emitted method file carries: the tool tag, a content hash, and a note that edits are the project's to keep. */
+export function methodMarker(contentHash: string): string {
+  return `<!-- ${METHOD_MARKER} · sha256:${contentHash} · safe to edit; a re-run updates this file only while it is unedited. -->`;
 }
 
 function sha256(text: string): string {
   return createHash("sha256").update(text, "utf8").digest("hex");
 }
 
-/**
- * The leading clew marker: the body it covers and its recorded hash — null for a
- * pre-hash marker an older setup wrote. The whole result is null when the file
- * carries no clew marker at all, i.e. it is the project's own file.
- */
-function parseMarker(
-  contents: string,
-): { hash: string | null; body: string } | null {
-  const separatorIndex = contents.indexOf(MARKER_SEPARATOR);
-  if (separatorIndex === -1) {
-    return null;
+/** The offset just past a leading YAML frontmatter block, so the marker lands after it — the frontmatter must stay at line 1; 0 when there is none. */
+function afterFrontmatter(content: string): number {
+  const frontmatter = content.match(/^---\n[\s\S]*?\n---\n/);
+  return frontmatter === null ? 0 : frontmatter[0].length;
+}
+
+/** Inserts the marker — carrying the hash of the whole content — after any frontmatter, so the frontmatter stays at the top. */
+function mark(content: string): string {
+  const offset = afterFrontmatter(content);
+  const marker = `${methodMarker(sha256(content))}\n\n`;
+  return content.slice(0, offset) + marker + content.slice(offset);
+}
+
+/** The content with its marker removed — the exact form the recorded hash was taken over — or null when it carries no clew marker. */
+function unmarked(contents: string): string | null {
+  return MARKER_LINE.test(contents) ? contents.replace(MARKER_LINE, "") : null;
+}
+
+/** The hash the marker records; null for a pre-hash marker an older setup wrote; undefined when there is no clew marker at all. */
+function recordedHash(contents: string): string | null | undefined {
+  const marker = contents.match(
+    new RegExp(`^<!-- ${METHOD_MARKER}[^\\n]*-->`, "m"),
+  );
+  if (marker === null) {
+    return undefined;
   }
-  const marker = contents.slice(0, separatorIndex);
-  if (!marker.startsWith("<!--") || !marker.includes(METHOD_MARKER)) {
-    return null;
-  }
-  return {
-    hash: marker.match(/sha256:([0-9a-f]{64})/)?.[1] ?? null,
-    body: contents.slice(separatorIndex + MARKER_SEPARATOR.length),
-  };
+  return marker[0].match(/sha256:([0-9a-f]{64})/)?.[1] ?? null;
 }
 
 /** Whether reconciling wrote the tool's version or deferred to the project's edit. */
@@ -42,30 +49,34 @@ export type ReconcileOutcome = "written" | "preserved";
 
 /**
  * Writes the tool's current version of a method file, but only when the file on
- * disk is absent or still pristine — its body matches the hash the tool last
- * recorded. A file the project has edited, or one whose marker it has removed, is
- * left untouched, so a re-run advances the method without ever discarding a
- * customization.
+ * disk is absent or still pristine — its content (marker removed) matches the hash
+ * the tool last recorded. A file the project has edited, or one whose marker it has
+ * removed, is left untouched, so a re-run advances the method without ever
+ * discarding a customization. The marker is placed after any YAML frontmatter, so
+ * a skill's frontmatter stays at line 1.
  */
 export async function reconcileMethodFile(
   absolutePath: string,
-  body: string,
+  content: string,
 ): Promise<ReconcileOutcome> {
-  const marked = `${methodMarker(sha256(body))}${MARKER_SEPARATOR}${body}`;
+  const marked = mark(content);
   const existing = await readIfPresent(absolutePath);
   if (existing === null) {
     await mkdir(dirname(absolutePath), { recursive: true });
     await writeFile(absolutePath, marked, "utf8");
     return "written";
   }
-  const parsed = parseMarker(existing);
-  if (parsed === null) {
+  const hash = recordedHash(existing);
+  if (hash === undefined) {
     return "preserved";
   }
   // A pre-hash marker (older setup) carries no recorded hash; adopt the current
   // scheme by rewriting it. A hashed marker is rewritten only while still pristine.
-  if (parsed.hash !== null && sha256(parsed.body) !== parsed.hash) {
-    return "preserved";
+  if (hash !== null) {
+    const original = unmarked(existing);
+    if (original === null || sha256(original) !== hash) {
+      return "preserved";
+    }
   }
   await writeFile(absolutePath, marked, "utf8");
   return "written";
