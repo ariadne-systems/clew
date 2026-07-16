@@ -26,6 +26,7 @@ Skip a relation the code does not actually hold; do not anchor for the sake of a
 - Do not anchor a relation the code does not hold, and do not add `concerns` for a coupling that is already a call.
 - Do not assume a marker form from one language applies to another; read the generator's documentation.
 - Do not author or promote specs here, and do not hand-edit the generated folder.
+- Do not guess past a missing or ambiguous precondition — no config, no generator for the language, an ambiguous generator choice, a missing generated folder or documentation, or an unclear target spec id. Stop, change nothing, and report the specific missing precondition.
 - Do not commit.
 
 ## Procedure
@@ -35,7 +36,7 @@ Skip a relation the code does not actually hold; do not anchor for the sake of a
 The markers live in a generated folder whose location is the project's choice, and each target language has its own folder — so read it, never assume a path.
 
 - Read `.clewrc.json` → `generators`. Each entry has a `type` (the target language) and an `outputDir`. Take the entry for the language you are editing.
-- That entry's `outputDir` is that language's traceables folder; if it has no `outputDir`, the generator's own default applies. Different generators write to different folders.
+- That entry's `outputDir` is that language's traceables folder; if it has no `outputDir`, the generator's own default applies — resolve it from the generator's documentation or from where the generation command writes, not by guessing a path. Different generators write to different folders.
 - The folder holds the generated verifiable symbols for that language (which name the available spec ids) and, where the language supports it, a helper or utility the generator emits.
 
 ### 2. Read what the generator emitted, before anchoring
@@ -48,10 +49,11 @@ Resolve how code references a symbol the way the codebase already does: find an 
 
 ### 3. Make sure the id exists
 
-A marker references a generated symbol, which exists only after the spec has been generated.
+A marker references a generated symbol, which exists only after the spec is promoted (bound id) and generated — an `active` or `deprecated` spec has one; a `planned` spec does not.
 
-- If the id you need is missing from the generated symbols, its spec has not been generated yet: a spec must be promoted (bound id) and the generator run before its symbol exists.
-- Regenerate with the project's spec command (`clew spec`).
+- If the id is present in the bound spec sources and `active` but its symbol is absent, the generated output is stale: regenerate with the project's spec command (`clew spec`) and check again.
+- If the id is not bound, or the spec is still `planned`, stop without editing code and report that anchoring requires promotion (or activation) first — this skill does not promote or change status.
+- If the spec is `deprecated`, its symbol exists, but do not add a new `realizes` or `verifies` anchor to it (a `concerns` coupling is still fine); stop and report so a live spec can be used instead. The build will not catch this — the marker compiles — so it is yours to catch.
 - Reference only symbols that exist; do not invent an id.
 
 ### 4. Choose the relation, then the form the generator documents
@@ -70,7 +72,7 @@ Anchoring to more than one spec uses the list form that documentation describes.
 - Reference the generated symbol(s) and add the marker, using the language's documented form.
 - Keep the code valid for the language's compiler or checker (for example, preserve explicit type annotations where the language requires them).
 - Do not also write the spec id in a comment — the marker is the link, and a comment would only rot.
-- Verify with the language's type-checker or build: a wrong or removed id will not pass. Do not commit.
+- Verify with the narrowest check that covers the change — a package script, a targeted test, or the module's type-check, not a full monorepo build: a wrong or removed id will not pass. Do not commit.
 
 ## Done when
 

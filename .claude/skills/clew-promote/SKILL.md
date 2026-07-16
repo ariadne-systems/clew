@@ -11,7 +11,7 @@ Do not treat this as a file move — a new story can change what existing specs 
 
 ## What a lens is
 
-A **lens** is a kind of spec — a viewpoint the system is described through: a software behaviour (`SW`), a constraint (`CON`), an architecture decision (`ARCH`), and so on.
+A **lens** is a category of spec — a viewpoint the system is described through: a software behaviour (`SW`), a constraint (`CON`), an architecture decision (`ARCH`), and so on.
 A project declares its lenses in `.clewrc.json`, each with an `id` and a one-line `description`; the `id` is also the prefix of the ids minted for that kind (lens `SW` → `SW-001`, `SW-002`, …).
 
 ## When to use
@@ -35,11 +35,11 @@ Read the project's configuration for the layout (where stories and specs live) a
 ### 2. Integrate — reconcile with the corpus (the part only an agent can do)
 
 First, make sure the corpus context exists.
-If it was already built while drafting (the `clew-context` skill), reuse it; if not, build it now with `clew-context`.
+If it was already built while drafting (the `clew-context` skill), reuse it — but only if it is still current for the drafts, configuration, state, and corpus; if that cannot be established, rebuild it. Otherwise build it now with `clew-context`.
 It maps what the new story and specs relate to, what they may supersede or make obsolete, what they may conflict with, and whether any draft merely duplicates an existing spec.
 
 Then act on that context: present the proposed relations and the supersession, conflict, and duplication candidates, with the edits they imply — to the drafts and to any affected existing specs — and get the user's confirmation.
-Do not retire or change an existing spec silently, and do not promote a contradiction or a duplicate into the corpus.
+Do not retire or change an existing spec silently, and do not promote a contradiction or a duplicate into the corpus. Resolve it with the user instead — revise or drop the draft, keep it as an explicit specialization or supersession of the existing spec, or block promotion until it is decided — never promote it as-is.
 This reconciliation is the point of promotion.
 
 ### 3. Finalize — run `clew promote` (mechanical)
@@ -51,11 +51,13 @@ Once integration is confirmed, run `clew promote <story…>` to finalize; name t
 - it **substitutes** each resolved temporary id within the drafts location — the promoted drafts and any other still-unpromoted draft that references them — so a draft that referenced a promoted one points at the bound id; the already-promoted spec tree is never rewritten;
 - it **moves** each draft into its place in the spec tree per the layout, renamed to its bound id.
 
-Invoke it for the story you confirmed: `clew promote <story|spec…>` finalizes those roots and their reference closure, or `clew promote all` finalizes every pending draft. A story must reference its draft specs, or they are not reached. It reports each temporary-id → bound-id mapping.
+Invoke it for the story you confirmed: `clew promote <story|spec…>` finalizes those roots and their reference closure, or `clew promote all` finalizes every pending draft. Identify each root by the form `clew promote` accepts (`clew promote --help`); do not guess the identifier form. Use `all` only when the user approved promoting every pending draft and the integration covered that whole set — never widen a named promotion to `all` for convenience. A story must reference its draft specs, or they are not reached. It reports each temporary-id → bound-id mapping.
 
 One thing it does not do, which stays with you after it runs:
 
-**Apply** the confirmed integration edits to affected existing specs (new relations, supersession notes) — that is judgment, not mechanics. An entity draft carries no special case: with an entity lens configured, it promotes through the ordinary spec path like any other lens.
+**Apply** the confirmed integration edits to affected existing specs (new relations, supersession notes) — that is judgment, not mechanics. Each such spec is already in the corpus, so every edit records a `## Changes` entry on that spec (`006`) — when and why — so the shift in intent is part of the record, not a silent rewrite. An entity draft carries no special case: with an entity lens configured, it promotes through the ordinary spec path like any other lens.
+
+After it runs, check the reported mapping against the set you confirmed: if a draft you did not confirm was promoted, or one you expected is missing, stop and report rather than proceeding. If `clew promote` does not succeed, or applying the confirmed edits to existing specs afterwards fails, do not re-run it, hand-bind an id, or edit the state file — report the partial state so the user can resolve it.
 
 ### 4. Report
 
@@ -66,5 +68,6 @@ Leave committing to the user, and remind them the state file advanced so it is c
 
 - The integration is reconciled with the user: relations, supersession, conflict, and duplication candidates presented and confirmed; no existing spec changed silently.
 - `clew promote` has finalized the confirmed story and its reference closure — each temporary id bound and reported (temp → bound), references substituted within the drafts, files moved into the spec tree.
-- The confirmed integration edits to existing specs are applied.
+- The reported mapping was checked against the confirmed set; no unexpected draft was promoted, and any failure was reported as a partial state rather than retried blindly.
+- The confirmed integration edits to existing specs are applied, each with its `## Changes` entry (`006`).
 - The user is reminded that the state file advanced and that committing is theirs.

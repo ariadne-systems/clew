@@ -10,7 +10,7 @@ This is the authoring workflow: it produces drafts with **temporary** ids and st
 
 ## What a lens is
 
-A **lens** is a kind of spec — a viewpoint the system is described through: a software behaviour (`SW`), a constraint (`CON`), an architecture decision (`ARCH`), and so on.
+A **lens** is a category of spec — a viewpoint the system is described through: a software behaviour (`SW`), a constraint (`CON`), an architecture decision (`ARCH`), and so on.
 A project declares its lenses in `.clewrc.json`, each with an `id` and a one-line `description`; the `id` is also the prefix of the ids minted for that kind (lens `SW` → `SW-001`, `SW-002`, …).
 
 ## When to use
@@ -18,7 +18,7 @@ A project declares its lenses in `.clewrc.json`, each with an `id` and a one-lin
 - The user wants to draft or author a new story and its specs.
 - The user wants to prepare specs before they are approved.
 
-If the project has no configuration yet (`error[E_NO_CONFIG]`), run `clew setup` first; drafting needs the project's lenses and layout.
+If the project has no configuration yet (`error[E_NO_CONFIG]`), stop and ask the user to run `clew setup` first — do not run it yourself; drafting needs the project's lenses and layout.
 
 ## What you must not do
 
@@ -26,6 +26,7 @@ If the project has no configuration yet (`error[E_NO_CONFIG]`), run `clew setup`
 - Do not promote (bind ids, move drafts into the spec tree) until the user approves.
 - Do not commit. Leave commits to the user.
 - Do not invent a derivation method for a lens you have no guidance for — stop and ask (see Lens coverage).
+- Write only inside the configured drafts location; never silently overwrite an existing draft or modify an existing spec — if a target draft path already exists, stop and ask.
 
 ## Read the project's configuration first
 
@@ -40,7 +41,7 @@ Use these as the source of truth: mint only configured lenses, and write drafts 
 
 For each lens you intend to use, confirm you can derive it:
 
-- The default lenses (`STK`, `SYS`, `SW`, `ARCH`, `NF`, `CON`) are covered in "Deriving through each lens" below.
+- The default lenses (`STK`, `SYS`, `SW`, `ARCH`, `NF`, `CON`) — and `ENT`, where the project configures it — are covered in "Deriving through each lens" below.
 - For a project-defined lens not covered there, derive from its configured `description`. If that is too thin to author confidently, stop and ask the user what the lens should contain rather than inventing it.
 
 ## Procedure
@@ -49,7 +50,8 @@ For each lens you intend to use, confirm you can derive it:
 2. **Draft the story first** — temp-mint the story id (`clew mint --tmp <story-prefix>`) and write the story draft (title, business value, problem/context, solution approach, acceptance criteria, out of scope) into the configured drafts location.
 3. **Build the context** — run the `clew-context` skill against the draft story. It maps the existing specs the story relates to, what it may affect or supersede, and the gaps it should fill, so the specs you write next are grounded in the corpus rather than invented in isolation.
 4. **Create the specs** — using that context, decide which specs the story needs (only configured lenses), temp-mint each (`clew mint --tmp <LENS>`), and write them into the drafts location, mirroring the spec tree (a specs area). Cross-reference by id, wire the relations the context surfaced (what each realizes or concerns, and links to the related existing specs), and follow the project's existing specs as the template.
-5. **Stop for review** — present the drafts, the ids used, and the context findings (related specs, supersession/conflict candidates), so the user sees how the new work sits in the corpus. Do not promote or commit.
+5. **Clarify — resolve what the drafts leave open** — before presenting, read the drafts back as a set and find what a reader still could not pin down: an acceptance criterion or verification a test or review could not actually check, a spec whose decision or exclusion is still vague, a decision the story implies that no spec covers, a term used but never fixed. Put these to the user **together** — do not guess an answer. Fold each resolution back into the drafts. Every point ends in one of three states — **resolved** in the draft, **explicitly deferred** with the trigger that will resolve it (for example "fixed as the code is built"), or **out of scope** — never a TODO, a TBD, or an open question left sitting in a draft. This gate collects the **non-blocking** completeness points; a blocker that prevents a defensible draft at all — for example missing guidance for a configured lens (see Lens coverage) — is raised when you hit it, not deferred to here. This gate is the drafts' own completeness; how they sit against the existing corpus was step 3's job.
+6. **Stop for review** — present the drafts, the ids used, and the context findings (related specs, supersession/conflict candidates), so the user sees how the new work sits in the corpus. Do not promote or commit.
 
 ## Every spec pins a decision — no hollow specs
 
@@ -77,6 +79,7 @@ The configured `description` says what a lens means in this project; the notes b
 ## On approval, hand off to promotion
 
 Drafting stops at review.
+The approval must refer to the presented draft set; do not read general positive feedback ("looks good") as authorization to promote.
 When the user approves the drafts, use the `clew-promote` skill to promote them — it reasons about how the new story and specs fit the existing corpus (relations, supersession, conflicts) and then finalizes them with bound ids in the spec tree.
 Promotion is its own step because that integration is judgment over the whole spec graph, not a file move.
 
@@ -84,5 +87,6 @@ Promotion is its own step because that integration is judgment over the whole sp
 
 - A story draft and its spec drafts exist in the configured drafts location, each with a **temporary** id.
 - Every draft uses only configured lenses and cross-references the related specs the context surfaced.
+- Every ambiguity the clarify pass surfaced is resolved in a draft, explicitly deferred with a named trigger, or out of scope — no draft carries an open question.
 - The drafts, the ids used, and the context findings are presented to the user for review.
 - Nothing is promoted, no bound id is minted, and nothing is committed.

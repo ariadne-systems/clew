@@ -5,7 +5,7 @@ description: "Set up a project after the `clew setup` command has scaffolded it 
 
 # clew-setup
 
-The `clew setup` command scaffolds a project's configuration and method (and emits this skill). This skill is the step **after** that: it establishes the project's **technology contract** and its **architecture overview**, and prepares its **workspace setup** — filling `004` and `docs/spec/architecture.md` and drafting a workspace-setup story.
+The `clew setup` command scaffolds a project's configuration and method (and emits this skill). This skill is the step **after** that: it establishes the project's **technology contract** and its **architecture overview**, and prepares its **workspace setup** — filling `004-technology-contract.md` and `docs/spec/architecture.md` and drafting a workspace-setup story.
 
 It works both ways: a **new** project (gather the stack and architecture by interview) and an **existing** one you are adopting clew into (derive them from the project's own build files, code, and documents, on confirmation). It fills documents and drafts a story; it does not build the workspace — that is the story's job, once the user promotes it.
 
