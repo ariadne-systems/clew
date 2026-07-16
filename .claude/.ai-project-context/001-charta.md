@@ -19,9 +19,9 @@ The AI shall operate under the following principles:
 ## II. Preserve Traceability
 
 -   Every implemented spec must be referenced explicitly in code.
--   Use the prescribed trace annotation format.
--   Do not remove or alter existing trace annotations.
--   Maintain bidirectional traceability at all times.
+-   Use the anchor format prescribed by the anchoring workflow.
+-   Do not remove, retarget, or alter an existing anchor unless the current task requires the corresponding implementation or traceability change.
+-   Maintain valid bidirectional traceability in every completed change set.
 
 ------------------------------------------------------------------------
 

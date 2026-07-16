@@ -19,14 +19,18 @@ Project-specific guidelines may extend these rules but must not weaken them with
 
 Deviation from style rules must be explicitly justified in the solution plan.
 
+**Rationale.** Code is read far more than written; names and shapes that carry intent are what let the next reader change it safely.
+
 ---
 
 ## 2. Error Handling
 
 - Exceptions must never be swallowed silently.
 - Fail fast on invalid input unless the architecture explicitly requires defensive tolerance.
-- Do not convert checked exceptions into unchecked ones without justification.
+- Do not erase a structured or expected error by collapsing it into an undifferentiated generic error without justification; preserve the original cause and its classification.
 - Error handling logic must remain explicit and traceable.
+
+**Rationale.** A swallowed or silently converted error hides the one signal that something is wrong, moving the failure to a later, harder-to-trace point.
 
 ---
 
@@ -42,6 +46,8 @@ Deviation from style rules must be explicitly justified in the solution plan.
 
 If a change cannot be reasonably tested, explicitly justify why.
 
+**Rationale.** A behavioral change without a test has no reproducible evidence it works or keeps working; an order-dependent or flaky test gives that evidence falsely.
+
 ---
 
 ## 4. Dependencies
@@ -52,6 +58,8 @@ If a change cannot be reasonably tested, explicitly justify why.
 - Do not increase framework coupling unnecessarily.
 - Dependency upgrades require justification if they change behavior or compatibility.
 
+**Rationale.** Every dependency is a permanent surface of risk, upgrade cost, and coupling; the bar is whether it earns that, not whether it is convenient today.
+
 ---
 
 ## 5. Change Discipline
@@ -60,6 +68,8 @@ If a change cannot be reasonably tested, explicitly justify why.
 - Do not refactor unrelated code opportunistically.
 - Avoid mixing structural refactoring with behavioral changes in a single change set.
 - Maintain backward compatibility unless the task explicitly requires breaking changes.
+
+**Rationale.** Mixing structural and behavioral change in one set makes the diff impossible to review for either; small, single-purpose changes keep intent legible.
 
 ---
 
@@ -71,6 +81,8 @@ If a change cannot be reasonably tested, explicitly justify why.
     - What changed.
     - Why it changed.
 - Avoid vague commit messages.
+
+**Rationale.** The log is the durable record of why the code is as it is; a vague or bundled commit destroys that history for everyone after.
 
 ---
 
@@ -85,6 +97,8 @@ If compliance with any guideline is technically impossible:
 
 Silent deviation is prohibited.
 
+**Rationale.** A rule will sometimes be genuinely impossible to meet; a stated, scoped, justified deviation keeps that an auditable exception rather than a silent erosion of the standard.
+
 ---
 
 ## 8. Comments
@@ -96,3 +110,5 @@ A comment that only paraphrases the spec, or restates what the code plainly does
 - Never write a spec id in a comment; the anchor is the sole reference (enforced by `clew check`'s spec-id-in-comment member).
 This section extends that rule from ids to spec content.
 - Prefer few load-bearing comments over matching a high surrounding comment density; where existing code over-comments, do not propagate it.
+
+**Rationale.** A comment that restates the spec or the code rots on its own schedule and drifts from what it describes; the ones worth keeping carry what neither the anchor nor the names already say.

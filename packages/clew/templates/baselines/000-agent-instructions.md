@@ -21,7 +21,7 @@ The current task — the work item and its specs — is supplied as a separate s
 
 ---
 
-## Normative Hierarchy (Total Order)
+## Normative Hierarchy (Priority Model)
 
 The following hierarchy defines authority and override rules:
 
@@ -44,6 +44,7 @@ May only be deviated from if:
 ### 4. Additional contract files (004+)
 Project-specific engineering contracts (technology, testing, security, etc.).
 Carry the same authority as `003-developer-guidelines.md` unless explicitly stated otherwise.
+`003` and the 004+ files share one rank: a later peer may specialize an earlier rule only where both remain satisfiable; a genuine contradiction is never resolved by load order and is escalated per Conflict Handling.
 
 ---
 
@@ -51,8 +52,9 @@ Carry the same authority as `003-developer-guidelines.md` unless explicitly stat
 
 - Imperative statements such as "must", "shall", "never", or "do not" are binding.
 - Examples are illustrative unless explicitly marked as mandatory.
-- Absence of an instruction does not imply permission.
+- Absence of an instruction does not authorize changes to product behavior, public interfaces, architecture, dependencies, traceability, or persisted formats; local implementation choices that preserve all specified behavior and constraints are permitted.
 - Silence does not authorize architectural changes.
+- A reference to a spec, ADR, or id that is not part of the loaded context is informative only and creates no obligation.
 - Do not introduce new dependencies, abstractions, or patterns unless required and compliant with higher layers.
 
 ---
@@ -61,11 +63,12 @@ Carry the same authority as `003-developer-guidelines.md` unless explicitly stat
 
 1. Extract all binding constraints from normative files.
 2. Extract the specs of the current task.
-3. Identify ambiguities, missing information, or contradictions.
-4. Produce a concise solution plan.
-5. Validate the plan against all higher-priority constraints.
-6. If compliant, generate the code changes.
-7. Keep changes minimal, deterministic, and aligned with existing architecture.
+3. Confirm each spec the task will anchor to is `active`. If the task explicitly authorizes implementing a `planned` spec, set it `active` first — with its `## Changes` entry (`006`); otherwise a `planned` target cannot be anchored and is a stop condition.
+4. Identify ambiguities, missing information, or contradictions.
+5. Produce a concise solution plan.
+6. Validate the plan against all higher-priority constraints.
+7. If compliant, generate the code changes.
+8. Keep changes minimal, deterministic, and aligned with existing architecture.
 
 ---
 
@@ -77,6 +80,7 @@ If any of the following occurs:
 - The task contains ambiguity that materially affects implementation.
 - The task contradicts higher-priority rules without explicit exception.
 - Required architectural decisions are unspecified.
+- The task requires anchoring to a `planned` spec that the task does not authorize activating.
 
 Then:
 

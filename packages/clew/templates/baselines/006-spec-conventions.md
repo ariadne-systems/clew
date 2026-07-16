@@ -1,3 +1,5 @@
+<!-- Copyright © 2026 Ariadne Systems GmbH. All rights reserved. -->
+
 # Spec Conventions
 
 These conventions govern how specs in the spec tree are authored and maintained.
@@ -56,7 +58,7 @@ It generates **no** traceable, so it is outside the coverage universe (CON-020) 
 - `active` — being built, or in service.
 It generates a traceable; coverage then shows whether code actually anchors it — an open gap until it does, Covered once it does.
 - `deprecated` — retiring.
-Its traceable is still generated but **marked** deprecated, so existing anchors keep building, and coverage lists it without counting it.
+Its traceable is still generated but **marked** deprecated, so existing anchors keep building, and coverage lists it without counting it; do not add a new `realizes` or `verifies` anchor to a `deprecated` spec.
 
 Set a spec `active` when work on it **begins** — that is what generates its traceable, so the code can anchor against it as it is written, not after the code is done.
 Set it `deprecated` when the spec is retiring.
