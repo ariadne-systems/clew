@@ -3,7 +3,6 @@
 - Status: Accepted (core decisions); open questions listed at the end.
 - Date: 2026-06-07
 - Deciders: project maintainer.
-- External input: the approach was reviewed with an external reviewer, who found it coherent. This is context, not a decision authority.
 
 ## Context
 
@@ -163,7 +162,7 @@ The reverse-direction completeness check from D6 is part of the same contract, b
 
 The package structure follows this split: a language-neutral core package, and one generator package per language (for example core, gen-java, gen-typescript).
 The core depends on the generator interface, never on a concrete generator.
-This is the most important architectural boundary and is enforced in the build, an architecture boundary rule.
+This is the most important architectural boundary and is enforced in the build, as an architecture boundary rule (an ArchUnit test in Java).
 
 Java and TypeScript are the first two generators and already exist.
 Adding a language means implementing the generator contract, not changing the core.
@@ -191,11 +190,7 @@ Behaviour remains the job of tests and review; this is the part Boeckeler calls 
 Negative and risks.
 Each foreign-approach adapter is maintenance surface against a moving target, and carries ongoing upkeep cost.
 
-
-
 ## Architectural consequence: local operation and the central-authority boundary
-
-
 
 The mechanism runs fully locally when the spec lives in the repo: scanner, committed index file, generator, resolver, and the target compiler, on a single repo and single stack, with no server.
 
@@ -226,4 +221,3 @@ It includes at least symbol generation, a reference convention, and the reverse-
 
 - B. Boeckeler, spec-driven development taxonomy: spec-first, spec-anchored, spec-as-source (martinfowler.com).
 - Structured-Prompt-Driven Development (SPDD), the REASONS Canvas, and openspdd; example codebase token-billing.
-

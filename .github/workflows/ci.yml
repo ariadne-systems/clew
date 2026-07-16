@@ -17,8 +17,8 @@ on:
   pull_request:
 
 # Trust the runner's system CA store in addition to Node's bundled CAs, so
-# `pnpm install` works behind a TLS-inspecting proxies. Additive and harmless on
-# runners that reach the public registry. Requires Node >= 22.15.
+# `pnpm install` works behind TLS-inspecting proxies. Additive and harmless on
+# runners that reach the public registry directly. Requires Node >= 22.15.
 env:
   NODE_OPTIONS: --use-system-ca
 

@@ -12,8 +12,8 @@ The type-checker enforces the forward link — an anchor names a live spec — b
 That blind spot, a requirement declared but never implemented or tested, is the drift-and-reinvention failure mode the whole approach exists to catch; ADR-0001 named a reverse-completeness check (D6) and an index/resolution layer (D4) but left both undesigned.
 
 Establishing the reverse therefore needs the code read *back* — scanned for its anchors — and compared against the full set of traceables.
-This scan-based shape is proven prior art — a scanner produces a code-locations index and a coverage result that downstream traceback and verification consume — so the shape is proven prior art.
-This decision brings the same capability to the open tool, aligned with that prior art rather than forked from it, and settles the shape of the scanning subsystem before its stories are authored.
+The scan → code-locations index → coverage-result shape, with downstream traceback and verification consuming that index, is a proven approach for establishing this reverse direction.
+This decision brings that capability to clew and settles the shape of the scanning subsystem before its stories are authored.
 
 ## Decision
 
@@ -84,7 +84,7 @@ The hard half — the pass condition per spec and per lens (what counts a `SW` a
 
 Rationale.
 Coverage must mean "implemented and tested", the property an audit cares about; letting a mere coupling satisfy it would let coverage be gamed by *mentioning* a spec.
-`concerns` exists to build context (ADR-0004), and a comparable traceability system runs its traceback and verification on two relations alone, so two relations suffice for coverage and the third stays out of it.
+`concerns` exists to build context (ADR-0004), so two relations suffice for coverage and the third stays out of it.
 ADR-0004 D2 is amended to record that `concerns` does not count toward coverage.
 
 Rejected alternative.
@@ -112,24 +112,19 @@ The list's value rests on it holding *genuine* gaps.
 Every spec in the universe is one that code *can* anchor — at the granularity that matches its altitude (ADR-0006): a behaviour at its symbol, a high-level need or capability at the file or module that serves it.
 So an uncovered spec is a real gap, not an artefact of altitude, and the list does not fill with mechanical waivers — a spec with no honest anchor is dropped, not waived (ADR-0006).
 
-### D6 — The configuration and outputs are a stable shared contract
+### D6 — The configuration and outputs are a stable, published contract
 
-clew and a other tooling operate on the same repository and the same `.clewrc.json`.
-The companion reads its own sections; clew reads its `idGeneration` / `generators` / `lenses` / `layout` sections; both read the shared `exclude` / `unexclude` with identical semantics.
-The scan's outputs — a code-locations index and a coverage result — use shared `locations.json` / `coverage.json` shapes.
-Other tooling converges onto clew's vocabulary — `realizes` / `verifies`, lenses, the marker grammar — rather than the reverse.
+clew's configuration (`.clewrc.json`) and its scan outputs — a code-locations index and a coverage result — are treated as a stable contract rather than internal detail.
+The config carries clew's `idGeneration` / `generators` / `lenses` / `layout` sections and the shared `exclude` / `unexclude`; the outputs use published `locations.json` / `coverage.json` shapes.
 
 Rationale.
-The config file and the JSON artifacts are the seam at which the open tool and a consumer interoperate; aligning them lets a project configured for one work with the other, and lets the two be swapped on input and output with no translation layer.
-Converging the names now, before a consumer exists, is cheap and removes a permanent dialect split over one repository.
+The config file and the JSON artifacts are the seam at which other tools interoperate with clew over the same repository; treating them as a published contract lets a project configured for clew be consumed by another tool with no translation layer, and lets clew own the vocabulary — `realizes` / `verifies`, lenses, the marker grammar — that such tools converge on.
 
-Note (ongoing cost, and the durable form).
-Aligning the shapes once is cheap; keeping two codebases aligned as both evolve is a recurring tax, paid alone, and a silent schema change on the other side could break the open tool's contract.
-The durable form is a single shared schema **definition** owned by one side — the open tool publishes it, the companion depends on it — rather than two copies kept in lockstep by discipline.
-That single-owner schema is the intended end-state; this decision commits to the alignment and names schema ownership as the way to hold it.
+Note (the durable form).
+The durable form of that contract is a single shared schema **definition** that clew owns and publishes, rather than copies kept in lockstep by discipline; a schema change is then a versioned change to a published contract, not a silent break for a consumer.
 
 Rejected alternative.
-clew defines its own config keys and output shapes — it forks the ecosystem into two incompatible dialects over the same code.
+clew leaves its config keys and output shapes undocumented and free to drift — every consumer then reverse-engineers an implementation detail, and any internal change can break it silently.
 
 ## Scope and boundary
 
@@ -159,7 +154,7 @@ ADR-0004 D2 is amended to record that `concerns` does not count toward coverage.
 
 The scan is policy-light: it makes no judgment about relevance or depth — that stays agentic, in the skills — and instead enumerates completely and deterministically, which is exactly what coverage and resolution need.
 
-A other tooling converges onto clew's vocabulary and shares its configuration and output shapes, so the open tool and that pipeline interoperate over a single repository.
+clew's configuration and output shapes are a published contract (D6), so other tools can interoperate with it over a single repository.
 
 ## Changes
 
@@ -174,3 +169,5 @@ The universe is the **generated traceables** (the enum members), read back throu
 A spec's implementation status **filters generation**: only `active` and `deprecated` specs become traceables; a `planned` spec is not generated and is outside the universe; a `deprecated` spec's traceable is emitted but marked deprecated (kept resolvable so anchors still build) and is listed in the report without counting toward coverage.
 This supersedes the `coverage.scope` config option (dropped): scoping to active specs is structural.
 The flat code↔spec check, the eligible relations (D4), and default-plus-waivers (D5) are unchanged.
+- **2026-07-16** — Generalized the Context prior-art note, the D4 rationale, and the D6 contract decision so each stands on its own without reference to a separate system, and generalized the decider line, ahead of publishing this repository.
+The architectural decisions are unchanged.
