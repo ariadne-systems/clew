@@ -8,8 +8,11 @@ import { ClewError, ErrorCode } from "../errors.js";
 const DEFAULT_GLOBS: readonly string[] = [
   "**/node_modules",
   "**/.git",
+  "**/.svn",
+  "**/.hg",
   "**/dist",
   "**/build",
+  "**/target",
   "**/coverage",
   ".clew",
 ];

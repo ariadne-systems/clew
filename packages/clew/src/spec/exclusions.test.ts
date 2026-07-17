@@ -45,6 +45,25 @@ describe("root-relative glob semantics", () => {
   });
 });
 
+describe("built-in default exclusions", () => {
+  verifies(ConTraceables.CON_016_SCAN_BUILTIN_EXCLUSIONS, () => {
+    test("excludes dependency, build-output, and version-control directories by default", () => {
+      const rules = compile({});
+      // A build output at any depth — the per-module case for Maven and Gradle.
+      expect(fileExcluded("target/classes/App.class", rules)).toBe(true);
+      expect(
+        fileExcluded("service/target/generated-sources/G.java", rules),
+      ).toBe(true);
+      expect(fileExcluded("module/build/libs/x.jar", rules)).toBe(true);
+      // Version-control metadata, including the source copies `.svn` keeps.
+      expect(fileExcluded(".svn/pristine/a.java", rules)).toBe(true);
+      expect(fileExcluded(".hg/store/x", rules)).toBe(true);
+      // The project's own source is scanned.
+      expect(fileExcluded("src/main/java/App.java", rules)).toBe(false);
+    });
+  });
+});
+
 describe("exclusion precedence", () => {
   verifies(ConTraceables.CON_017_EXCLUSION_PRECEDENCE, () => {
     test("a built-in default excludes; nothing configured includes the rest", () => {
