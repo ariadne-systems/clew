@@ -7,8 +7,8 @@ Group the scanned specs into the configured spec sets
 
 **Description**
 Grouping assigns each scanned spec to a spec set by matching its filename against the configured set patterns.
-The configured `specSets` is an ordered list of `{ name, pattern }`, where `pattern` is a regular expression over the spec's filename; an `ignore` list of patterns excludes matching specs from every set.
-With no `specSets` configured, the default is one set per lens.
+The configured `generation.sets` is an ordered list of `{ name, pattern }`, where `pattern` is a regular expression over the spec's filename; a `generation.ignore` list of patterns excludes matching specs from every set.
+With no `generation.sets` configured, the default is one set per lens.
 The resulting groups are what the generators emit as separate symbol sets.
 
 **Rationale**
@@ -19,7 +19,7 @@ The filename is matched rather than the bare id because the id exposes only the 
 **Verification Description**
 Given configured patterns, each spec is assigned to the set whose pattern matches its filename.
 A spec matching an `ignore` pattern is excluded from every set.
-With no `specSets` configured, the specs group one set per lens.
+With no `generation.sets` configured, the specs group one set per lens.
 
 ## Relations
 
@@ -35,3 +35,5 @@ With no `specSets` configured, the specs group one set per lens.
 
 - **2026-06-26** — Renamed "scanned traceables" to "scanned specs" throughout: a *traceable* is the generated enum member (CON-020), so the scan model that grouping operates on is the scanned spec.
 Grouping is unchanged; this only aligns the vocabulary.
+- **2026-07-17** — The sets and the ignore list are read from `generation.sets` and `generation.ignore` rather than from the configuration root (STR-033).
+At the root, `ignore` named no object; both now sit under the machine they shape. Grouping itself — filename matching, order, the one-set-per-lens default — is unchanged.

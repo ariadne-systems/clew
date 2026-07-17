@@ -320,7 +320,7 @@ function toGeneratorConfig(entry: unknown): GeneratorConfig | undefined {
 }
 
 /**
- * Reads the `specSets` section: the configured spec-set matchers, in order
+ * Reads `generation.sets`: the configured spec-set matchers, in order.
  * Each entry carries a `name`, an optional `pattern` (a regex over the
  * filename), and an optional `catchAll` flag. A missing or empty section yields
  * an empty list, which the `spec` command reads as "group by lens" (the default).
@@ -328,7 +328,7 @@ function toGeneratorConfig(entry: unknown): GeneratorConfig | undefined {
 export async function readSpecSets(
   file: string = DEFAULT_CONFIG_FILE,
 ): Promise<SpecSetMatcher[]> {
-  const raw = (await readRawConfig(file)).specSets;
+  const raw = asObject((await readRawConfig(file)).generation).sets;
   if (!Array.isArray(raw)) {
     return [];
   }
@@ -343,14 +343,14 @@ export async function readSpecSets(
 }
 
 /**
- * Reads the `ignore` section: regular expressions over a spec's filename whose
+ * Reads `generation.ignore`: regular expressions over a spec's filename whose
  * matching traceables are excluded from every spec set. A missing
  * section yields an empty list — nothing is excluded.
  */
 export async function readIgnore(
   file: string = DEFAULT_CONFIG_FILE,
 ): Promise<string[]> {
-  const raw = (await readRawConfig(file)).ignore;
+  const raw = asObject((await readRawConfig(file)).generation).ignore;
   if (!Array.isArray(raw)) {
     return [];
   }
@@ -359,12 +359,12 @@ export async function readIgnore(
   );
 }
 
-/** Reads a section that is a list of glob strings; a missing section yields an empty list. */
+/** Reads a `scan` entry that is a list of glob strings; a missing section yields an empty list. */
 async function readGlobList(
   file: string,
   section: "exclude" | "unexclude",
 ): Promise<string[]> {
-  const raw = (await readRawConfig(file))[section];
+  const raw = asObject((await readRawConfig(file)).scan)[section];
   if (!Array.isArray(raw)) {
     return [];
   }
@@ -374,7 +374,7 @@ async function readGlobList(
 }
 
 /**
- * Reads the `exclude` section: the project's scan exclusion globs.
+ * Reads `scan.exclude`: the project's scan exclusion globs.
  * A missing section yields an empty list — no configured exclusions.
  */
 export async function readExclude(
@@ -384,7 +384,7 @@ export async function readExclude(
 }
 
 /**
- * Reads the `unexclude` section: globs that re-include paths a built-in default
+ * Reads `scan.unexclude`: globs that re-include paths a built-in default
  * would exclude. A missing section yields an empty list.
  */
 export async function readUnexclude(
@@ -409,8 +409,8 @@ export async function readSchemas(
   if (typeof raw.story === "string") {
     config.story = raw.story;
   }
-  if (typeof raw["spec"] === "string") {
-    config["spec"] = raw["spec"];
+  if (typeof raw.spec === "string") {
+    config.spec = raw.spec;
   }
   return config;
 }

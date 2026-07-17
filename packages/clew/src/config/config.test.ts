@@ -13,12 +13,14 @@ import {
   DEFAULT_LENSES,
   ErrorCode,
   readConfiguredPrefixes,
+  readExclude,
   readGenerators,
   readIdGenerationConfig,
   readIgnore,
   readLayout,
   readLenses,
   readSpecSets,
+  readUnexclude,
   requireConfig,
   resolveConfiguration,
 } from "../index.js";
@@ -169,10 +171,12 @@ describe("readSpecSets", () => {
   verifies(SwTraceables.SW_009_READ_CONFIGURATION, () => {
     test("reads the configured spec sets in order, with patterns and catch-all", async () => {
       const file = await tempConfigFile({
-        specSets: [
-          { name: "security", pattern: "secur" },
-          { name: "rest", catchAll: true },
-        ],
+        generation: {
+          sets: [
+            { name: "security", pattern: "secur" },
+            { name: "rest", catchAll: true },
+          ],
+        },
       });
 
       const specSets = await readSpecSets(file);
@@ -183,8 +187,16 @@ describe("readSpecSets", () => {
       ]);
     });
 
-    test("returns an empty list when no specSets are configured", async () => {
+    test("returns an empty list when no generation section is configured", async () => {
       expect(await readSpecSets(await missingConfigFile())).toEqual([]);
+    });
+
+    test("does not read sets left at the configuration root", async () => {
+      const file = await tempConfigFile({
+        specSets: [{ name: "security", pattern: "secur" }],
+      });
+
+      expect(await readSpecSets(file)).toEqual([]);
     });
   });
 });
@@ -228,13 +240,51 @@ describe("readGenerators", () => {
 describe("readIgnore", () => {
   verifies(SwTraceables.SW_009_READ_CONFIGURATION, () => {
     test("reads the configured ignore patterns", async () => {
-      const file = await tempConfigFile({ ignore: ["draft", "scratch"] });
+      const file = await tempConfigFile({
+        generation: { ignore: ["draft", "scratch"] },
+      });
 
       expect(await readIgnore(file)).toEqual(["draft", "scratch"]);
     });
 
     test("returns an empty list when no ignore patterns are configured", async () => {
       expect(await readIgnore(await missingConfigFile())).toEqual([]);
+    });
+
+    test("does not read an ignore list left at the configuration root", async () => {
+      const file = await tempConfigFile({ ignore: ["draft"] });
+
+      expect(await readIgnore(file)).toEqual([]);
+    });
+  });
+});
+
+describe("readExclude and readUnexclude", () => {
+  verifies(SwTraceables.SW_025_READ_EXCLUSION_PATTERNS, () => {
+    test("reads the configured scan exclusion globs", async () => {
+      const file = await tempConfigFile({
+        scan: { exclude: ["notes"], unexclude: ["node_modules/keep/**"] },
+      });
+
+      expect(await readExclude(file)).toEqual(["notes"]);
+      expect(await readUnexclude(file)).toEqual(["node_modules/keep/**"]);
+    });
+
+    test("returns empty lists when no scan section is configured", async () => {
+      const file = await missingConfigFile();
+
+      expect(await readExclude(file)).toEqual([]);
+      expect(await readUnexclude(file)).toEqual([]);
+    });
+
+    test("does not read globs left at the configuration root", async () => {
+      const file = await tempConfigFile({
+        exclude: ["notes"],
+        unexclude: ["node_modules/keep/**"],
+      });
+
+      expect(await readExclude(file)).toEqual([]);
+      expect(await readUnexclude(file)).toEqual([]);
     });
   });
 });

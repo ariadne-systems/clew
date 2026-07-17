@@ -331,15 +331,17 @@ describe("configured spec sets", () => {
       ConTraceables.CON_013_SPEC_SET_PARTITION,
     ],
     () => {
-      test("groups by the configured specSets instead of by lens", async () => {
+      test("groups by the configured spec sets instead of by lens", async () => {
         const { configFile, outputDir } = await fixture(
           ["SW-012-command.md", "SW-013-scan.md", "CON-012-owned.md"],
           ["fake"],
           {
-            specSets: [
-              { name: "commands", pattern: "command" },
-              { name: "rest", catchAll: true },
-            ],
+            generation: {
+              sets: [
+                { name: "commands", pattern: "command" },
+                { name: "rest", catchAll: true },
+              ],
+            },
           },
         );
         const { generator, received } = recordingGenerator("fake");
@@ -360,7 +362,7 @@ describe("configured spec sets", () => {
         const { configFile, outputDir } = await fixture(
           ["SW-012-a.md", "SW-013-draft.md"],
           ["fake"],
-          { ignore: ["draft"] },
+          { generation: { ignore: ["draft"] } },
         );
         const { generator, received } = recordingGenerator("fake");
 
@@ -390,7 +392,7 @@ describe("configured spec sets", () => {
         const { configFile, outputDir } = await fixture(
           ["SW-012-a.md", "CON-012-b.md"],
           ["fake"],
-          { specSets: [{ name: "sw", pattern: "^SW-" }] },
+          { generation: { sets: [{ name: "sw", pattern: "^SW-" }] } },
         );
         const { generator } = recordingGenerator("fake");
 

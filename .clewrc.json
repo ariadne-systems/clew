@@ -43,7 +43,9 @@
     "story": "docs/spec/schemas/story.schema.yaml",
     "spec": "docs/spec/schemas/spec.schema.yaml"
   },
-  "exclude": ["notes", "packages/clew/templates"],
+  "scan": {
+    "exclude": ["notes", "packages/clew/templates"]
+  },
   "waivers": [
     {
       "pattern": "STK-*",

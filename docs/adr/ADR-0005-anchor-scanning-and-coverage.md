@@ -112,19 +112,23 @@ The list's value rests on it holding *genuine* gaps.
 Every spec in the universe is one that code *can* anchor — at the granularity that matches its altitude (ADR-0006): a behaviour at its symbol, a high-level need or capability at the file or module that serves it.
 So an uncovered spec is a real gap, not an artefact of altitude, and the list does not fill with mechanical waivers — a spec with no honest anchor is dropped, not waived (ADR-0006).
 
-### D6 — The configuration and outputs are a stable, published contract
+### D6 — The outputs are a stable, published contract; the configuration is clew's own
 
-clew's configuration (`.clewrc.json`) and its scan outputs — a code-locations index and a coverage result — are treated as a stable contract rather than internal detail.
-The config carries clew's `idGeneration` / `generators` / `lenses` / `layout` sections and the shared `exclude` / `unexclude`; the outputs use published `locations.json` / `coverage.json` shapes.
+clew's scan outputs — a code-locations index and a coverage result — are treated as a stable contract rather than internal detail, and use published `locations.json` / `coverage.json` shapes.
+clew's configuration (`.clewrc.json`) is **not** part of that contract.
+It is clew's own file, shaped for the people and the tool that write and read it; its sections are described by the Configuration entity rather than frozen here.
 
 Rationale.
-The config file and the JSON artifacts are the seam at which other tools interoperate with clew over the same repository; treating them as a published contract lets a project configured for clew be consumed by another tool with no translation layer, and lets clew own the vocabulary — `realizes` / `verifies`, lenses, the marker grammar — that such tools converge on.
+The JSON artifacts are the seam at which another tool consumes clew's results over the same repository; treating them as a published contract lets the trace record be exported, audited, and read with no translation layer, and lets clew own the vocabulary — `realizes` / `verifies`, lenses, the marker grammar — that such consumers converge on.
+The configuration is not that seam: nothing outside clew reads it.
+Binding its shape to a published contract would buy no interoperation, while taxing every improvement to the one file a project must actually author by hand.
 
 Note (the durable form).
-The durable form of that contract is a single shared schema **definition** that clew owns and publishes, rather than copies kept in lockstep by discipline; a schema change is then a versioned change to a published contract, not a silent break for a consumer.
+The durable form of the outputs' contract is a single shared schema **definition** that clew owns and publishes, rather than copies kept in lockstep by discipline; a schema change is then a versioned change to a published contract, not a silent break for a consumer.
 
 Rejected alternative.
-clew leaves its config keys and output shapes undocumented and free to drift — every consumer then reverse-engineers an implementation detail, and any internal change can break it silently.
+clew leaves its output shapes undocumented and free to drift — every consumer then reverse-engineers an implementation detail, and any internal change can break it silently.
+Holding the configuration to the same published contract — it was written for a cross-tool seam that does not exist, and it would freeze the shape of the file users have to write.
 
 ## Scope and boundary
 
@@ -171,3 +175,7 @@ This supersedes the `coverage.scope` config option (dropped): scoping to active 
 The flat code↔spec check, the eligible relations (D4), and default-plus-waivers (D5) are unchanged.
 - **2026-07-16** — Generalized the Context prior-art note, the D4 rationale, and the D6 contract decision so each stands on its own without reference to a separate system, and generalized the decider line, ahead of publishing this repository.
 The architectural decisions are unchanged.
+- **2026-07-17** — Narrowed D6: the published contract now covers the **outputs** (`locations.json` / `coverage.json`) only; the **configuration** leaves it and is clew's own (STR-033).
+The cross-tool seam D6 was written for does not exist — nothing outside clew reads `.clewrc.json` — so holding its shape to a published contract bought no interoperation while freezing the one file a project must author by hand.
+D6 also stopped enumerating the config's sections: that is the Configuration entity's job, and the enumeration is what made the decision rot as sections were added.
+The outputs' contract, which STK-002's export-and-audit value rests on, is unchanged.

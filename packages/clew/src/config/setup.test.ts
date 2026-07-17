@@ -141,7 +141,7 @@ describe("setup selects the generator", () => {
         string,
         unknown
       >;
-      expect(after["generators"]).toEqual([{ type: "typescript" }]);
+      expect(after.generators).toEqual([{ type: "typescript" }]);
       expect({ ...after, generators: [] }).toEqual({
         ...before,
         generators: [],

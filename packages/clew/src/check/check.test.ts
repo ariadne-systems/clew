@@ -462,7 +462,7 @@ describe("exclusions apply to every check", () => {
   verifies(SwTraceables.SW_024_EXCLUDE_MATCHING_PATHS, () => {
     test("an excluded spec file is not checked", async () => {
       const p = await project({
-        exclude: ["docs/spec/specs/SW-001-a.md"],
+        scan: { exclude: ["docs/spec/specs/SW-001-a.md"] },
       });
       await writeFile(
         join(p.derivedDir, "SW-001-a.md"),
@@ -480,7 +480,7 @@ describe("exclusions apply to every check", () => {
 
     test("a link to an excluded target is not validated", async () => {
       const p = await project({
-        exclude: ["docs/spec/specs/SW-002-b.md"],
+        scan: { exclude: ["docs/spec/specs/SW-002-b.md"] },
       });
       await writeFile(
         join(p.storiesDir, "STR-001-x.md"),

@@ -7,7 +7,7 @@ The scan excludes dependency and build directories by default
 
 **Description**
 The code scan skips dependency and build directories by default — for example `node_modules` and build output — because they are not the project's source.
-It does **not** automatically exclude a generator's output directory: generated output is inert to the scan (CON-030), so it need not be hidden to keep the located set faithful, and a project that wants it skipped lists it under `exclude` like any other path.
+It does **not** automatically exclude a generator's output directory: generated output is inert to the scan (CON-030), so it need not be hidden to keep the located set faithful, and a project that wants it skipped lists it under `scan.exclude` like any other path.
 STR-017 adds the configurable `exclude` / `unexclude` layer on top: there the built-in defaults become root-relative globs (CON-018) and the lowest precedence layer, which a user `exclude` or an `unexclude` can override (CON-017); the built-ins are the base of that precedence, not an immovable floor (ADR-0005 D6).
 
 **Rationale**
@@ -18,7 +18,7 @@ Relying on that inertness rather than a remembered exclusion removes a correctne
 **Verification Description**
 A marker placed under a built-in-excluded location (`node_modules`, a build directory) produces no anchor location.
 A marker in the project's own source outside those locations is reported normally.
-The built-in exclusions apply with no configuration present, and a generator's output directory is scanned unless the project lists it under `exclude`.
+The built-in exclusions apply with no configuration present, and a generator's output directory is scanned unless the project lists it under `scan.exclude`.
 
 ## Relations
 
@@ -35,3 +35,5 @@ The built-in exclusions apply with no configuration present, and a generator's o
 - **2026-06-29** — Dropped the automatic exclusion of generator output directories.
 Generated output is now inert to the scan (CON-030), so excluding it is a project choice (`exclude`), not a built-in correctness requirement.
 The prior rationale — that scanning the output directory "would invent anchors that no one wrote" — no longer held: discovery masks comments and strings and derives ids from member names, so it finds no anchor in generated output wherever it sits.
+- **2026-07-17** — A project now lists a path it wants skipped under `scan.exclude` rather than under a root-level `exclude` (STR-033).
+Where the patterns are configured moved; the built-in defaults and their place at the base of the precedence are unchanged.

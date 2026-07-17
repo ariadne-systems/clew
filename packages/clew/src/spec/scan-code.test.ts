@@ -132,7 +132,7 @@ describe("code scan", () => {
       const { root, configFile } = await project(
         { "src/a.ts": "SW-100", "src/a.fixture.ts": "SW-200" },
         [{ type: "fake", outputDir: "gen/out" }],
-        { exclude: ["**/*.fixture.ts"] },
+        { scan: { exclude: ["**/*.fixture.ts"] } },
       );
 
       const result = await scanCode({
@@ -149,7 +149,7 @@ describe("code scan", () => {
       const { root, configFile } = await project(
         { "src/a.ts": "SW-100", "node_modules/keep/b.ts": "SW-300" },
         [{ type: "fake", outputDir: "gen/out" }],
-        { unexclude: ["node_modules/keep/**"] },
+        { scan: { unexclude: ["node_modules/keep/**"] } },
       );
 
       const result = await scanCode({

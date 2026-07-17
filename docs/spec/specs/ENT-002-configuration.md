@@ -16,6 +16,8 @@ The defaults are the opinionated template (ADR-0001 D8); a project overrides onl
 An id is `<prefix>-<number>`, where the number is zero-padded to `idGeneration.padding` and the prefix is a configured one — a `lenses[].id` for a spec, or `layout.stories.prefix`.
 The set of configured prefixes is the single source of truth for id validity, so no separate id pattern is configured (ADR-0003 subsumes the former `idToken.pattern`).
 
+An attribute that shapes a machine is grouped under it: `generation` for what becomes a traceable, `scan` for which paths the code scan reads.
+
 | Attribute | Type | Description |
 | --- | --- | --- |
 | `idGeneration.mode` | `"sequential" \| "opaque"` | The id-generation scheme (ARCH-001). Defaults to `sequential`. |
@@ -26,10 +28,10 @@ The set of configured prefixes is the single source of truth for id validity, so
 | `layout.drafts` | `{ dir: String }` | Where unapproved drafts live (mirrors the spec tree). Defaults to `docs/spec/drafts`. |
 | `layout.state` | `{ file: String }` | The StateStore file (CON-001). Defaults to `.clew/state.json`. |
 | `generators` | `List<{ type: String, outputDir?: String }>` | The language generators to run; each declares its target-language `type` and the directory it writes into, relative to the project root (SW-014). A generator's `outputDir` defaults to that generator's idiomatic location. Optional; with none configured, nothing is generated. |
-| `specSets` | `List<{ name: String, pattern?: String, catchAll?: Boolean }>` | Named spec sets, each matched by a regular expression over the spec's filename; one symbol set is generated per set (SW-015). Optional; with none configured, the default is one set per lens. One set may set `catchAll` to collect otherwise-unmatched specs, in which case it needs no pattern (CON-013). |
-| `ignore` | `List<String>` | Regular expressions over the spec's filename; a matching spec is excluded from every spec set and produces no symbol (CON-013). Optional. |
-| `exclude` | `List<String>` | Repository-root-relative globs (CON-018); a matching path is excluded from the code scan and produces no anchor (SW-024, SW-025). A user `exclude` is absolute in the exclusion precedence (CON-017). Optional. |
-| `unexclude` | `List<String>` | Repository-root-relative globs (CON-018) that re-include a path a built-in default (CON-016) would exclude; never overrides a user `exclude` (CON-017). Optional. |
+| `generation.sets` | `List<{ name: String, pattern?: String, catchAll?: Boolean }>` | Named spec sets, each matched by a regular expression over the spec's filename; one symbol set is generated per set (SW-015). Optional; with none configured, the default is one set per lens. One set may set `catchAll` to collect otherwise-unmatched specs, in which case it needs no pattern (CON-013). |
+| `generation.ignore` | `List<String>` | Regular expressions over the spec's filename; a matching spec is excluded from every spec set and produces no symbol (CON-013). Optional. |
+| `scan.exclude` | `List<String>` | Repository-root-relative globs (CON-018); a matching path is excluded from the code scan and produces no anchor (SW-024, SW-025). A user `scan.exclude` is absolute in the exclusion precedence (CON-017). Optional. |
+| `scan.unexclude` | `List<String>` | Repository-root-relative globs (CON-018) that re-include a path a built-in default (CON-016) would exclude; never overrides a user `scan.exclude` (CON-017). Optional. |
 | `waivers` | `List<{ id?: String, pattern?: String, reason: String }>` | The committed coverage waiver list: each entry targets a spec `id` or a glob `pattern` over ids (exactly one), with a reason, and waives a missing *test* — a matching spec that is implemented but unverified is reported waived rather than an open gap (SW-027, SW-030). A spec missing its realizing code is never waived (CON-021). A waiver that waives nothing is reported as stale. Optional. |
 | `schemas` | `{ story?: String, "spec"?: String }` | Per-document-type validation schema files; clew validates each document against its type's schema when it reads it (SW-036) — the pinned core merged with the project's required fields and enums (ARCH-007). Optional. |
 | `agent` | `String` | The agent harness the method scaffold was emitted for; setup records it so a re-run re-emits for the same one (SW-043). Defaults to `claude`. Optional. |
@@ -52,3 +54,8 @@ Reading a `.clewrc.json` yields each attribute above, and a missing file or attr
 
 - **2026-07-12** — Added the `agent` attribute recording the harness the method scaffold was emitted for (STR-031, SW-043), so a re-run re-emits for the same one.
 Additive; the entity's shape grew by one attribute, none changed in place.
+- **2026-07-17** — Grouped the four filter attributes under the machine each configures: `specSets` → `generation.sets`, `ignore` → `generation.ignore`, `exclude` → `scan.exclude`, `unexclude` → `scan.unexclude` (STR-033).
+At the root they named no object — *ignore what? exclude from what?* — and read as near-synonyms despite serving two different corpora in two different units: a regular expression over a spec's filename versus a glob over a repository path.
+This changes existing attributes **in place**, which the append-only rule in this entity's description forbids.
+It is taken as an explicit, one-off **exception**, not a relaxation of that rule: the rule exists to protect deployed consumers from a breaking change, and there are none — nothing is released, and clew is its own only reader.
+The rule stands unchanged and binds again from the first release; moving an attribute after that is a migration, not an edit.
