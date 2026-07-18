@@ -5,7 +5,7 @@ import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import { readConfiguredPrefixes, readLayout } from "../config/config.js";
 import { withState } from "./state.js";
 
-export type InitOptions = {
+export type ReconcileOptions = {
   /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
   /** Path to the state file. Defaults to the StateStore default. */
@@ -19,10 +19,10 @@ export type RaisedMark = {
   to: number;
 };
 
-export type InitResult = {
+export type ReconcileResult = {
   /** The high-water mark recorded for each prefix after reconciliation. */
   marks: Record<string, number>;
-  /** The marks this run raised; empty when an unchanged project is re-initialized. */
+  /** The marks this run raised; empty when the state already covers every id on disk. */
   raised: RaisedMark[];
 };
 
@@ -37,27 +37,29 @@ const IGNORED_DIRECTORIES = new Set([".git", ".clew", "node_modules", "dist"]);
 const BOUND_ID_IN_FILENAME = /^([A-Z]+)-(\d+)(?:[-.]|$)/;
 
 /**
- * Initializes the StateStore from existing artifacts: scans the configured
- * layout directories and reconciles the highest number per configured prefix
- * into the state's high-water marks. Only configured prefixes are counted, so
- * non-lens files such as ADRs are ignored.
+ * Reconciles the StateStore with existing artifacts: scans the configured
+ * layout directories and raises the highest number per configured prefix into
+ * the state's high-water marks, never lowering one. Only configured prefixes
+ * are counted, so non-lens files such as ADRs are ignored.
  */
-export async function init(options: InitOptions = {}): Promise<InitResult> {
+export async function reconcile(
+  options: ReconcileOptions = {},
+): Promise<ReconcileResult> {
   const layout = await readLayout(options.configFile);
   const prefixes = await readConfiguredPrefixes(options.configFile);
   const dirs = [layout.stories.dir, layout.specs.dir];
   const discovered = await discoverHighWaterMarks(dirs, prefixes);
-  return withState((state) => reconcile(state.sequences, discovered), {
+  return withState((state) => reconcileMarks(state.sequences, discovered), {
     file: options.stateFile,
   });
 }
 
-const reconcile = realizes(
+const reconcileMarks = realizes(
   ConTraceables.CON_009_RECONCILE_NEVER_LOWERS,
   (
     sequences: Record<string, number>,
     discovered: Map<string, number>,
-  ): InitResult => {
+  ): ReconcileResult => {
     const raised: RaisedMark[] = [];
     for (const [prefix, discoveredMax] of discovered) {
       const existing = sequences[prefix] ?? 0;

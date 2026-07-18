@@ -35,5 +35,10 @@ The command is idempotent: running it again on an unchanged project leaves the s
 **Realizes**
 
 - [SW-006 — Derive per-prefix high-water marks from existing artifacts](../specs/SW-006-derive-high-water-marks.md)
-- [SW-007 — The tool exposes an `init` command that delegates to core](../specs/SW-007-init-command.md)
+- [SW-007 — The tool exposes a `reconcile` command that delegates to core](../specs/SW-007-reconcile-command.md)
 - [CON-009 — Reconciliation never lowers a high-water mark](../specs/CON-009-reconcile-never-lowers.md)
+
+## Changes
+
+- **2026-07-17** — Re-pointed the SW-007 link to its renamed file and title: the command was renamed `init` → `reconcile` (SW-007), moving the slug to `SW-007-reconcile-command`.
+A mechanical rename of a referenced name; this story's own meaning is unchanged.

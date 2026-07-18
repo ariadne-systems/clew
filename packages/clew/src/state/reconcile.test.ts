@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ConTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { init, mint } from "../index.js";
+import { mint, reconcile } from "../index.js";
 
 type Fixture = {
   derivedDir: string;
@@ -13,14 +13,14 @@ type Fixture = {
 
 // Lays out an artifact tree under <dir>/docs/spec (stories under stories/, other
 // specs under specs/) and writes a config whose `layout` points at those
-// directories, so `init` reads the locations from configuration.
+// directories, so `reconcile` reads the locations from configuration.
 // Optionally seeds the state so the never-lower and idempotency cases can start
 // from a mark.
 async function fixture(
   idFilenames: string[],
   seed?: Record<string, number>,
 ): Promise<Fixture> {
-  const dir = await mkdtemp(join(tmpdir(), "clew-init-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-reconcile-"));
   const storiesDir = join(dir, "docs", "spec", "stories");
   const derivedDir = join(dir, "docs", "spec", "specs");
   await mkdir(storiesDir, { recursive: true });
@@ -74,7 +74,7 @@ describe("deriving high-water marks", () => {
           "NF-002-g.md",
         ]);
 
-        const result = await init({ configFile, stateFile });
+        const result = await reconcile({ configFile, stateFile });
 
         expect(result.marks).toEqual({ STR: 7, SW: 5, CON: 8, ARCH: 2, NF: 2 });
       });
@@ -82,7 +82,7 @@ describe("deriving high-water marks", () => {
       test("a prefix with no artifacts contributes no mark", async () => {
         const { configFile, stateFile } = await fixture(["SW-002-a.md"]);
 
-        const result = await init({ configFile, stateFile });
+        const result = await reconcile({ configFile, stateFile });
 
         expect(result.marks).toEqual({ SW: 2 });
         expect(result.marks.CON).toBeUndefined();
@@ -94,7 +94,7 @@ describe("deriving high-water marks", () => {
           "SW-TMP-abc123.md",
         ]);
 
-        const result = await init({ configFile, stateFile });
+        const result = await reconcile({ configFile, stateFile });
 
         expect(result.marks.SW).toBe(5);
       });
@@ -107,7 +107,7 @@ describe("deriving high-water marks", () => {
         await writeFile(join(derivedDir, "ADR-0002-x.md"), "x", "utf8");
         await writeFile(join(derivedDir, "ZZZ-009-y.md"), "x", "utf8");
 
-        const result = await init({ configFile, stateFile });
+        const result = await reconcile({ configFile, stateFile });
 
         expect(result.marks).toEqual({ SW: 5 });
         expect(result.marks.ADR).toBeUndefined();
@@ -124,7 +124,7 @@ describe("reconciliation", () => {
         SW: 3,
       });
 
-      const result = await init({ configFile, stateFile });
+      const result = await reconcile({ configFile, stateFile });
 
       expect(result.marks.SW).toBe(5);
       expect(result.raised).toEqual([{ prefix: "SW", from: 3, to: 5 }]);
@@ -136,7 +136,7 @@ describe("reconciliation", () => {
         SW: 9,
       });
 
-      const result = await init({ configFile, stateFile });
+      const result = await reconcile({ configFile, stateFile });
 
       expect(result.marks.SW).toBe(9);
       expect(result.raised).toEqual([]);
@@ -149,8 +149,8 @@ describe("reconciliation", () => {
         "STR-007-b.md",
       ]);
 
-      await init({ configFile, stateFile });
-      const second = await init({ configFile, stateFile });
+      await reconcile({ configFile, stateFile });
+      const second = await reconcile({ configFile, stateFile });
 
       expect(second.raised).toEqual([]);
       expect(second.marks).toEqual({ SW: 5, STR: 7 });
@@ -158,11 +158,11 @@ describe("reconciliation", () => {
   });
 });
 
-describe("init then mint", () => {
+describe("reconcile then mint", () => {
   test("a subsequent mint continues after the discovered mark", async () => {
     const { configFile, stateFile } = await fixture(["SW-005-a.md"]);
 
-    await init({ configFile, stateFile });
+    await reconcile({ configFile, stateFile });
     const ids = await mint("SW", 1, { configFile, stateFile });
 
     expect(ids).toEqual(["SW-006"]);

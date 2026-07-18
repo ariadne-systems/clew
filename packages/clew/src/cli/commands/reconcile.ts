@@ -1,18 +1,18 @@
 import { realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Command } from "commander";
-import { init, requireConfig } from "../../index.js";
+import { reconcile, requireConfig } from "../../index.js";
 
-/** Registers the `clew init` command surface. */
-export const registerInit: (program: Command) => void = realizes(
-  SwTraceables.SW_007_INIT_COMMAND,
+/** Registers the `clew reconcile` command surface. */
+export const registerReconcile: (program: Command) => void = realizes(
+  SwTraceables.SW_007_RECONCILE_COMMAND,
   (program: Command): void => {
     program
-      .command("init")
-      .description("Initialize the StateStore from existing artifacts.")
+      .command("reconcile")
+      .description("Reconcile the id state with the ids already on disk.")
       .allowExcessArguments(false)
       .action(async () => {
         await requireConfig();
-        const { raised } = await init();
+        const { raised } = await reconcile();
         if (raised.length === 0) {
           process.stdout.write(
             "State already covers all artifacts; nothing changed.\n",

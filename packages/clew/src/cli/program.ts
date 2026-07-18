@@ -3,9 +3,9 @@ import pkg from "../../package.json" with { type: "json" };
 import { registerCheck } from "./commands/check.js";
 import { registerConfig } from "./commands/config.js";
 import { registerCoverage } from "./commands/coverage.js";
-import { registerInit } from "./commands/init.js";
 import { registerMint } from "./commands/mint.js";
 import { registerPromote } from "./commands/promote.js";
+import { registerReconcile } from "./commands/reconcile.js";
 import { registerScan } from "./commands/scan.js";
 import { registerSetup } from "./commands/setup.js";
 import { registerSpec } from "./commands/spec.js";
@@ -26,7 +26,7 @@ export function buildProgram(): Command {
       program.outputHelp();
     });
 
-  registerInit(program);
+  registerReconcile(program);
   registerMint(program);
   registerSetup(program);
   registerSpec(program);

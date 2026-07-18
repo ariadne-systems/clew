@@ -14,9 +14,9 @@ afterEach(() => {
 });
 
 // Creates an isolated project with an artifact tree under docs/spec and switches
-// into it, so `init` discovers ids there and writes .clew/state.json locally.
+// into it, so `reconcile` discovers ids there and writes .clew/state.json locally.
 async function setupProjectDir(idFilenames: string[]): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "clew-cli-init-"));
+  const dir = await mkdtemp(join(tmpdir(), "clew-cli-reconcile-"));
   await writeFile(
     join(dir, ".clewrc.json"),
     JSON.stringify({ idGeneration: { mode: "sequential", padding: 3 } }),
@@ -46,13 +46,13 @@ async function runClew(...args: string[]): Promise<void> {
   await buildProgram().parseAsync(["node", "clew", ...args]);
 }
 
-describe("init output", () => {
-  verifies(SwTraceables.SW_007_INIT_COMMAND, () => {
+describe("reconcile output", () => {
+  verifies(SwTraceables.SW_007_RECONCILE_COMMAND, () => {
     test("records discovered marks and reports each raised prefix to stdout", async () => {
       const dir = await setupProjectDir(["SW-005-a.md", "CON-008-b.md"]);
       const stdout = captureStdout();
 
-      await runClew("init");
+      await runClew("reconcile");
 
       expect(stdout()).toContain("CON: 0 -> 8");
       expect(stdout()).toContain("SW: 0 -> 5");
@@ -65,12 +65,12 @@ describe("init output", () => {
     test("a second run changes nothing and reports it", async () => {
       const dir = await setupProjectDir(["SW-005-a.md"]);
       const first = captureStdout();
-      await runClew("init");
+      await runClew("reconcile");
       expect(first()).toContain("SW: 0 -> 5");
 
       vi.restoreAllMocks();
       const second = captureStdout();
-      await runClew("init");
+      await runClew("reconcile");
 
       expect(second()).toContain("nothing changed");
       const state = JSON.parse(
@@ -81,19 +81,21 @@ describe("init output", () => {
   });
 });
 
-describe("init invalid invocation", () => {
-  verifies(SwTraceables.SW_007_INIT_COMMAND, () => {
+describe("reconcile invalid invocation", () => {
+  verifies(SwTraceables.SW_007_RECONCILE_COMMAND, () => {
     test("an extra positional argument exits non-zero", () => {
       const program = buildProgram().exitOverride();
 
-      expect(() => program.parse(["node", "clew", "init", "extra"])).toThrow();
+      expect(() =>
+        program.parse(["node", "clew", "reconcile", "extra"]),
+      ).toThrow();
     });
 
     test("an unknown option exits non-zero", () => {
       const program = buildProgram().exitOverride();
 
       expect(() =>
-        program.parse(["node", "clew", "init", "--bogus"]),
+        program.parse(["node", "clew", "reconcile", "--bogus"]),
       ).toThrow();
     });
   });
@@ -101,11 +103,11 @@ describe("init invalid invocation", () => {
 
 describe("configuration required", () => {
   verifies(ConTraceables.CON_011_COMMAND_REQUIRES_CONFIG, () => {
-    test("init fails with code E_NO_CONFIG when no configuration is present", async () => {
-      const dir = await mkdtemp(join(tmpdir(), "clew-cli-init-noconfig-"));
+    test("reconcile fails with code E_NO_CONFIG when no configuration is present", async () => {
+      const dir = await mkdtemp(join(tmpdir(), "clew-cli-reconcile-noconfig-"));
       process.chdir(dir);
 
-      await expect(runClew("init")).rejects.toMatchObject({
+      await expect(runClew("reconcile")).rejects.toMatchObject({
         code: ErrorCode.NO_CONFIG,
       });
     });

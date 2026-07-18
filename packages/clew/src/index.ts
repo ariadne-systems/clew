@@ -107,8 +107,12 @@ export {
 export type { GeneratorReport, SpecOptions, SpecResult } from "./spec/spec.js";
 export { spec } from "./spec/spec.js";
 export { groupIntoSpecSets, lensMatchers } from "./spec/spec-set.js";
-export type { InitOptions, InitResult, RaisedMark } from "./state/init.js";
-export { init } from "./state/init.js";
+export type {
+  RaisedMark,
+  ReconcileOptions,
+  ReconcileResult,
+} from "./state/reconcile.js";
+export { reconcile } from "./state/reconcile.js";
 export type { WithStateOptions } from "./state/state.js";
 export { DEFAULT_STATE_FILE, withState } from "./state/state.js";
 export type {
