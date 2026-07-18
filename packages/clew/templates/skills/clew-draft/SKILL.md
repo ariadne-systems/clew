@@ -1,12 +1,21 @@
 ---
 name: clew-draft
-description: "Draft a story and the specs it needs in a clew project — choose the lenses, temp-mint ids, and write the drafts into the configured drafts location, ready for review and (on approval) promotion. Use when the user wants to draft or author a new story or spec, or prepare specs before approval — e.g. 'draft a story', 'write the specs for', 'author a spec'. Not promotion (see clew-promote) or code anchoring (see clew-anchor)."
+description: "Draft a story and the specs it needs in a clew project — choose the lenses, temp-mint ids, and write the drafts into the configured drafts location, ready for review and (on approval) promotion. Use when the user wants to draft or author a new story or spec, or prepare specs before approval — e.g. 'draft a story', 'write the specs for', 'author a spec'. The actual authoring follows the project's own installed drafting and brainstorming skills, while clew's spec conventions stay authoritative. Not promotion (see clew-promote) or code anchoring (see clew-anchor)."
 ---
 
 # clew-draft
 
 Draft a story and the specs it needs, using clew to allocate ids, and write them as reviewable drafts.
 This is the authoring workflow: it produces drafts with **temporary** ids and stops for review; it binds real ids and moves drafts into the spec tree only when the user approves promotion.
+
+## The authoring follows the project's own skills
+
+This skill owns the **clew frame** of drafting — temp-minting ids per lens, grounding the drafts in the corpus (`clew-context`), writing to the configured drafts location, and the spec conventions below (a decision per spec, the title/slug rule, the clarify gate).
+It does **not** own *how you author*.
+Where the project has installed drafting, spec-authoring, requirements, or brainstorming skills, follow them for the actual authoring — the ideation before a draft, the prose of a story, the shape of the acceptance criteria — just as the code an increment produces follows the project's own implementation skills.
+
+clew's conventions stay authoritative: an installed authoring skill informs *how well* you write a draft, not *what a draft is*.
+Where such a skill and these conventions disagree — on the lenses, the decision a spec must pin, the temporary ids, or the drafts location — these win.
 
 ## What a lens is
 
@@ -27,6 +36,7 @@ If the project has no configuration yet (`error[E_NO_CONFIG]`), stop and ask the
 - Do not commit. Leave commits to the user.
 - Do not invent a derivation method for a lens you have no guidance for — stop and ask (see Lens coverage).
 - Write only inside the configured drafts location; never silently overwrite an existing draft or modify an existing spec — if a target draft path already exists, stop and ask.
+- Do not let an installed authoring or brainstorming skill override clew's spec conventions — the lenses, the decision-per-spec rule, the temporary ids, and the drafts location hold regardless of authoring technique.
 
 ## Read the project's configuration first
 

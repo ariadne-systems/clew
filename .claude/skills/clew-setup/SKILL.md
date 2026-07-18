@@ -11,6 +11,8 @@ It works both ways: a **new** project (gather the stack and architecture by inte
 
 **Invariant:** every document this skill touches ends in one of three states — a resolved decision, an explicitly deferred decision that names its trigger (for example "authored as the code is built"), or an out-of-scope note. Never a TODO, a TBD, an unanswered question, an empty heading, a placeholder ("describe your…"), or a pointer to a document that does not exist.
 
+**Authoring follows the project's own skills.** When the project has installed writing, documentation, or requirements skills, follow them for the *prose* of the `004` and the architecture overview — how those documents read. This skill owns what they must *contain* — the invariant above, the stack-only `004`, the preserve rule (step 4), the enforceable-rules plan — not the writing craft; where a writing skill and these rules disagree, these win.
+
 ## When to use
 
 - After the `clew setup` command has run and the user wants to establish the stack and architecture, or adopt clew into an existing project.
