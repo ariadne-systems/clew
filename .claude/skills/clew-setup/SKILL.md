@@ -1,13 +1,13 @@
 ---
 name: clew-setup
-description: "Set up a project after the `clew setup` command has scaffolded it — establish the technology contract (004) and the architecture overview (docs/spec/architecture.md), and draft a workspace-setup story. Works greenfield (interview) or on an existing project (derive the stack and architecture from its build files, code, and docs, on confirmation), reading any documentation the user placed in a `setup/` directory. Use when the user wants to establish the stack and architecture or 'set up the project'. Not the `clew setup` command itself (that scaffolds config and method), and not spec authoring (clew-draft)."
+description: "Set up a project after the `clew setup` command has scaffolded it — establish the technology contract (004) and the architecture overview (docs/spec/architecture.md), and, for a new project, draft a workspace-setup story to stand the workspace up. Works greenfield (interview) or on an existing project (derive the stack and architecture from its build files, code, and docs, on confirmation); for an existing project the agent judges whether a workspace-setup story is needed at all — only when the workspace does not yet match the derived contract and architecture. Reads any documentation the user placed in a `setup/` directory. Use when the user wants to establish the stack and architecture or 'set up the project'. Not the `clew setup` command itself (that scaffolds config and method), and not spec authoring (clew-draft)."
 ---
 
 # clew-setup
 
-The `clew setup` command scaffolds a project's configuration and method (and emits this skill). This skill is the step **after** that: it establishes the project's **technology contract** and its **architecture overview**, and prepares its **workspace setup** — filling `004-technology-contract.md` and `docs/spec/architecture.md` and drafting a workspace-setup story.
+The `clew setup` command scaffolds a project's configuration and method (and emits this skill). This skill is the step **after** that: it establishes the project's **technology contract** and its **architecture overview** — filling `004-technology-contract.md` and `docs/spec/architecture.md` — and, when a workspace still needs building or bringing in line, drafts a **workspace-setup story**.
 
-It works both ways: a **new** project (gather the stack and architecture by interview) and an **existing** one you are adopting clew into (derive them from the project's own build files, code, and documents, on confirmation). It fills documents and drafts a story; it does not build the workspace — that is the story's job, once the user promotes it.
+It works both ways: a **new** project (gather the stack and architecture by interview) and an **existing** one you are adopting clew into (derive them from the project's own build files, code, and documents, on confirmation). A new project has no workspace yet, so it always gets a setup story; an existing one already has a workspace, so the agent judges whether a story is warranted at all (step 5). Either way the skill only fills documents and drafts — it never builds the workspace; that is the story's job, once the user promotes it.
 
 **Invariant:** every document this skill touches ends in one of three states — a resolved decision, an explicitly deferred decision that names its trigger (for example "authored as the code is built"), or an out-of-scope note. Never a TODO, a TBD, an unanswered question, an empty heading, a placeholder ("describe your…"), or a pointer to a document that does not exist.
 
@@ -32,7 +32,7 @@ Existing documentation belongs in a `setup/` directory at the project root (the 
 
 ## Procedure
 
-The order matters — later artifacts depend on earlier ones: preflight → read the evidence → `004` → architecture overview → the setup story (which reads both, so it comes last).
+The order matters — later artifacts depend on earlier ones: preflight → read the evidence → `004` → architecture overview → the setup story where one is needed (it reads both, so it comes last).
 
 ### 1. Preflight — frame and scope
 
@@ -68,29 +68,34 @@ Keep it lean and to the stack; see the worked example.
 
 The overview is `docs/spec/architecture.md`. Fill it, replacing the seeded skeleton — no "describe your architecture" survives — and end it with the plan: the enforceable rules become **ARCH and CON specs authored as the code that they constrain is built**, checked at that point.
 
-- **New** — write it from the interview: the architectural style, the modules and their responsibilities, the dependency directions. (If `setup/` already describes it, that is the source.)
-- **Existing** — after analysis consent, derive it and present the proposed overview: the style and modules from the code structure; the dependency directions from the actual dependencies and architecture tests; reconciled with the ADRs, and distinguishing as-is from target. **Check its consistency** — internally coherent, covering style, modules, and dependency directions, and (when the `004` is established) agreeing with the stack; if the `004` was left a stub, check coherence only. Resolve conflicts with the user, then write it only on write approval. If an architecture document already exists elsewhere, consolidate its relevant content into `docs/spec/architecture.md`; do not delete or modify the original unless the user separately approves that.
+**Preserve what the user provides.** When the user supplies architecture documentation — in `setup/` or pointed to — that document is the source: carry it over **faithfully, diagrams and all**, rather than distilling it. Add what it lacks (the dependency directions, the enforceable-rules plan) and reconcile it with the code and ADRs, but do not strip its content to make a leaner page. Trim only what genuinely does not belong in an architecture overview (for example build-time infrastructure that is the `004`'s or a later story's concern), and when you do, **surface each cut for approval** — never reduce the user's material silently. The lean shape in the worked example below is how to write an overview **from scratch**, not a target to shrink a richer source down to.
 
-### 5. Draft the workspace-setup story
+- **New** — write it from the interview: the architectural style, the modules and their responsibilities, the dependency directions. (If `setup/` already describes it, that is the source, carried over per the rule above.)
+- **Existing** — after analysis consent, derive it and present the proposed overview: the style and modules from the code structure; the dependency directions from the actual dependencies and architecture tests; reconciled with the ADRs, and distinguishing as-is from target. **Check its consistency** — internally coherent, covering style, modules, and dependency directions, and (when the `004` is established) agreeing with the stack; if the `004` was left a stub, check coherence only. Resolve conflicts with the user, then write it only on write approval. If an architecture document already exists elsewhere, consolidate its content into `docs/spec/architecture.md` — keeping it whole, per the preserve rule above — and do not delete or modify the original unless the user separately approves that.
 
-Only when the `004` and the architecture overview are both established (if either was left out, no story is drafted — it needs both). Resolve the drafts location and the story prefix from `.clewrc.json` (its `layout`), temp-mint an id with `clew mint --tmp <prefix>` — if it fails or prints no valid temporary id, stop, and do not create the story with a guessed or hand-written id — and write a **draft** "set up the workspace" story there, following the project's story schema, whose steps instruct the agent to:
+### 5. Draft the workspace-setup story — if one is needed
+
+A story is drafted only when the `004` and the architecture overview are both established (if either was left out, none is — it needs both), and then whether to draft one depends on the project:
+
+- **New project** — it has no workspace yet, so one must be built. Draft the story.
+- **Existing project** — it already has a workspace, so **judge whether a story is warranted**. Compare the workspace you inspected in step 2 against the `004` and architecture you just established. If they already match — the stack, build, test, and lint are in place and consistent with the frame — draft **no** story, and say so: the documented frame is the deliverable, and the project goes on to author specs for the code that exists. If they do not — a tool the contract names is missing, the structure diverges from the architecture, an enforceable rule is unenforced — draft a story that closes that gap, and state which gap it closes. Never draft an empty story just to complete a step.
+
+When you do draft one, resolve the drafts location and the story prefix from `.clewrc.json` (its `layout`), temp-mint an id with `clew mint --tmp <prefix>` — if it fails or prints no valid temporary id, stop, and do not create the story with a guessed or hand-written id — and write a **draft** "set up the workspace" story there, following the project's story schema, whose steps instruct the agent to:
 
 1. read the project's `004` and its architecture overview;
 2. check the supported versions and setup guidance of the tools they name (docs, not memory);
 3. ask the user where anything is still unclear;
-4. set up the workspace (dependencies, build, test, lint) following the architecture.
-
-For an existing project, the story reconciles the workspace with the contract and architecture — bringing what is there in line.
+4. set up the workspace (dependencies, build, test, lint) following the architecture — for an existing project, reconciling what is there rather than building from scratch.
 
 ### 6. Validate, then stop for review
 
 Before presenting, check mechanically:
 
 - every intended document exists, and none contains a known seed placeholder — `TODO`, `TBD`, "describe your…", or any unchanged instructional text from the scaffolded stubs — or an empty section;
-- changes are limited to the `004`, `docs/spec/architecture.md`, the draft story, and the temporary-id bookkeeping of `clew mint --tmp` — nothing else was written, and no install, build, commit, or promotion happened;
+- changes are limited to the `004`, `docs/spec/architecture.md`, the draft story if you drafted one, and the temporary-id bookkeeping of `clew mint --tmp` — nothing else was written, and no install, build, commit, or promotion happened;
 - for an existing project, each written document had write approval.
 
-Then present a concise summary — and a diff of what changed — with the choices behind it. The user reviews, promotes the story (`clew-promote`), and only then has the agent execute it.
+Then present a concise summary — and a diff of what changed — with the choices behind it, including whether a setup story was drafted and why. The user reviews; where a story was drafted, they promote it (`clew-promote`) and only then have the agent execute it; where none was needed, the documented frame stands and the ordinary draft-and-anchor loop begins on the code that exists.
 
 ## Worked examples
 
@@ -144,5 +149,5 @@ is built — checked at that point.
 ## Done when
 
 - Per the user's choices: the `004` is filled or deliberately left a stub, and the architecture overview is filled — each in a resolved or explicitly-deferred state, never an open question. (If the user declines the architecture, the run ends here without a setup story — the story needs both documents.)
-- When the `004` was established, a draft workspace-setup story exists with a temporary id.
+- A workspace-setup story is drafted only where one is needed: for a new project (with the `004` established), or for an existing project where the agent judged the workspace does not yet match the derived frame. Where the workspace already matches — or either document was left out — no story is drafted, and that decision is stated. Any story that exists carries a temporary id.
 - The validation in step 6 passed, the user was shown a summary and diff, and nothing was promoted, executed, or committed.
