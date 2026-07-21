@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "description": "clew — compile-checked, id-anchored traceability for specs and code: the CLI and its engine.",
   "type": "module",
-  "license": "SEE LICENSE IN LICENSE.md",
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "Apache-2.0",
   "author": "Ariadne Systems GmbH",
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/ariadne-forge/ariadne-thread-cli.git",
+    "url": "git+https://github.com/ariadne-systems/clew.git",
     "directory": "packages/clew"
   },
   "sideEffects": false,
@@ -27,7 +30,7 @@
     "templates"
   ],
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "scripts": {
     "build": "tsdown"
