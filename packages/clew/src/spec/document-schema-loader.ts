@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { isAbsolute, relative, resolve } from "node:path";
 import { parse } from "yaml";
 import { readSchemas } from "../config/config.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import type { DocumentSchema, DocumentType } from "./document-schema.js";
 import { schemaFromParsed } from "./document-schema.js";
 
@@ -23,9 +24,31 @@ export async function loadSchemas(
   for (const type of DOCUMENT_TYPES) {
     const file = config[type];
     if (file !== undefined) {
-      const text = await readFile(join(projectRoot, file), "utf8");
+      const text = await readFile(resolveWithinRoot(projectRoot, file), "utf8");
       schemas.set(type, schemaFromParsed(parse(text), file));
     }
   }
   return schemas;
+}
+
+/**
+ * Resolves a configured schema path under the project root, rejecting one that
+ * escapes it — a repo's `.clewrc.json` is untrusted input, so a `../`-traversal
+ * or absolute path must not read a file outside the project.
+ */
+function resolveWithinRoot(projectRoot: string, file: string): string {
+  const root = resolve(projectRoot);
+  const resolved = resolve(root, file);
+  const rel = relative(root, resolved);
+  if (rel === "" || rel.startsWith("..") || isAbsolute(rel)) {
+    throw new ClewError(
+      ErrorCode.INVALID_SCHEMA,
+      `Schema file path "${file}" escapes the project root.`,
+      {
+        location: file,
+        help: "point the schema at a file inside the project",
+      },
+    );
+  }
+  return resolved;
 }
