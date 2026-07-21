@@ -39,8 +39,8 @@ export type ExclusionInput = {
 };
 
 /**
- * Compiles the exclusion rules from the configured patterns and the generator
- * output directories. Every pattern is compiled up front; an
+ * Compiles the exclusion rules from the configured patterns and the built-in
+ * defaults. Every pattern is compiled up front; an
  * uncompilable `exclude` or `unexclude` glob fails fast with a stable error
  * naming it.
  */

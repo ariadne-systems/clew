@@ -1,4 +1,4 @@
-# @ariadne-thread/core
+# @ariadne-thread/clew
 
 ## 0.1.0
 
