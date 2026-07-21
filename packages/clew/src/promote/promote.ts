@@ -413,9 +413,10 @@ const applyAtomically: (
 
 /**
  * Replaces every temporary id with its bound id in `text`. Each replacement is
- * bounded so a shorter id (`SW-TMP-1`) never matches inside a longer one
- * (`SW-TMP-10`): a temporary id's trailing run is alphanumeric, so it ends only
- * where no further id character follows.
+ * bounded on both edges so a temporary id matches only as a whole token: the
+ * trailing guard stops a shorter id (`SW-TMP-1`) matching inside a longer one
+ * (`SW-TMP-10`), and the leading guard stops one prefix's id matching inside a
+ * longer prefix's (`SYS-TMP-1` inside `SUBSYS-TMP-1`).
  */
 function applySubstitutions(
   text: string,
@@ -424,7 +425,10 @@ function applySubstitutions(
   let updated = text;
   for (const [temporaryId, boundId] of substitutions) {
     updated = updated.replace(
-      new RegExp(`${escapeRegExp(temporaryId)}(?![0-9A-Za-z])`, "g"),
+      new RegExp(
+        `(?<![0-9A-Za-z])${escapeRegExp(temporaryId)}(?![0-9A-Za-z])`,
+        "g",
+      ),
       boundId,
     );
   }

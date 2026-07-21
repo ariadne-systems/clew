@@ -197,6 +197,47 @@ describe("finalizing drafts", () => {
         );
       });
 
+      test("a temporary id whose prefix is a suffix of another prefix is not matched inside it", async () => {
+        // Two lenses in a suffix relation: `SYS` is the tail of `SUBSYS`.
+        const dir = await mkdtemp(join(tmpdir(), "clew-promote-"));
+        const storiesDir = join(dir, "docs", "spec", "stories");
+        const derivedDir = join(dir, "docs", "spec", "specs");
+        const draftsDir = join(dir, "docs", "spec", "drafts");
+        await mkdir(join(draftsDir, "specs"), { recursive: true });
+        await mkdir(storiesDir, { recursive: true });
+        await mkdir(derivedDir, { recursive: true });
+        const configFile = join(dir, ".clewrc.json");
+        await writeFile(
+          configFile,
+          JSON.stringify({
+            lenses: [
+              { id: "SYS", description: "A system spec." },
+              { id: "SUBSYS", description: "A subsystem spec." },
+            ],
+            layout: {
+              stories: { dir: storiesDir, prefix: "STR" },
+              specs: { dir: derivedDir },
+              drafts: { dir: draftsDir },
+            },
+          }),
+          "utf8",
+        );
+        const stateFile = join(dir, ".clew", "state.json");
+        await writeFile(
+          join(draftsDir, "specs", "SYS-TMP-1-a.md"),
+          "Spec SYS-TMP-1\n",
+          "utf8",
+        );
+        // A still-unpromoted draft whose id embeds the promoted id's token.
+        const ref = join(draftsDir, "specs", "SUBSYS-TMP-1-b.md");
+        await writeFile(ref, "Spec SUBSYS-TMP-1\n", "utf8");
+
+        await promote({ configFile, stateFile, roots: ["SYS-TMP-1"] });
+
+        // Substituting SYS-TMP-1 must not rewrite the `SYS-TMP-1` run inside SUBSYS-TMP-1.
+        expect(await readFile(ref, "utf8")).toBe("Spec SUBSYS-TMP-1\n");
+      });
+
       test("moves a promoted draft whatever its filename extension", async () => {
         const p = await project();
         const from = await writeDraft(
