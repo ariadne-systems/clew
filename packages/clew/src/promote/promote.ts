@@ -25,7 +25,7 @@ const ALL_DRAFTS = "all";
 export type PromoteOptions = {
   /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
-  /** Path to the state file. Defaults to the StateStore default. */
+  /** Path to the state file. Defaults to the configured `layout.state.file`. */
   stateFile?: string;
   /**
    * The drafts to root the promotion at — each a temporary id, filename, or path —
@@ -111,7 +111,7 @@ export const promote: (options: PromoteOptions) => Promise<PromoteResult> =
       for (const { draft, targetDir } of targets) {
         const ids = await mint(draft.prefix, 1, {
           configFile: options.configFile,
-          stateFile: options.stateFile,
+          stateFile: options.stateFile ?? layout.state.file,
         });
         const boundId = ids[0];
         if (boundId === undefined) {

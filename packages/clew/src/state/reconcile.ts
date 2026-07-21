@@ -8,7 +8,7 @@ import { withState } from "./state.js";
 export type ReconcileOptions = {
   /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
-  /** Path to the state file. Defaults to the StateStore default. */
+  /** Path to the state file. Defaults to the configured `layout.state.file`. */
   stateFile?: string;
 };
 
@@ -50,7 +50,7 @@ export async function reconcile(
   const dirs = [layout.stories.dir, layout.specs.dir];
   const discovered = await discoverHighWaterMarks(dirs, prefixes);
   return withState((state) => reconcileMarks(state.sequences, discovered), {
-    file: options.stateFile,
+    file: options.stateFile ?? layout.state.file,
   });
 }
 

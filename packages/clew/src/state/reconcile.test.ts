@@ -168,3 +168,32 @@ describe("reconcile then mint", () => {
     expect(ids).toEqual(["SW-006"]);
   });
 });
+
+describe("the configured state-file location", () => {
+  test("reconcile writes to the configured layout.state.file when no stateFile is given", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "clew-reconcile-"));
+    const storiesDir = join(dir, "docs", "spec", "stories");
+    const derivedDir = join(dir, "docs", "spec", "specs");
+    await mkdir(storiesDir, { recursive: true });
+    await mkdir(derivedDir, { recursive: true });
+    await writeFile(join(derivedDir, "SW-005-a.md"), "x", "utf8");
+    const stateFile = join(dir, "custom", "ids.json");
+    const configFile = join(dir, ".clewrc.json");
+    await writeFile(
+      configFile,
+      JSON.stringify({
+        layout: {
+          stories: { dir: storiesDir, prefix: "STR" },
+          specs: { dir: derivedDir },
+          state: { file: stateFile },
+        },
+      }),
+      "utf8",
+    );
+
+    const result = await reconcile({ configFile });
+
+    expect(result.marks.SW).toBe(5);
+    expect(await readMarks(stateFile)).toEqual({ SW: 5 });
+  });
+});

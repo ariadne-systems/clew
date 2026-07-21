@@ -26,7 +26,7 @@ import {
 export type MintOptions = {
   /** Path to `.clewrc.json`. Defaults to the configuration default. */
   configFile?: string;
-  /** Path to the state file. Defaults to the StateStore default. */
+  /** Path to the state file. Defaults to the configured `layout.state.file`. */
   stateFile?: string;
 };
 
@@ -49,11 +49,17 @@ export async function mint(
   count: number,
   options: MintOptions = {},
 ): Promise<string[]> {
-  const config = await readIdGenerationConfig(options.configFile);
-  const prefixes = await readConfiguredPrefixes(options.configFile);
+  const [config, prefixes, layout] = await Promise.all([
+    readIdGenerationConfig(options.configFile),
+    readConfiguredPrefixes(options.configFile),
+    readLayout(options.configFile),
+  ]);
   assertTypeNotReserved(type);
   assertPrefixConfigured(type, prefixes);
-  const strategy = createIdStrategy(config, options.stateFile);
+  const strategy = createIdStrategy(
+    config,
+    options.stateFile ?? layout.state.file,
+  );
   return strategy.mint(type, count);
 }
 

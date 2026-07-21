@@ -434,3 +434,21 @@ describe("reserved temporary marker", () => {
     });
   });
 });
+
+describe("the configured state-file location", () => {
+  test("mint writes state to the configured layout.state.file when no stateFile is given", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "clew-mint-"));
+    const stateFile = join(dir, "custom", "ids.json");
+    const configFile = join(dir, ".clewrc.json");
+    await writeFile(
+      configFile,
+      JSON.stringify({ layout: { state: { file: stateFile } } }),
+      "utf8",
+    );
+
+    const ids = await mint("SW", 2, { configFile });
+
+    expect(ids).toEqual(["SW-001", "SW-002"]);
+    expect(await readHighWaterMark(stateFile, "SW")).toBe(2);
+  });
+});
