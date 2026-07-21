@@ -208,6 +208,21 @@ describe("reconcileWaivers", () => {
         byPattern.specs.find((spec) => spec.id === "STK-005")?.waiver,
       ).toBeUndefined();
     });
+
+    test("a verify-only spec is never waived, and its waiver is reported stale", () => {
+      const verifyOnly: SpecCoverage[] = [
+        { id: "SW-9", lens: "SW", status: "verified" },
+      ];
+
+      const result = reconcileWaivers(verifyOnly, [
+        { id: "SW-9", reason: "z" },
+      ]);
+
+      expect(
+        result.specs.find((spec) => spec.id === "SW-9")?.waiver,
+      ).toBeUndefined();
+      expect(result.staleWaivers).toEqual([{ id: "SW-9", reason: "z" }]);
+    });
   });
 });
 
