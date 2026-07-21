@@ -1,6 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { ConTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 import { loadAdrTemplate, loadMethodMaterials } from "./materials.js";
 
@@ -39,16 +40,18 @@ describe("loading the method materials", () => {
     expect(await loadAdrTemplate()).toContain("ADR-NNNN");
   });
 
-  test("strips clew's copyright from every emitted method body", async () => {
-    const materials = await loadMethodMaterials();
-    const bodies = [
-      ...materials.baselines,
-      ...materials.skills,
-      ...materials.stubs,
-    ].map((file) => file.contents);
+  verifies(ConTraceables.CON_033_METHOD_SCAFFOLD_TOOL_OWNED, () => {
+    test("strips clew's copyright from every emitted method body", async () => {
+      const materials = await loadMethodMaterials();
+      const bodies = [
+        ...materials.baselines,
+        ...materials.skills,
+        ...materials.stubs,
+      ].map((file) => file.contents);
 
-    expect(bodies.some((body) => /copyright/i.test(body))).toBe(false);
-    expect(/copyright/i.test(await loadAdrTemplate())).toBe(false);
+      expect(bodies.some((body) => /copyright/i.test(body))).toBe(false);
+      expect(/copyright/i.test(await loadAdrTemplate())).toBe(false);
+    });
   });
 });
 

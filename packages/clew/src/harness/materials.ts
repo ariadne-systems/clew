@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { ConTraceables, realizes } from "@ariadne-thread/trace";
 import type { MethodFile, MethodMaterials } from "./harness.js";
 
 /** The nearest ancestor of this module holding a `package.json` — the clew package root, in dev and when installed. */
@@ -34,9 +35,11 @@ async function readMethodBody(path: string): Promise<string> {
 }
 
 /** Removes a leading HTML-comment copyright line and any blank line following it. */
-function withoutLeadingCopyright(contents: string): string {
-  return contents.replace(/^<!--[^\n]*copyright[^\n]*-->\r?\n\r?\n?/i, "");
-}
+const withoutLeadingCopyright = realizes(
+  ConTraceables.CON_033_METHOD_SCAFFOLD_TOOL_OWNED,
+  (contents: string): string =>
+    contents.replace(/^<!--[^\n]*copyright[^\n]*-->\r?\n\r?\n?/i, ""),
+);
 
 /** Reads a flat directory of markdown files into method files, name-sorted. */
 async function readFlat(dir: string): Promise<MethodFile[]> {
