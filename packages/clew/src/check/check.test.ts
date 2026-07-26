@@ -259,6 +259,28 @@ describe("the check suite", () => {
           result.findings.filter((f) => f.check === "reference-rot"),
         ).toEqual([]);
       });
+
+      test("a placeholder link inside a scaffolded example template is not reported", async () => {
+        const p = await project();
+        const schemas = join(p.root, "docs", "spec", "schemas");
+        await mkdir(schemas, { recursive: true });
+        // The scaffolded example ships the post-promotion form, whose target does
+        // not exist in a fresh project by design.
+        await writeFile(
+          join(schemas, "story.example.md"),
+          "**Realizes**\n\n- [SW-001 — x](../specs/SW-001-the-behaviour.md)\n",
+          "utf8",
+        );
+
+        const result = await check({
+          configFile: p.configFile,
+          resolveGenerator,
+        });
+
+        expect(
+          result.findings.filter((f) => f.check === "reference-rot"),
+        ).toEqual([]);
+      });
     },
   );
 });

@@ -450,7 +450,7 @@ function specFiles(
   return specs;
 }
 
-/** Every non-excluded markdown document in the project, project-root-relative, excepting the drafts location. */
+/** Every non-excluded markdown document in the project, project-root-relative, excepting the drafts location and the scaffolded example templates. */
 async function documentMarkdown(
   context: Pick<CheckContext, "projectRoot" | "layout" | "exclusion">,
 ): Promise<string[]> {
@@ -461,7 +461,12 @@ async function documentMarkdown(
     descend: (dir) =>
       !withinDrafts(dir) && shouldDescend(dir, context.exclusion),
     accept: (path) =>
-      path.endsWith(".md") && !fileExcluded(path, context.exclusion),
+      path.endsWith(".md") &&
+      // The scaffolded example templates (`*.example.md`) ship the post-promotion
+      // link form a reader copies; their targets do not exist in a fresh project
+      // by design, so — like a draft's references — they are not rot.
+      !path.endsWith(".example.md") &&
+      !fileExcluded(path, context.exclusion),
   });
 }
 

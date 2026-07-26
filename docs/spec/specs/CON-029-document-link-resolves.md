@@ -9,6 +9,7 @@ Every document link resolves to an existing target
 Every link, and every `@`-include, that any document in the project makes resolves to a target that exists — whether the document is a spec, a story, an architecture decision record, a governance file, a skill, or any other committed markdown.
 The reference-rot member walks every non-excluded document, not only the spec tree, and reports a link or include that resolves to nothing, and a `#fragment` that names no heading in its target, with its location.
 The **drafts** location is excepted: a draft references unpromoted temporary specs by design, so checking it would read every intentional temporary reference as dangling.
+The scaffolded **example templates** (`*.example.md`, SW-040) are excepted for the same reason: they ship the post-promotion link form a reader copies, whose targets do not exist in a fresh project by design.
 The check is **type-agnostic**: it verifies the reference lands on a real node, not what kind of edge it is — the relation vocabulary (which relation types a project uses, and what each may point at) is project-defined and not this check's concern.
 
 **Rationale**
@@ -18,7 +19,7 @@ Keeping it type-blind keeps it correct for any project: clew reads the *links* t
 
 **Verification Description**
 A link — in a spec, a story, an ADR, a governance file, or a skill — to an existing target is accepted; a link or `@`-include to a missing file, or a `#fragment` naming no heading in its target, is reported with its location.
-A link inside the excepted drafts location, or to an excluded path, is not reported.
+A link inside the excepted drafts location, inside a scaffolded example template (`*.example.md`), or to an excluded path, is not reported.
 
 ## Relations
 
@@ -35,3 +36,5 @@ A link inside the excepted drafts location, or to an excluded path, is not repor
 
 - **2026-07-10** — Broadened from "every relation link, under `## Relations`, resolves to a spec" to "every link and `@`-include in every non-excluded document resolves to its target," and renamed the slug `relation-link-resolves` → `document-link-resolves` to match (STR-030).
 The invariant — a reference lands on a real node — is unchanged; its corpus widens from the spec tree to the whole document set, drafts excepted, so `clew check` subsumes the repo-local reference lint and ARCH-005 is met without one.
+- **2026-07-23** — Excepted the scaffolded example templates (`*.example.md`) alongside drafts.
+Setup now scaffolds a copyable example story and spec beside the schemas (SW-040); those carry the post-promotion link form a reader copies, whose targets are absent in a fresh project by design, so reference-rot read them as dangling — the same false positive the drafts exception exists for.
