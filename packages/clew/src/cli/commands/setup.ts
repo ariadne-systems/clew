@@ -48,7 +48,7 @@ export const registerSetup: (program: Command) => void = realizes(
             : `  - generators    ${result.generator}`;
         const scaffoldNote =
           result.schemas.length > 0 || result.gitignoreUpdated
-            ? "Scaffolded the default document schemas and ignored the tool's regenerated output.\n\n"
+            ? "Scaffolded the default document schemas with a copyable example of each, and added .gitignore rules for clew's regenerated output (the scan index and coverage report) while keeping .clew/state.json tracked.\n\n"
             : "";
         process.stdout.write(
           `Created ${result.configFile} with a runnable configuration.
@@ -65,9 +65,8 @@ ${generatorLine}
 
 Next steps:
   1. Review the lenses in ${result.configFile} — they are your spec kinds, fixed once ids exist under them.
-  2. Put any existing documentation (architecture, tech notes, ADRs, diagrams) into a setup/ directory. Then run the clew-setup skill: it reads setup/, establishes your stack (004) and architecture with you, and drafts your first setup story.
-  3. Review and promote that story (the clew-promote skill), then let your agent set up the workspace and run \`clew check\`.
-  4. Commit ${result.configFile} and .clew/state.json so the team shares them.
+  2. Read the governance your ${result.agent} method was given — the charter, and the architecture, coding, testing, and spec conventions — and adjust it to your project. It is the contract your agent works under, so shape it before it starts.
+  3. Put any existing documentation (architecture, tech notes, ADRs, diagrams) into a setup/ directory, then run the clew-setup skill: it reads setup/, establishes your stack (004) and architecture with you and — where the workspace still needs standing up — drafts a setup story. The skill tells you what to do next from there.
 
 The skills allocate ids as they draft and promote — you never mint by hand.
 `,
