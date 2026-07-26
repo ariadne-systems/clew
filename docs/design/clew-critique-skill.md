@@ -1,8 +1,8 @@
 # clew-critique — design draft
 
-> Status: **design for review**, not an installed skill. On approval it becomes
-> `.claude/skills/clew-critique/SKILL.md` (+ the shipped `packages/clew/templates/skills/` copy).
-> Addresses robustness backlog **#2** (requirement-sufficiency critic).
+> Status: **built** (2026-07-26). The installed skill is `.claude/skills/clew-critique/SKILL.md`
+> (+ the shipped `packages/clew/templates/skills/clew-critique/` copy); this document is the
+> design rationale behind it. Addresses robustness backlog **#2** (requirement-sufficiency critic).
 
 ## One-line
 
