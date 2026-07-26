@@ -31,3 +31,9 @@ The schema is checked before any document is validated against it.
 
 - Enforces [ARCH-007 — A document schema pins only what clew reads; the rest is project-defined](ARCH-007-schema-core-is-what-clew-reads.md) — this is where "a project cannot relax the pinned core" is actually checked, at the schema.
 - Mirrors [CON-031 — A document that violates its schema is rejected, or warned per config](CON-031-reject-schema-violation.md) at the meta level — that rejects a document against its schema; this rejects a schema against clew's contract.
+- Content, not provenance: [CON-040 — A configured schema path may not escape the project root](CON-040-schema-path-within-root.md) bounds *where* a schema loads from; this validates *what* it contains — together, a schema is safe to use.
+
+## Changes
+
+- **2026-07-26** — Added the relation to CON-040 (schema-path containment).
+This does not change what this spec requires — a `clew-critique` pass noted that "before it is used" here covers the schema's *shape* but not its *path*, so the provenance half is named explicitly as CON-040's concern rather than left implicit.

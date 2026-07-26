@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve } from "node:path";
+import { ConTraceables, realizes } from "@ariadne-thread/trace";
 import { parse } from "yaml";
 import { readSchemas } from "../config/config.js";
 import { ClewError, ErrorCode } from "../errors.js";
@@ -9,11 +10,32 @@ import { schemaFromParsed } from "./document-schema.js";
 /** The document types that may carry a schema, in a stable order. */
 const DOCUMENT_TYPES: readonly DocumentType[] = ["story", "spec"];
 
+const resolveWithinRoot: (projectRoot: string, file: string) => string =
+  realizes(
+    ConTraceables.CON_040_SCHEMA_PATH_WITHIN_ROOT,
+    (projectRoot: string, file: string): string => {
+      const root = resolve(projectRoot);
+      const resolved = resolve(root, file);
+      const rel = relative(root, resolved);
+      if (rel === "" || rel.startsWith("..") || isAbsolute(rel)) {
+        throw new ClewError(
+          ErrorCode.INVALID_SCHEMA,
+          `Schema file path "${file}" escapes the project root.`,
+          {
+            location: file,
+            help: "point the schema at a file inside the project",
+          },
+        );
+      }
+      return resolved;
+    },
+  );
+
 /**
- * Loads and self-validates the configured per-document-type schemas, resolving each
- * schema file under the project root and parsing its YAML. A document
- * type with no configured schema is absent from the map. A malformed or overreaching
- * schema is rejected with its path, before any document is validated against it.
+ * Loads and self-validates the configured per-document-type schemas, parsing each
+ * schema file's YAML. A document type with no configured schema is absent from the
+ * map. A malformed or overreaching schema is rejected with its path, before any
+ * document is validated against it.
  */
 export async function loadSchemas(
   configFile: string | undefined,
@@ -29,26 +51,4 @@ export async function loadSchemas(
     }
   }
   return schemas;
-}
-
-/**
- * Resolves a configured schema path under the project root, rejecting one that
- * escapes it — a repo's `.clewrc.json` is untrusted input, so a `../`-traversal
- * or absolute path must not read a file outside the project.
- */
-function resolveWithinRoot(projectRoot: string, file: string): string {
-  const root = resolve(projectRoot);
-  const resolved = resolve(root, file);
-  const rel = relative(root, resolved);
-  if (rel === "" || rel.startsWith("..") || isAbsolute(rel)) {
-    throw new ClewError(
-      ErrorCode.INVALID_SCHEMA,
-      `Schema file path "${file}" escapes the project root.`,
-      {
-        location: file,
-        help: "point the schema at a file inside the project",
-      },
-    );
-  }
-  return resolved;
 }
