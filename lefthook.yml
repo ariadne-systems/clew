@@ -8,3 +8,8 @@ pre-commit:
       run: pnpm typecheck
     check:
       run: pnpm check:specs
+    # Run only the tests affected by the staged files (vitest `related` walks the
+    # module graph); passes when a staged file has no related tests.
+    test:
+      glob: "*.ts"
+      run: pnpm exec vitest related --run --passWithNoTests {staged_files}
