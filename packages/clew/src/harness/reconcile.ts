@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { readFileOrNull } from "../fs/files.js";
 import { METHOD_MARKER } from "./harness.js";
 
 /** The marker line at the start of any line, together with the blank line after it — how `mark` inserts it and `unmarked` removes it. */
@@ -60,7 +61,7 @@ export async function reconcileMethodFile(
   content: string,
 ): Promise<ReconcileOutcome> {
   const marked = mark(content);
-  const existing = await readIfPresent(absolutePath);
+  const existing = await readFileOrNull(absolutePath);
   if (existing === null) {
     await mkdir(dirname(absolutePath), { recursive: true });
     await writeFile(absolutePath, marked, "utf8");
@@ -80,15 +81,4 @@ export async function reconcileMethodFile(
   }
   await writeFile(absolutePath, marked, "utf8");
   return "written";
-}
-
-async function readIfPresent(path: string): Promise<string | null> {
-  try {
-    return await readFile(path, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return null;
-    }
-    throw error;
-  }
 }

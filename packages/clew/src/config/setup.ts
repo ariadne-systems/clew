@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import { ClewError, ErrorCode } from "../errors.js";
+import { readFileOrEmpty, writeIfAbsent } from "../fs/files.js";
 import { resolveBuiltinGenerator } from "../generators/registry.js";
 import type {
   EmitOptions,
@@ -346,28 +347,3 @@ const seedArchitectureDoc: (root: string) => Promise<boolean> = realizes(
     return writeIfAbsent(absolute, DEFAULT_ARCHITECTURE_DOC);
   },
 );
-
-/** Writes `content` to `path` only when it does not exist (`wx`); returns whether it wrote. */
-async function writeIfAbsent(path: string, content: string): Promise<boolean> {
-  try {
-    await writeFile(path, content, { encoding: "utf8", flag: "wx" });
-    return true;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "EEXIST") {
-      return false;
-    }
-    throw error;
-  }
-}
-
-/** Reads a file, treating a missing one as empty. */
-async function readFileOrEmpty(path: string): Promise<string> {
-  try {
-    return await readFile(path, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return "";
-    }
-    throw error;
-  }
-}

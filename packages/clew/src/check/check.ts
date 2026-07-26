@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import {
   basename,
   dirname,
@@ -24,6 +24,7 @@ import {
   readLenses,
   readUnexclude,
 } from "../config/config.js";
+import { pathExists } from "../fs/files.js";
 import { walkProject } from "../fs/walk-files.js";
 import type { DocumentSchema, DocumentType } from "../spec/document-schema.js";
 import { validateDocument } from "../spec/document-schema.js";
@@ -523,14 +524,4 @@ async function headingAnchors(
   }
   cache.set(file, slugs);
   return slugs;
-}
-
-/** Whether a path exists. */
-async function pathExists(path: string): Promise<boolean> {
-  try {
-    await access(path);
-    return true;
-  } catch {
-    return false;
-  }
 }

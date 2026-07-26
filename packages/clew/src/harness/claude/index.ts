@@ -1,6 +1,7 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { ConTraceables, realizes } from "@ariadne-thread/trace";
+import { writeIfAbsent } from "../../fs/files.js";
 import type {
   EmitOptions,
   EmittedMethod,
@@ -89,13 +90,5 @@ async function seedIfAbsent(
 ): Promise<boolean> {
   const absolute = join(root, path);
   await mkdir(dirname(absolute), { recursive: true });
-  try {
-    await writeFile(absolute, contents, { encoding: "utf8", flag: "wx" });
-    return true;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "EEXIST") {
-      return false;
-    }
-    throw error;
-  }
+  return writeIfAbsent(absolute, contents);
 }

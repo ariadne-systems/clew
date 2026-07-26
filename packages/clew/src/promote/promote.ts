@@ -1,4 +1,4 @@
-import { access, readFile, rm } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import type { Layout } from "../config/config.js";
@@ -9,6 +9,7 @@ import {
   TEMP_SUFFIX,
   writeFilesAtomic,
 } from "../fs/atomic-write.js";
+import { pathExists, readFileOrNull } from "../fs/files.js";
 import { walkFiles } from "../fs/walk-files.js";
 import { mint } from "../mint/mint.js";
 import {
@@ -444,29 +445,4 @@ async function collectDraftFiles(draftsDir: string): Promise<string[]> {
     }
   }
   return files;
-}
-
-/** Reads a file, treating a missing file as absent rather than an error. */
-async function readFileOrNull(file: string): Promise<string | null> {
-  try {
-    return await readFile(file, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return null;
-    }
-    throw error;
-  }
-}
-
-/** Whether a path exists. A missing path is `false`; any other error propagates. */
-async function pathExists(path: string): Promise<boolean> {
-  try {
-    await access(path);
-    return true;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return false;
-    }
-    throw error;
-  }
 }
