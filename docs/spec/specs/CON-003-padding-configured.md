@@ -23,4 +23,4 @@ No padding width is hard-coded in the minting code.
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)

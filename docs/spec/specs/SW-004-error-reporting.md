@@ -26,7 +26,7 @@ A failure carrying a location, note, or help renders each on its own line beneat
 
 **Realizes**
 
-- [SYS-006 — Diagnostic clarity](SYS-006-diagnostic-clarity.md)
+- [SYS-006](SYS-006-diagnostic-clarity.md)
 
 ## Changes
 

@@ -65,12 +65,12 @@ The configuration stays documented; it stops being a contract shared with other 
 **Related (existing corpus)**
 
 - Amends [ADR-0005 D6](../../adr/ADR-0005-anchor-scanning-and-coverage.md) — the configuration leaves the shared, published contract; the outputs stay in it.
-- Revises [SYS-013 — The system publishes stable, machine-readable schemas for its configuration and results](../specs/SYS-013-shared-schemas.md) — the claim narrows to the locations record and the coverage result.
-- Revises [ENT-002 — Configuration](../specs/ENT-002-configuration.md) — the attribute table gains `generation` and `scan`.
-- Revises [SW-015 — Group the scanned specs into the configured spec sets](../specs/SW-015-group-traceables.md) — the keys move under `generation`.
-- Revises [SW-025 — Read the scan's `exclude` and `unexclude` patterns from configuration](../specs/SW-025-read-exclusion-patterns.md), [CON-016 — The scan excludes dependency and build directories by default](../specs/CON-016-scan-builtin-exclusions.md), and [SW-022 — Scan the code into the set of anchor locations](../specs/SW-022-scan-code-into-anchor-locations.md) — the keys move under `scan`.
-- Leaves [CON-013 — Each scanned spec belongs to exactly one spec set](../specs/CON-013-spec-set-partition.md), [CON-017 — Scan exclusion precedence](../specs/CON-017-exclusion-precedence.md), [CON-018 — Exclusion patterns are repository-root-relative globs](../specs/CON-018-root-relative-globs.md), and [SW-024 — A path matching the configured patterns is excluded](../specs/SW-024-exclude-matching-paths.md) untouched — each names the *pattern*, not its configured location.
-- Builds on [STR-012 — spec sets](STR-012-spec-sets.md) and [STR-017 — scan exclusion config](STR-017-scan-exclusion-config.md), whose keys this story regroups. Both stories stand as the record of what was decided then and are not rewritten.
+- Revises [SYS-013](../specs/SYS-013-shared-schemas.md) — the claim narrows to the locations record and the coverage result.
+- Revises [ENT-002](../specs/ENT-002-configuration.md) — the attribute table gains `generation` and `scan`.
+- Revises [SW-015](../specs/SW-015-group-traceables.md) — the keys move under `generation`.
+- Revises [SW-025](../specs/SW-025-read-exclusion-patterns.md), [CON-016](../specs/CON-016-scan-builtin-exclusions.md), and [SW-022](../specs/SW-022-scan-code-into-anchor-locations.md) — the keys move under `scan`.
+- Leaves [CON-013](../specs/CON-013-spec-set-partition.md), [CON-017](../specs/CON-017-exclusion-precedence.md), [CON-018](../specs/CON-018-root-relative-globs.md), and [SW-024](../specs/SW-024-exclude-matching-paths.md) untouched — each names the *pattern*, not its configured location.
+- Builds on [STR-012](STR-012-spec-sets.md) and [STR-017](STR-017-scan-exclusion-config.md), whose keys this story regroups. Both stories stand as the record of what was decided then and are not rewritten.
 
 ## Changes
 

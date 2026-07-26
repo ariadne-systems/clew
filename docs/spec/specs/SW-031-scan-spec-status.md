@@ -19,11 +19,11 @@ A spec with `**Status**: active` yields a scanned spec with that state; `depreca
 
 **Realizes**
 
-- [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Generalized by [SW-036 — The scan validates each document against its schema](SW-036-scan-validates-schema.md): reading the status is one part of validating the whole document schema on scan.
+- Generalized by [SW-036](SW-036-scan-validates-schema.md): reading the status is one part of validating the whole document schema on scan.
 
 ## Changes
 

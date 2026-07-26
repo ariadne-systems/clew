@@ -24,12 +24,12 @@ The resolution names no concrete generator; supplying a fake generator resolves 
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
-- [SYS-010 — Configurable lenses](SYS-010-configurable-lenses.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
+- [SYS-010](SYS-010-configurable-lenses.md)
 
 ## Changes
 

@@ -18,5 +18,5 @@ Each failure carries a stable code; a released code is never reused for a differ
 
 **Realizes**
 
-- [STK-007 — Scriptable and supportable diagnostics](STK-007-scriptable-diagnostics.md)
-- [STK-003 — Low authoring friction](STK-003-low-authoring-friction.md)
+- [STK-007](STK-007-scriptable-diagnostics.md)
+- [STK-003](STK-003-low-authoring-friction.md)

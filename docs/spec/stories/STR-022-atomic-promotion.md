@@ -36,14 +36,14 @@ Split promotion into a **prepare** phase that mutates nothing real and a **commi
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](../specs/SYS-005-spec-lifecycle.md)
+- [SYS-005](../specs/SYS-005-spec-lifecycle.md)
 
 **Realizes** (new specs)
 
-- [CON-024 — A failed promotion leaves the spec tree unchanged](../specs/CON-024-atomic-promotion.md)
+- [CON-024](../specs/CON-024-atomic-promotion.md)
 
 **Related**
 
-- Refines [SW-017 — Finalize reviewed drafts into the spec tree](../specs/SW-017-finalize-drafts.md) — its substitution and move now run as prepare-then-commit, applied through atomic renames.
-- Complements [CON-014 — Promotion substitutes a draft's temporary id exhaustively](../specs/CON-014-exhaustive-substitution.md) — CON-014 governs a successful run (no occurrence left behind); this governs a failed run (no change left behind).
-- Hardens [STR-013 — Add the `promote` command](../stories/STR-013-promote-command.md) — the command whose finalize step this makes atomic.
+- Refines [SW-017](../specs/SW-017-finalize-drafts.md) — its substitution and move now run as prepare-then-commit, applied through atomic renames.
+- Complements [CON-014](../specs/CON-014-exhaustive-substitution.md) — CON-014 governs a successful run (no occurrence left behind); this governs a failed run (no change left behind).
+- Hardens [STR-013](../stories/STR-013-promote-command.md) — the command whose finalize step this makes atomic.

@@ -24,9 +24,9 @@ A generator that emitted a hyphenated spec-id token in a comment, or an anchor m
 
 **Concerns**
 
-- [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](ARCH-003-generator-interface.md)
+- [ARCH-003](ARCH-003-generator-interface.md)
 
 **Related**
 
-- Lets [CON-016 — The scan excludes dependency and build directories by default](CON-016-scan-builtin-exclusions.md) relax its automatic exclusion of generator output: inertness, not hiding, is what keeps the scan faithful.
-- Strengthens [CON-012 — Generated traceables and utilities are tool-owned and never hand-edited](CON-012-generated-files-tool-owned.md): tool-owned output is not only never hand-edited, it is never mistaken for a use.
+- Lets [CON-016](CON-016-scan-builtin-exclusions.md) relax its automatic exclusion of generator output: inertness, not hiding, is what keeps the scan faithful.
+- Strengthens [CON-012](CON-012-generated-files-tool-owned.md): tool-owned output is not only never hand-edited, it is never mistaken for a use.

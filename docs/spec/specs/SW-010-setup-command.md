@@ -27,7 +27,7 @@ The `--generator <type>` option is registered and its value forwarded to core.
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
 
 ## Changes
 

@@ -30,4 +30,4 @@ A path matching only a built-in default is excluded; a path matching nothing is 
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)

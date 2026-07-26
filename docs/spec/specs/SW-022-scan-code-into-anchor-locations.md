@@ -26,11 +26,11 @@ The core drives discovery through the generator interface only, holding no marke
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-002 — Reverse-traceability scan](SYS-002-reverse-traceability-coverage.md)
+- [SYS-002](SYS-002-reverse-traceability-coverage.md)
 
 ## Changes
 

@@ -26,4 +26,4 @@ No bound id produced for an accepted prefix carries the `-TMP-` marker.
 
 **Concerns**
 
-- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)
+- [ENT-001](../domain-model.md#ent-001-clewstate)

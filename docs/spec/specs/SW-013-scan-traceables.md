@@ -24,11 +24,11 @@ The scan depends only on the configured artifact locations, not on any target la
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-001 — Compile-checked anchoring](SYS-001-compile-checked-anchoring.md)
+- [SYS-001](SYS-001-compile-checked-anchoring.md)
 
 ## Changes
 

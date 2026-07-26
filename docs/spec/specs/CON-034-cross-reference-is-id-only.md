@@ -3,6 +3,8 @@ A spec cross-reference cites its target by id alone, with no title label
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 A relation link to a spec cites the target by its id: the link text is the target's `<id>`, and the path is the tool-owned `<id>-<slug>.md` filename.
 The link text carries no title or descriptive label beyond the id.
@@ -26,14 +28,15 @@ A citation quoted inside an inline-code or fenced-code span is not reported.
 
 **Realizes**
 
-- [SYS-003 — The system allocates unique, stable, persistent spec ids](SYS-003-stable-spec-identity.md)
+- [SYS-003](SYS-003-stable-spec-identity.md)
 
 **Related**
 
-- The companion of [CON-029 — Every document link resolves to an existing target](CON-029-document-link-resolves.md): CON-029 checks the reference lands on a real node; this keeps the reference to the id alone, so a citation is a bare id that resolves.
-- Runs as a member of the suite in [STR-024 — The tool runs its deterministic integrity checks as one `clew check` command](../stories/STR-024-clew-check-suite.md).
+- The companion of [CON-029](CON-029-document-link-resolves.md): CON-029 checks the reference lands on a real node; this keeps the reference to the id alone, so a citation is a bare id that resolves.
+- Runs as a member of the suite in [STR-024](../stories/STR-024-clew-check-suite.md).
 
 ## Changes
 
 - **2026-07-26** — Added that a citation quoted inside a code span is an example, not a reference, so a spec can show the forbidden form without self-flagging.
 Folded in from STR-035 on the day of promotion; the id-only rule itself is unchanged, and reference-rot shares the same link-identification.
+- **2026-07-26** — Set active: implementation of STR-035 began.

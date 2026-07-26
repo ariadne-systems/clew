@@ -23,13 +23,13 @@ Setup appends only the missing entries and leaves an existing `.gitignore` other
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
 
 **Related**
 
-- Keeps tracked the state file of [CON-001 — The tool's state is a single version-controlled file](CON-001-state-file-version-controlled.md).
-- Ignores the outputs of [SW-023 — The `scan` command reports the code's anchor locations](SW-023-scan-command.md) and [SW-028 — Emit the coverage result](SW-028-emit-coverage-result.md).
-- Extends the scaffolding of [SW-011 — Scaffold the default configuration and layout](SW-011-scaffold-default-config.md); appends without overwriting, honouring [CON-010 — Setup never overwrites an existing configuration](CON-010-setup-never-overwrites.md).
+- Keeps tracked the state file of [CON-001](CON-001-state-file-version-controlled.md).
+- Ignores the outputs of [SW-023](SW-023-scan-command.md) and [SW-028](SW-028-emit-coverage-result.md).
+- Extends the scaffolding of [SW-011](SW-011-scaffold-default-config.md); appends without overwriting, honouring [CON-010](CON-010-setup-never-overwrites.md).
 
 ## Changes
 

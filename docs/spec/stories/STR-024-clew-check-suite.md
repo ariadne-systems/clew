@@ -44,27 +44,27 @@ Judgment-adjacent checks are deliberately excluded or kept as soft warnings (see
 
 **Realizes**
 
-- [STK-002 — A trustworthy, exportable trace record](../specs/STK-002-audit-evidence.md)
+- [STK-002](../specs/STK-002-audit-evidence.md)
 
 **Realizes** (new specs)
 
-- [SW-034 — clew exposes a `check` command that runs the integrity-check suite](../specs/SW-034-check-command.md)
-- [ARCH-005 — Deterministic integrity checks are one shipped `clew check` suite](../specs/ARCH-005-checks-are-one-suite.md)
-- [SYS-014 — The system detects a spec reference that bypasses the anchor](../specs/SYS-014-detect-references-bypassing-anchor.md)
-- [SW-033 — clew reports a spec id found in a code comment](../specs/SW-033-flag-spec-id-in-comment.md)
-- [CON-026 — A spec id appears in code only inside its anchor](../specs/CON-026-spec-id-only-in-anchor.md)
-- [CON-029 — Every document link resolves to an existing target](../specs/CON-029-document-link-resolves.md)
-- [ARCH-006 — Comment detection is a generator capability](../specs/ARCH-006-pluggable-comment-finders.md)
-- [CON-030 — Generated output is inert to the scan and the checks](../specs/CON-030-generated-output-inert-to-scan.md)
+- [SW-034](../specs/SW-034-check-command.md)
+- [ARCH-005](../specs/ARCH-005-checks-are-one-suite.md)
+- [SYS-014](../specs/SYS-014-detect-references-bypassing-anchor.md)
+- [SW-033](../specs/SW-033-flag-spec-id-in-comment.md)
+- [CON-026](../specs/CON-026-spec-id-only-in-anchor.md)
+- [CON-029](../specs/CON-029-document-link-resolves.md)
+- [ARCH-006](../specs/ARCH-006-pluggable-comment-finders.md)
+- [CON-030](../specs/CON-030-generated-output-inert-to-scan.md)
 
 **Related**
 
 - Folds in the spec-id-in-comment check — detection (SYS-014), the report (SW-033), and the invariant it holds (CON-026) — as one member of this suite rather than a standalone command; the earlier standalone-command framing is dropped.
-- Surfaces [CON-025 — A bound spec id is declared by exactly one file](../specs/CON-025-one-file-per-spec-id.md) — the same logic `scan` gates on at generation, exposed as a standing check.
-- Enforces [CON-022 — a spec's status is one of the declared values](../specs/CON-022-valid-status.md) as a standing check; a dangling temporary reference ([CON-027](../specs/CON-027-no-temporary-id-in-promoted-corpus.md)) shows up as a non-resolving link, caught by reference-rot.
+- Surfaces [CON-025](../specs/CON-025-one-file-per-spec-id.md) — the same logic `scan` gates on at generation, exposed as a standing check.
+- Enforces [CON-022](../specs/CON-022-valid-status.md) as a standing check; a dangling temporary reference ([CON-027](../specs/CON-027-no-temporary-id-in-promoted-corpus.md)) shows up as a non-resolving link, caught by reference-rot.
 - Generalizes the repo-local reference-rot script (`scripts/check-references.mjs`) into a shipped capability.
 - Revises [CON-016](../specs/CON-016-scan-builtin-exclusions.md), [ARCH-003](../specs/ARCH-003-generator-interface.md), and [SW-024](../specs/SW-024-exclude-matching-paths.md): the checks scan the same source domain as the anchor scan through one shared, exclusion-aware walk; generator output is no longer auto-excluded but kept inert ([CON-030](../specs/CON-030-generated-output-inert-to-scan.md)); and comment detection moves onto the generator.
-- Defers structural and field conformance to [STR-026 — clew validates each spec and story against a configurable schema](STR-026-validate-specs-against-schema.md): the schema feature validates each document on scan, so the suite hand-rolls no required-fields check.
+- Defers structural and field conformance to [STR-026](STR-026-validate-specs-against-schema.md): the schema feature validates each document on scan, so the suite hand-rolls no required-fields check.
 
 ## Changes
 

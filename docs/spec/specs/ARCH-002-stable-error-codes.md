@@ -24,4 +24,4 @@ Rewording the message does not change the code.
 
 **Realizes**
 
-- [SYS-006 — Diagnostic clarity](SYS-006-diagnostic-clarity.md)
+- [SYS-006](SYS-006-diagnostic-clarity.md)

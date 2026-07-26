@@ -19,4 +19,4 @@ The configuration and state are files under the project root; reading them refle
 
 **Realizes**
 
-- [STK-004 — Traceability data living with the code](STK-004-traceability-with-the-code.md)
+- [STK-004](STK-004-traceability-with-the-code.md)

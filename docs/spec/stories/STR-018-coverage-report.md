@@ -46,24 +46,24 @@ Turning the report into a pass/fail — the **gate** — is a separate concern a
 
 **Realizes**
 
-- [SW-026 — Compute traceability coverage as a per-spec status](../specs/SW-026-compute-coverage.md) — classifies each traceable by realize/verify.
-- [SW-027 — Reconcile uncovered specs against the committed waiver list](../specs/SW-027-apply-waivers.md) — waived versus gap; surfaces stale waivers.
-- [SW-028 — Emit the coverage result](../specs/SW-028-emit-coverage-result.md) — `coverage.json` (shared shape) and the human-readable report.
-- [SW-029 — The `clew coverage` command](../specs/SW-029-coverage-command.md) — reports coverage; informational (exits 0).
-- [CON-019 — `concerns` never contributes to coverage](../specs/CON-019-concerns-not-coverage.md)
-- [CON-020 — The coverage universe is exactly the traceables the spec scan produces](../specs/CON-020-coverage-universe.md)
+- [SW-026](../specs/SW-026-compute-coverage.md) — classifies each traceable by realize/verify.
+- [SW-027](../specs/SW-027-apply-waivers.md) — waived versus gap; surfaces stale waivers.
+- [SW-028](../specs/SW-028-emit-coverage-result.md) — `coverage.json` (shared shape) and the human-readable report.
+- [SW-029](../specs/SW-029-coverage-command.md) — reports coverage; informational (exits 0).
+- [CON-019](../specs/CON-019-concerns-not-coverage.md)
+- [CON-020](../specs/CON-020-coverage-universe.md)
 
 **Related (existing corpus)**
 
-- Stands on [SW-022 — Scan the code into the set of anchor locations](../specs/SW-022-scan-code-into-anchor-locations.md) (the located anchors it reads) and [SW-013 — Scan the configured artifacts into the set of traceables](../specs/SW-013-scan-traceables.md) (the universe it compares against).
-- Its specs realize [SYS-012 — Coverage policy and waivers](../specs/SYS-012-coverage-policy-and-waivers.md) and, for `coverage.json`, [SYS-013 — Shared schemas](../specs/SYS-013-shared-schemas.md); both were unrealized roadmap specs until this story.
-- The `coverage` command is the sibling of [SW-023 — the `scan` command](../specs/SW-023-scan-command.md): scan emits the locations index, coverage reads it back.
-- Picks up the coverage half deferred by [STR-016 — the anchor scan](STR-016-anchor-scan.md).
+- Stands on [SW-022](../specs/SW-022-scan-code-into-anchor-locations.md) (the located anchors it reads) and [SW-013](../specs/SW-013-scan-traceables.md) (the universe it compares against).
+- Its specs realize [SYS-012](../specs/SYS-012-coverage-policy-and-waivers.md) and, for `coverage.json`, [SYS-013](../specs/SYS-013-shared-schemas.md); both were unrealized roadmap specs until this story.
+- The `coverage` command is the sibling of [SW-023](../specs/SW-023-scan-command.md): scan emits the locations index, coverage reads it back.
+- Picks up the coverage half deferred by [STR-016](STR-016-anchor-scan.md).
 - The **gate** (the pass/fail check) is a later story that reads this report; the spec status field that scopes the universe to built specs filters generation (STR-020), not the gate.
 
 **Artifacts** (not specs)
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration) gains a `waivers` attribute (`{ id, reason }`), applied on promotion as `exclude` / `unexclude` were (STR-017).
+- [ENT-002](../domain-model.md#ent-002-configuration) gains a `waivers` attribute (`{ id, reason }`), applied on promotion as `exclude` / `unexclude` were (STR-017).
 - A changeset covering the coverage feature.
 
 ## Changes

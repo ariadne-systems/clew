@@ -21,5 +21,5 @@ The report states the count per status, the gaps, and the waived.
 
 **Realizes**
 
-- [SYS-012 — Coverage policy and waivers](SYS-012-coverage-policy-and-waivers.md)
-- [SYS-013 — Shared configuration and output schemas](SYS-013-shared-schemas.md)
+- [SYS-012](SYS-012-coverage-policy-and-waivers.md)
+- [SYS-013](SYS-013-shared-schemas.md)

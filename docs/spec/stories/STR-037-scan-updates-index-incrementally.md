@@ -36,12 +36,12 @@ The write stays atomic (the discipline of NF-002), and the result is what a full
 
 **Realizes** (new specs)
 
-- [SW-048 — `clew scan` updates the index incrementally, rescanning only changed files](../specs/SW-048-scan-incremental-update.md)
-- [CON-035 — An incremental scan yields the same index as a full scan](../specs/CON-035-incremental-scan-equals-full-scan.md)
+- [SW-048](../specs/SW-048-scan-incremental-update.md)
+- [CON-035](../specs/CON-035-incremental-scan-equals-full-scan.md)
 
 **Related**
 
-- Extends [SW-023 — The tool exposes a `scan` command that reports the code's anchor locations](../specs/SW-023-scan-command.md), whose "full, not incremental" statement this revises.
-- Builds on the core scan of [SW-022 — Scan the code into the set of anchor locations](../specs/SW-022-scan-code-into-anchor-locations.md).
-- The write-side companion of [STR-036 — The tool resolves spec ids to their anchor sites through an agent-facing `anchors` command](STR-036-anchors-reverse-lookup-command.md): this keeps the index fresh cheaply, that reads it and reports staleness — both off the same recorded provenance.
-- Preserves the atomic-write discipline of [NF-002 — A state write is atomic](../specs/NF-002-atomic-state-write.md).
+- Extends [SW-023](../specs/SW-023-scan-command.md), whose "full, not incremental" statement this revises.
+- Builds on the core scan of [SW-022](../specs/SW-022-scan-code-into-anchor-locations.md).
+- The write-side companion of [STR-036](STR-036-anchors-reverse-lookup-command.md): this keeps the index fresh cheaply, that reads it and reports staleness — both off the same recorded provenance.
+- Preserves the atomic-write discipline of [NF-002](../specs/NF-002-atomic-state-write.md).

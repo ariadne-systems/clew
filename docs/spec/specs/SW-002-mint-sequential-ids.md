@@ -21,8 +21,8 @@ The underlying numbers come from the allocator and are never reused.
 
 **Concerns**
 
-- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)
+- [ENT-001](../domain-model.md#ent-001-clewstate)
 
 **Realizes**
 
-- [SYS-003 — Stable spec identity](SYS-003-stable-spec-identity.md)
+- [SYS-003](SYS-003-stable-spec-identity.md)

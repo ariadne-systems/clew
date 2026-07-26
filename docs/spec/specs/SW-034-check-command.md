@@ -22,10 +22,10 @@ On a clean corpus it exits zero with no findings.
 
 **Realizes**
 
-- [STK-002 — A trustworthy, exportable trace record](STK-002-audit-evidence.md)
+- [STK-002](STK-002-audit-evidence.md)
 
 **Related**
 
-- Conforms to [ARCH-005 — Deterministic integrity checks are one shipped `clew check` suite](ARCH-005-checks-are-one-suite.md).
-- Enforces [CON-014 — exhaustive substitution](CON-014-exhaustive-substitution.md), [CON-022 — valid status](CON-022-valid-status.md), and the new [CON-026](CON-026-spec-id-only-in-anchor.md) and [CON-025](CON-025-one-file-per-spec-id.md) as checks.
-- Reads the located-anchor record of [SYS-002 — reverse traceability](SYS-002-reverse-traceability-coverage.md).
+- Conforms to [ARCH-005](ARCH-005-checks-are-one-suite.md).
+- Enforces [CON-014](CON-014-exhaustive-substitution.md), [CON-022](CON-022-valid-status.md), and the new [CON-026](CON-026-spec-id-only-in-anchor.md) and [CON-025](CON-025-one-file-per-spec-id.md) as checks.
+- Reads the located-anchor record of [SYS-002](SYS-002-reverse-traceability-coverage.md).

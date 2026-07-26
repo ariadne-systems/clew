@@ -19,4 +19,4 @@ Given code whose spec reference is a hyphenated id in a comment, the system repo
 
 **Realizes**
 
-- [STK-001 — Assurance that every spec is implemented and tested](STK-001-implementation-assurance.md)
+- [STK-001](STK-001-implementation-assurance.md)

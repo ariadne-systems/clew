@@ -34,13 +34,13 @@ The minting code depends on the strategy interface, never on a concrete scheme.
 
 **Realizes**
 
-- [SW-001 — Allocate consecutive sequence numbers for a prefix](../specs/SW-001-allocate-sequence-numbers.md)
-- [CON-002 — A sequence number is never reused](../specs/CON-002-sequence-number-never-reused.md)
-- [CON-004 — Ids are returned only after the allocation is persisted](../specs/CON-004-ids-returned-only-after-persist.md)
-- [SW-002 — Mint ids in sequential mode](../specs/SW-002-mint-sequential-ids.md)
-- [CON-003 — The numeric padding is configured in .clewrc.json](../specs/CON-003-padding-configured.md)
-- [ARCH-001 — Id generation is a config-selected, pluggable strategy](../specs/ARCH-001-pluggable-id-strategy.md)
+- [SW-001](../specs/SW-001-allocate-sequence-numbers.md)
+- [CON-002](../specs/CON-002-sequence-number-never-reused.md)
+- [CON-004](../specs/CON-004-ids-returned-only-after-persist.md)
+- [SW-002](../specs/SW-002-mint-sequential-ids.md)
+- [CON-003](../specs/CON-003-padding-configured.md)
+- [ARCH-001](../specs/ARCH-001-pluggable-id-strategy.md)
 
 **Reads**
 
-- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)
+- [ENT-001](../domain-model.md#ent-001-clewstate)

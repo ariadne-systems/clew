@@ -10,6 +10,7 @@ Every link, and every `@`-include, that any document in the project makes resolv
 The reference-rot member walks every non-excluded document, not only the spec tree, and reports a link or include that resolves to nothing, and a `#fragment` that names no heading in its target, with its location.
 The **drafts** location is excepted: a draft references unpromoted temporary specs by design, so checking it would read every intentional temporary reference as dangling.
 The scaffolded **example templates** (`*.example.md`, SW-040) are excepted for the same reason: they ship the post-promotion link form a reader copies, whose targets do not exist in a fresh project by design.
+A link **quoted inside an inline-code or fenced-code span** is an example, not a reference, and is not reported — a document that discusses link syntax can show it without self-flagging; the id-only member (CON-034) shares the same masking.
 The check is **type-agnostic**: it verifies the reference lands on a real node, not what kind of edge it is — the relation vocabulary (which relation types a project uses, and what each may point at) is project-defined and not this check's concern.
 
 **Rationale**
@@ -20,17 +21,18 @@ Keeping it type-blind keeps it correct for any project: clew reads the *links* t
 **Verification Description**
 A link — in a spec, a story, an ADR, a governance file, or a skill — to an existing target is accepted; a link or `@`-include to a missing file, or a `#fragment` naming no heading in its target, is reported with its location.
 A link inside the excepted drafts location, inside a scaffolded example template (`*.example.md`), or to an excluded path, is not reported.
+A link quoted inside an inline-code or fenced-code span is not reported.
 
 ## Relations
 
 **Realizes**
 
-- [SYS-003 — The system allocates unique, stable, persistent spec ids](SYS-003-stable-spec-identity.md)
+- [SYS-003](SYS-003-stable-spec-identity.md)
 
 **Related**
 
-- Enforced as a standing check by [STR-024 — The tool runs its deterministic integrity checks as one `clew check` command](../stories/STR-024-clew-check-suite.md) — the reference-rot member of the suite.
-- Sits beside the other corpus invariants the suite checks: [CON-022 — valid status](CON-022-valid-status.md), [CON-025 — one file per spec id](CON-025-one-file-per-spec-id.md), and [CON-027 — no temporary id in the promoted tree](CON-027-no-temporary-id-in-promoted-corpus.md).
+- Enforced as a standing check by [STR-024](../stories/STR-024-clew-check-suite.md) — the reference-rot member of the suite.
+- Sits beside the other corpus invariants the suite checks: [CON-022](CON-022-valid-status.md), [CON-025](CON-025-one-file-per-spec-id.md), and [CON-027](CON-027-no-temporary-id-in-promoted-corpus.md).
 
 ## Changes
 
@@ -38,3 +40,5 @@ A link inside the excepted drafts location, inside a scaffolded example template
 The invariant — a reference lands on a real node — is unchanged; its corpus widens from the spec tree to the whole document set, drafts excepted, so `clew check` subsumes the repo-local reference lint and ARCH-005 is met without one.
 - **2026-07-23** — Excepted the scaffolded example templates (`*.example.md`) alongside drafts.
 Setup now scaffolds a copyable example story and spec beside the schemas (SW-040); those carry the post-promotion link form a reader copies, whose targets are absent in a fresh project by design, so reference-rot read them as dangling — the same false positive the drafts exception exists for.
+- **2026-07-27** — Excepted a link quoted inside an inline-code or fenced-code span: it is an example, not a reference.
+A spec that discusses link or citation syntax must be able to show the form without self-flagging; the masking that recognises a code-span is shared with the id-only member (CON-034, STR-035).

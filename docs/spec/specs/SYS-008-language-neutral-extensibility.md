@@ -19,7 +19,7 @@ A target language is added by implementing the generator contract and registerin
 
 **Realizes**
 
-- [STK-008 — The approach works across the team's languages](STK-008-polyglot-applicability.md)
+- [STK-008](STK-008-polyglot-applicability.md)
 
 ## Changes
 

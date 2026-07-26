@@ -22,5 +22,5 @@ The integrity checks are reachable through the one `clew check` command; a newly
 
 **Related**
 
-- Realized by [SW-034 — the `check` command](SW-034-check-command.md).
-- Serves [STK-002 — A trustworthy, exportable trace record](STK-002-audit-evidence.md).
+- Realized by [SW-034](SW-034-check-command.md).
+- Serves [STK-002](STK-002-audit-evidence.md).

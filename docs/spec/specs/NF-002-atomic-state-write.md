@@ -21,4 +21,4 @@ After a successful save the file contains the complete new state.
 
 **Concerns**
 
-- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)
+- [ENT-001](../domain-model.md#ent-001-clewstate)

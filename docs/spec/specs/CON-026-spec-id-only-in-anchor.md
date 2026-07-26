@@ -21,4 +21,4 @@ A spec id in a comment or a name is rejected; the same id inside an anchor is ac
 
 **Realizes**
 
-- [SYS-001 — The system anchors code to specs with compile-time-checked references](SYS-001-compile-checked-anchoring.md)
+- [SYS-001](SYS-001-compile-checked-anchoring.md)

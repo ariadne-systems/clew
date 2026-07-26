@@ -27,12 +27,12 @@ A generator's emitted traceables read back through the interface recover exactly
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-002 — Reverse-traceability scan](SYS-002-reverse-traceability-coverage.md)
-- [SYS-008 — Language-neutral extensibility](SYS-008-language-neutral-extensibility.md)
+- [SYS-002](SYS-002-reverse-traceability-coverage.md)
+- [SYS-008](SYS-008-language-neutral-extensibility.md)
 
 ## Changes
 

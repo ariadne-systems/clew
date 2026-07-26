@@ -23,13 +23,13 @@ A re-run leaves each unchanged where it already exists; setup writes a stub only
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
 
 **Related**
 
-- Seeded through the interface defined by [ARCH-008 — The agent-facing method is emitted through a harness-adapter interface](ARCH-008-method-behind-harness-adapter.md).
-- Their project-owned, never-overwritten status is governed by [CON-033 — The method scaffold is tool-owned; project files are never overwritten](CON-033-method-scaffold-tool-owned.md), which extends [CON-010 — Setup never overwrites an existing configuration](CON-010-setup-never-overwrites.md).
-- Extends the scaffolding of [SW-011 — Scaffold the default configuration and layout](SW-011-scaffold-default-config.md).
+- Seeded through the interface defined by [ARCH-008](ARCH-008-method-behind-harness-adapter.md).
+- Their project-owned, never-overwritten status is governed by [CON-033](CON-033-method-scaffold-tool-owned.md), which extends [CON-010](CON-010-setup-never-overwrites.md).
+- Extends the scaffolding of [SW-011](SW-011-scaffold-default-config.md).
 
 ## Changes
 

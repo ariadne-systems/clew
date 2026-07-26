@@ -24,13 +24,13 @@ A re-run leaves an existing schema file, an existing example, and an existing `s
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
 
 **Related**
 
-- Extends [SW-011 — Scaffold the default configuration and layout](SW-011-scaffold-default-config.md): the scaffolded configuration now carries the document schemas.
-- The written schemas are consumed by [SW-036 — Reading a document validates it against its type's schema](SW-036-scan-validates-schema.md); the pinned core they start from is [ARCH-007 — The schema core is what clew reads](ARCH-007-schema-core-is-what-clew-reads.md).
-- Writes the `schemas` section of [ENT-002 — Configuration](../domain-model.md#ent-002-configuration).
+- Extends [SW-011](SW-011-scaffold-default-config.md): the scaffolded configuration now carries the document schemas.
+- The written schemas are consumed by [SW-036](SW-036-scan-validates-schema.md); the pinned core they start from is [ARCH-007](ARCH-007-schema-core-is-what-clew-reads.md).
+- Writes the `schemas` section of [ENT-002](../domain-model.md#ent-002-configuration).
 
 ## Changes
 

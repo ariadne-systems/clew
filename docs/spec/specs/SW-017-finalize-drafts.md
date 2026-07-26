@@ -30,16 +30,16 @@ Binding follows the same persistence guarantee as minting: an id is reported onl
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Constrained by [CON-028 — A promotion is rooted at named drafts and finalizes their reference closure](CON-028-promotion-rooted-at-named-drafts.md) — finalize resolves the closure of the named roots and refuses an unresolved reference.
-- Resolved by [SW-035 — Promotion resolves its set as the closure of the named roots' references](SW-035-resolve-set-as-reference-closure.md) — SW-035 computes the set this finalizes, and refuses an unresolved reference.
+- Constrained by [CON-028](CON-028-promotion-rooted-at-named-drafts.md) — finalize resolves the closure of the named roots and refuses an unresolved reference.
+- Resolved by [SW-035](SW-035-resolve-set-as-reference-closure.md) — SW-035 computes the set this finalizes, and refuses an unresolved reference.
 
 ## Changes
 

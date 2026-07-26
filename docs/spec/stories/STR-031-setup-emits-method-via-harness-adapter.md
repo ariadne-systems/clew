@@ -60,16 +60,16 @@ The generator and schema scaffolding is the sibling story STR-029 and is out of 
 
 **Realizes**
 
-- [ARCH-008 — The agent-facing method is emitted through a harness-adapter interface](../specs/ARCH-008-method-behind-harness-adapter.md)
-- [SW-043 — Setup emits the method scaffold through the configured harness adapter](../specs/SW-043-setup-emits-method-scaffold.md)
-- [SW-044 — Setup seeds the project governance stubs as marked skeletons](../specs/SW-044-setup-seeds-project-stubs.md)
-- [SW-045 — Setup seeds the ADR practice with a tool-owned template](../specs/SW-045-setup-seeds-adr-practice.md)
-- [CON-033 — The method scaffold is tool-owned; project files are never overwritten](../specs/CON-033-method-scaffold-tool-owned.md)
+- [ARCH-008](../specs/ARCH-008-method-behind-harness-adapter.md)
+- [SW-043](../specs/SW-043-setup-emits-method-scaffold.md)
+- [SW-044](../specs/SW-044-setup-seeds-project-stubs.md)
+- [SW-045](../specs/SW-045-setup-seeds-adr-practice.md)
+- [CON-033](../specs/CON-033-method-scaffold-tool-owned.md)
 
 **Related (existing corpus)**
 
 - Realizes [ADR-0008 — The agent-facing method is emitted through per-harness adapters](../../adr/ADR-0008-harness-adapter-for-agent-facing-method.md).
-- The harness-adapter boundary is the sibling of [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](../specs/ARCH-003-generator-interface.md): the same in-tree-implementation-behind-an-interface pattern, on the harness axis.
-- The tool-owned rule reuses [CON-012 — Generated traceables and utilities are tool-owned and never hand-edited](../specs/CON-012-generated-files-tool-owned.md) and extends [CON-010 — Setup never overwrites an existing configuration](../specs/CON-010-setup-never-overwrites.md) from the configuration to every project-owned file.
-- Extends the scaffolding of [SW-011 — Scaffold the default configuration and layout](../specs/SW-011-scaffold-default-config.md); adds an `agent` attribute to [ENT-002 — Configuration](../domain-model.md#ent-002-configuration).
-- Sibling story: [STR-029 — setup scaffolds a runnable configuration](STR-029-setup-scaffolds-runnable-config.md).
+- The harness-adapter boundary is the sibling of [ARCH-003](../specs/ARCH-003-generator-interface.md): the same in-tree-implementation-behind-an-interface pattern, on the harness axis.
+- The tool-owned rule reuses [CON-012](../specs/CON-012-generated-files-tool-owned.md) and extends [CON-010](../specs/CON-010-setup-never-overwrites.md) from the configuration to every project-owned file.
+- Extends the scaffolding of [SW-011](../specs/SW-011-scaffold-default-config.md); adds an `agent` attribute to [ENT-002](../domain-model.md#ent-002-configuration).
+- Sibling story: [STR-029](STR-029-setup-scaffolds-runnable-config.md).

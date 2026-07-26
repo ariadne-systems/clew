@@ -25,10 +25,10 @@ A token quoted inside an inline- or fenced-code span is not reported.
 
 **Realizes**
 
-- [SYS-003 — The system allocates unique, stable, persistent spec ids](SYS-003-stable-spec-identity.md)
+- [SYS-003](SYS-003-stable-spec-identity.md)
 
 **Related**
 
-- The token-resolving sibling of [CON-029 — Every document link resolves to an existing target](CON-029-document-link-resolves.md): CON-029 resolves markdown links and includes; this resolves bare ADR-id tokens.
-- Runs as a member of the suite in [STR-024 — The tool runs its deterministic integrity checks as one `clew check` command](../stories/STR-024-clew-check-suite.md).
-- Keeps honest the citations to the ADRs seeded by [SW-045 — Setup seeds the ADR practice with a tool-owned template](SW-045-setup-seeds-adr-practice.md).
+- The token-resolving sibling of [CON-029](CON-029-document-link-resolves.md): CON-029 resolves markdown links and includes; this resolves bare ADR-id tokens.
+- Runs as a member of the suite in [STR-024](../stories/STR-024-clew-check-suite.md).
+- Keeps honest the citations to the ADRs seeded by [SW-045](SW-045-setup-seeds-adr-practice.md).

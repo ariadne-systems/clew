@@ -22,7 +22,7 @@ A deprecated traceable is not counted in any status and is listed separately.
 
 **Realizes**
 
-- [SYS-012 — Coverage policy and waivers](SYS-012-coverage-policy-and-waivers.md)
+- [SYS-012](SYS-012-coverage-policy-and-waivers.md)
 
 ## Changes
 

@@ -29,4 +29,4 @@ The same pattern set excludes the same paths given Windows or POSIX separators, 
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)

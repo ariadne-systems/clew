@@ -19,4 +19,4 @@ A spec anchored only by `concerns` is None; adding `realizes` makes it Realized 
 
 **Realizes**
 
-- [SYS-012 — Coverage policy and waivers](SYS-012-coverage-policy-and-waivers.md)
+- [SYS-012](SYS-012-coverage-policy-and-waivers.md)

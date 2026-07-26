@@ -48,11 +48,11 @@ The interface being preserved keeps the future path — a config-named dynamic i
 
 **Realizes**
 
-- [SYS-008 — The system supports multiple target languages through the generator interface](../specs/SYS-008-language-neutral-extensibility.md)
+- [SYS-008](../specs/SYS-008-language-neutral-extensibility.md)
 
 **Related**
 
-- Implements the revised [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](../specs/ARCH-003-generator-interface.md) and [ARCH-004 — Generation and reading back are dual operations of the generator contract](../specs/ARCH-004-generator-discovers-markers.md) — the interface kept as an internal seam, generators bound at a single registry point.
-- Carries out the revisions to [SW-014 — Generate traceables and anchoring utilities](../specs/SW-014-generate-traceables.md), [SW-019 — Resolve the project configuration into a single view](../specs/SW-019-resolve-configuration.md), and [SW-022 — Scan the code into the set of anchor locations](../specs/SW-022-scan-code-into-anchor-locations.md) — generation, resolution, and scan now reach the in-tree generators through the interface and the registry.
-- Softens [STK-008 — The approach works across the team's languages](../specs/STK-008-polyglot-applicability.md) — the polyglot need is unchanged; its verification no longer pins the mechanism.
+- Implements the revised [ARCH-003](../specs/ARCH-003-generator-interface.md) and [ARCH-004](../specs/ARCH-004-generator-discovers-markers.md) — the interface kept as an internal seam, generators bound at a single registry point.
+- Carries out the revisions to [SW-014](../specs/SW-014-generate-traceables.md), [SW-019](../specs/SW-019-resolve-configuration.md), and [SW-022](../specs/SW-022-scan-code-into-anchor-locations.md) — generation, resolution, and scan now reach the in-tree generators through the interface and the registry.
+- Softens [STK-008](../specs/STK-008-polyglot-applicability.md) — the polyglot need is unchanged; its verification no longer pins the mechanism.
 - Records the decision in ADR-0007 (in-tree generators, single engine package), which revises ADR-0001 D9.

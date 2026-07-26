@@ -9,12 +9,12 @@ This page is a non-normative view — like `architecture.md`, it carries no boun
 ### ENT-001 ClewState
 
 The tool's persistent, version-controlled state for a project.
-Specified in [ENT-001 — ClewState](specs/ENT-001-clew-state.md).
+Specified in [ENT-001](specs/ENT-001-clew-state.md).
 
 ### ENT-002 Configuration
 
 The tool's per-project self-description, read from `.clewrc.json`.
-Specified in [ENT-002 — Configuration](specs/ENT-002-configuration.md).
+Specified in [ENT-002](specs/ENT-002-configuration.md).
 
 ## View
 

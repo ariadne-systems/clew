@@ -24,12 +24,12 @@ The rejection does not depend on the order the files are visited.
 
 **Realizes**
 
-- [SYS-003 — The system allocates unique, stable, persistent spec ids](SYS-003-stable-spec-identity.md)
+- [SYS-003](SYS-003-stable-spec-identity.md)
 
 **Related**
 
-- Constrains [SW-013 — Scan the configured artifacts into the set of scanned specs](SW-013-scan-traceables.md) — the scan that enforces it.
-- Mirrors [CON-013 — Each scanned spec belongs to exactly one spec set](CON-013-spec-set-partition.md) — both fail fast on an ambiguous corpus.
+- Constrains [SW-013](SW-013-scan-traceables.md) — the scan that enforces it.
+- Mirrors [CON-013](CON-013-spec-set-partition.md) — both fail fast on an ambiguous corpus.
 
 ## Changes
 

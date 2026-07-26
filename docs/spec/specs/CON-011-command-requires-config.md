@@ -23,7 +23,7 @@ With a configuration present, the commands run normally.
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 ## Changes
 

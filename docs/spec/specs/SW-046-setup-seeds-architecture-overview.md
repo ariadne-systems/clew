@@ -23,13 +23,13 @@ A re-run leaves it unchanged where it already exists; setup writes it only when 
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
 
 **Related**
 
-- Extends the scaffolding of [SW-011 — Scaffold the default configuration and layout](SW-011-scaffold-default-config.md).
-- Its project-owned, never-overwritten status follows [CON-010 — Setup never overwrites an existing configuration](CON-010-setup-never-overwrites.md).
-- Complements [SW-044 — Setup seeds the project governance stubs as marked skeletons](SW-044-setup-seeds-project-stubs.md): the governance stubs are agent-context contracts, whereas this is the docs-tree architecture overview.
+- Extends the scaffolding of [SW-011](SW-011-scaffold-default-config.md).
+- Its project-owned, never-overwritten status follows [CON-010](CON-010-setup-never-overwrites.md).
+- Complements [SW-044](SW-044-setup-seeds-project-stubs.md): the governance stubs are agent-context contracts, whereas this is the docs-tree architecture overview.
 
 ## Changes
 

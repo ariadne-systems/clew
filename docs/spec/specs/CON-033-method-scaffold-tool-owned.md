@@ -27,12 +27,12 @@ A freshly emitted method file carries the tool marker with a content hash; a pro
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Related**
 
-- Departs from [CON-012 — Generated traceables and utilities are tool-owned and never hand-edited](CON-012-generated-files-tool-owned.md): the traceables are pure build output and are never edited, whereas the method scaffold is the project's governance to customize, so setup reconciles it rather than regenerating it wholesale.
-- Extends [CON-010 — Setup never overwrites an existing configuration](CON-010-setup-never-overwrites.md) from the configuration to every project-owned file setup can touch.
+- Departs from [CON-012](CON-012-generated-files-tool-owned.md): the traceables are pure build output and are never edited, whereas the method scaffold is the project's governance to customize, so setup reconciles it rather than regenerating it wholesale.
+- Extends [CON-010](CON-010-setup-never-overwrites.md) from the configuration to every project-owned file setup can touch.
 
 ## Changes
 

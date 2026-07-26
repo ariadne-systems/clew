@@ -21,4 +21,4 @@ On failure nothing is written to stdout and the error is written to stderr.
 
 **Realizes**
 
-- [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)

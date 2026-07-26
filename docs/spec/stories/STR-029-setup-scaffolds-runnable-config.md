@@ -61,15 +61,15 @@ The agent-facing half of the method — the governance baselines and the clew sk
 
 **Realizes**
 
-- [SW-039 — Setup selects the target generator and writes it to the configuration](../specs/SW-039-setup-selects-generator.md)
-- [SW-040 — Setup scaffolds the default document schemas and wires them](../specs/SW-040-setup-scaffolds-schemas.md)
-- [SW-041 — Setup ignores the tool's regenerated output and keeps state tracked](../specs/SW-041-setup-ignores-tool-output.md)
-- [SW-042 — Setup waives the stakeholder lens from test coverage by default](../specs/SW-042-setup-waives-stakeholder-lens.md)
+- [SW-039](../specs/SW-039-setup-selects-generator.md)
+- [SW-040](../specs/SW-040-setup-scaffolds-schemas.md)
+- [SW-041](../specs/SW-041-setup-ignores-tool-output.md)
+- [SW-042](../specs/SW-042-setup-waives-stakeholder-lens.md)
 
 **Related (existing corpus)**
 
-- Extends [SW-011 — Scaffold the default configuration and layout](../specs/SW-011-scaffold-default-config.md): scaffolding grows from lenses+layout to a runnable configuration.
-- Revises the surface of [SW-010 — The tool exposes a `setup` command that delegates to core](../specs/SW-010-setup-command.md): the command gains the `--generator` option.
-- The chosen generator is consumed by [SW-014 — Generate traceables through the configured generators](../specs/SW-014-generate-traceables.md), and the schemas by [SW-036 — Reading a document validates it against its type's schema](../specs/SW-036-scan-validates-schema.md).
-- Writes the `generators` and `schemas` sections of [ENT-002 — Configuration](../domain-model.md#ent-002-configuration) without changing its shape.
-- Realizes the same system need as SW-010/SW-011: [SYS-004 — Configuration and state](../specs/SYS-004-configuration-and-state.md).
+- Extends [SW-011](../specs/SW-011-scaffold-default-config.md): scaffolding grows from lenses+layout to a runnable configuration.
+- Revises the surface of [SW-010](../specs/SW-010-setup-command.md): the command gains the `--generator` option.
+- The chosen generator is consumed by [SW-014](../specs/SW-014-generate-traceables.md), and the schemas by [SW-036](../specs/SW-036-scan-validates-schema.md).
+- Writes the `generators` and `schemas` sections of [ENT-002](../domain-model.md#ent-002-configuration) without changing its shape.
+- Realizes the same system need as SW-010/SW-011: [SYS-004](../specs/SYS-004-configuration-and-state.md).

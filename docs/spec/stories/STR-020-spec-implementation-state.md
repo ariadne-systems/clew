@@ -37,13 +37,13 @@ The status is intrinsic to the spec's source; for files it is the `**Status**` f
 
 **Realizes** (temporary ids; bound and substituted on promotion)
 
-- [SW-031 — The spec scan reads each spec's implementation state](../specs/SW-031-scan-spec-status.md) — reads the `**Status**` field onto the scanned spec; absent means planned.
-- [CON-022 — A spec's status is one of the declared values](../specs/CON-022-valid-status.md)
+- [SW-031](../specs/SW-031-scan-spec-status.md) — reads the `**Status**` field onto the scanned spec; absent means planned.
+- [CON-022](../specs/CON-022-valid-status.md)
 
 **Related (existing corpus)**
 
-- Extends the traceable scan [SW-013 — Scan the configured artifacts into the set of traceables](../specs/SW-013-scan-traceables.md) — it now also carries each spec's status.
-- Realizes [SYS-005 — Spec lifecycle](../specs/SYS-005-spec-lifecycle.md): a spec's lifecycle now includes its implementation state.
+- Extends the traceable scan [SW-013](../specs/SW-013-scan-traceables.md) — it now also carries each spec's status.
+- Realizes [SYS-005](../specs/SYS-005-spec-lifecycle.md): a spec's lifecycle now includes its implementation state.
 - The generation filter this adds also bounds the coverage **gate** (its own later story), which reads the A3 report — only active specs are held to account.
 
 **Artifacts** (not specs)

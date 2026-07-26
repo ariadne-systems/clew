@@ -23,13 +23,13 @@ A re-run leaves an existing `waivers` list unchanged.
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
 
 **Related**
 
-- Realizes the waiver half of [SYS-012 — Coverage policy and waivers](SYS-012-coverage-policy-and-waivers.md); the waiver is applied by [SW-027 — Apply the coverage waivers](SW-027-apply-waivers.md) and matched by [SW-030 — A waiver matches by id or pattern](SW-030-waiver-match-by-id-or-pattern.md).
-- Never waives a missing realization — [CON-021 — A missing realization is never waivable](CON-021-missing-realize-never-waivable.md).
-- Writes the `waivers` section of [ENT-002 — Configuration](../domain-model.md#ent-002-configuration); appends only into a fresh configuration, honouring [CON-010 — Setup never overwrites an existing configuration](CON-010-setup-never-overwrites.md).
+- Realizes the waiver half of [SYS-012](SYS-012-coverage-policy-and-waivers.md); the waiver is applied by [SW-027](SW-027-apply-waivers.md) and matched by [SW-030](SW-030-waiver-match-by-id-or-pattern.md).
+- Never waives a missing realization — [CON-021](CON-021-missing-realize-never-waivable.md).
+- Writes the `waivers` section of [ENT-002](../domain-model.md#ent-002-configuration); appends only into a fresh configuration, honouring [CON-010](CON-010-setup-never-overwrites.md).
 
 ## Changes
 

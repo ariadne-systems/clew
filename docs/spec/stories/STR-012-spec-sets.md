@@ -40,7 +40,7 @@ When no `specSets` are configured, the default is one set per lens.
 
 **Realizes**
 
-- [SW-015 — Group the scanned traceables into the configured spec sets](../specs/SW-015-group-traceables.md)
-- [CON-013 — Each traceable belongs to exactly one spec set, or is explicitly ignored](../specs/CON-013-spec-set-partition.md)
+- [SW-015](../specs/SW-015-group-traceables.md)
+- [CON-013](../specs/CON-013-spec-set-partition.md)
 
 This story depends on the `spec` command skeleton (`STR-011`).

@@ -25,7 +25,7 @@ The command performs no reconciliation itself; it delegates to core and surfaces
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
 
 ## Changes
 

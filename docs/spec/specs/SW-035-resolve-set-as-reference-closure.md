@@ -23,18 +23,18 @@ Promoting a named spec whose references are all already bound finalizes just tha
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Realizes [CON-028 — A promotion is rooted at named drafts and finalizes their reference closure](CON-028-promotion-rooted-at-named-drafts.md) — this is the behaviour that resolves the set and refuses an unresolved reference.
-- Holds [CON-027 — A promoted spec never contains a temporary id](CON-027-no-temporary-id-in-promoted-corpus.md) — refusing an unresolvable closure is how no temporary id reaches the tree.
-- Substitutes within the set per [CON-014 — Promotion substitutes a draft's temporary id exhaustively](CON-014-exhaustive-substitution.md).
-- Part of [SW-017 — Finalize reviewed drafts into the spec tree](SW-017-finalize-drafts.md) — SW-017 finalizes the set this resolves.
+- Realizes [CON-028](CON-028-promotion-rooted-at-named-drafts.md) — this is the behaviour that resolves the set and refuses an unresolved reference.
+- Holds [CON-027](CON-027-no-temporary-id-in-promoted-corpus.md) — refusing an unresolvable closure is how no temporary id reaches the tree.
+- Substitutes within the set per [CON-014](CON-014-exhaustive-substitution.md).
+- Part of [SW-017](SW-017-finalize-drafts.md) — SW-017 finalizes the set this resolves.
 
 ## Changes
 

@@ -22,13 +22,13 @@ Re-running setup re-emits the template but never overwrites a project's own ADR.
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
 
 **Related**
 
-- The harness-neutral counterpart to the per-harness emission of [SW-043 — Setup emits the method scaffold through the configured harness adapter](SW-043-setup-emits-method-scaffold.md); both are method the tool ships.
-- Tool-owned and re-emittable, project ADRs untouched, per [CON-033 — The method scaffold is tool-owned; project files are never overwritten](CON-033-method-scaffold-tool-owned.md).
-- Extends the scaffolding of [SW-011 — Scaffold the default configuration and layout](SW-011-scaffold-default-config.md).
+- The harness-neutral counterpart to the per-harness emission of [SW-043](SW-043-setup-emits-method-scaffold.md); both are method the tool ships.
+- Tool-owned and re-emittable, project ADRs untouched, per [CON-033](CON-033-method-scaffold-tool-owned.md).
+- Extends the scaffolding of [SW-011](SW-011-scaffold-default-config.md).
 
 ## Changes
 

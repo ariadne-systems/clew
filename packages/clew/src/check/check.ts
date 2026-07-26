@@ -41,6 +41,7 @@ import {
   resolveGeneratorOrThrow,
   SPEC_STATUSES,
 } from "../spec/generator.js";
+import { escapeRegExp } from "../text/escape-regexp.js";
 
 /** A bound spec filename: a lens or story prefix, a number, an optional slug. */
 const SPEC_FILENAME = /^([A-Z]+)-(\d+)(?:-.*)?\.md$/;
@@ -107,6 +108,7 @@ type CheckModule = {
 function suite(): readonly CheckModule[] {
   return [
     { name: "reference-rot", run: referenceRot },
+    { name: "id-only-reference", run: idOnlyReference },
     { name: "invalid-status", run: invalidStatus },
     { name: "duplicate-id", run: duplicateId },
     { name: "spec-id-in-comment", run: specIdInComment },
@@ -172,8 +174,8 @@ export function formatCheckReport(result: CheckResult): string {
   return `check: ${result.findings.length} violation(s):\n${lines.join("\n")}\n`;
 }
 
-/** A markdown link's local target — `[text](./x.md#frag)` captures `./x.md#frag`. */
-const LINK = /\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+/** A markdown link — `[text](./x.md#frag)` captures the text (group 1) and the target (group 2). */
+const LINK = /\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
 
 /** The reference-rot member: every link and `@`-include in the document corpus resolves to an existing target. */
 const referenceRot: (context: CheckContext) => Promise<RawFinding[]> = realizes(
@@ -183,7 +185,7 @@ const referenceRot: (context: CheckContext) => Promise<RawFinding[]> = realizes(
     const anchorsByFile = new Map<string, Set<string>>();
     for (const file of await documentMarkdown(context)) {
       const absolute = join(context.projectRoot, file);
-      const lines = (await readFile(absolute, "utf8")).split(/\r?\n/);
+      const lines = maskCode(await readFile(absolute, "utf8"));
       for (const [index, line] of lines.entries()) {
         for (const target of localReferences(line)) {
           const finding = await brokenLink(
@@ -201,6 +203,39 @@ const referenceRot: (context: CheckContext) => Promise<RawFinding[]> = realizes(
     return findings;
   },
 );
+
+/** The id-only member: a relation link whose text begins with a spec id names the target by that id alone, no label after it. */
+const idOnlyReference: (context: CheckContext) => Promise<RawFinding[]> =
+  realizes(
+    ConTraceables.CON_034_CROSS_REFERENCE_IS_ID_ONLY,
+    async (context: CheckContext): Promise<RawFinding[]> => {
+      const idCitation = idCitationPattern(context.prefixes);
+      const findings: RawFinding[] = [];
+      for (const file of await documentMarkdown(context)) {
+        const absolute = join(context.projectRoot, file);
+        const lines = maskCode(await readFile(absolute, "utf8"));
+        for (const [index, line] of lines.entries()) {
+          for (const text of linkTexts(line)) {
+            const id = idCitation.exec(text)?.[0];
+            if (id !== undefined && text.trim() !== id) {
+              findings.push({
+                file,
+                line: index + 1,
+                message: `link text "${text}" carries more than the id "${id}"; cite the target by its id alone`,
+              });
+            }
+          }
+        }
+      }
+      return findings;
+    },
+  );
+
+/** A spec id — a configured prefix and a number — anchored at the start of a link's text. */
+function idCitationPattern(prefixes: Iterable<string>): RegExp {
+  const alternation = [...prefixes].map(escapeRegExp).join("|");
+  return new RegExp(`^(?:${alternation})-\\d+(?![\\w-])`);
+}
 
 /** The reference-rot finding for one link target, or undefined when it resolves. A link to an excluded path is skipped. */
 async function brokenLink(
@@ -474,7 +509,7 @@ async function documentMarkdown(
 /** The local link targets on a line — not an external URL, not a bare `#anchor`. */
 function* localLinks(line: string): IterableIterator<string> {
   for (const match of line.matchAll(LINK)) {
-    const target = match[1];
+    const target = match[2];
     if (
       target !== undefined &&
       !target.startsWith("#") &&
@@ -493,6 +528,38 @@ function* localReferences(line: string): IterableIterator<string> {
     const target = trimmed.slice(1).replace(/^import\s+/, "");
     if (target.includes("/") && /^[\w./-]+\.[a-z]+$/i.test(target)) {
       yield target;
+    }
+  }
+}
+
+/**
+ * The document's lines with inline-code and fenced-code spans blanked, so a
+ * citation quoted as an example is read as neither a reference nor an id-citation.
+ * Fenced blocks span lines, so fence state is tracked; inline spans are blanked
+ * within a line, preserving columns so a location still points at the real link.
+ */
+function maskCode(text: string): string[] {
+  const masked: string[] = [];
+  let inFence = false;
+  for (const line of text.split(/\r?\n/)) {
+    const isFence = /^\s*(?:```|~~~)/.test(line);
+    if (isFence) {
+      inFence = !inFence;
+    }
+    masked.push(
+      isFence || inFence
+        ? ""
+        : line.replace(/`[^`\n]*`/g, (span) => " ".repeat(span.length)),
+    );
+  }
+  return masked;
+}
+
+/** The text of each markdown link on a line — `[text](path)` yields `text`. */
+function* linkTexts(line: string): IterableIterator<string> {
+  for (const match of line.matchAll(LINK)) {
+    if (match[1] !== undefined) {
+      yield match[1];
     }
   }
 }

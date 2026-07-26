@@ -26,11 +26,11 @@ The command performs no binding, substitution, or move itself; it delegates to c
 
 **Realizes**
 
-- [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Constrained by [CON-028 — A promotion is rooted at named drafts and finalizes their reference closure](CON-028-promotion-rooted-at-named-drafts.md) — the command names a draft (or `all`), never nothing.
+- Constrained by [CON-028](CON-028-promotion-rooted-at-named-drafts.md) — the command names a draft (or `all`), never nothing.
 
 ## Changes
 

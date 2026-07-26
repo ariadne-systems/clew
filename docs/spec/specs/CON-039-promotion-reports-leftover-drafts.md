@@ -19,9 +19,9 @@ After promoting a story, a draft file left under the drafts location that was no
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Complements [CON-028 — A promotion is rooted at named drafts and finalizes their reference closure](CON-028-promotion-rooted-at-named-drafts.md) and [CON-024 — A failed promotion leaves the spec tree unchanged](CON-024-atomic-promotion.md): those govern what a promotion *moves*, this surfaces what it *leaves*.
-- Refines the report of [SW-016 — The tool exposes a `promote` command that delegates to core](SW-016-promote-command.md).
+- Complements [CON-028](CON-028-promotion-rooted-at-named-drafts.md) and [CON-024](CON-024-atomic-promotion.md): those govern what a promotion *moves*, this surfaces what it *leaves*.
+- Refines the report of [SW-016](SW-016-promote-command.md).

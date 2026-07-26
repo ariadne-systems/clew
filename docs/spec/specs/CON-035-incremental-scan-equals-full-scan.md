@@ -20,9 +20,9 @@ Where the change set cannot be trusted — no provenance, no version control, a 
 
 **Realizes**
 
-- [SYS-002 — The system scans the code for its anchors and produces a located record of all three relations](SYS-002-reverse-traceability-coverage.md)
+- [SYS-002](SYS-002-reverse-traceability-coverage.md)
 
 **Related**
 
-- Constrains [SW-048 — `clew scan` updates the index incrementally, rescanning only changed files](SW-048-scan-incremental-update.md).
-- Guards the index written by [SW-023 — The tool exposes a `scan` command that reports the code's anchor locations](SW-023-scan-command.md).
+- Constrains [SW-048](SW-048-scan-incremental-update.md).
+- Guards the index written by [SW-023](SW-023-scan-command.md).

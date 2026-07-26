@@ -20,8 +20,8 @@ The locations and coverage formats follow documented schemas; a change to a form
 
 **Realizes**
 
-- [STK-002 — A trustworthy, exportable trace record](STK-002-audit-evidence.md)
-- [STK-004 — Traceability data living with the code](STK-004-traceability-with-the-code.md)
+- [STK-002](STK-002-audit-evidence.md)
+- [STK-004](STK-004-traceability-with-the-code.md)
 
 ## Changes
 

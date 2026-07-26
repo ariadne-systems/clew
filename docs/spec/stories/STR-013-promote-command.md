@@ -54,9 +54,9 @@ The command does only the mechanical finalize; the integration reasoning and any
 
 **Realizes**
 
-- [SW-016 — The tool exposes a `promote` command that delegates to core](../specs/SW-016-promote-command.md)
-- [SW-017 — Finalize reviewed drafts into the spec tree](../specs/SW-017-finalize-drafts.md)
-- [CON-014 — Promotion substitutes a draft's temporary id exhaustively](../specs/CON-014-exhaustive-substitution.md)
+- [SW-016](../specs/SW-016-promote-command.md)
+- [SW-017](../specs/SW-017-finalize-drafts.md)
+- [CON-014](../specs/CON-014-exhaustive-substitution.md)
 
 This story depends on the existing `mint` allocation (STR-004) and the configured layout (ENT-002), and revises the `clew-promote` skill.
 

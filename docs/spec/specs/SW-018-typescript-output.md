@@ -33,7 +33,7 @@ Re-running on unchanged spec sets produces byte-identical files (CON-012).
 
 **Realizes**
 
-- [SYS-001 — Compile-checked anchoring](SYS-001-compile-checked-anchoring.md)
+- [SYS-001](SYS-001-compile-checked-anchoring.md)
 
 ## Changes
 

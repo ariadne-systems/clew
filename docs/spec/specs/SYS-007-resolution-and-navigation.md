@@ -19,5 +19,5 @@ Resolving an id yields its current location and metadata; the specs related to i
 
 **Realizes**
 
-- [STK-005 — Reuse over reinvention](STK-005-reuse-over-reinvention.md)
-- [STK-002 — A trustworthy, exportable trace record](STK-002-audit-evidence.md)
+- [STK-005](STK-005-reuse-over-reinvention.md)
+- [STK-002](STK-002-audit-evidence.md)

@@ -18,4 +18,4 @@ Given a spec whose content changed after code anchored to it, the system flags t
 
 **Realizes**
 
-- [STK-001 — Assurance that every spec is implemented and tested](STK-001-implementation-assurance.md)
+- [STK-001](STK-001-implementation-assurance.md)

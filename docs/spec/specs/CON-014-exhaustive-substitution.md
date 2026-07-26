@@ -25,11 +25,11 @@ The already-promoted spec tree is left byte-for-byte unchanged by the substituti
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Related**
 
-- Revised by [CON-027 — A promoted spec never contains a temporary id](CON-027-no-temporary-id-in-promoted-corpus.md) — scopes this substitution to the drafts and moves the promoted-tree guarantee to a refusal check.
+- Revised by [CON-027](CON-027-no-temporary-id-in-promoted-corpus.md) — scopes this substitution to the drafts and moves the promoted-tree guarantee to a refusal check.
 
 ## Changes
 

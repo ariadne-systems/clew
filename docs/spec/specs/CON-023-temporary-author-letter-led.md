@@ -22,4 +22,4 @@ A `--as` author that is not letter-led (for example `--as 12`) is rejected befor
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)

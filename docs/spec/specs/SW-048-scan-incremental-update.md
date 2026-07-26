@@ -24,14 +24,14 @@ The index is written atomically and records the provenance — the version-contr
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-002 — The system scans the code for its anchors and produces a located record of all three relations](SYS-002-reverse-traceability-coverage.md)
+- [SYS-002](SYS-002-reverse-traceability-coverage.md)
 
 **Related**
 
-- Extends [SW-023 — The tool exposes a `scan` command that reports the code's anchor locations](SW-023-scan-command.md), revising its "full, not incremental" clause, and builds on the core scan of [SW-022 — Scan the code into the set of anchor locations](SW-022-scan-code-into-anchor-locations.md).
-- Constrained by [CON-035 — An incremental scan yields the same index as a full scan](CON-035-incremental-scan-equals-full-scan.md).
-- Preserves the atomic-write discipline of [NF-002 — A state write is atomic](NF-002-atomic-state-write.md).
+- Extends [SW-023](SW-023-scan-command.md), revising its "full, not incremental" clause, and builds on the core scan of [SW-022](SW-022-scan-code-into-anchor-locations.md).
+- Constrained by [CON-035](CON-035-incremental-scan-equals-full-scan.md).
+- Preserves the atomic-write discipline of [NF-002](NF-002-atomic-state-write.md).

@@ -40,12 +40,12 @@ And because a spec about citation form must be able to quote that form, both the
 
 **Realizes** (new specs)
 
-- [CON-034 — A spec cross-reference cites its target by id alone, with no title label](../specs/CON-034-cross-reference-is-id-only.md)
+- [CON-034](../specs/CON-034-cross-reference-is-id-only.md)
 
 **Related**
 
-- Extends the suite stood up by [STR-024 — The tool runs its deterministic integrity checks as one `clew check` command](STR-024-clew-check-suite.md) — a new member beside reference-rot.
-- Complements and refines [CON-029 — Every document link resolves to an existing target](../specs/CON-029-document-link-resolves.md): CON-029 checks the reference *lands*; this keeps the reference *to the id alone*, so together a citation is a bare id that resolves. This story also refines CON-029 so a citation quoted inside a code span is not treated as a reference.
+- Extends the suite stood up by [STR-024](STR-024-clew-check-suite.md) — a new member beside reference-rot.
+- Complements and refines [CON-029](../specs/CON-029-document-link-resolves.md): CON-029 checks the reference *lands*; this keeps the reference *to the id alone*, so together a citation is a bare id that resolves. This story also refines CON-029 so a citation quoted inside a code span is not treated as a reference.
 
 ## Changes
 

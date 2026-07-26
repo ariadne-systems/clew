@@ -39,10 +39,10 @@ It writes nothing and never rebuilds the index — a pure read path safe for the
 
 **Realizes** (new specs)
 
-- [SW-047 — The tool exposes an `anchors` command that resolves spec ids to their anchor sites](../specs/SW-047-anchors-command.md)
+- [SW-047](../specs/SW-047-anchors-command.md)
 
 **Related**
 
-- Realizes a piece of [SYS-007 — The system resolves a spec id to its current location and surfaces the specs related to it](../specs/SYS-007-resolution-and-navigation.md), the planned resolution-and-navigation capability.
-- Reads the persisted index written by [SW-023 — The tool exposes a `scan` command that reports the code's anchor locations](../specs/SW-023-scan-command.md); the two are the read and write paths over the same file.
-- The read-and-report sibling of [SW-029 — The tool exposes a `coverage` command that reports coverage](../specs/SW-029-coverage-command.md).
+- Realizes a piece of [SYS-007](../specs/SYS-007-resolution-and-navigation.md), the planned resolution-and-navigation capability.
+- Reads the persisted index written by [SW-023](../specs/SW-023-scan-command.md); the two are the read and write paths over the same file.
+- The read-and-report sibling of [SW-029](../specs/SW-029-coverage-command.md).

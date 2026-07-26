@@ -22,4 +22,4 @@ Run twice in succession, the project is byte-for-byte unchanged.
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)

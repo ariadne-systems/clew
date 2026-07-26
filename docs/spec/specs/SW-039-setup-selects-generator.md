@@ -23,14 +23,14 @@ Making the generator a setup-time choice closes that gap at the one moment the p
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
 
 **Related**
 
-- Extends [SW-011 — Scaffold the default configuration and layout](SW-011-scaffold-default-config.md): the scaffolded configuration now carries a generator.
-- Revises the surface of [SW-010 — The tool exposes a `setup` command that delegates to core](SW-010-setup-command.md): the command gains the `--generator` option.
-- The written generator is consumed by [SW-014 — Generate traceables through the configured generators](SW-014-generate-traceables.md).
-- Writes the `generators` section of [ENT-002 — Configuration](../domain-model.md#ent-002-configuration).
+- Extends [SW-011](SW-011-scaffold-default-config.md): the scaffolded configuration now carries a generator.
+- Revises the surface of [SW-010](SW-010-setup-command.md): the command gains the `--generator` option.
+- The written generator is consumed by [SW-014](SW-014-generate-traceables.md).
+- Writes the `generators` section of [ENT-002](../domain-model.md#ent-002-configuration).
 
 ## Changes
 

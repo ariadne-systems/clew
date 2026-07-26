@@ -31,5 +31,5 @@ The ids the generator emits for a set of example markers are exactly the ids its
 
 **Realizes**
 
-- [SYS-002 — Reverse-traceability scan](SYS-002-reverse-traceability-coverage.md)
-- [SYS-011 — Named anchor relations](SYS-011-named-anchor-relations.md)
+- [SYS-002](SYS-002-reverse-traceability-coverage.md)
+- [SYS-011](SYS-011-named-anchor-relations.md)

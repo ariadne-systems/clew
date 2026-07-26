@@ -28,14 +28,14 @@ An unnamed promotion — no draft named and not `all` — is rejected, as is `al
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Constrains [SW-016 — The tool exposes a `promote` command that delegates to core](SW-016-promote-command.md) — the command names one or more drafts (a story or a spec), or `all`, never nothing.
-- Constrains [SW-017 — Finalize reviewed drafts into the spec tree](SW-017-finalize-drafts.md) — finalize operates on the resolved closure.
-- Makes [CON-027 — A promoted spec never contains a temporary id](CON-027-no-temporary-id-in-promoted-corpus.md) hold — refusing an incomplete closure is how no temporary id reaches the tree.
-- Scopes [CON-014 — Promotion substitutes a draft's temporary id exhaustively](CON-014-exhaustive-substitution.md) — substitution runs across the drafts in the resolved set.
+- Constrains [SW-016](SW-016-promote-command.md) — the command names one or more drafts (a story or a spec), or `all`, never nothing.
+- Constrains [SW-017](SW-017-finalize-drafts.md) — finalize operates on the resolved closure.
+- Makes [CON-027](CON-027-no-temporary-id-in-promoted-corpus.md) hold — refusing an incomplete closure is how no temporary id reaches the tree.
+- Scopes [CON-014](CON-014-exhaustive-substitution.md) — substitution runs across the drafts in the resolved set.
 
 ## Changes
 

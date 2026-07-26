@@ -46,22 +46,22 @@ Promotion therefore finalizes only a referentially-closed set rooted at a named 
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](../specs/SYS-005-spec-lifecycle.md)
+- [SYS-005](../specs/SYS-005-spec-lifecycle.md)
 
 **Realizes** (new specs)
 
-- [CON-028 — A promotion is rooted at named drafts and finalizes their reference closure](../specs/CON-028-promotion-rooted-at-named-drafts.md)
-- [SW-035 — Promotion resolves its set as the closure of the named roots' references](../specs/SW-035-resolve-set-as-reference-closure.md)
-- [CON-027 — A promoted spec never contains a temporary id](../specs/CON-027-no-temporary-id-in-promoted-corpus.md)
+- [CON-028](../specs/CON-028-promotion-rooted-at-named-drafts.md)
+- [SW-035](../specs/SW-035-resolve-set-as-reference-closure.md)
+- [CON-027](../specs/CON-027-no-temporary-id-in-promoted-corpus.md)
 
 **Related**
 
-- Revises [SW-016 — The tool exposes a `promote` command that delegates to core](../specs/SW-016-promote-command.md) — the command now names a draft (or `all`) and no longer finalizes all pending with no argument.
-- Hardens [SW-017 — Finalize reviewed drafts into the spec tree](../specs/SW-017-finalize-drafts.md) — it finalizes the resolved closure, substitutes only within the drafts, and refuses an unresolved reference.
-- Revises [CON-014 — Promotion substitutes a draft's temporary id exhaustively](../specs/CON-014-exhaustive-substitution.md) — removes "already-promoted specs and the domain model" from substitution scope; the no-dangling guarantee is met by refusing an unresolved reference within a closed set.
-- Supersedes the draft-selection of [STR-013 — Add an `clew promote` command](STR-013-promote-command.md) — its "promote-all by default / named drafts" selection and project-wide substitution are replaced by rooting at a named story (or `all`) and resolving the closure.
-- Traces the collision to [STR-021 — Readable per-author temporary ids](STR-021-readable-per-author-temporary-ids.md) — legible ids are what made a temporary id coincide with example prose.
-- Complements [CON-024 — A failed promotion leaves the spec tree unchanged](../specs/CON-024-atomic-promotion.md) — atomicity guards a *failed* run; this keeps a *successful* one from writing outside the drafts.
+- Revises [SW-016](../specs/SW-016-promote-command.md) — the command now names a draft (or `all`) and no longer finalizes all pending with no argument.
+- Hardens [SW-017](../specs/SW-017-finalize-drafts.md) — it finalizes the resolved closure, substitutes only within the drafts, and refuses an unresolved reference.
+- Revises [CON-014](../specs/CON-014-exhaustive-substitution.md) — removes "already-promoted specs and the domain model" from substitution scope; the no-dangling guarantee is met by refusing an unresolved reference within a closed set.
+- Supersedes the draft-selection of [STR-013](STR-013-promote-command.md) — its "promote-all by default / named drafts" selection and project-wide substitution are replaced by rooting at a named story (or `all`) and resolving the closure.
+- Traces the collision to [STR-021](STR-021-readable-per-author-temporary-ids.md) — legible ids are what made a temporary id coincide with example prose.
+- Complements [CON-024](../specs/CON-024-atomic-promotion.md) — atomicity guards a *failed* run; this keeps a *successful* one from writing outside the drafts.
 
 ## Changes
 

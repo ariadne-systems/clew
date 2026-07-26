@@ -27,12 +27,12 @@ Each file is written stage-then-rename, so an interrupted write never leaves a p
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Constrains [SW-017 — Finalize reviewed drafts into the spec tree](SW-017-finalize-drafts.md) — how its substitution and move execute.
-- Complements [CON-014 — Promotion substitutes a draft's temporary id exhaustively](CON-014-exhaustive-substitution.md) — success-completeness there, failure-atomicity here.
+- Constrains [SW-017](SW-017-finalize-drafts.md) — how its substitution and move execute.
+- Complements [CON-014](CON-014-exhaustive-substitution.md) — success-completeness there, failure-atomicity here.
 
 ## Changes
 

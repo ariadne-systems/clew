@@ -27,7 +27,7 @@ A missing `type`, an extra argument, or an unknown option is rejected with a non
 
 **Realizes**
 
-- [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 ## Changes
 

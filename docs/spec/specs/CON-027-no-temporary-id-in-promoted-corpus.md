@@ -23,15 +23,15 @@ After any successful promotion, a search for the `-TMP-` marker across the promo
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Revises [CON-014 — Promotion substitutes a draft's temporary id exhaustively](CON-014-exhaustive-substitution.md) — the no-dangling guarantee is met by refusing an unresolved reference within a closed set, not by substituting across already-promoted specs.
-- Builds on [CON-008 — The `-TMP-` marker is reserved and a prefix may not use it](CON-008-tmp-marker-reserved.md) — the reserved marker makes an unresolved reference unambiguously detectable.
-- Is the result of [CON-028 — A promotion is rooted at named drafts and finalizes their reference closure](CON-028-promotion-rooted-at-named-drafts.md) — refusing an incomplete closure is how this invariant is reached.
-- Constrains [SW-035 — Promotion resolves its set as the closure of the named roots' references](SW-035-resolve-set-as-reference-closure.md).
-- Complements [CON-024 — A failed promotion leaves the spec tree unchanged](CON-024-atomic-promotion.md).
+- Revises [CON-014](CON-014-exhaustive-substitution.md) — the no-dangling guarantee is met by refusing an unresolved reference within a closed set, not by substituting across already-promoted specs.
+- Builds on [CON-008](CON-008-tmp-marker-reserved.md) — the reserved marker makes an unresolved reference unambiguously detectable.
+- Is the result of [CON-028](CON-028-promotion-rooted-at-named-drafts.md) — refusing an incomplete closure is how this invariant is reached.
+- Constrains [SW-035](SW-035-resolve-set-as-reference-closure.md).
+- Complements [CON-024](CON-024-atomic-promotion.md).
 
 ## Changes
 

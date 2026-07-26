@@ -26,8 +26,8 @@ Minting advances no bound sequence and takes no lock (CON-007).
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Concerns**
 
-- [CON-023 — A temporary id's author postfix is letter-led](CON-023-temporary-author-letter-led.md)
+- [CON-023](CON-023-temporary-author-letter-led.md)

@@ -35,11 +35,11 @@ The scan and a check resolve the same source-file set for the same configuration
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-002 — Reverse-traceability scan](SYS-002-reverse-traceability-coverage.md)
+- [SYS-002](SYS-002-reverse-traceability-coverage.md)
 
 ## Changes
 

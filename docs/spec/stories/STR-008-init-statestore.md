@@ -34,9 +34,9 @@ The command is idempotent: running it again on an unchanged project leaves the s
 
 **Realizes**
 
-- [SW-006 — Derive per-prefix high-water marks from existing artifacts](../specs/SW-006-derive-high-water-marks.md)
-- [SW-007 — The tool exposes a `reconcile` command that delegates to core](../specs/SW-007-reconcile-command.md)
-- [CON-009 — Reconciliation never lowers a high-water mark](../specs/CON-009-reconcile-never-lowers.md)
+- [SW-006](../specs/SW-006-derive-high-water-marks.md)
+- [SW-007](../specs/SW-007-reconcile-command.md)
+- [CON-009](../specs/CON-009-reconcile-never-lowers.md)
 
 ## Changes
 

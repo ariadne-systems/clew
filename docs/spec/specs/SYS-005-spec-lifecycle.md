@@ -18,7 +18,7 @@ Temporary ids can be minted without advancing state; promotion binds real ids an
 
 **Realizes**
 
-- [STK-003 — Low authoring friction](STK-003-low-authoring-friction.md)
+- [STK-003](STK-003-low-authoring-friction.md)
 
 ## Changes
 

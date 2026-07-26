@@ -26,15 +26,15 @@ Adding a harness is a new adapter implementing the contract plus its registratio
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
 
 **Related**
 
-- Sibling of [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](ARCH-003-generator-interface.md): the same in-tree-implementation-behind-an-interface pattern, on the harness axis.
+- Sibling of [ARCH-003](ARCH-003-generator-interface.md): the same in-tree-implementation-behind-an-interface pattern, on the harness axis.
 - Realizes [ADR-0008 — The agent-facing method is emitted through per-harness adapters](../../adr/ADR-0008-harness-adapter-for-agent-facing-method.md).
 
 ## Changes

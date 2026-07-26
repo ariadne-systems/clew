@@ -19,8 +19,8 @@ A spec covered only by `concerns` is reported uncovered; an uncovered, unwaived 
 
 **Realizes**
 
-- [STK-001 — Assurance that every spec is implemented and tested](STK-001-implementation-assurance.md)
-- [STK-002 — A trustworthy, exportable trace record](STK-002-audit-evidence.md)
+- [STK-001](STK-001-implementation-assurance.md)
+- [STK-002](STK-002-audit-evidence.md)
 
 ## Changes
 

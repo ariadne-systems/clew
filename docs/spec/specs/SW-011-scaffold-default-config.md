@@ -22,4 +22,4 @@ The written configuration is valid: minting a default lens against it succeeds, 
 
 **Realizes**
 
-- [SYS-004 — Configuration and state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)

@@ -29,14 +29,14 @@ The ids the generator emits for a set of example markers are exactly the ids its
 
 **Realizes**
 
-- [SYS-002 — Reverse-traceability scan](SYS-002-reverse-traceability-coverage.md)
-- [SYS-011 — Named anchor relations](SYS-011-named-anchor-relations.md)
+- [SYS-002](SYS-002-reverse-traceability-coverage.md)
+- [SYS-011](SYS-011-named-anchor-relations.md)
 
 **Related**
 
-- Parallels [SW-021 — Discover anchors in TypeScript via a lightweight lexical scan](SW-021-discover-anchors-typescript.md) — the same discovery, for Java's annotation forms.
-- Implements the discover half of [ARCH-004 — Generation and reading back are dual operations](ARCH-004-generator-discovers-markers.md) for Java.
-- Reads comments and code regions through [ARCH-006 — Comment detection is a generator capability](ARCH-006-pluggable-comment-finders.md), the shared C-family lexer in its Java dialect.
+- Parallels [SW-021](SW-021-discover-anchors-typescript.md) — the same discovery, for Java's annotation forms.
+- Implements the discover half of [ARCH-004](ARCH-004-generator-discovers-markers.md) for Java.
+- Reads comments and code regions through [ARCH-006](ARCH-006-pluggable-comment-finders.md), the shared C-family lexer in its Java dialect.
 
 ## Changes
 

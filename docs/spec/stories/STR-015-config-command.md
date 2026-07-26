@@ -50,9 +50,9 @@ Resolving the configuration is a single core behaviour the skills and the comman
 
 **Realizes**
 
-- [SW-020 — The tool exposes a `config` command that prints the resolved configuration](../specs/SW-020-config-command.md)
-- [SW-019 — The tool resolves the project configuration into a single view](../specs/SW-019-resolve-configuration.md)
-- [CON-015 — The `config` command is read-only](../specs/CON-015-config-read-only.md)
+- [SW-020](../specs/SW-020-config-command.md)
+- [SW-019](../specs/SW-019-resolve-configuration.md)
+- [CON-015](../specs/CON-015-config-read-only.md)
 
 This story builds on the configuration readers (SW-009), mirrors the `spec` command's shape (SW-012), and reuses the configuration precondition (CON-011) and the generator interface (ARCH-003).
 

@@ -20,10 +20,10 @@ The covered count itself is unchanged.
 
 **Realizes**
 
-- [SYS-012 — The system enforces traceability coverage by default, computed by policy and admitting gaps only through committed waivers](SYS-012-coverage-policy-and-waivers.md)
+- [SYS-012](SYS-012-coverage-policy-and-waivers.md)
 
 **Related**
 
-- Refines the report of [SW-028 — Emit the coverage result as `coverage.json` and a human-readable report](SW-028-emit-coverage-result.md), surfaced by the command [SW-029 — The tool exposes a `coverage` command that reports coverage](SW-029-coverage-command.md).
-- Rests on [CON-020 — The coverage universe is exactly the generated traceables (the enum members)](CON-020-coverage-universe.md): planned specs are the universe's complement, which is what this surfaces.
-- The report-honesty sibling of [CON-038 — A coverage waiver's report names the ids it absorbs](CON-038-coverage-report-names-waiver-absorption.md).
+- Refines the report of [SW-028](SW-028-emit-coverage-result.md), surfaced by the command [SW-029](SW-029-coverage-command.md).
+- Rests on [CON-020](CON-020-coverage-universe.md): planned specs are the universe's complement, which is what this surfaces.
+- The report-honesty sibling of [CON-038](CON-038-coverage-report-names-waiver-absorption.md).

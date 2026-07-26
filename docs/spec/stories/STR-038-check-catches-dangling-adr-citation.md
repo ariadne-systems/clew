@@ -39,10 +39,10 @@ State the stance in the spec conventions (006) so a reader knows ADRs are the wh
 
 **Realizes** (new specs)
 
-- [CON-036 — Every cited ADR id resolves to an ADR file](../specs/CON-036-cited-adr-id-resolves.md)
+- [CON-036](../specs/CON-036-cited-adr-id-resolves.md)
 
 **Related**
 
-- Extends the suite stood up by [STR-024 — The tool runs its deterministic integrity checks as one `clew check` command](STR-024-clew-check-suite.md) — a new member beside reference-rot.
-- The token-resolving sibling of [CON-029 — Every document link resolves to an existing target](../specs/CON-029-document-link-resolves.md): CON-029 resolves markdown links, this resolves bare ADR-id tokens.
-- Checks the practice seeded by [SW-045 — Setup seeds the ADR practice with a tool-owned template](../specs/SW-045-setup-seeds-adr-practice.md): setup gives a project ADRs; this keeps their citations honest.
+- Extends the suite stood up by [STR-024](STR-024-clew-check-suite.md) — a new member beside reference-rot.
+- The token-resolving sibling of [CON-029](../specs/CON-029-document-link-resolves.md): CON-029 resolves markdown links, this resolves bare ADR-id tokens.
+- Checks the practice seeded by [SW-045](../specs/SW-045-setup-seeds-adr-practice.md): setup gives a project ADRs; this keeps their citations honest.

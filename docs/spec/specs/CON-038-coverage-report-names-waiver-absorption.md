@@ -20,10 +20,10 @@ Given a glob waiver and a spec newer than the waiver that it matches, the report
 
 **Realizes**
 
-- [SYS-012 — The system enforces traceability coverage by default, computed by policy and admitting gaps only through committed waivers](SYS-012-coverage-policy-and-waivers.md)
+- [SYS-012](SYS-012-coverage-policy-and-waivers.md)
 
 **Related**
 
-- Refines the report of [SW-028 — Emit the coverage result as `coverage.json` and a human-readable report](SW-028-emit-coverage-result.md), surfaced by the command [SW-029 — The tool exposes a `coverage` command that reports coverage](SW-029-coverage-command.md).
-- Sits beside [CON-021 — A waiver never hides a spec that is missing its implementation](CON-021-missing-realize-never-waivable.md): that bounds what a waiver may do, this makes what it *does* do visible.
-- The report-honesty sibling of [CON-037 — The coverage report states the planned count distinctly from covered](CON-037-coverage-report-shows-planned-count.md).
+- Refines the report of [SW-028](SW-028-emit-coverage-result.md), surfaced by the command [SW-029](SW-029-coverage-command.md).
+- Sits beside [CON-021](CON-021-missing-realize-never-waivable.md): that bounds what a waiver may do, this makes what it *does* do visible.
+- The report-honesty sibling of [CON-037](CON-037-coverage-report-shows-planned-count.md).

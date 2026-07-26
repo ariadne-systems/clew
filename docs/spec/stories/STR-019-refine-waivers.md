@@ -43,17 +43,17 @@ And a single-id waiver landing on a `None` spec hides a spec with no anchor to c
 
 **Realizes** (temporary ids; bound and substituted on promotion)
 
-- [SW-030 — A waiver matches specs by id or glob pattern and waives a missing test](../specs/SW-030-waiver-match-by-id-or-pattern.md)
-- [CON-021 — A waiver never hides a spec that is missing its implementation](../specs/CON-021-missing-realize-never-waivable.md)
+- [SW-030](../specs/SW-030-waiver-match-by-id-or-pattern.md)
+- [CON-021](../specs/CON-021-missing-realize-never-waivable.md)
 
 **Related (existing corpus)**
 
-- Refines [SW-027 — Reconcile uncovered specs against the committed waiver list](../specs/SW-027-apply-waivers.md): its match-and-stale step now matches by id or pattern and waives a missing test. (Supersession candidate — reconcile at promotion; my lean is to refine SW-027 in place.)
-- Its specs realize [SYS-012 — Coverage policy and waivers](../specs/SYS-012-coverage-policy-and-waivers.md): a gap is admitted only as a missing test, by a possibly-pattern waiver.
-- Sharpens the waiver list introduced by [STR-018 — the coverage report](STR-018-coverage-report.md).
+- Refines [SW-027](../specs/SW-027-apply-waivers.md): its match-and-stale step now matches by id or pattern and waives a missing test. (Supersession candidate — reconcile at promotion; my lean is to refine SW-027 in place.)
+- Its specs realize [SYS-012](../specs/SYS-012-coverage-policy-and-waivers.md): a gap is admitted only as a missing test, by a possibly-pattern waiver.
+- Sharpens the waiver list introduced by [STR-018](STR-018-coverage-report.md).
 - Motivated by the structural gaps the report surfaced: `STK-*` Realized-forever and SYS-001 (no honest verify), versus STK-005 / SYS-007 / SYS-009 (`None`), which must stay visible.
 
 **Artifacts** (not specs)
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration): the `waivers` attribute gains `pattern` (an alternative to `id`); an entry stays `{ id | pattern, reason }`.
+- [ENT-002](../domain-model.md#ent-002-configuration): the `waivers` attribute gains `pattern` (an alternative to `id`); an entry stays `{ id | pattern, reason }`.
 - A changeset for the refined waiver behaviour.

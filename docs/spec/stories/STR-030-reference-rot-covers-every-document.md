@@ -49,14 +49,14 @@ CON-029 is therefore revised — broadened from spec-relation links to every doc
 
 **Realizes**
 
-- Revises and delivers [CON-029 — Every document link resolves to an existing target](../specs/CON-029-document-link-resolves.md) — broadened to every document link.
-- Fulfills [ARCH-005 — Deterministic integrity checks are one shipped `clew check` suite](../specs/ARCH-005-checks-are-one-suite.md) — the repo-local reference script is retired.
+- Revises and delivers [CON-029](../specs/CON-029-document-link-resolves.md) — broadened to every document link.
+- Fulfills [ARCH-005](../specs/ARCH-005-checks-are-one-suite.md) — the repo-local reference script is retired.
 
 **Related (existing corpus)**
 
-- Runs under [SW-034 — clew exposes a `check` command that runs the integrity-check suite](../specs/SW-034-check-command.md).
-- Reuses the exclusion model of [CON-016 — The scan excludes dependency and build directories by default](../specs/CON-016-scan-builtin-exclusions.md) and [CON-017 — Exclusion precedence](../specs/CON-017-exclusion-precedence.md).
-- Leaves untouched the temporary-id guarantee of [CON-027 — A promoted spec never contains a temporary id](../specs/CON-027-no-temporary-id-in-promoted-corpus.md).
+- Runs under [SW-034](../specs/SW-034-check-command.md).
+- Reuses the exclusion model of [CON-016](../specs/CON-016-scan-builtin-exclusions.md) and [CON-017](../specs/CON-017-exclusion-precedence.md).
+- Leaves untouched the temporary-id guarantee of [CON-027](../specs/CON-027-no-temporary-id-in-promoted-corpus.md).
 
 ## Changes
 

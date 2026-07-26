@@ -21,8 +21,8 @@ A pattern waives every matching `Realized` spec and leaves a matching `None` spe
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-012 — Coverage policy and waivers](SYS-012-coverage-policy-and-waivers.md)
+- [SYS-012](SYS-012-coverage-policy-and-waivers.md)

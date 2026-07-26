@@ -24,7 +24,7 @@ Cross-call uniqueness follows by construction from the crypto-random token; it i
 
 **Realizes**
 
-- [SYS-003 — Stable spec identity](SYS-003-stable-spec-identity.md)
+- [SYS-003](SYS-003-stable-spec-identity.md)
 
 ## Changes
 

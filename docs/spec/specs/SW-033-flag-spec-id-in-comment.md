@@ -21,8 +21,8 @@ A file whose only reference is an anchor passes; a file with a spec id in a line
 
 **Realizes**
 
-- [SYS-014 — The system detects a spec reference that bypasses the anchor](SYS-014-detect-references-bypassing-anchor.md)
+- [SYS-014](SYS-014-detect-references-bypassing-anchor.md)
 
 **Related**
 
-- Enforces [CON-026 — A spec id appears in code only inside its anchor](CON-026-spec-id-only-in-anchor.md) — this check is how the invariant is held.
+- Enforces [CON-026](CON-026-spec-id-only-in-anchor.md) — this check is how the invariant is held.

@@ -33,18 +33,18 @@ Re-running on unchanged spec sets produces byte-identical files (CON-012).
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-001 — Compile-checked anchoring](SYS-001-compile-checked-anchoring.md)
+- [SYS-001](SYS-001-compile-checked-anchoring.md)
 
 **Related**
 
-- Parallels [SW-018 — The TypeScript generator emits per-set string enums and an anchoring helper module](SW-018-typescript-output.md) — the same output contract for Java, with real annotations instead of function and type markers.
-- Implements [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](ARCH-003-generator-interface.md) for the Java target.
-- Emits one enum per spec set per [SW-015 — Group the scanned specs into spec sets](SW-015-group-traceables.md), and marks a `deprecated` member per [SW-014 — Generate the traceables through the configured generators](SW-014-generate-traceables.md).
-- Tool-owned and deterministic per [CON-012 — Generated files are tool-owned](CON-012-generated-files-tool-owned.md), and inert to the scan per [CON-030 — Generated output is inert to the scan](CON-030-generated-output-inert-to-scan.md).
+- Parallels [SW-018](SW-018-typescript-output.md) — the same output contract for Java, with real annotations instead of function and type markers.
+- Implements [ARCH-003](ARCH-003-generator-interface.md) for the Java target.
+- Emits one enum per spec set per [SW-015](SW-015-group-traceables.md), and marks a `deprecated` member per [SW-014](SW-014-generate-traceables.md).
+- Tool-owned and deterministic per [CON-012](CON-012-generated-files-tool-owned.md), and inert to the scan per [CON-030](CON-030-generated-output-inert-to-scan.md).
 
 ## Changes
 

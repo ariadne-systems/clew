@@ -24,9 +24,9 @@ A project cannot relax the pinned core: an id, `**Status**`, or unresolved-relat
 
 **Realizes**
 
-- [SYS-015 — The system validates each artifact against its declared schema when it reads it](SYS-015-validate-artifacts-on-load.md)
+- [SYS-015](SYS-015-validate-artifacts-on-load.md)
 
 **Related**
 
 - The project-defined part is configured in ENT-002 (Configuration), a schema reference per document type.
-- The pinned core is the existing in-code rules gathered under one contract: [CON-022 — A spec's status is one of the declared values](CON-022-valid-status.md) (status) and [CON-025 — A bound spec id is declared by exactly one file](CON-025-one-file-per-spec-id.md) (uniqueness); the id form and relation resolvability are likewise clew's.
+- The pinned core is the existing in-code rules gathered under one contract: [CON-022](CON-022-valid-status.md) (status) and [CON-025](CON-025-one-file-per-spec-id.md) (uniqueness); the id form and relation resolvability are likewise clew's.

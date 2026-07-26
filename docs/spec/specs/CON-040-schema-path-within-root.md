@@ -22,12 +22,12 @@ A configured schema path that resolves within the project root is read; one that
 
 **Realizes**
 
-- [SYS-004 — The system keeps version-controlled per-project configuration and allocation state](SYS-004-configuration-and-state.md)
+- [SYS-004](SYS-004-configuration-and-state.md)
 
 **Related**
 
-- The provenance sibling of [CON-032 — A schema is validated against clew's minimum contract before it is used](CON-032-validate-schema-before-use.md): that validates the loaded schema's shape, this bounds where the schema may be loaded from — together they are "safe to use".
-- Applies the same repository-root containment as [CON-018 — Exclusion patterns are repository-root-relative globs](CON-018-root-relative-globs.md), to a configured file path rather than a glob.
+- The provenance sibling of [CON-032](CON-032-validate-schema-before-use.md): that validates the loaded schema's shape, this bounds where the schema may be loaded from — together they are "safe to use".
+- Applies the same repository-root containment as [CON-018](CON-018-root-relative-globs.md), to a configured file path rather than a glob.
 
 ## Changes
 

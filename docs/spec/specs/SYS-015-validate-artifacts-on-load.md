@@ -21,4 +21,4 @@ A project supplies its own document schema, and the system honours it without mo
 
 **Realizes**
 
-- [STK-002 — A trustworthy, exportable trace record](STK-002-audit-evidence.md)
+- [STK-002](STK-002-audit-evidence.md)

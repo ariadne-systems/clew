@@ -19,4 +19,4 @@ Only the three relations are emitted and recognized; a spec id in a comment is n
 
 **Realizes**
 
-- [STK-001 — Assurance that every spec is implemented and tested](STK-001-implementation-assurance.md)
+- [STK-001](STK-001-implementation-assurance.md)

@@ -25,9 +25,9 @@ The command reads the index once, writes nothing, and does not rescan; the JSON 
 
 **Realizes**
 
-- [SYS-007 — The system resolves a spec id to its current location and surfaces the specs related to it](SYS-007-resolution-and-navigation.md)
+- [SYS-007](SYS-007-resolution-and-navigation.md)
 
 **Related**
 
-- Reads the persisted index written by [SW-023 — The tool exposes a `scan` command that reports the code's anchor locations](SW-023-scan-command.md); the two are the read and write paths over the same file, produced by [SW-022 — Scan the code into the set of anchor locations](SW-022-scan-code-into-anchor-locations.md).
-- The read-and-report sibling of [SW-029 — The tool exposes a `coverage` command that reports coverage](SW-029-coverage-command.md).
+- Reads the persisted index written by [SW-023](SW-023-scan-command.md); the two are the read and write paths over the same file, produced by [SW-022](SW-022-scan-code-into-anchor-locations.md).
+- The read-and-report sibling of [SW-029](SW-029-coverage-command.md).

@@ -19,5 +19,5 @@ Allocating ids yields distinct values; a released id is never reissued; the allo
 
 **Realizes**
 
-- [STK-001 — Assurance that every spec is implemented and tested](STK-001-implementation-assurance.md)
-- [STK-004 — Traceability data living with the code](STK-004-traceability-with-the-code.md)
+- [STK-001](STK-001-implementation-assurance.md)
+- [STK-004](STK-004-traceability-with-the-code.md)

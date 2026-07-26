@@ -35,11 +35,11 @@ Make the three reports name what they currently hide, without changing any comma
 
 **Realizes** (new specs)
 
-- [CON-037 — The coverage report states the planned count distinctly from covered](../specs/CON-037-coverage-report-shows-planned-count.md)
-- [CON-038 — A coverage waiver's report names the ids it absorbs](../specs/CON-038-coverage-report-names-waiver-absorption.md)
-- [CON-039 — Promotion reports the drafts it leaves behind](../specs/CON-039-promotion-reports-leftover-drafts.md)
+- [CON-037](../specs/CON-037-coverage-report-shows-planned-count.md)
+- [CON-038](../specs/CON-038-coverage-report-names-waiver-absorption.md)
+- [CON-039](../specs/CON-039-promotion-reports-leftover-drafts.md)
 
 **Related**
 
-- Refines the report emitted by [SW-028 — Emit the coverage result as `coverage.json` and a human-readable report](../specs/SW-028-emit-coverage-result.md) and the command [SW-029 — The tool exposes a `coverage` command that reports coverage](../specs/SW-029-coverage-command.md).
-- Refines the report of [SW-016 — The tool exposes a `promote` command that delegates to core](../specs/SW-016-promote-command.md).
+- Refines the report emitted by [SW-028](../specs/SW-028-emit-coverage-result.md) and the command [SW-029](../specs/SW-029-coverage-command.md).
+- Refines the report of [SW-016](../specs/SW-016-promote-command.md).

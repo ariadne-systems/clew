@@ -42,10 +42,10 @@ The requirement is a command-level precondition; the core config readers still d
 
 **Realizes**
 
-- [SW-010 — The tool exposes a `setup` command that delegates to core](../specs/SW-010-setup-command.md)
-- [SW-011 — Scaffold the default configuration and layout](../specs/SW-011-scaffold-default-config.md)
-- [CON-010 — Setup never overwrites an existing configuration](../specs/CON-010-setup-never-overwrites.md)
-- [CON-011 — A command requires a project configuration and directs the user to setup](../specs/CON-011-command-requires-config.md)
+- [SW-010](../specs/SW-010-setup-command.md)
+- [SW-011](../specs/SW-011-scaffold-default-config.md)
+- [CON-010](../specs/CON-010-setup-never-overwrites.md)
+- [CON-011](../specs/CON-011-command-requires-config.md)
 
 ## Changes
 

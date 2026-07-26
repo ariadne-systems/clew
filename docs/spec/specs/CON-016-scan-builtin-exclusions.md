@@ -26,11 +26,11 @@ The built-in exclusions apply with no configuration present, and a generator's o
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Related**
 
-- Relies on [CON-030 — Generated output is inert to the scan and the checks](CON-030-generated-output-inert-to-scan.md): inertness, not a built-in exclusion, is what keeps the scan faithful to generated output.
+- Relies on [CON-030](CON-030-generated-output-inert-to-scan.md): inertness, not a built-in exclusion, is what keeps the scan faithful to generated output.
 
 ## Changes
 

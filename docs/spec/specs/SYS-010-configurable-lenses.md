@@ -19,5 +19,5 @@ The configured lenses determine which prefixes are valid; minting an unconfigure
 
 **Realizes**
 
-- [STK-006 — Project-controlled traceability vocabulary](STK-006-project-controlled-vocabulary.md)
-- [STK-004 — Traceability data living with the code](STK-004-traceability-with-the-code.md)
+- [STK-006](STK-006-project-controlled-vocabulary.md)
+- [STK-004](STK-004-traceability-with-the-code.md)

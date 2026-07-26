@@ -21,4 +21,4 @@ Given a recorded mark SW=3 and artifacts up to SW-005, initialization raises SW 
 
 **Concerns**
 
-- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)
+- [ENT-001](../domain-model.md#ent-001-clewstate)

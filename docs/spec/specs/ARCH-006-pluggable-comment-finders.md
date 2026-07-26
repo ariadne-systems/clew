@@ -23,12 +23,12 @@ A language the project generates for is scanned for spec-id-in-comment with no s
 
 **Realizes**
 
-- [SYS-014 — The system detects a spec reference that bypasses the anchor](SYS-014-detect-references-bypassing-anchor.md)
+- [SYS-014](SYS-014-detect-references-bypassing-anchor.md)
 
 **Related**
 
-- Part of [ARCH-003 — Generation is delegated to language-specific generators behind a narrow interface](ARCH-003-generator-interface.md): comment identification is one operation of the generator contract, beside generation and discovery.
-- [SW-033 — clew reports a spec id found in a code comment](SW-033-flag-spec-id-in-comment.md) finds comments through the generator's comment identification.
+- Part of [ARCH-003](ARCH-003-generator-interface.md): comment identification is one operation of the generator contract, beside generation and discovery.
+- [SW-033](SW-033-flag-spec-id-in-comment.md) finds comments through the generator's comment identification.
 
 ## Changes
 

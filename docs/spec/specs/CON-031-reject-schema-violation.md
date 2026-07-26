@@ -24,9 +24,9 @@ A project-field violation rejects at `fail` and is reported but non-fatal at `wa
 
 **Realizes**
 
-- [SYS-015 — The system validates each artifact against its declared schema when it reads it](SYS-015-validate-artifacts-on-load.md)
+- [SYS-015](SYS-015-validate-artifacts-on-load.md)
 
 **Related**
 
-- Parallels [CON-022 — A spec's status is one of the declared values](CON-022-valid-status.md) — the same fail-fast rule, now one part of the schema's pinned core.
+- Parallels [CON-022](CON-022-valid-status.md) — the same fail-fast rule, now one part of the schema's pinned core.
 - The severity (`warn` / `fail`) is configured in ENT-002 (Configuration).

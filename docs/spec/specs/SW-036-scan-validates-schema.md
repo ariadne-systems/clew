@@ -28,18 +28,18 @@ With no project schema configured, a document carrying arbitrary fields scans as
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-015 — The system validates each artifact against its declared schema when it reads it](SYS-015-validate-artifacts-on-load.md)
+- [SYS-015](SYS-015-validate-artifacts-on-load.md)
 
 **Related**
 
-- Implements [ARCH-007 — A document schema pins only what clew reads; the rest is project-defined](ARCH-007-schema-core-is-what-clew-reads.md) — the pinned-core/project split this scan enforces.
-- Generalizes [SW-031 — The spec scan reads each spec's implementation state](SW-031-scan-spec-status.md) — reading and checking the status becomes one part of validating the schema.
-- Holds [CON-031 — A document that violates its schema is rejected, or warned per config](CON-031-reject-schema-violation.md).
-- Applies a schema only after it passes [CON-032 — A schema is validated against clew's minimum contract before it is used](CON-032-validate-schema-before-use.md).
+- Implements [ARCH-007](ARCH-007-schema-core-is-what-clew-reads.md) — the pinned-core/project split this scan enforces.
+- Generalizes [SW-031](SW-031-scan-spec-status.md) — reading and checking the status becomes one part of validating the schema.
+- Holds [CON-031](CON-031-reject-schema-violation.md).
+- Applies a schema only after it passes [CON-032](CON-032-validate-schema-before-use.md).
 
 ## Changes
 

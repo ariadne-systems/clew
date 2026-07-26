@@ -36,10 +36,10 @@ The store carries no domain logic — it knows the entity's shape, not what any 
 
 **Realizes**
 
-- [CON-001 — The tool's state is a single version-controlled file](../specs/CON-001-state-file-version-controlled.md)
-- [NF-001 — State access is mutually exclusive across processes](../specs/NF-001-state-access-mutually-exclusive.md)
-- [NF-002 — A state write is atomic](../specs/NF-002-atomic-state-write.md)
+- [CON-001](../specs/CON-001-state-file-version-controlled.md)
+- [NF-001](../specs/NF-001-state-access-mutually-exclusive.md)
+- [NF-002](../specs/NF-002-atomic-state-write.md)
 
 **Persists**
 
-- [ENT-001 — ClewState](../domain-model.md#ent-001-clewstate)
+- [ENT-001](../domain-model.md#ent-001-clewstate)

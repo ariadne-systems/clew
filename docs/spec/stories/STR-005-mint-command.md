@@ -45,6 +45,6 @@ This story adds `src/commands/mint.ts` and wires it in one line in `program.ts` 
 
 **Realizes**
 
-- [SW-008 — The tool exposes a `mint` command that delegates to core](../specs/SW-008-mint-command.md)
-- [SW-003 — The mint command emits ids to stdout, one per line](../specs/SW-003-mint-command-output.md)
-- [CON-005 — A minted id's prefix must be a configured prefix](../specs/CON-005-id-prefix-must-be-configured.md)
+- [SW-008](../specs/SW-008-mint-command.md)
+- [SW-003](../specs/SW-003-mint-command-output.md)
+- [CON-005](../specs/CON-005-id-prefix-must-be-configured.md)

@@ -26,15 +26,15 @@ Adding a target language is a new generator implementing the contract — genera
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-008 — Language-neutral extensibility](SYS-008-language-neutral-extensibility.md)
+- [SYS-008](SYS-008-language-neutral-extensibility.md)
 
 **Related**
 
-- [ARCH-006 — Comment detection is a generator capability](ARCH-006-pluggable-comment-finders.md) — comment identification is one operation of this contract, beside generation and discovery.
+- [ARCH-006](ARCH-006-pluggable-comment-finders.md) — comment identification is one operation of this contract, beside generation and discovery.
 
 ## Changes
 

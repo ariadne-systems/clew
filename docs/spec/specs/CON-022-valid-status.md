@@ -19,11 +19,11 @@ Each declared value and an absent field are accepted; any other value is rejecte
 
 **Realizes**
 
-- [SYS-005 — Spec lifecycle](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Generalized by [ARCH-007 — A document schema pins only what clew reads; the rest is project-defined](ARCH-007-schema-core-is-what-clew-reads.md): the status value check is one instance of the schema's pinned core, enforced by [CON-031 — A document that violates its schema is rejected, or warned per config](CON-031-reject-schema-violation.md).
+- Generalized by [ARCH-007](ARCH-007-schema-core-is-what-clew-reads.md): the status value check is one instance of the schema's pinned core, enforced by [CON-031](CON-031-reject-schema-violation.md).
 
 ## Changes
 

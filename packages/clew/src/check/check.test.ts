@@ -95,7 +95,7 @@ describe("the check suite", () => {
         const p = await project();
         await writeFile(
           join(p.derivedDir, "SW-001-a.md"),
-          "See [SW-002 — b](SW-002-b.md).\n",
+          "See [SW-002](SW-002-b.md).\n",
           "utf8",
         );
         await writeFile(join(p.derivedDir, "SW-002-b.md"), "Spec b\n", "utf8");
@@ -112,7 +112,7 @@ describe("the check suite", () => {
         const p = await project();
         await writeFile(
           join(p.derivedDir, "SW-001-a.md"),
-          "Line one.\nSee [SW-099 — gone](SW-099-missing.md).\n",
+          "Line one.\nSee [SW-099](SW-099-missing.md).\n",
           "utf8",
         );
 
@@ -135,7 +135,7 @@ describe("the check suite", () => {
         const p = await project();
         await writeFile(
           join(p.storiesDir, "STR-001-x.md"),
-          "Realizes [SW-001 — a](../specs/SW-001-a.md).\n",
+          "Realizes [SW-001](../specs/SW-001-a.md).\n",
           "utf8",
         );
         await writeFile(join(p.derivedDir, "SW-001-a.md"), "Spec a\n", "utf8");
@@ -566,6 +566,114 @@ describe("the document-schema check", () => {
 
       expect(
         result.findings.filter((f) => f.check === "document-schema"),
+      ).toEqual([]);
+    });
+  });
+});
+
+describe("code-span exemption and id-only citations", () => {
+  verifies(ConTraceables.CON_034_CROSS_REFERENCE_IS_ID_ONLY, () => {
+    test("a relation link cited by id alone is accepted", async () => {
+      const p = await project();
+      await writeFile(
+        join(p.derivedDir, "SW-001-a.md"),
+        "Realizes [SW-002](SW-002-b.md).\n",
+        "utf8",
+      );
+      await writeFile(join(p.derivedDir, "SW-002-b.md"), "Spec b\n", "utf8");
+
+      const result = await check({
+        configFile: p.configFile,
+        resolveGenerator,
+      });
+
+      expect(
+        result.findings.filter((f) => f.check === "id-only-reference"),
+      ).toEqual([]);
+    });
+
+    test("a link whose text is an id followed by a title is reported", async () => {
+      const p = await project();
+      await writeFile(
+        join(p.derivedDir, "SW-001-a.md"),
+        "Realizes [SW-002 — the behaviour](SW-002-b.md).\n",
+        "utf8",
+      );
+      await writeFile(join(p.derivedDir, "SW-002-b.md"), "Spec b\n", "utf8");
+
+      const result = await check({
+        configFile: p.configFile,
+        resolveGenerator,
+      });
+
+      expect(
+        result.findings.filter((f) => f.check === "id-only-reference"),
+      ).toEqual([
+        {
+          check: "id-only-reference",
+          file: "docs/spec/specs/SW-001-a.md",
+          line: 1,
+          message:
+            'link text "SW-002 — the behaviour" carries more than the id "SW-002"; cite the target by its id alone',
+        },
+      ]);
+    });
+
+    test("a link whose text is not an id-citation is not reported", async () => {
+      const p = await project();
+      await writeFile(
+        join(p.derivedDir, "SW-001-a.md"),
+        "See [the behaviour it enforces](SW-002-b.md).\n",
+        "utf8",
+      );
+      await writeFile(join(p.derivedDir, "SW-002-b.md"), "Spec b\n", "utf8");
+
+      const result = await check({
+        configFile: p.configFile,
+        resolveGenerator,
+      });
+
+      expect(
+        result.findings.filter((f) => f.check === "id-only-reference"),
+      ).toEqual([]);
+    });
+
+    test("a citation quoted inside a code span is not reported", async () => {
+      const p = await project();
+      await writeFile(
+        join(p.derivedDir, "SW-001-a.md"),
+        "Inline `[SW-002 — x](SW-002-b.md)`, and a fence:\n\n```\n[SW-003 — y](SW-003-c.md)\n```\n",
+        "utf8",
+      );
+      await writeFile(join(p.derivedDir, "SW-002-b.md"), "Spec b\n", "utf8");
+
+      const result = await check({
+        configFile: p.configFile,
+        resolveGenerator,
+      });
+
+      expect(
+        result.findings.filter((f) => f.check === "id-only-reference"),
+      ).toEqual([]);
+    });
+  });
+
+  verifies(ConTraceables.CON_029_DOCUMENT_LINK_RESOLVES, () => {
+    test("a broken link quoted inside a code span is not reported by reference-rot", async () => {
+      const p = await project();
+      await writeFile(
+        join(p.derivedDir, "SW-001-a.md"),
+        "Inline `[SW-009](SW-009-missing.md)`, and a fence:\n\n```\n[SW-008](SW-008-missing.md)\n```\n",
+        "utf8",
+      );
+
+      const result = await check({
+        configFile: p.configFile,
+        resolveGenerator,
+      });
+
+      expect(
+        result.findings.filter((f) => f.check === "reference-rot"),
       ).toEqual([]);
     });
   });
