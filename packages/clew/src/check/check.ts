@@ -276,7 +276,7 @@ const duplicateId: (context: CheckContext) => Promise<RawFinding[]> = realizes(
   ConTraceables.CON_025_ONE_FILE_PER_SPEC_ID,
   async (context: CheckContext): Promise<RawFinding[]> => {
     const filesById = new Map<string, string[]>();
-    for (const spec of await specFiles(context)) {
+    for (const spec of specFiles(context)) {
       const id = `${spec.prefix}-${spec.number}`;
       const group = filesById.get(id) ?? [];
       group.push(spec.path);
