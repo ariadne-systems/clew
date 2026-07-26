@@ -501,7 +501,15 @@ const readRawConfig = realizes(
       }
       throw error;
     }
-    return JSON.parse(raw) as Record<string, unknown>;
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch (error) {
+      throw new ClewError(
+        ErrorCode.INVALID_JSON,
+        `${file} is not valid JSON.`,
+        { location: file, note: (error as Error).message, cause: error },
+      );
+    }
   },
 );
 

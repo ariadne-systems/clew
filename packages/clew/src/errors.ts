@@ -17,6 +17,8 @@ export const ErrorCode = {
   RESERVED_TYPE: "E_RESERVED_TYPE",
   /** No project configuration was found; the command directs the user to `setup`. */
   NO_CONFIG: "E_NO_CONFIG",
+  /** A JSON file clew reads — the configuration or the state — is not valid JSON. */
+  INVALID_JSON: "E_INVALID_JSON",
   /** The configuration names a generator that is not registered. */
   UNKNOWN_GENERATOR: "E_UNKNOWN_GENERATOR",
   /** The requested harness (agent) is not a registered adapter. */

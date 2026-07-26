@@ -308,6 +308,21 @@ describe("requireConfig", () => {
   });
 });
 
+describe("malformed configuration", () => {
+  verifies(SwTraceables.SW_009_READ_CONFIGURATION, () => {
+    test("a config that is not valid JSON is reported with E_INVALID_JSON and its path", async () => {
+      const dir = await mkdtemp(join(tmpdir(), "clew-config-"));
+      const file = join(dir, ".clewrc.json");
+      await writeFile(file, "{ not valid json", "utf8");
+
+      await expect(readLenses(file)).rejects.toMatchObject({
+        code: ErrorCode.INVALID_JSON,
+        location: file,
+      });
+    });
+  });
+});
+
 describe("resolveConfiguration", () => {
   verifies(
     [

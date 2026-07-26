@@ -8,7 +8,7 @@ import {
   verifies,
 } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import { withState } from "../index.js";
+import { ErrorCode, withState } from "../index.js";
 
 async function tempStateFile(): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "clew-state-"));
@@ -29,6 +29,15 @@ describe("loading", () => {
         file,
       });
       expect(sequences).toEqual({});
+    });
+
+    test("a state file that is not valid JSON is reported with E_INVALID_JSON and its path", async () => {
+      const file = await tempStateFile();
+      await writeFile(file, "{ not valid", "utf8");
+
+      await expect(
+        withState((state) => state.sequences, { file }),
+      ).rejects.toMatchObject({ code: ErrorCode.INVALID_JSON, location: file });
     });
   });
 });

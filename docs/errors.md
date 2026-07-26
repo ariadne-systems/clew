@@ -14,6 +14,7 @@ A released code is never reused for a different condition and never renamed (CON
 | `E_STATE_WRITE_FAILED` | The state file could not be written. |
 | `E_RESERVED_TYPE` | The requested type uses the reserved temporary-id marker `TMP` as a `-`-delimited segment. |
 | `E_NO_CONFIG` | No project configuration was found; run `clew setup` to create one. |
+| `E_INVALID_JSON` | A JSON file clew reads — the configuration or the state — could not be parsed; fix the JSON syntax in the named file. |
 | `E_UNKNOWN_GENERATOR` | The configuration names a generator that is not registered; remove it from `generators` or install a generator that provides it. |
 | `E_SPEC_SET_OVERLAP` | A traceable matches more than one configured spec set; adjust the patterns so each spec matches exactly one set. |
 | `E_SPEC_SET_UNMATCHED` | A traceable matches no configured spec set; add a matching set, an `ignore` pattern, or a catch-all set. |

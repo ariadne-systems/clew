@@ -34,7 +34,16 @@ const loadState = realizes(
     if (raw.trim() === "") {
       return { sequences: {} };
     }
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(raw) as Record<string, unknown>;
+    } catch (error) {
+      throw new ClewError(
+        ErrorCode.INVALID_JSON,
+        `${file} is not valid JSON.`,
+        { location: file, note: (error as Error).message, cause: error },
+      );
+    }
     const sequences =
       typeof parsed.sequences === "object" && parsed.sequences !== null
         ? (parsed.sequences as SequenceMap)

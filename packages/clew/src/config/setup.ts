@@ -249,7 +249,17 @@ const fillGeneratorIfEmpty: (
     if ((await readGenerators(configFile)).length > 0) {
       return null;
     }
-    const raw = JSON.parse(await readFile(configFile, "utf8"));
+    const configText = await readFile(configFile, "utf8");
+    let raw: Record<string, unknown>;
+    try {
+      raw = JSON.parse(configText) as Record<string, unknown>;
+    } catch (error) {
+      throw new ClewError(
+        ErrorCode.INVALID_JSON,
+        `${configFile} is not valid JSON.`,
+        { location: configFile, note: (error as Error).message, cause: error },
+      );
+    }
     raw.generators = generators;
     await writeFile(configFile, `${JSON.stringify(raw, null, 2)}\n`, "utf8");
     return requested.type;
