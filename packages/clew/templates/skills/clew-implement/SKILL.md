@@ -32,7 +32,7 @@ It owns only the **clew-specific frame** around that work — setting the spec `
 A marker can only reference a spec that generates a traceable, and only an `active` (or `deprecated`) spec does — a `planned` one generates none.
 
 - If the spec is still `planned`, set its `**Status**` to `active`. It is already in the corpus, so record a `## Changes` entry (`006`) — for example "Set active: implementation of STR-… began".
-- Regenerate the traceables with the project's spec command (`clew spec`), so the symbol exists to anchor against.
+- Regenerate the traceables with the project's spec command (`clew spec`), so the symbol exists to anchor against. If the traceables are a **built** package rather than imported from source, build it too — `clew spec` writes the source, but the type-checker resolves the built package, so without the build the anchor will not type-check against the new symbol.
 - If the spec has no bound id, or is `deprecated`, stop and report: this skill implements a promoted, live spec — promote or choose a live one first.
 
 ### 2. Read the spec's intent first
