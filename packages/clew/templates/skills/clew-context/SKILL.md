@@ -37,7 +37,7 @@ A project declares its lenses in `.clewrc.json`, each with an `id` and a one-lin
 
 - Read `.clewrc.json` for the `layout` (where stories and specs live) and the `lenses`.
 - Find how the project binds code to specs — its **trace markers** (`realizes`, `verifies`, and `concerns` — the fixed relations, in whatever marker syntax the generator uses). Infer the convention from existing code; do not assume a language.
-- Prefer the tool's index or resolver if it exists (`clew --help`) for "what relates to this id" — that is the intended, faster path. Until it exists, read the spec files and grep the code directly.
+- For "what anchors / relates to this id", prefer a dedicated command if one exists (`clew --help`) — the intended, faster path. Otherwise filter the reverse index the scan writes — `.clew/locations.json`, mapping a spec id to its anchor sites — and read the spec files; the index can lag very recent edits, so grep the code directly when current precision matters.
 
 ## What you must not do
 
@@ -85,9 +85,10 @@ Each spec found this way that was not already `linked` is tagged `path` — rele
 
 Steps 2–4 gather the specs near the change; this goes the other way — from each **fine-grained** spec found so far (a behaviour anchored at a precise site, typically `SW`/`CON`), find its **other** anchors across the codebase and read them. That is where code sharing the same unit of intent — a sibling implementation, a distant test, a configuration point — lives without ever touching the call path.
 
-- For each such spec, look up everything that anchors it (the tool's resolver, or grep its traceable across the code — see *Reading the project*), and read each new site, collecting its markers. Specs found this way are also tagged `path`.
-- Do **not** lateral-scan a high-altitude **governing** spec (`STK`/`SYS`, anchored coarsely at a file or module entrypoint): it holds over a whole region, so its reverse scan is broad and low-signal — those stay the "why" of the containment ascent, not coupling to chase.
+- For each such spec, look up everything that anchors it — filter `.clew/locations.json` for the id, or grep its traceable across the code when the index may be stale (see *Reading the project*) — and read each new site, collecting its markers. Specs found this way are also tagged `path`.
+- Gate the scan on the spec's **measured** reverse fan-out, not on its lens: before reading, count how many sites anchor it, and skip only when that count is **broad** (a handful is fine — skip past roughly six), because a broad reverse scan is low-signal noise whichever lens the spec is. This usually coincides with a high-altitude **governing** spec (`STK`/`SYS`) anchored coarsely over a whole region — but where a project anchors its `STK`/`SYS` narrowly, at a few precise sites, their other anchors are squarely in the change set and must be read. A spec skipped as broad still stays the "why" of the containment ascent (step 6), not coupling to chase.
 - One hop only — do not re-run the call-graph walk from each lateral hit. Keep it within the same overall budget as step 4, prefer the nearest sites, and say so if a spec has more anchors than you read.
+- Exception when the change **reshapes a type or other shared shape**: the `verifies` (test) anchors of every related spec are the change set, not a sample — read them all rather than capping to the nearest, since each test encodes an assumption the reshape may break. The budget bounds exploratory breadth, not the sites a shape change is certain to touch.
 
 ### 6. Containment ascent — what governs where the code lives
 

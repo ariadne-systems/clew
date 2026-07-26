@@ -61,7 +61,7 @@ A marker references a generated symbol, which exists only after the spec is prom
 Three relations, the same in every language:
 
 - **realizes** — the code is the spec's implementation.
-- **verifies** — a test exercises the spec.
+- **verifies** — a test exercises the spec. The test must be able to *fail* if the spec were violated; a test that cannot fail is a hollow verification, and a `verifies` anchor on it claims a check that is not there. The build compiles the marker either way — so this one is yours to catch.
 - **concerns** — the code is coupled to the spec without realizing or verifying it. Add this **only** when the coupling is not already a call into the realizing code; a coupling on the call path is recovered from the call graph and needs no marker.
 
 Apply the chosen relation with the form the generator's documentation gives for your target language and for the kind of element you are anchoring — a value, a function, a class, a method, a test, a type, or an interface.

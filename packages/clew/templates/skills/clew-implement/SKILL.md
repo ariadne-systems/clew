@@ -7,6 +7,8 @@ description: "Take a promoted spec to Covered: set it active and regenerate, rea
 
 This skill closes one increment: it takes a **promoted** spec from `active` to **Covered** — implemented, tested, and anchored so the build holds the spec-to-code link.
 
+The increment is the **whole promoted target** — a spec, or a story and the specs it carries. Implement it in **one sweep** and present it once. A user who asked to implement a story expects the story built, not sliced into review-gated phases; slice it into smaller steps only if the user asks for that.
+
 It owns only the **clew-specific frame** around that work — setting the spec `active`, regenerating the traceables, anchoring, and checking coverage. It does **not** tell you how to write the code: the implementation and its tests follow the project's own way of working. It never authors or promotes specs (that is `clew-draft` and `clew-promote`).
 
 ## When to use
@@ -17,6 +19,7 @@ It owns only the **clew-specific frame** around that work — setting the spec `
 ## What you must not do
 
 - **Do not re-specify how to write code or tests.** The actual implementation and testing follow the project's **installed implementation, testing, and language skills** and its conventions (`003`, `005`); this skill adds only the clew frame around them.
+- **Do not slice the target into separate, review-gated steps unless the user asks.** Use the installed skills to write the code, but keep the whole promoted story (with its specs) as one increment — one sweep, one review. A planning or subagent skill may organize the work internally, but it must not fragment the story into pieces the user has to sign off one by one.
 - Do not anchor by hand — delegate to `clew-anchor`. Do not hand-edit the generated traceables folder.
 - Do not author or promote specs here, and do not implement a spec that is not yet promoted (no bound id) or is `deprecated`.
 - Do not read **Covered** as **correct** (see step 5), and do not skip the review.
@@ -43,6 +46,10 @@ For anything beyond a trivial change, run `clew-context` for the area: it walks 
 **This skill does not teach coding.** Write the implementation and its test the way the project works: **follow whatever implementation, testing, debugging, and language skills are installed** (for example a TDD skill, a testing-conventions skill, a systematic-debugging skill, a framework skill), and the project's governance (`003` code conventions, `005` testing contract).
 
 Within that, implement the behaviour the spec describes and a test that exercises it, from the intent read in step 2. If no such skill is installed, implement to the project's conventions and the spec's verification description.
+
+The `verifies` test must encode a **falsifying** case — one that *fails* if the spec were violated. A test that cannot fail verifies nothing; marking it `verifies` then claims a check that is not there, and coverage shows green over a hollow guarantee. If you cannot construct the failing case, the test is decorative — reconsider it, or the spec, since a verification the spec's own description could not fail is a sufficiency gap in the spec, not a test to force.
+
+For a **type reshape**, the change set is mostly **unanchored consumers**: reshaping a shared type breaks every site that uses it, and those sites carry no marker — you anchor the decision, not every consumer — so neither the anchor walk nor an id scan enumerates them (the id finds where the type is *realized*, not where it is *used*). Get the sites from the **type system**: run a find-references on the type, or make the shape change and read the checker's breaks — either follows the type through inference, where neither the id nor the type name appears textually. The anchor traversal (`clew-context`) is the complement, not a substitute — it tells you *why* each site matters, the type system tells you *where* they all are; do not conflate the two.
 
 ### 4. Anchor the code and the test
 
