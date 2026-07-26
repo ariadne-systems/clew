@@ -35,5 +35,23 @@ describe("loading configured schemas", () => {
         code: ErrorCode.INVALID_SCHEMA,
       });
     });
+
+    test("a schema file whose name begins with .. but stays in the root is accepted", async () => {
+      const dir = await mkdtemp(join(tmpdir(), "clew-schema-"));
+      const configFile = join(dir, ".clewrc.json");
+      await writeFile(
+        configFile,
+        JSON.stringify({ schemas: { spec: "..schema.yaml" } }),
+        "utf8",
+      );
+      await writeFile(
+        join(dir, "..schema.yaml"),
+        "fields:\n  Title:\n    required: true\n",
+        "utf8",
+      );
+
+      const schemas = await loadSchemas(configFile, dir);
+      expect(schemas.has("spec")).toBe(true);
+    });
   });
 });

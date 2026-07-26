@@ -676,5 +676,31 @@ describe("code-span exemption and id-only citations", () => {
         result.findings.filter((f) => f.check === "reference-rot"),
       ).toEqual([]);
     });
+
+    test("a link whose path traverses a file is reported, not crashed on", async () => {
+      const p = await project();
+      await writeFile(join(p.derivedDir, "SW-002-b.md"), "Spec b\n", "utf8");
+      await writeFile(
+        join(p.derivedDir, "SW-001-a.md"),
+        "See [x](SW-002-b.md/inner.md).\n",
+        "utf8",
+      );
+
+      const result = await check({
+        configFile: p.configFile,
+        resolveGenerator,
+      });
+
+      expect(
+        result.findings.filter((f) => f.check === "reference-rot"),
+      ).toEqual([
+        {
+          check: "reference-rot",
+          file: "docs/spec/specs/SW-001-a.md",
+          line: 1,
+          message: 'link to "SW-002-b.md/inner.md" resolves to nothing',
+        },
+      ]);
+    });
   });
 });

@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { isAbsolute, relative, resolve } from "node:path";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 import { ConTraceables, realizes } from "@ariadne-thread/trace";
 import { parse } from "yaml";
 import { readSchemas } from "../config/config.js";
@@ -17,7 +17,12 @@ const resolveWithinRoot: (projectRoot: string, file: string) => string =
       const root = resolve(projectRoot);
       const resolved = resolve(root, file);
       const rel = relative(root, resolved);
-      if (rel === "" || rel.startsWith("..") || isAbsolute(rel)) {
+      if (
+        rel === "" ||
+        rel === ".." ||
+        rel.startsWith(`..${sep}`) ||
+        isAbsolute(rel)
+      ) {
         throw new ClewError(
           ErrorCode.INVALID_SCHEMA,
           `Schema file path "${file}" escapes the project root.`,

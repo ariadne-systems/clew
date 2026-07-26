@@ -6,7 +6,11 @@ export async function pathExists(path: string): Promise<boolean> {
     await access(path);
     return true;
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+    // ENOENT (nothing there) and ENOTDIR (a path component is a file, so the path
+    // cannot resolve) both mean "does not exist"; a genuine error (a permission
+    // denial, say) still propagates rather than reading as absent.
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT" || code === "ENOTDIR") {
       return false;
     }
     throw error;
