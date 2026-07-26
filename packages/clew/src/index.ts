@@ -100,10 +100,18 @@ export {
 } from "./spec/identifiers.js";
 export type { ScanOptions } from "./spec/scan.js";
 export { scan } from "./spec/scan.js";
-export type { ScanCodeOptions, ScanCodeResult } from "./spec/scan-code.js";
+export type {
+  LocationsIndex,
+  Provenance,
+  ScanCodeOptions,
+  ScanCodeResult,
+  UpdateIndexOptions,
+  UpdateIndexResult,
+} from "./spec/scan-code.js";
 export {
   DEFAULT_LOCATIONS_FILE,
   scanCode,
+  updateLocationsIndex,
   writeLocationsIndex,
 } from "./spec/scan-code.js";
 export type { GeneratorReport, SpecOptions, SpecResult } from "./spec/spec.js";

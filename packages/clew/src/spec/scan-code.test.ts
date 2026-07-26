@@ -1,6 +1,8 @@
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { promisify } from "node:util";
 import {
   ArchTraceables,
   ConTraceables,
@@ -9,7 +11,27 @@ import {
 } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 import type { Generator } from "../index.js";
-import { scanCode, writeLocationsIndex } from "../index.js";
+import {
+  scanCode,
+  updateLocationsIndex,
+  writeLocationsIndex,
+} from "../index.js";
+
+const git = promisify(execFile);
+
+/** Initializes a throwaway git repo in the test tree, with signing off so commits never prompt. */
+async function gitInit(root: string): Promise<void> {
+  await git("git", ["init", "-q"], { cwd: root });
+  await git("git", ["config", "user.email", "t@example.com"], { cwd: root });
+  await git("git", ["config", "user.name", "Test"], { cwd: root });
+  await git("git", ["config", "commit.gpgsign", "false"], { cwd: root });
+}
+
+/** Stages and commits everything in the test tree. */
+async function gitCommitAll(root: string, message: string): Promise<void> {
+  await git("git", ["add", "-A"], { cwd: root });
+  await git("git", ["commit", "-q", "-m", message], { cwd: root });
+}
 
 /**
  * A generator whose discover treats each source file's trimmed content as a
@@ -223,6 +245,203 @@ describe("code scan", () => {
       expect(result.anchors).toEqual([
         { id: "SW-100", relation: "realizes", file: "src/a.ts", line: 1 },
       ]);
+    });
+  });
+});
+
+describe("incremental scan", () => {
+  verifies(ConTraceables.CON_035_INCREMENTAL_SCAN_EQUALS_FULL_SCAN, () => {
+    test("rescans only the changed files and matches a full scan of the same state", async () => {
+      const generator = contentGenerator("gen/out");
+      const { root, configFile } = await project(
+        { "src/a.ts": "SW-100", "src/b.ts": "CON-101", "src/c.ts": "NF-102" },
+        [{ type: "fake", outputDir: "gen/out" }],
+      );
+      const options = {
+        resolveGenerator: resolveFake(generator),
+        configFile,
+        projectRoot: root,
+      };
+      await gitInit(root);
+      await gitCommitAll(root, "init");
+
+      const first = await updateLocationsIndex(options);
+      expect(first.mode).toBe("full");
+
+      await writeFile(join(root, "src/a.ts"), "SW-100-v2", "utf8");
+      await rm(join(root, "src/b.ts"));
+      await writeFile(join(root, "src/d.ts"), "ARCH-103", "utf8");
+
+      const second = await updateLocationsIndex(options);
+      const full = await scanCode(options);
+
+      expect(second.mode).toBe("incremental");
+      expect(second.anchors).toEqual(full.anchors);
+      expect(second.anchors.map((anchor) => anchor.id)).toEqual([
+        "SW-100-v2",
+        "NF-102",
+        "ARCH-103",
+      ]);
+    });
+
+    test("a rename is a delete plus an add, and still matches a full scan", async () => {
+      const generator = contentGenerator("gen/out");
+      const { root, configFile } = await project({ "src/a.ts": "SW-100" }, [
+        { type: "fake", outputDir: "gen/out" },
+      ]);
+      const options = {
+        resolveGenerator: resolveFake(generator),
+        configFile,
+        projectRoot: root,
+      };
+      await gitInit(root);
+      await gitCommitAll(root, "init");
+      await updateLocationsIndex(options);
+
+      await rm(join(root, "src/a.ts"));
+      await writeFile(join(root, "src/renamed.ts"), "SW-100", "utf8");
+
+      const second = await updateLocationsIndex(options);
+      const full = await scanCode(options);
+
+      expect(second.anchors).toEqual(full.anchors);
+      expect(second.anchors).toEqual([
+        { id: "SW-100", relation: "realizes", file: "src/renamed.ts", line: 1 },
+      ]);
+    });
+
+    test("drops anchors for an untracked file that was scanned then deleted", async () => {
+      const generator = contentGenerator("gen/out");
+      const { root, configFile } = await project({ "src/a.ts": "SW-100" }, [
+        { type: "fake", outputDir: "gen/out" },
+      ]);
+      const options = {
+        resolveGenerator: resolveFake(generator),
+        configFile,
+        projectRoot: root,
+      };
+      await gitInit(root);
+      await gitCommitAll(root, "init");
+      await updateLocationsIndex(options);
+
+      // Scan an untracked file into the index, then delete it — git's changed set
+      // never mentions a file that was untracked and is now gone.
+      await writeFile(join(root, "src/new.ts"), "SW-500", "utf8");
+      const withNew = await updateLocationsIndex(options);
+      expect(withNew.anchors.map((anchor) => anchor.id).sort()).toEqual([
+        "SW-100",
+        "SW-500",
+      ]);
+      await rm(join(root, "src/new.ts"));
+
+      const second = await updateLocationsIndex(options);
+      const full = await scanCode(options);
+      expect(second.anchors).toEqual(full.anchors);
+      expect(second.anchors.map((anchor) => anchor.id)).toEqual(["SW-100"]);
+    });
+
+    test("rescans a file that was dirty at the last scan and is then reverted", async () => {
+      const generator = contentGenerator("gen/out");
+      const { root, configFile } = await project({ "src/a.ts": "SW-100" }, [
+        { type: "fake", outputDir: "gen/out" },
+      ]);
+      const options = {
+        resolveGenerator: resolveFake(generator),
+        configFile,
+        projectRoot: root,
+      };
+      await gitInit(root);
+      await gitCommitAll(root, "init");
+
+      // Scan while a.ts is dirty (edited vs the commit).
+      await writeFile(join(root, "src/a.ts"), "SW-100-dirty", "utf8");
+      const dirty = await updateLocationsIndex(options);
+      expect(dirty.anchors.map((anchor) => anchor.id)).toEqual([
+        "SW-100-dirty",
+      ]);
+
+      // Revert a.ts to its committed content — git no longer reports it changed.
+      await writeFile(join(root, "src/a.ts"), "SW-100", "utf8");
+
+      const second = await updateLocationsIndex(options);
+      const full = await scanCode(options);
+      expect(second.anchors).toEqual(full.anchors);
+      expect(second.anchors.map((anchor) => anchor.id)).toEqual(["SW-100"]);
+    });
+  });
+
+  verifies(SwTraceables.SW_048_SCAN_INCREMENTAL_UPDATE, () => {
+    test("falls back to a full scan with no version control, and records no provenance", async () => {
+      const generator = contentGenerator("gen/out");
+      const { root, configFile } = await project({ "src/a.ts": "SW-100" }, [
+        { type: "fake", outputDir: "gen/out" },
+      ]);
+      const options = {
+        resolveGenerator: resolveFake(generator),
+        configFile,
+        projectRoot: root,
+      };
+
+      const first = await updateLocationsIndex(options);
+      const second = await updateLocationsIndex(options);
+
+      expect(first.mode).toBe("full");
+      expect(second.mode).toBe("full");
+      const index = JSON.parse(
+        await readFile(join(root, ".clew/locations.json"), "utf8"),
+      );
+      expect(index.provenance).toBeUndefined();
+    });
+
+    test("falls back to a full scan when the scan configuration changed", async () => {
+      const generator = contentGenerator("gen/out");
+      const { root, configFile } = await project(
+        { "src/a.ts": "SW-100", "src/a.fixture.ts": "SW-999" },
+        [{ type: "fake", outputDir: "gen/out" }],
+      );
+      const options = {
+        resolveGenerator: resolveFake(generator),
+        configFile,
+        projectRoot: root,
+      };
+      await gitInit(root);
+      await gitCommitAll(root, "init");
+      expect((await updateLocationsIndex(options)).mode).toBe("full");
+
+      // Change the scan config, touching no source file.
+      await writeFile(
+        configFile,
+        JSON.stringify({
+          generators: [{ type: "fake", outputDir: "gen/out" }],
+          scan: { exclude: ["**/*.fixture.ts"] },
+        }),
+        "utf8",
+      );
+
+      const second = await updateLocationsIndex(options);
+      expect(second.mode).toBe("full");
+      expect(second.anchors.map((anchor) => anchor.id)).toEqual(["SW-100"]);
+    });
+
+    test("--full forces a full scan even when an incremental one is possible", async () => {
+      const generator = contentGenerator("gen/out");
+      const { root, configFile } = await project({ "src/a.ts": "SW-100" }, [
+        { type: "fake", outputDir: "gen/out" },
+      ]);
+      const options = {
+        resolveGenerator: resolveFake(generator),
+        configFile,
+        projectRoot: root,
+      };
+      await gitInit(root);
+      await gitCommitAll(root, "init");
+      await updateLocationsIndex(options);
+
+      await writeFile(join(root, "src/a.ts"), "SW-100-v2", "utf8");
+      const forced = await updateLocationsIndex({ ...options, full: true });
+
+      expect(forced.mode).toBe("full");
+      expect(forced.anchors.map((anchor) => anchor.id)).toEqual(["SW-100-v2"]);
     });
   });
 });
