@@ -58,6 +58,7 @@ export { promote } from "./promote/promote.js";
 export type {
   CoverageEntry,
   CoverageResult,
+  CoverageRun,
   CoverageStatus,
   ReadUniverseOptions,
   SpecCoverage,
@@ -65,6 +66,7 @@ export type {
 } from "./spec/coverage.js";
 export {
   computeCoverage,
+  coverage,
   DEFAULT_COVERAGE_FILE,
   formatCoverageReport,
   readUniverse,

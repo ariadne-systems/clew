@@ -8,7 +8,7 @@ import {
   SwTraceables,
 } from "@ariadne-thread/trace";
 import type { Waiver } from "../config/config.js";
-import { readGenerators } from "../config/config.js";
+import { readGenerators, readWaivers } from "../config/config.js";
 import { writeFileAtomic } from "../fs/atomic-write.js";
 import { walkFiles } from "../fs/walk-files.js";
 import { resolveBuiltinGenerator } from "../generators/registry.js";
@@ -23,6 +23,7 @@ import {
   GENERATED_SUBDIR,
   resolveGeneratorOrThrow,
 } from "./generator.js";
+import { scanCode } from "./scan-code.js";
 
 // Module-level anchor.
 type _Anchors = Realizes<
@@ -410,4 +411,32 @@ function appendSection<Entry>(
   for (const entry of entries) {
     lines.push(render(entry));
   }
+}
+
+/** The outcome of a coverage run: the reconciled result, the file it was written to, and whether the trace was empty. */
+export type CoverageRun = {
+  result: CoverageResult;
+  /** Where the coverage result was written. */
+  file: string;
+  /** True when no generated traceables were found — `clew spec` has not run. */
+  universeEmpty: boolean;
+};
+
+/**
+ * Runs the coverage pipeline end to end: reads the generated traceables and the
+ * code anchors, classifies and reconciles against the committed waivers, and
+ * writes the coverage record. The presentation layer formats the returned
+ * result; the orchestration is the engine's, so `clew coverage` stays a thin
+ * command like `check` and `spec`.
+ */
+export async function coverage(): Promise<CoverageRun> {
+  const [universe, scanResult, waivers] = await Promise.all([
+    readUniverse(),
+    scanCode(),
+    readWaivers(),
+  ]);
+  const computed = computeCoverage(universe, scanResult.anchors);
+  const result = reconcileWaivers(computed, waivers);
+  const file = await writeCoverageResult(result);
+  return { result, file, universeEmpty: universe.length === 0 };
 }
