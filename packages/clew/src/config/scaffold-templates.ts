@@ -112,7 +112,7 @@ The one decision this spec pins, stated concretely
 
 **Lens**: SW
 
-**Status**: active
+**Status**: planned
 
 **Description**
 The single behaviour, rule, or decision this spec fixes — what it requires and,

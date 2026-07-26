@@ -255,6 +255,20 @@ describe("setup scaffolds the document schemas", () => {
       ).toEqual([]);
     });
 
+    test("the scaffolded spec example models planned, the default for a newly authored spec", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+
+      await setup({ configFile });
+
+      const specExample = await readFile(
+        join(dir, "docs", "spec", "schemas", "spec.example.md"),
+        "utf8",
+      );
+      expect(specExample).toContain("**Status**: planned");
+      expect(specExample).not.toContain("**Status**: active");
+    });
+
     test("does not overwrite an existing example file", async () => {
       const dir = await tempDir();
       const configFile = join(dir, ".clewrc.json");
