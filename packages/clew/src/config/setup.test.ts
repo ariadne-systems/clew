@@ -11,6 +11,8 @@ import {
 import { describe, expect, test } from "vitest";
 import type { HarnessAdapter, MethodMaterials } from "../harness/harness.js";
 import { mint, setup } from "../index.js";
+import { validateDocument } from "../spec/document-schema.js";
+import { loadSchemas } from "../spec/document-schema-loader.js";
 
 async function tempDir(): Promise<string> {
   return mkdtemp(join(tmpdir(), "clew-setup-"));
@@ -214,6 +216,64 @@ describe("setup scaffolds the document schemas", () => {
         story: "docs/spec/schemas/story.schema.yaml",
         spec: "docs/spec/schemas/spec.schema.yaml",
       });
+    });
+
+    test("writes a copyable example beside each schema, and each example is valid against its schema", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+
+      await setup({ configFile });
+
+      const storyExample = join(
+        dir,
+        "docs",
+        "spec",
+        "schemas",
+        "story.example.md",
+      );
+      const specExample = join(
+        dir,
+        "docs",
+        "spec",
+        "schemas",
+        "spec.example.md",
+      );
+      expect(existsSync(storyExample)).toBe(true);
+      expect(existsSync(specExample)).toBe(true);
+
+      const schemas = await loadSchemas(configFile, dir);
+      const storySchema = schemas.get("story");
+      const specSchema = schemas.get("spec");
+      if (storySchema === undefined || specSchema === undefined) {
+        throw new Error("setup did not scaffold the document schemas");
+      }
+      expect(
+        validateDocument(await readFile(storyExample, "utf8"), storySchema),
+      ).toEqual([]);
+      expect(
+        validateDocument(await readFile(specExample, "utf8"), specSchema),
+      ).toEqual([]);
+    });
+
+    test("does not overwrite an existing example file", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+      const storyExample = join(
+        dir,
+        "docs",
+        "spec",
+        "schemas",
+        "story.example.md",
+      );
+      await mkdir(join(dir, "docs", "spec", "schemas"), { recursive: true });
+      await writeFile(storyExample, "mine\n", "utf8");
+
+      const result = await setup({ configFile });
+
+      expect(await readFile(storyExample, "utf8")).toBe("mine\n");
+      expect(result.schemas).not.toContain(
+        "docs/spec/schemas/story.example.md",
+      );
     });
 
     test("does not overwrite an existing schema file", async () => {

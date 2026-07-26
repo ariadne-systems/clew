@@ -29,12 +29,16 @@ import {
   ARCHITECTURE_DOC_FILE,
   DEFAULT_ARCHITECTURE_DOC,
   DEFAULT_SCHEMA_DIR,
+  DEFAULT_SPEC_EXAMPLE,
   DEFAULT_SPEC_SCHEMA,
+  DEFAULT_STORY_EXAMPLE,
   DEFAULT_STORY_SCHEMA,
   DEFAULT_WAIVERS,
   GITIGNORE_ENTRIES,
   GITIGNORE_HEADER,
+  SPEC_EXAMPLE_FILE,
   SPEC_SCHEMA_FILE,
+  STORY_EXAMPLE_FILE,
   STORY_SCHEMA_FILE,
 } from "./scaffold-templates.js";
 
@@ -271,7 +275,13 @@ function unknownHarness(name: string): ClewError {
   );
 }
 
-/** Writes the default document-schema templates (only when absent) and returns the `schemas` config plus the files written. */
+/**
+ * Writes the default document-schema templates and a copyable valid example
+ * beside each (only when absent), and returns the `schemas` config plus the files
+ * written. The example demonstrates the field format clew reads, so a fresh
+ * project — which has no existing story or spec to copy — follows the form rather
+ * than guessing it.
+ */
 const scaffoldSchemas: (
   root: string,
 ) => Promise<{ schemas: SchemaConfig; written: string[] }> = realizes(
@@ -282,12 +292,17 @@ const scaffoldSchemas: (
     await mkdir(join(root, DEFAULT_SCHEMA_DIR), { recursive: true });
     const storyPath = `${DEFAULT_SCHEMA_DIR}/${STORY_SCHEMA_FILE}`;
     const specPath = `${DEFAULT_SCHEMA_DIR}/${SPEC_SCHEMA_FILE}`;
+    const scaffolds: [string, string][] = [
+      [storyPath, DEFAULT_STORY_SCHEMA],
+      [specPath, DEFAULT_SPEC_SCHEMA],
+      [`${DEFAULT_SCHEMA_DIR}/${STORY_EXAMPLE_FILE}`, DEFAULT_STORY_EXAMPLE],
+      [`${DEFAULT_SCHEMA_DIR}/${SPEC_EXAMPLE_FILE}`, DEFAULT_SPEC_EXAMPLE],
+    ];
     const written: string[] = [];
-    if (await writeIfAbsent(join(root, storyPath), DEFAULT_STORY_SCHEMA)) {
-      written.push(storyPath);
-    }
-    if (await writeIfAbsent(join(root, specPath), DEFAULT_SPEC_SCHEMA)) {
-      written.push(specPath);
+    for (const [path, contents] of scaffolds) {
+      if (await writeIfAbsent(join(root, path), contents)) {
+        written.push(path);
+      }
     }
     return { schemas: { story: storyPath, spec: specPath }, written };
   },

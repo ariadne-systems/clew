@@ -45,6 +45,96 @@ fields:
     required: true
 `;
 
+export const STORY_EXAMPLE_FILE = "story.example.md";
+export const SPEC_EXAMPLE_FILE = "spec.example.md";
+
+/**
+ * A minimal, valid example story in the field format clew reads — a copyable
+ * template beside the schema, so a fresh project has a form to follow rather than
+ * guessing it. Each field is a bold label; a heading is not a field.
+ */
+export const DEFAULT_STORY_EXAMPLE: string = `<!--
+Example story — copy this shape. Each field below is a bold label (Title,
+Business Value, ...) on its own line, in the order shown. A "#"/"##" heading is
+NOT a field: clew detects a field only as a bold label written like the ones
+below. The "## Relations" section links the specs the story realizes and the
+existing specs it relates to — the ids and paths here are placeholders to
+replace. This file sits beside the schemas, not in the stories directory, so
+clew never treats it as a real story.
+-->
+
+**Title**
+A concise, decisive statement of the increment
+
+**Business Value**
+Why the work matters — the benefit to the users or the project.
+
+**Problem / Context**
+What is missing or wrong today, and the context the increment sits in.
+
+**Solution Approach**
+How the increment is carried out, at a high level — the decisions, not the code.
+
+**Acceptance Criteria**
+- A checkable outcome the increment must meet.
+- Another — each one a test or a review could confirm.
+
+**Out of scope**
+- What this increment deliberately does not do.
+
+## Relations
+
+**Realizes**
+
+- [SW-001 — The behaviour this story delivers](../specs/SW-001-the-behaviour.md)
+
+**Related**
+
+- [SW-002 — An existing spec this story touches](../specs/SW-002-a-related-spec.md)
+`;
+
+/**
+ * A minimal, valid example spec in the field format clew reads — a copyable
+ * template beside the schema. Lens and Status carry an inline value after the colon.
+ */
+export const DEFAULT_SPEC_EXAMPLE: string = `<!--
+Example spec — copy this shape. Each field below is a bold label; Lens and Status
+carry an inline value after the colon, as shown. Status is one of planned |
+active | deprecated (planned is the default and generates no traceable). A
+"#"/"##" heading is NOT a field. The "## Relations" section links what the spec
+realizes, concerns, or relates to — the ids and paths here are placeholders to
+replace (a sibling spec is linked by bare filename). This file sits beside the
+schemas, not in the specs directory, so clew never treats it as a real spec.
+-->
+
+**Title**
+The one decision this spec pins, stated concretely
+
+**Lens**: SW
+
+**Status**: active
+
+**Description**
+The single behaviour, rule, or decision this spec fixes — what it requires and,
+where there is a real choice, what it excludes.
+
+**Rationale**
+Why this decision and not the alternatives.
+
+**Verification Description**
+How a test or a review confirms the decision holds.
+
+## Relations
+
+**Realizes**
+
+- [SYS-001 — The system capability this realizes](SYS-001-the-capability.md)
+
+**Related**
+
+- [CON-001 — A constraint this spec must respect](CON-001-a-related-constraint.md)
+`;
+
 /** Where setup seeds the project architecture overview, relative to the project root. */
 export const ARCHITECTURE_DOC_FILE = "docs/spec/architecture.md";
 
