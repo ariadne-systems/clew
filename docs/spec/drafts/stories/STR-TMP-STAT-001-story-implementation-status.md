@@ -17,12 +17,22 @@ Stories are not traceables — the scan skips non-lens prefixes — so a story g
 A story needs the two terminal states (`done`, `dropped`) a spec's status lacks, because a spec gets "done" from coverage and retires through `deprecated`, while a story has neither.
 - The status is **declared and informational**: it generates no traceable and does not affect coverage — a story stays outside the traceable/coverage universe.
 It is read from the story file and validated against the recognized states; an unrecognized value is rejected, as it is for a spec.
+- The status is **set by the workflow, never by the tool** — the tool only reads, validates, and lists it.
+Its transitions mirror a spec's, which `006 §4` already assigns: a story is born `planned` when drafted; the implementation step sets it `active` as the increment begins — the same moment it sets the target specs `active` — and `done` when the increment closes with its specs Covered and reviewed; a person sets `dropped` when abandoning the work.
+Without an assigned writer the field sits at `planned` for every built story and misreports backlog as the truth, so the ownership is part of this story, not left implicit.
 - A dedicated **`clew status`** command lists each story with its status, so you can see what is built without opening every file.
 It is kept separate from `clew coverage`: coverage reports *verified* anchoring, a story's status is *declared*, and mixing them would blur the two.
+- The story schema's contract is extended to cover the value set.
+Like a spec's, a story's `**Status**` is enforced by the pinned core, not listed as a `story.schema.yaml` field — so the change is the schema's header contract, which moves from "`**Status**` grammar" to "grammar and value set", mirroring the spec schema.
+Because setup scaffolds this schema (SW-040), the scaffolded template carries the same corrected contract, so a fresh project's story schema does not misstate what its story status enforces.
 
 **Acceptance Criteria**
 - A story may declare `**Status**: planned`, `active`, `done`, or `dropped`; an absent field means `planned`.
 - An unrecognized story status value is rejected with an error.
+- The `story.schema.yaml` contract declares the story status value set — its header states "grammar and value set", as the spec schema's does — and `**Status**` is not added to the schema's `fields:` block, staying pinned-core.
+The schema template setup scaffolds carries the same contract, so a fresh project's story schema does not misstate what it enforces.
+- `006 §4` gains a story-status ownership clause, parallel to the spec-status one — who sets `planned` / `active` / `done` / `dropped`, and at which workflow moment.
+- `clew-implement` sets the carrying story `active` as the increment begins and `done` as it closes — the same transitions it already applies to the increment's specs — so a built story is marked without a manual step.
 - `clew status` lists each story with its status, so a reader can tell which stories are implemented; a story with no `**Status**` lists as `planned`.
 - A story's status generates no traceable and leaves coverage unchanged; `clew status` and `clew coverage` stay separate.
 - Tests cover each declared value, the absent default, the rejection of an unknown value, the `clew status` listing, and that story status does not alter the traceable/coverage output.
@@ -51,3 +61,4 @@ The declared field declares *intent*; that later check enforces *truth* — whic
 - Parallels [CON-022 — A spec's status is one of the declared values](../specs/CON-022-valid-status.md) — the same idea for a spec, whose value set differs (no `done`; `deprecated` instead).
 - Parallels [SW-031 — The spec scan reads each spec's implementation state](../specs/SW-031-scan-spec-status.md) — the reader for a spec's status; a story's is read the same way but onto the story, not a traceable.
 - Defers its integrity check to [STR-024 — The tool runs its deterministic integrity checks as one `clew check` command](STR-024-clew-check-suite.md).
+- Extends the story schema scaffolded by [SW-040 — Setup scaffolds the default document schemas and wires them](../specs/SW-040-setup-scaffolds-schemas.md) — its scaffolded contract must declare the new story value set.
