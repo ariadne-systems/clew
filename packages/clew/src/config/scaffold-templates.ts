@@ -59,7 +59,8 @@ Business Value, ...) on its own line, in the order shown. A "#"/"##" heading is
 NOT a field: clew detects a field only as a bold label written like the ones
 below. The "## Relations" section links the specs the story realizes and the
 existing specs it relates to — the ids and paths here are placeholders to
-replace. This file sits beside the schemas, not in the stories directory, so
+replace. Cite each spec by its id alone; any note goes after the link, not
+inside it. This file sits beside the schemas, not in the stories directory, so
 clew never treats it as a real story.
 -->
 
@@ -86,11 +87,11 @@ How the increment is carried out, at a high level — the decisions, not the cod
 
 **Realizes**
 
-- [SW-001 — The behaviour this story delivers](../specs/SW-001-the-behaviour.md)
+- [SW-001](../specs/SW-001-the-behaviour.md) — the behaviour this story delivers
 
 **Related**
 
-- [SW-002 — An existing spec this story touches](../specs/SW-002-a-related-spec.md)
+- [SW-002](../specs/SW-002-a-related-spec.md) — an existing spec this story touches
 `;
 
 /**
@@ -103,7 +104,8 @@ carry an inline value after the colon, as shown. Status is one of planned |
 active | deprecated (planned is the default and generates no traceable). A
 "#"/"##" heading is NOT a field. The "## Relations" section links what the spec
 realizes, concerns, or relates to — the ids and paths here are placeholders to
-replace (a sibling spec is linked by bare filename). This file sits beside the
+replace (a sibling spec is linked by bare filename). Cite each spec by its id
+alone; any note goes after the link, not inside it. This file sits beside the
 schemas, not in the specs directory, so clew never treats it as a real spec.
 -->
 
@@ -128,11 +130,11 @@ How a test or a review confirms the decision holds.
 
 **Realizes**
 
-- [SYS-001 — The system capability this realizes](SYS-001-the-capability.md)
+- [SYS-001](SYS-001-the-capability.md) — the system capability this realizes
 
 **Related**
 
-- [CON-001 — A constraint this spec must respect](CON-001-a-related-constraint.md)
+- [CON-001](CON-001-a-related-constraint.md) — a constraint this spec must respect
 `;
 
 /** Where setup seeds the project architecture overview, relative to the project root. */
