@@ -10,8 +10,10 @@ import {
   verifies,
 } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
+import { ErrorCode } from "../errors.js";
 import type { Generator } from "../index.js";
 import {
+  resolveAnchors,
   scanCode,
   updateLocationsIndex,
   writeLocationsIndex,
@@ -442,6 +444,150 @@ describe("incremental scan", () => {
 
       expect(forced.mode).toBe("full");
       expect(forced.anchors.map((anchor) => anchor.id)).toEqual(["SW-100-v2"]);
+    });
+  });
+});
+
+describe("anchors resolution", () => {
+  verifies(SwTraceables.SW_047_ANCHORS_COMMAND, () => {
+    const scanned = async () => {
+      const generator = contentGenerator("gen/out");
+      const { root, configFile } = await project(
+        { "src/a.ts": "SW-100", "src/b.ts": "SW-100", "src/c.ts": "CON-200" },
+        [{ type: "fake", outputDir: "gen/out" }],
+      );
+      const options = {
+        resolveGenerator: resolveFake(generator),
+        configFile,
+        projectRoot: root,
+      };
+      await gitInit(root);
+      await gitCommitAll(root, "init");
+      await updateLocationsIndex(options);
+      return { root, options };
+    };
+
+    test("resolves requested ids to their sites keyed by id; an absent id maps to []", async () => {
+      const { options } = await scanned();
+      const report = await resolveAnchors({
+        ...options,
+        ids: ["SW-100", "SW-999"],
+      });
+      expect(report.anchors).toEqual({
+        "SW-100": [
+          { relation: "realizes", file: "src/a.ts", line: 1 },
+          { relation: "realizes", file: "src/b.ts", line: 1 },
+        ],
+        "SW-999": [],
+      });
+    });
+
+    test("--all resolves every id in the index", async () => {
+      const { options } = await scanned();
+      const report = await resolveAnchors({ ...options, all: true });
+      expect(Object.keys(report.anchors).sort()).toEqual(["CON-200", "SW-100"]);
+    });
+
+    test("--relation restricts the sites to one relation", async () => {
+      const { root, configFile } = await project({}, [
+        { type: "fake", outputDir: "gen/out" },
+      ]);
+      await writeLocationsIndex(
+        {
+          anchors: [
+            { id: "SW-100", relation: "realizes", file: "a.ts", line: 1 },
+            {
+              id: "SW-100",
+              relation: "verifies",
+              file: "a.test.ts",
+              line: 2,
+            },
+          ],
+        },
+        { projectRoot: root },
+      );
+      const report = await resolveAnchors({
+        resolveGenerator: resolveFake(contentGenerator("gen/out")),
+        configFile,
+        projectRoot: root,
+        ids: ["SW-100"],
+        relation: "verifies",
+      });
+      expect(report.anchors["SW-100"]).toEqual([
+        { relation: "verifies", file: "a.test.ts", line: 2 },
+      ]);
+    });
+
+    test("freshness reports fresh, then stale with the changed source file", async () => {
+      const { root, options } = await scanned();
+      const fresh = await resolveAnchors({ ...options, all: true });
+      expect(fresh.freshness.stale).toBe(false);
+      expect(fresh.freshness.changedFiles).toEqual([]);
+      expect(fresh.freshness.head).toEqual(expect.any(String));
+
+      await writeFile(join(root, "src/a.ts"), "SW-100-v2", "utf8");
+      const stale = await resolveAnchors({ ...options, all: true });
+      expect(stale.freshness.stale).toBe(true);
+      expect(stale.freshness.changedFiles).toEqual(["src/a.ts"]);
+    });
+
+    test("freshness is stale when the scan configuration changed since the index", async () => {
+      const { root, configFile } = await project({}, [
+        { type: "fake", outputDir: "gen/out" },
+      ]);
+      await writeLocationsIndex(
+        {
+          anchors: [
+            { id: "SW-100", relation: "realizes", file: "a.ts", line: 1 },
+          ],
+        },
+        {
+          projectRoot: root,
+          provenance: {
+            head: "0000000",
+            config: "stale-config-fingerprint",
+            dirty: [],
+          },
+        },
+      );
+      const report = await resolveAnchors({
+        resolveGenerator: resolveFake(contentGenerator("gen/out")),
+        configFile,
+        projectRoot: root,
+        all: true,
+      });
+      expect(report.freshness.stale).toBe(true);
+      expect(report.freshness.changedFiles).toEqual([]);
+      expect(report.freshness.head).toBe("0000000");
+    });
+
+    test("freshness is unknown (null) with no version control", async () => {
+      const { root, configFile } = await project({ "src/a.ts": "SW-100" }, [
+        { type: "fake", outputDir: "gen/out" },
+      ]);
+      const options = {
+        resolveGenerator: resolveFake(contentGenerator("gen/out")),
+        configFile,
+        projectRoot: root,
+      };
+      await updateLocationsIndex(options);
+      const report = await resolveAnchors({ ...options, all: true });
+      expect(report.freshness.stale).toBeNull();
+      expect(report.freshness.head).toBeNull();
+    });
+
+    test("a missing index is a NO_INDEX error", async () => {
+      const { root, configFile } = await project({}, [
+        { type: "fake", outputDir: "gen/out" },
+      ]);
+      await expect(
+        resolveAnchors({
+          resolveGenerator: resolveFake(contentGenerator("gen/out")),
+          configFile,
+          projectRoot: root,
+          all: true,
+        }),
+      ).rejects.toMatchObject({ code: ErrorCode.NO_INDEX });
     });
   });
 });

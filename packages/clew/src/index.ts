@@ -101,6 +101,10 @@ export {
 export type { ScanOptions } from "./spec/scan.js";
 export { scan } from "./spec/scan.js";
 export type {
+  AnchorSite,
+  AnchorsOptions,
+  AnchorsReport,
+  Freshness,
   LocationsIndex,
   Provenance,
   ScanCodeOptions,
@@ -110,6 +114,7 @@ export type {
 } from "./spec/scan-code.js";
 export {
   DEFAULT_LOCATIONS_FILE,
+  resolveAnchors,
   scanCode,
   updateLocationsIndex,
   writeLocationsIndex,

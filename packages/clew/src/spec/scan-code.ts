@@ -7,6 +7,7 @@ import {
   readGenerators,
   readUnexclude,
 } from "../config/config.js";
+import { ClewError, ErrorCode } from "../errors.js";
 import { writeFileAtomic } from "../fs/atomic-write.js";
 import { pathExists, readFileOrNull } from "../fs/files.js";
 import { changedSince, scanState } from "../fs/git.js";
@@ -18,7 +19,12 @@ import {
   fileExcluded,
   shouldDescend,
 } from "./exclusions.js";
-import type { AnchorLocation, Generator, SourceFile } from "./generator.js";
+import type {
+  AnchorLocation,
+  Generator,
+  Relation,
+  SourceFile,
+} from "./generator.js";
 import { resolveGeneratorOrThrow } from "./generator.js";
 
 export type ScanCodeOptions = {
@@ -178,6 +184,116 @@ export const updateLocationsIndex: (
     };
   },
 );
+
+export type AnchorSite = { relation: Relation; file: string; line: number };
+
+/** How current the index is against version control: whether a source file changed since the scan, which files, and the commit the index reflects. */
+export type Freshness = {
+  stale: boolean | null;
+  changedFiles: string[];
+  head: string | null;
+};
+
+export type AnchorsReport = {
+  /** The requested ids, each mapped to its anchor sites — an empty list when the id has none. */
+  anchors: Record<string, AnchorSite[]>;
+  freshness: Freshness;
+};
+
+export type AnchorsOptions = ScanCodeOptions & {
+  /** The ids to resolve; ignored when `all` is set. */
+  ids?: readonly string[];
+  /** Resolve every id in the index. */
+  all?: boolean;
+  /** Restrict the sites to one relation. */
+  relation?: Relation;
+  /** The index file, relative to the project root. */
+  file?: string;
+};
+
+/**
+ * Resolves spec ids to their anchor sites by reading the persisted index once —
+ * the read side of the locations index, for a context agent's lateral scan. It
+ * writes nothing and does not rescan; freshness is derived from version control
+ * against the index's provenance.
+ */
+export const resolveAnchors: (
+  options?: AnchorsOptions,
+) => Promise<AnchorsReport> = realizes(
+  SwTraceables.SW_047_ANCHORS_COMMAND,
+  async (options: AnchorsOptions = {}): Promise<AnchorsReport> => {
+    const inputs = await scanInputs(options);
+    const file = options.file ?? DEFAULT_LOCATIONS_FILE;
+    const index = await readLocationsIndex(inputs.projectRoot, file);
+    if (index === null) {
+      throw new ClewError(
+        ErrorCode.NO_INDEX,
+        `No locations index at ${file}.`,
+        {
+          help: "run `clew scan` to write the index",
+        },
+      );
+    }
+    const sitesById = new Map<string, AnchorSite[]>();
+    for (const anchor of index.locations) {
+      const site: AnchorSite = {
+        relation: anchor.relation,
+        file: anchor.file,
+        line: anchor.line,
+      };
+      const existing = sitesById.get(anchor.id);
+      if (existing === undefined) {
+        sitesById.set(anchor.id, [site]);
+      } else {
+        existing.push(site);
+      }
+    }
+    const ids = options.all
+      ? [...sitesById.keys()].sort()
+      : (options.ids ?? []);
+    const anchors: Record<string, AnchorSite[]> = {};
+    for (const id of ids) {
+      const sites = sitesById.get(id) ?? [];
+      anchors[id] =
+        options.relation === undefined
+          ? sites
+          : sites.filter((site) => site.relation === options.relation);
+    }
+    return { anchors, freshness: await freshnessOf(inputs, index.provenance) };
+  },
+);
+
+/** The index's freshness against version control: source files changed since its provenance, or unknown when there is no version control. */
+async function freshnessOf(
+  inputs: ScanInputs,
+  provenance: Provenance | undefined,
+): Promise<Freshness> {
+  const head = provenance?.head ?? null;
+  if (provenance === undefined) {
+    return { stale: null, changedFiles: [], head };
+  }
+  // A changed scan configuration re-selects which files are anchors, so the
+  // index is stale wholesale — knowable without version control, and the signal
+  // the incremental path gates its full rescan on.
+  if (provenance.config !== inputs.fingerprint) {
+    return { stale: true, changedFiles: [], head };
+  }
+  const changed = await changedSince(provenance.head, inputs.projectRoot);
+  if (changed === null) {
+    return { stale: null, changedFiles: [], head };
+  }
+  for (const dirty of provenance.dirty ?? []) {
+    changed.add(dirty);
+  }
+  const changedFiles = [...changed]
+    .filter(
+      (path) =>
+        inputs.extensions.has(extname(path)) &&
+        !fileExcluded(path, inputs.rules),
+    )
+    .sort();
+  return { stale: changedFiles.length > 0, changedFiles, head };
+}
 
 /**
  * The prior index patched for version-control's changed set — a changed file's
