@@ -21,10 +21,10 @@ With no configuration present it directs the user to `setup`.
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Parallels [SW-016 — The tool exposes a `promote` command that delegates to core](SW-016-promote-command.md) — a thin command surface over a core behaviour.
-- Delegates the read to [SW-TMP-STAT-001 — The tool reads each story's implementation status](SW-TMP-STAT-001-read-story-status.md).
-- Requires a configuration like every command ([CON-011 — A command requires a configuration](CON-011-command-requires-config.md)).
+- Parallels [SW-016](SW-016-promote-command.md) — a thin command surface over a core behaviour.
+- Delegates the read to [SW-049](SW-049-read-story-status.md).
+- Requires a configuration like every command ([CON-011](CON-011-command-requires-config.md)).

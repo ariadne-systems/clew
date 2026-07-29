@@ -48,17 +48,17 @@ The declared field declares *intent*; that later check enforces *truth* — whic
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](../specs/SYS-005-spec-lifecycle.md)
+- [SYS-005](../specs/SYS-005-spec-lifecycle.md)
 
 **Realizes** (new specs)
 
-- [CON-TMP-STAT-001 — A story's status carries explicit terminal states a spec lacks](../specs/CON-TMP-STAT-001-story-status-terminal-states.md)
-- [SW-TMP-STAT-001 — The tool reads each story's implementation status](../specs/SW-TMP-STAT-001-read-story-status.md)
-- [SW-TMP-STAT-002 — The tool exposes a `clew status` command that lists each story's status](../specs/SW-TMP-STAT-002-status-command.md)
+- [CON-041](../specs/CON-041-story-status-terminal-states.md)
+- [SW-049](../specs/SW-049-read-story-status.md)
+- [SW-050](../specs/SW-050-status-command.md)
 
 **Related**
 
-- Parallels [CON-022 — A spec's status is one of the declared values](../specs/CON-022-valid-status.md) — the same idea for a spec, whose value set differs (no `done`; `deprecated` instead).
-- Parallels [SW-031 — The spec scan reads each spec's implementation state](../specs/SW-031-scan-spec-status.md) — the reader for a spec's status; a story's is read the same way but onto the story, not a traceable.
-- Defers its integrity check to [STR-024 — The tool runs its deterministic integrity checks as one `clew check` command](STR-024-clew-check-suite.md).
-- Extends the story schema scaffolded by [SW-040 — Setup scaffolds the default document schemas and wires them](../specs/SW-040-setup-scaffolds-schemas.md) — its scaffolded contract must declare the new story value set.
+- Parallels [CON-022](../specs/CON-022-valid-status.md) — the same idea for a spec, whose value set differs (no `done`; `deprecated` instead).
+- Parallels [SW-031](../specs/SW-031-scan-spec-status.md) — the reader for a spec's status; a story's is read the same way but onto the story, not a traceable.
+- Defers its integrity check to [STR-024](STR-024-clew-check-suite.md).
+- Extends the story schema scaffolded by [SW-040](../specs/SW-040-setup-scaffolds-schemas.md) — its scaffolded contract must declare the new story value set.

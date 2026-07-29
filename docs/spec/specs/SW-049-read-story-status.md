@@ -19,13 +19,13 @@ A story whose `**Status**` is unrecognized is rejected.
 
 **Concerns**
 
-- [ENT-002 — Configuration](../domain-model.md#ent-002-configuration)
+- [ENT-002](../domain-model.md#ent-002-configuration)
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Parallels [SW-031 — The spec scan reads each spec's implementation state](SW-031-scan-spec-status.md) — the same read, but over the stories location and onto a story state, not onto a traceable.
-- Reads the value constrained by [CON-TMP-STAT-001 — A story's status carries explicit terminal states a spec lacks](CON-TMP-STAT-001-story-status-terminal-states.md).
+- Parallels [SW-031](SW-031-scan-spec-status.md) — the same read, but over the stories location and onto a story state, not onto a traceable.
+- Reads the value constrained by [CON-041](CON-041-story-status-terminal-states.md).

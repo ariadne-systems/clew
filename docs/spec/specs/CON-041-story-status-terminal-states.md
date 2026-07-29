@@ -22,8 +22,8 @@ A story's status produces no traceable and leaves coverage unchanged.
 
 **Realizes**
 
-- [SYS-005 — The system supports drafting, allocating, and finalizing specs](SYS-005-spec-lifecycle.md)
+- [SYS-005](SYS-005-spec-lifecycle.md)
 
 **Related**
 
-- Parallels [CON-022 — A spec's status is one of the declared values](CON-022-valid-status.md) — the same fail-fast rule for a spec, whose value set differs: `planned`/`active`/`deprecated`, with no `done` or `dropped` because coverage carries done and `deprecated` carries retirement.
+- Parallels [CON-022](CON-022-valid-status.md) — the same fail-fast rule for a spec, whose value set differs: `planned`/`active`/`deprecated`, with no `done` or `dropped` because coverage carries done and `deprecated` carries retirement.
