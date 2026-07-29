@@ -66,3 +66,9 @@ Because the status filters generation (SW-014), it is how a spec-first project k
 
 The `**Status**` field is the file-based source of the state; a future ALM connector maps it from the work item's state instead.
 An unrecognized value is rejected (CON-022).
+
+A story carries the same `**Status**` field, used for its original purpose — the work item's own state.
+Its value set differs (CON-041): `planned` → `active` → `done`, plus `dropped` for abandoned work, because a story is never a traceable and so has neither coverage to signal done nor `deprecated` to retire.
+A story's status is informational: it generates no traceable and does not affect coverage.
+It is set by the workflow, never by the tool: a story is born `planned` when drafted; the implementation step sets it `active` when the increment begins — the same moment it sets the target specs `active` — and `done` when the increment closes with its specs Covered and reviewed; a person sets `dropped` when abandoning the work.
+An unrecognized value is rejected (CON-041), and `clew status` lists each story's state.

@@ -3,6 +3,8 @@ A story's status carries explicit terminal states a spec lacks
 
 **Lens**: CON
 
+**Status**: active
+
 **Description**
 A story declares its implementation status in a `**Status**` field, one of `planned`, `active`, `done`, or `dropped`, or absent (meaning `planned`).
 It carries two terminal states a spec's status does not: `done` (the work is implemented) and `dropped` (the work is abandoned and will not be built).
@@ -27,3 +29,7 @@ A story's status produces no traceable and leaves coverage unchanged.
 **Related**
 
 - Parallels [CON-022](CON-022-valid-status.md) — the same fail-fast rule for a spec, whose value set differs: `planned`/`active`/`deprecated`, with no `done` or `dropped` because coverage carries done and `deprecated` carries retirement.
+
+## Changes
+
+- **2026-07-29** — Set active: implementation of STR-040 began.

@@ -3,6 +3,8 @@ The tool exposes a `clew status` command that lists each story's status
 
 **Lens**: SW
 
+**Status**: active
+
 **Description**
 The tool exposes a `clew status` command that lists each story with its implementation status — `planned`, `active`, `done`, or `dropped` — so a reader sees at a glance what is planned, in progress, done, or abandoned at the work-item level.
 It is deliberately separate from `clew coverage`: coverage reports *verified* code-to-spec anchoring, while a story's status is *declared*, so listing them together would blur a derived truth with a stated intent.
@@ -28,3 +30,7 @@ With no configuration present it directs the user to `setup`.
 - Parallels [SW-016](SW-016-promote-command.md) — a thin command surface over a core behaviour.
 - Delegates the read to [SW-049](SW-049-read-story-status.md).
 - Requires a configuration like every command ([CON-011](CON-011-command-requires-config.md)).
+
+## Changes
+
+- **2026-07-29** — Set active: implementation of STR-040 began.

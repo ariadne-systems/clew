@@ -1,6 +1,8 @@
 **Title**
 A story declares its implementation status
 
+**Status**: done
+
 **Business Value**
 You cannot currently tell whether a story — a unit of work — has been implemented.
 A spec's done-ness comes from coverage: code anchors its traceable and `clew coverage` shows Covered.
@@ -62,3 +64,8 @@ The declared field declares *intent*; that later check enforces *truth* — whic
 - Parallels [SW-031](../specs/SW-031-scan-spec-status.md) — the reader for a spec's status; a story's is read the same way but onto the story, not a traceable.
 - Defers its integrity check to [STR-024](STR-024-clew-check-suite.md).
 - Extends the story schema scaffolded by [SW-040](../specs/SW-040-setup-scaffolds-schemas.md) — its scaffolded contract must declare the new story value set.
+
+## Changes
+
+- **2026-07-29** — Set active: implementation of the story began.
+- **2026-07-29** — Set done: implementation completed, all specs Covered, and accepted in review.

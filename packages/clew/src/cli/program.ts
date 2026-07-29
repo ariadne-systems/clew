@@ -10,6 +10,7 @@ import { registerReconcile } from "./commands/reconcile.js";
 import { registerScan } from "./commands/scan.js";
 import { registerSetup } from "./commands/setup.js";
 import { registerSpec } from "./commands/spec.js";
+import { registerStatus } from "./commands/status.js";
 
 // The single place where subcommands are registered.
 export function buildProgram(): Command {
@@ -37,6 +38,7 @@ export function buildProgram(): Command {
   registerCheck(program);
   registerConfig(program);
   registerPromote(program);
+  registerStatus(program);
 
   return program;
 }

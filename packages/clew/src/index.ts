@@ -131,6 +131,16 @@ export { reconcile } from "./state/reconcile.js";
 export type { WithStateOptions } from "./state/state.js";
 export { DEFAULT_STATE_FILE, withState } from "./state/state.js";
 export type {
+  ReadStoryStatusesOptions,
+  StoryState,
+  StoryStatus,
+} from "./story/story-status.js";
+export {
+  readStoryStatus,
+  readStoryStatuses,
+  STORY_STATUSES,
+} from "./story/story-status.js";
+export type {
   CFamilyDialect,
   ClassifiedSource,
   CommentSpan,

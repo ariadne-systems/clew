@@ -7,8 +7,9 @@ export const SPEC_SCHEMA_FILE = "spec.schema.yaml";
 
 /** The opinionated story document-schema template (ADR-0001 D8). */
 export const DEFAULT_STORY_SCHEMA: string = `# Document schema for stories (the \`story\` document type).
-# clew merges this with the pinned core (id form, \`**Status**\` grammar, relation
-# links) it always enforces. Fields are listed in the order a story must present them.
+# clew merges this with the pinned core (id form, \`**Status**\` grammar and value
+# set, relation links) it always enforces — so Status is not listed here. Fields
+# are listed in the order a story must present them.
 onError: fail
 fields:
   Title:
