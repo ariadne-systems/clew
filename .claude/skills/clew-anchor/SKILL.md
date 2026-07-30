@@ -67,6 +67,8 @@ Three relations, the same in every language:
 Apply the chosen relation with the form the generator's documentation gives for your target language and for the kind of element you are anchoring — a value, a function, a class, a method, a test, a type, or an interface.
 Anchoring to more than one spec uses the list form that documentation describes.
 
+A **cross-cutting** spec has no single implementing line — a structural rule that governs a whole region (every module, every package), or a quality attribute realized by many parts at once. Anchor its `realizes` at the **most representative single site**: the region's own declaration for a whole-region rule (a package or module entry point), or the mechanism that makes the attribute achievable for a quality one (the port, factory, or seam it hinges on — for example the injectable clock a deterministic-timing spec depends on). Its `verifies` goes on the test that exercises the rule across the region (a structural-rule test, an end-to-end quality test). The single site is a deliberate, representative choice, not an arbitrary one; pick the site that most *is* the rule, and place the marker there consistently.
+
 ### 5. Apply, then stop
 
 - Reference the generated symbol(s) and add the marker, using the language's documented form.
