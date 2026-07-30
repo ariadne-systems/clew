@@ -158,14 +158,8 @@ Describe the modules, their responsibilities, and how they compose.
 State the dependencies that must hold, and the ones that must never.
 `;
 
-/** The default coverage waiver setup writes. */
-export const DEFAULT_WAIVERS: readonly Waiver[] = [
-  {
-    pattern: "STK-*",
-    reason:
-      "stakeholder needs are verified by acceptance, not by an automated test",
-  },
-];
+/** The coverage waivers setup writes into a fresh configuration: none by default. A waiver is a per-spec exception a project adds deliberately, not a lens-wide default the tool presumes. */
+export const DEFAULT_WAIVERS: readonly Waiver[] = [];
 
 /** The tool-output entries setup ensures in the project's `.gitignore`; `state.json` stays tracked. */
 export const GITIGNORE_ENTRIES: readonly string[] = [

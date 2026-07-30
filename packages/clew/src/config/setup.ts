@@ -88,7 +88,6 @@ export const setup: (options?: SetupOptions) => Promise<SetupResult> = realizes(
   [
     SwTraceables.SW_011_SCAFFOLD_DEFAULT_CONFIG,
     ConTraceables.CON_010_SETUP_NEVER_OVERWRITES,
-    SwTraceables.SW_042_SETUP_WAIVES_STAKEHOLDER_LENS,
   ],
   async (options: SetupOptions = {}): Promise<SetupResult> => {
     const configFile = options.configFile ?? DEFAULT_CONFIG_FILE;

@@ -35,6 +35,7 @@ describe("setup", () => {
         const config = JSON.parse(await readFile(configFile, "utf8")) as {
           lenses: { id: string }[];
           layout: { stories: { prefix: string } };
+          waivers: unknown[];
         };
         expect(config.lenses.map((lens) => lens.id)).toEqual([
           "STK",
@@ -45,6 +46,7 @@ describe("setup", () => {
           "CON",
         ]);
         expect(config.layout.stories.prefix).toBe("STR");
+        expect(config.waivers).toEqual([]);
         expect(existsSync(join(dir, "docs", "spec", "stories"))).toBe(true);
         expect(existsSync(join(dir, "docs", "spec", "specs"))).toBe(true);
         expect(existsSync(join(dir, "docs", "spec", "drafts"))).toBe(true);
@@ -361,24 +363,6 @@ describe("setup ignores the tool's regenerated output", () => {
       expect(gitignore.startsWith("node_modules\n")).toBe(true);
       expect(gitignore).toContain(".clew/locations.json");
       expect(gitignore).toContain(".clew/coverage.json");
-    });
-  });
-});
-
-describe("setup waives the stakeholder lens", () => {
-  verifies(SwTraceables.SW_042_SETUP_WAIVES_STAKEHOLDER_LENS, () => {
-    test("writes a default STK-* coverage waiver", async () => {
-      const dir = await tempDir();
-      const configFile = join(dir, ".clewrc.json");
-
-      await setup({ configFile });
-
-      const config = JSON.parse(await readFile(configFile, "utf8")) as {
-        waivers: { pattern?: string; reason: string }[];
-      };
-      expect(config.waivers).toHaveLength(1);
-      expect(config.waivers[0]?.pattern).toBe("STK-*");
-      expect(config.waivers[0]?.reason).toBeTruthy();
     });
   });
 });

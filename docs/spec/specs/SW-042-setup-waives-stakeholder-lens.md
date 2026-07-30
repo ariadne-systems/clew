@@ -3,7 +3,7 @@ Setup waives the stakeholder lens from test coverage by default
 
 **Lens**: SW
 
-**Status**: active
+**Status**: deprecated
 
 **Description**
 Setup writes a default coverage waiver for the stakeholder lens — a `waivers` entry with the pattern `STK-*` and a reason — into the scaffolded configuration, so a stakeholder spec is reported waived rather than as an open coverage gap.
@@ -34,3 +34,8 @@ A re-run leaves an existing `waivers` list unchanged.
 ## Changes
 
 - **2026-07-10** — Set active: implementation of STR-029 began.
+- **2026-07-30** — Set deprecated: setup no longer ships a default `STK-*` waiver.
+The decision rests on two premises that do not hold.
+The first — that a stakeholder need cannot be verified by a test — is a blanket claim a lens-wide default cannot make: some stakeholder needs decompose into a testable acceptance behaviour (a demo run verified one on the first attempt), while genuine quality needs are handled by a *per-spec* waiver, which is the shape uniform coverage (SYS-012) already prescribes for a real exception.
+The second — that the default "keeps the first coverage run honest" — is false: a freshly scaffolded project has no specs, so its first run is green regardless; the waiver's only effect is later, suppressing the coverage gap of an unanchored stakeholder spec, which is the opposite of honest.
+A project that genuinely acceptance-verifies a stakeholder need adds a per-spec waiver deliberately.
