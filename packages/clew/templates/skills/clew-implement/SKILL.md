@@ -50,6 +50,10 @@ Within that, implement the behaviour the spec describes and a test that exercise
 
 The `verifies` test must encode a **falsifying** case — one that *fails* if the spec were violated. A test that cannot fail verifies nothing; marking it `verifies` then claims a check that is not there, and coverage shows green over a hollow guarantee. If you cannot construct the failing case, the test is decorative — reconsider it, or the spec, since a verification the spec's own description could not fail is a sufficiency gap in the spec, not a test to force.
 
+When the increment **revises an existing spec** — widens or reshapes a claim already implemented — its `verifies` test is now suspect: a test written against the *old* claim keeps compiling, keeps passing, and keeps the spec **Covered**, while asserting nothing about the *new* claim. So for **every** spec this increment widens, re-open its `verifies` test and confirm it still falsifies the spec's **current** text; update it where it does not. This is not optional cleanup — a widened spec with an unrevised test is the default outcome, not the exception.
+
+**Nothing in the build will flag this, by design, and you must not wait for it to.** The anchor proves a link *exists*; coverage proves *some* test names the spec. Neither proves the test still *means* what the spec now says — that is semantic, and no compiler or coverage number can reach it. clew does not detect widened-but-under-tested specs and is not intended to: the build guards the structure, and this re-read is the check that guards the meaning. It is your step in the loop, not a missing tool feature — do not report its absence as one.
+
 For a **type reshape**, the change set is mostly **unanchored consumers**: reshaping a shared type breaks every site that uses it, and those sites carry no marker — you anchor the decision, not every consumer — so neither the anchor walk nor an id scan enumerates them (the id finds where the type is *realized*, not where it is *used*). Get the sites from the **type system**: run a find-references on the type, or make the shape change and read the checker's breaks — either follows the type through inference, where neither the id nor the type name appears textually. The anchor traversal (`clew-context`) is the complement, not a substitute — it tells you *why* each site matters, the type system tells you *where* they all are; do not conflate the two.
 
 ### 4. Anchor the code and the test
@@ -63,6 +67,7 @@ Run `clew coverage` and `clew check`. Focus on the spec (or specs) this incremen
 - If a targeted spec is not Covered, go back and find what is missing — a `realizes` or `verifies` anchor not yet placed, a test not written, a stale regeneration — and close it within this increment.
 - If you cannot find what is missing — the anchors look right yet coverage still reports the gap — stop and report the problem to the user; do not invent an anchor to move the number.
 - A spec that coverage reports as uncovered but that this increment did **not** target is out of scope. Do not anchor it to force it Covered — tell the user it is open and leave it for its own increment.
+- **Covered is not fresh.** A spec you *widened* this increment stays Covered on its old test — the number cannot tell you the test went stale. For every widened spec, the confirmation is the re-read from step 3, not a green coverage line.
 
 **Covered proves the link, not the code.** The build confirms the code names a live spec and a test names it; it does not confirm the code is right or that the test asserts anything meaningful. So do not read Covered as done — the implementation and the test still need genuine review.
 
