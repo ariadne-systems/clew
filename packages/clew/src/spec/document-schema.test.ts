@@ -17,6 +17,8 @@ import {
 } from "./document-schema.js";
 
 describe("schemaFromParsed", () => {
+  const statusSet = ["planned", "active", "deprecated"];
+
   verifies(
     [
       ConTraceables.CON_032_VALIDATE_SCHEMA_BEFORE_USE,
@@ -32,6 +34,7 @@ describe("schemaFromParsed", () => {
             },
           },
           "s.yml",
+          statusSet,
         );
         expect(schema.onError).toBe("warn");
         expect(schema.fields.get("title")).toEqual({
@@ -47,26 +50,43 @@ describe("schemaFromParsed", () => {
 
       test("rejects a schema that redefines the id form", () => {
         expect(() =>
-          schemaFromParsed({ id: { pattern: "x" } }, "s.yml"),
+          schemaFromParsed({ id: { pattern: "x" } }, "s.yml", statusSet),
         ).toThrow(ClewError);
       });
 
-      test("rejects an enum on the Status field (the value set is clew's)", () => {
+      test("accepts a Status enum that matches the value set, order-independent", () => {
+        const schema = schemaFromParsed(
+          { fields: { Status: { enum: ["deprecated", "planned", "active"] } } },
+          "s.yml",
+          statusSet,
+        );
+        expect(schema.fields.get("status")).toEqual({
+          label: "Status",
+          required: false,
+          enum: ["deprecated", "planned", "active"],
+        });
+      });
+
+      test("rejects a Status enum that diverges from the value set", () => {
         expect(() =>
-          schemaFromParsed({ fields: { Status: { enum: ["a"] } } }, "s.yml"),
-        ).toThrow(/status value set is clew's/i);
+          schemaFromParsed(
+            { fields: { Status: { enum: ["planned", "active"] } } },
+            "s.yml",
+            statusSet,
+          ),
+        ).toThrow(/differs from clew's value set/i);
       });
 
       test("rejects an unrecognized top-level key", () => {
-        expect(() => schemaFromParsed({ rules: {} }, "s.yml")).toThrow(
-          /unrecognized key/i,
-        );
+        expect(() =>
+          schemaFromParsed({ rules: {} }, "s.yml", statusSet),
+        ).toThrow(/unrecognized key/i);
       });
 
       test("rejects an invalid onError", () => {
-        expect(() => schemaFromParsed({ onError: "halt" }, "s.yml")).toThrow(
-          /onError/,
-        );
+        expect(() =>
+          schemaFromParsed({ onError: "halt" }, "s.yml", statusSet),
+        ).toThrow(/onError/);
       });
     },
   );

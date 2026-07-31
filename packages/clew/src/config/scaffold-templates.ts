@@ -7,13 +7,16 @@ export const SPEC_SCHEMA_FILE = "spec.schema.yaml";
 
 /** The opinionated story document-schema template (ADR-0001 D8). */
 export const DEFAULT_STORY_SCHEMA: string = `# Document schema for stories (the \`story\` document type).
-# clew merges this with the pinned core (id form, \`**Status**\` grammar and value
-# set, relation links) it always enforces — so Status is not listed here. Fields
-# are listed in the order a story must present them.
+# clew merges this with the pinned core (id form, \`**Status**\` grammar, relation
+# links) it always enforces. The \`Status\` value set is clew's; it is listed here so
+# the schema is complete, and a restated enum must match clew's set exactly.
+# Fields are listed in the order a story must present them.
 onError: fail
 fields:
   Title:
     required: true
+  Status:
+    enum: [planned, active, done, dropped]
   Business Value:
     required: true
   Problem / Context:
@@ -28,8 +31,9 @@ fields:
 
 /** The opinionated spec document-schema template; the \`Lens\` enum is the default lens set. */
 export const DEFAULT_SPEC_SCHEMA: string = `# Document schema for specs (SW, CON, ARCH, NF, STK, SYS, ...).
-# clew merges this with the pinned core (id form, \`**Status**\` grammar and value
-# set, relation links) it always enforces — so Status is not listed here, and Lens
+# clew merges this with the pinned core (id form, \`**Status**\` grammar, relation
+# links) it always enforces. The \`Status\` value set is clew's; it is listed here so
+# the schema is complete, and a restated enum must match clew's set exactly. Lens
 # carries only the allowed values.
 onError: fail
 fields:
@@ -38,6 +42,8 @@ fields:
   Lens:
     required: true
     enum: [${DEFAULT_LENSES.map((lens) => lens.id).join(", ")}]
+  Status:
+    enum: [planned, active, deprecated]
   Description:
     required: true
   Rationale:
@@ -58,7 +64,9 @@ export const DEFAULT_STORY_EXAMPLE: string = `<!--
 Example story — copy this shape. Each field below is a bold label (Title,
 Business Value, ...) on its own line, in the order shown. A "#"/"##" heading is
 NOT a field: clew detects a field only as a bold label written like the ones
-below. The "## Relations" section links the specs the story realizes and the
+below. Status carries an inline value after the colon, as shown, and is one of
+planned | active | done | dropped (a story is born planned). The "## Relations"
+section links the specs the story realizes and the
 existing specs it relates to — the ids and paths here are placeholders to
 replace. Cite each spec by its id alone; any note goes after the link, not
 inside it. This file sits beside the schemas, not in the stories directory, so
@@ -67,6 +75,8 @@ clew never treats it as a real story.
 
 **Title**
 A concise, decisive statement of the increment
+
+**Status**: planned
 
 **Business Value**
 Why the work matters — the benefit to the users or the project.

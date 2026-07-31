@@ -271,6 +271,40 @@ describe("setup scaffolds the document schemas", () => {
       expect(specExample).not.toContain("**Status**: active");
     });
 
+    test("the scaffolded story example models planned, the born status of a new story", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+
+      await setup({ configFile });
+
+      const storyExample = await readFile(
+        join(dir, "docs", "spec", "schemas", "story.example.md"),
+        "utf8",
+      );
+      expect(storyExample).toContain("**Status**: planned");
+      expect(storyExample).not.toContain("**Status**: active");
+    });
+
+    test("the scaffolded schemas surface the Status field with its value set", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+
+      await setup({ configFile });
+
+      const storySchema = await readFile(
+        join(dir, "docs", "spec", "schemas", "story.schema.yaml"),
+        "utf8",
+      );
+      const specSchema = await readFile(
+        join(dir, "docs", "spec", "schemas", "spec.schema.yaml"),
+        "utf8",
+      );
+      expect(storySchema).toContain("Status:");
+      expect(storySchema).toContain("[planned, active, done, dropped]");
+      expect(specSchema).toContain("Status:");
+      expect(specSchema).toContain("[planned, active, deprecated]");
+    });
+
     test("does not overwrite an existing example file", async () => {
       const dir = await tempDir();
       const configFile = join(dir, ".clewrc.json");

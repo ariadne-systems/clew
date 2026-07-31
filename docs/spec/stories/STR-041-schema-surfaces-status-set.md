@@ -1,7 +1,7 @@
 **Title**
 A scaffolded document schema surfaces the Status field and its value set
 
-**Status**: planned
+**Status**: done
 
 **Business Value**
 An adopter reads the document schema to learn the contract a story or spec must meet.
@@ -46,3 +46,8 @@ The id form stays clew-owned and un-restated; only Status is surfaced.
 - [CON-022](../specs/CON-022-valid-status.md) — the spec value set the scaffolded spec schema now writes as an enum
 - [CON-041](../specs/CON-041-story-status-terminal-states.md) — the story value set the scaffolded story schema now writes as an enum
 - [SW-036](../specs/SW-036-scan-validates-schema.md) — validates each document against the schema whose Status field is now surfaced
+
+## Changes
+
+- **2026-07-31** — Set active: implementation of the story began.
+- **2026-07-31** — Set done: CON-032 and SW-040 revised, implemented, tested, and anchored; both Covered, `clew check` clean; accepted in review.

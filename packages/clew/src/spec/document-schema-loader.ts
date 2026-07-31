@@ -4,8 +4,10 @@ import { ConTraceables, realizes } from "@ariadne-thread/trace";
 import { parse } from "yaml";
 import { readSchemas } from "../config/config.js";
 import { ClewError, ErrorCode } from "../errors.js";
+import { STORY_STATUSES } from "../story/story-status.js";
 import type { DocumentSchema, DocumentType } from "./document-schema.js";
 import { schemaFromParsed } from "./document-schema.js";
+import { SPEC_STATUSES } from "./generator.js";
 
 /** The document types that may carry a schema, in a stable order. */
 const DOCUMENT_TYPES: readonly DocumentType[] = ["story", "spec"];
@@ -52,7 +54,8 @@ export async function loadSchemas(
     const file = config[type];
     if (file !== undefined) {
       const text = await readFile(resolveWithinRoot(projectRoot, file), "utf8");
-      schemas.set(type, schemaFromParsed(parse(text), file));
+      const statusValues = type === "story" ? STORY_STATUSES : SPEC_STATUSES;
+      schemas.set(type, schemaFromParsed(parse(text), file, statusValues));
     }
   }
   return schemas;

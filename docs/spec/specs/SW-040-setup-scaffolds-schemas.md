@@ -18,6 +18,7 @@ Scaffolding the schemas at setup gives every project the same baseline validatio
 **Verification Description**
 After `clew setup`, the configured schema files exist and the `schemas` section points at them; a minimal valid story and a minimal valid spec pass validation, and a document missing a pinned field is rejected (SW-036).
 A copyable example exists beside each schema, and each example validates against its own scaffolded schema with no violations.
+The scaffolded schema lists the `**Status**` field with its document type's value set (a story's, a spec's), and the example models `planned`.
 A re-run leaves an existing schema file, an existing example, and an existing `schemas` section unchanged.
 
 ## Relations
@@ -39,3 +40,6 @@ A re-run leaves an existing schema file, an existing example, and an existing `s
 A fresh project has no existing story or spec to copy the field format from, and the schema lists field names without showing that clew detects a field only as a `**Bold label**` — so an agent authoring the first story guessed the form (a heading instead of a `**Title**` field), producing a story that fails validation on promotion.
 The example gives every project a copyable, schema-valid form from the start; a golden test keeps each example valid against its own schema.
 The title and slug are unchanged — the examples are part of scaffolding the schemas, not a separate decision — so no anchor churns.
+
+- **2026-07-31** — The scaffolded schemas now surface the `**Status**` field with its per-type value set as an enum (story `planned/active/done/dropped`, spec `planned/active/deprecated`), and the example models `planned`; the schema comment no longer says Status is omitted (STR-041).
+The schema enforced Status but did not show it, so a reader learned the field only from clew's code; surfacing it makes the schema the whole contract. Accepting the restated enum is CON-032's revision.

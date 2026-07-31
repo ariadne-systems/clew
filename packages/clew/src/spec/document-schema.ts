@@ -46,25 +46,31 @@ export interface DocumentViolation {
 
 const SEVERITIES: readonly SchemaSeverity[] = ["warn", "fail"];
 
-/** The one field whose value set clew owns; a schema may require it, but not redefine its values. */
+/** The one field whose value set clew owns; a schema may restate its values, but not diverge from them. */
 const PINNED_STATUS_LABEL = "status";
 
 /**
  * Validates a parsed schema against clew's minimum contract and returns it
  * normalized. The shape must be recognized — an `onError` of `warn`/`fail`
  * and `fields` of label → `{ required?, enum? }` — and it may not reach into the
- * pinned core: no `id`, and no `enum` on the `Status` field. A schema that fails is
+ * pinned core: no `id`, and a `Status` `enum`, if given, must equal `statusValues`
+ * (this document type's value set, which is clew's). A schema that fails is
  * rejected with its location, before any document is validated against it.
  */
 export const schemaFromParsed: (
   parsed: unknown,
   location: string,
+  statusValues: readonly string[],
 ) => DocumentSchema = realizes(
   [
     ConTraceables.CON_032_VALIDATE_SCHEMA_BEFORE_USE,
     ArchTraceables.ARCH_007_SCHEMA_CORE_IS_WHAT_CLEW_READS,
   ],
-  (parsed: unknown, location: string): DocumentSchema => {
+  (
+    parsed: unknown,
+    location: string,
+    statusValues: readonly string[],
+  ): DocumentSchema => {
     const root = asMapping(parsed, location, "the schema");
     if ("id" in root) {
       throw invalidSchema(
@@ -75,7 +81,7 @@ export const schemaFromParsed: (
     rejectUnknownKeys(root, ["onError", "fields"], location);
     return {
       onError: readSeverity(root.onError, location),
-      fields: readFields(root.fields, location),
+      fields: readFields(root.fields, location, statusValues),
     };
   },
 );
@@ -99,6 +105,7 @@ function readSeverity(value: unknown, location: string): SchemaSeverity {
 function readFields(
   value: unknown,
   location: string,
+  statusValues: readonly string[],
 ): ReadonlyMap<string, FieldRule> {
   const fields = new Map<string, FieldRule>();
   if (value === undefined) {
@@ -107,7 +114,10 @@ function readFields(
   for (const [label, ruleValue] of Object.entries(
     asMapping(value, location, "`fields`"),
   )) {
-    fields.set(label.toLowerCase(), readFieldRule(label, ruleValue, location));
+    fields.set(
+      label.toLowerCase(),
+      readFieldRule(label, ruleValue, location, statusValues),
+    );
   }
   return fields;
 }
@@ -116,20 +126,32 @@ function readFieldRule(
   label: string,
   value: unknown,
   location: string,
+  statusValues: readonly string[],
 ): FieldRule {
   const raw = asMapping(value, location, `field \`${label}\``);
   rejectUnknownKeys(raw, ["required", "enum"], location);
   const required = readBoolean(raw.required, label, location);
   const enumValues = readEnum(raw.enum, label, location);
-  if (label.toLowerCase() === PINNED_STATUS_LABEL && enumValues !== undefined) {
+  if (
+    label.toLowerCase() === PINNED_STATUS_LABEL &&
+    enumValues !== undefined &&
+    !sameValueSet(enumValues, statusValues)
+  ) {
     throw invalidSchema(
       location,
-      "it sets an `enum` on `Status`, but the status value set is clew's and cannot be redefined",
+      `it sets an \`enum\` on \`Status\` that differs from clew's value set (${statusValues.join(", ")}); a restated Status enum must match it exactly`,
     );
   }
   return enumValues === undefined
     ? { label, required }
     : { label, required, enum: enumValues };
+}
+
+/** Whether two value lists denote the same set, ignoring order and duplicates. */
+function sameValueSet(a: readonly string[], b: readonly string[]): boolean {
+  const setA = new Set(a);
+  const setB = new Set(b);
+  return setA.size === setB.size && [...setA].every((value) => setB.has(value));
 }
 
 function readBoolean(value: unknown, label: string, location: string): boolean {
