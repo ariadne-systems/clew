@@ -7,13 +7,13 @@ import {
   requireConfig,
 } from "../../index.js";
 
-const EMPTY_UNIVERSE_WARNING =
-  "warning: no generated traceables found — run `clew spec` first; coverage is reported against the generated trace, not the spec files.\n";
+const EMPTY_UNIVERSE_NOTE =
+  "note: the coverage universe is empty — no generated traceables were found. If you have active specs, run `clew spec` first (coverage reads the generated trace, not the spec files); with none yet, this is the expected state.\n";
 
-/** Warns, on stderr, when the coverage universe is empty — the generator has not run. */
-function warnEmptyUniverse(universeEmpty: boolean): void {
+/** Notes, on stderr, when the coverage universe is empty — expected with no active specs, a `clew spec` reminder otherwise. */
+function noteEmptyUniverse(universeEmpty: boolean): void {
   if (universeEmpty) {
-    process.stderr.write(EMPTY_UNIVERSE_WARNING);
+    process.stderr.write(EMPTY_UNIVERSE_NOTE);
   }
 }
 
@@ -35,12 +35,12 @@ export const registerCoverage: (program: Command) => void = realizes(
         await requireConfig();
         if (ids.length > 0) {
           const { report, universeEmpty } = await coverageOf(ids);
-          warnEmptyUniverse(universeEmpty);
+          noteEmptyUniverse(universeEmpty);
           process.stdout.write(report);
           return;
         }
         const { result, file, universeEmpty } = await coverage();
-        warnEmptyUniverse(universeEmpty);
+        noteEmptyUniverse(universeEmpty);
         process.stdout.write(formatCoverageReport(result));
         process.stdout.write(`Wrote ${file}.\n`);
       });

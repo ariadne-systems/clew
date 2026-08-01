@@ -60,6 +60,17 @@ function captureStdout(): () => string {
   return () => chunks.join("");
 }
 
+function captureStderr(): () => string {
+  const chunks: string[] = [];
+  vi.spyOn(process.stderr, "write").mockImplementation((chunk): boolean => {
+    chunks.push(
+      typeof chunk === "string" ? chunk : Buffer.from(chunk).toString(),
+    );
+    return true;
+  });
+  return () => chunks.join("");
+}
+
 async function runClew(...args: string[]): Promise<void> {
   await buildProgram().parseAsync(["node", "clew", ...args]);
 }
@@ -135,6 +146,21 @@ describe("coverage per-spec query", () => {
         "SW-404  absent — not in the coverage universe",
       );
     });
+  });
+});
+
+describe("coverage on an empty universe", () => {
+  test("notes the empty universe without alarming, and exits 0", async () => {
+    await setupProjectDir();
+    // No `clew spec` run, so no generated traceables — the universe is empty.
+    captureStdout();
+    const stderr = captureStderr();
+
+    await runClew("coverage");
+
+    const err = stderr();
+    expect(err).toContain("the coverage universe is empty");
+    expect(err).not.toContain("warning:");
   });
 });
 
