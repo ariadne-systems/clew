@@ -30,7 +30,13 @@ The command holds no coverage logic of its own.
 
 - [SYS-012](SYS-012-coverage-policy-and-waivers.md)
 
+**Related**
+
+- [SW-051](SW-051-coverage-reports-named-specs.md) — adds a read-only per-spec query form; the `coverage.json` write named here is the bare command's
+
 ## Changes
 
 - **2026-06-26** — The command now assembles the coverage universe by reading the generated traceables back through the generators (ARCH-004, CON-020) instead of re-scanning the spec files.
 It stays thin; only where the universe comes from changed.
+
+- **2026-08-01** — Noted the read-only per-spec query form (SW-051): `clew coverage <ids>` reports the named specs without writing, so the "writes `coverage.json`" here describes the bare `clew coverage`.
