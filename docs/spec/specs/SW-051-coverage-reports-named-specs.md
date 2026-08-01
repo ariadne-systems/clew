@@ -3,7 +3,7 @@ clew coverage reports the status of each spec id it is given
 
 **Lens**: SW
 
-**Status**: planned
+**Status**: active
 
 **Description**
 Given one or more spec ids, `clew coverage <id…>` reports each named spec's coverage status directly — realized, verified, Covered, none, or deprecated, and a waived spec's status with its waiver reason — instead of only the corpus-wide summary.
@@ -30,3 +30,7 @@ A per-spec query writes no `coverage.json` — an existing file is left untouche
 
 - [SW-029](SW-029-coverage-command.md) — the coverage command this filters
 - [SW-028](SW-028-emit-coverage-result.md) — the whole-corpus report and wholesale `coverage.json` write this must not truncate
+
+## Changes
+
+- **2026-08-01** — Set active: implementation of STR-042 began.

@@ -62,7 +62,7 @@ Bind the implementation and the test to the spec with the generated trace marker
 
 ### 5. Verify it closed — the specs you targeted
 
-Run `clew coverage` and `clew check`. Focus on the spec (or specs) this increment set out to build: each must now report **Covered** — realized *and* verified.
+Run `clew coverage <the ids you targeted>` and `clew check`. The per-spec form reports each named spec's status directly, so you confirm the increment's specs without reading the whole-corpus report or `coverage.json` by hand: each must now report **Covered** — realized *and* verified.
 
 - If a targeted spec is not Covered, go back and find what is missing — a `realizes` or `verifies` anchor not yet placed, a test not written, a stale regeneration — and close it within this increment.
 - If you cannot find what is missing — the anchors look right yet coverage still reports the gap — stop and report the problem to the user; do not invent an anchor to move the number.
@@ -80,5 +80,5 @@ When the increment is **accepted** after this review, set the carrying story's `
 ## Done when
 
 - The spec is `active` with its traceable regenerated; the implementation and a test are written following the project's installed skills and conventions; both are anchored (`realizes` / `verifies`) via `clew-anchor`, so the build holds the link.
-- `clew coverage` shows every spec this increment targeted as **Covered**, and `clew check` is clean; any *other* open coverage was reported to the user, not forced.
+- `clew coverage <targeted ids>` shows every spec this increment targeted as **Covered**, and `clew check` is clean; any *other* open coverage was reported to the user, not forced.
 - The change is presented for review — Covered read as the link's proof, not the code's correctness — and nothing is committed.

@@ -1,7 +1,7 @@
 **Title**
 clew coverage answers whether a named spec is Covered, directly
 
-**Status**: planned
+**Status**: done
 
 **Business Value**
 The implement step closes an increment by confirming its target specs reached Covered.
@@ -39,3 +39,8 @@ The `clew-implement` skill then adopts it: its verify step confirms each targete
 
 - [SW-029](../specs/SW-029-coverage-command.md) — the coverage command this extends
 - [SW-028](../specs/SW-028-emit-coverage-result.md) — the whole-corpus report and `coverage.json` write, which stays the bare command's job
+
+## Changes
+
+- **2026-08-01** — Set active: implementation of the story began.
+- **2026-08-01** — Set done: SW-051 implemented, tested, anchored, and Covered; `clew coverage SW-051` reports covered and `clew check` is clean; accepted in review.

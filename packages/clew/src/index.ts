@@ -62,13 +62,16 @@ export type {
   CoverageStatus,
   ReadUniverseOptions,
   SpecCoverage,
+  SpecCoverageQuery,
   StaleWaiver,
 } from "./spec/coverage.js";
 export {
   computeCoverage,
   coverage,
+  coverageOf,
   DEFAULT_COVERAGE_FILE,
   formatCoverageReport,
+  formatSpecCoverage,
   readUniverse,
   reconcileWaivers,
   writeCoverageResult,

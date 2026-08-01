@@ -397,6 +397,29 @@ export const formatCoverageReport: (result: CoverageResult) => string =
     },
   );
 
+/**
+ * Formats the coverage of each named spec id, in the order given: its status —
+ * with a waiver's reason when waived — or, for an id not in the universe, that it
+ * is absent. This is the per-spec view `clew coverage <ids>` prints.
+ */
+export const formatSpecCoverage: (
+  result: CoverageResult,
+  ids: readonly string[],
+) => string = (result: CoverageResult, ids: readonly string[]): string => {
+  const byId = new Map(result.specs.map((spec) => [spec.id, spec] as const));
+  const lines = ids.map((id) => {
+    const spec = byId.get(id);
+    if (spec === undefined) {
+      return `  ${id}  absent — not in the coverage universe`;
+    }
+    if (spec.waiver !== undefined) {
+      return `  ${spec.id}  ${spec.status} — ${spec.waiver.reason}`;
+    }
+    return `  ${spec.id}  ${spec.status}`;
+  });
+  return `${lines.join("\n")}\n`;
+};
+
 /** Appends a titled section to the report when it has entries. */
 function appendSection<Entry>(
   lines: string[],
@@ -429,14 +452,43 @@ export type CoverageRun = {
  * result; the orchestration is the engine's, so `clew coverage` stays a thin
  * command like `check` and `spec`.
  */
-export async function coverage(): Promise<CoverageRun> {
+/** Computes the reconciled coverage without writing — the read side shared by the full run and the per-spec query. */
+async function computeCoverageRun(): Promise<{
+  result: CoverageResult;
+  universeEmpty: boolean;
+}> {
   const [universe, scanResult, waivers] = await Promise.all([
     readUniverse(),
     scanCode(),
     readWaivers(),
   ]);
   const computed = computeCoverage(universe, scanResult.anchors);
-  const result = reconcileWaivers(computed, waivers);
-  const file = await writeCoverageResult(result);
-  return { result, file, universeEmpty: universe.length === 0 };
+  return {
+    result: reconcileWaivers(computed, waivers),
+    universeEmpty: universe.length === 0,
+  };
 }
+
+export async function coverage(): Promise<CoverageRun> {
+  const { result, universeEmpty } = await computeCoverageRun();
+  const file = await writeCoverageResult(result);
+  return { result, file, universeEmpty };
+}
+
+/** The outcome of a per-spec query: the report to print, and whether the trace was empty. */
+export type SpecCoverageQuery = { report: string; universeEmpty: boolean };
+
+/**
+ * The read-only per-spec query behind `clew coverage <ids>`: computes coverage
+ * over the whole corpus but writes no `coverage.json` — that file stays the bare
+ * `clew coverage`'s — and returns the report for just the named ids.
+ */
+export const coverageOf: (
+  ids: readonly string[],
+) => Promise<SpecCoverageQuery> = realizes(
+  SwTraceables.SW_051_COVERAGE_REPORTS_NAMED_SPECS,
+  async (ids: readonly string[]): Promise<SpecCoverageQuery> => {
+    const { result, universeEmpty } = await computeCoverageRun();
+    return { report: formatSpecCoverage(result, ids), universeEmpty };
+  },
+);

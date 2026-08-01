@@ -19,6 +19,7 @@ import type {
 import {
   computeCoverage,
   formatCoverageReport,
+  formatSpecCoverage,
   GENERATED_MARKER,
   readUniverse,
   reconcileWaivers,
@@ -313,6 +314,25 @@ describe("coverage result output", () => {
       });
     },
   );
+
+  verifies(SwTraceables.SW_051_COVERAGE_REPORTS_NAMED_SPECS, () => {
+    test("reports only the named specs, in order, with a waived one's reason", () => {
+      const report = formatSpecCoverage(result, ["SW-4", "SW-1", "SW-2"]);
+
+      expect(report).toBe(
+        "  SW-4  none\n  SW-1  covered\n  SW-2  realized — verified by acceptance\n",
+      );
+    });
+
+    test("reports an id not in the universe as absent, rather than dropping it", () => {
+      const report = formatSpecCoverage(result, ["SW-1", "SW-404"]);
+
+      expect(report).toContain("SW-1  covered");
+      expect(report).toContain("SW-404  absent — not in the coverage universe");
+      expect(report).not.toContain("SW-2");
+      expect(report).not.toContain("SW-3");
+    });
+  });
 });
 
 describe("readUniverse", () => {

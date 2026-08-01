@@ -99,13 +99,41 @@ describe("coverage command", () => {
         staleWaivers: [],
       });
     });
+  });
+});
 
-    test("an extra positional argument exits non-zero", () => {
-      const program = buildProgram().exitOverride();
+describe("coverage per-spec query", () => {
+  verifies(SwTraceables.SW_051_COVERAGE_REPORTS_NAMED_SPECS, () => {
+    test("reports only the named spec and leaves coverage.json untouched", async () => {
+      const dir = await setupProjectDir();
+      await runClew("spec");
+      await runClew("coverage");
+      const before = await readFile(
+        join(dir, ".clew", "coverage.json"),
+        "utf8",
+      );
 
-      expect(() =>
-        program.parse(["node", "clew", "coverage", "extra"]),
-      ).toThrow();
+      const stdout = captureStdout();
+      await runClew("coverage", "SW-001");
+      const out = stdout();
+
+      expect(out).toContain("SW-001  realized — verified by acceptance");
+      expect(out).not.toContain("SW-002");
+      expect(await readFile(join(dir, ".clew", "coverage.json"), "utf8")).toBe(
+        before,
+      );
+    });
+
+    test("reports an id absent from the universe as absent", async () => {
+      await setupProjectDir();
+      await runClew("spec");
+
+      const stdout = captureStdout();
+      await runClew("coverage", "SW-404");
+
+      expect(stdout()).toContain(
+        "SW-404  absent — not in the coverage universe",
+      );
     });
   });
 });
