@@ -9,7 +9,7 @@ They carry the same authority as `003-developer-guidelines.md` (per `000`, addit
 
 ## 1. Change Tracking
 
-Every change to a spec already in the corpus — a story or a spec that has been promoted into the spec tree — must be recorded in a `## Changes` section at the end of that spec.
+Every change to a **spec** already promoted into the spec tree must be recorded in a `## Changes` section at the end of that spec.
 
 Each entry states **when** the change was made and **why**.
 Record the date as an absolute ISO date (`YYYY-MM-DD`), not a relative one.
@@ -22,6 +22,8 @@ This mirrors the traceability the corpus exists to preserve (`001-charta.md`, II
 
 Drafts — specs still in the drafts location, not yet promoted — do not carry a `## Changes` section.
 Their recorded history begins at promotion; edits before that are part of authoring, not change.
+
+A **story** carries no `## Changes` section: its only change in the corpus is its `**Status**` transition (`planned` → `active` → `done`), which the `**Status**` field records and git dates — there is no evolving decision text to track, as there is for a spec.
 
 ### Format
 
@@ -69,6 +71,6 @@ An unrecognized value is rejected (CON-022).
 
 A story carries the same `**Status**` field, used for its original purpose — the work item's own state.
 Its value set differs (CON-041): `planned` → `active` → `done`, plus `dropped` for abandoned work, because a story is never a traceable and so has neither coverage to signal done nor `deprecated` to retire.
-A story's status is informational: it generates no traceable and does not affect coverage.
+A story's status is informational: it generates no traceable, does not affect coverage, and its transitions are recorded by the `**Status**` field and git, not a `## Changes` section (§1).
 It is set by the workflow, never by the tool: a story is born `planned` when drafted; the implementation step sets it `active` when the increment begins — the same moment it sets the target specs `active` — and `done` when the increment closes with its specs Covered and reviewed; a person sets `dropped` when abandoning the work.
 An unrecognized value is rejected (CON-041), and `clew status` lists each story's state.

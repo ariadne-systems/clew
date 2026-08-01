@@ -33,7 +33,7 @@ It owns only the **clew-specific frame** around that work — setting the spec `
 A marker can only reference a spec that generates a traceable, and only an `active` (or `deprecated`) spec does — a `planned` one generates none.
 
 - If the spec is still `planned`, set its `**Status**` to `active`. It is already in the corpus, so record a `## Changes` entry (`006`) — for example "Set active: implementation of STR-… began".
-- When the target is a **story**, set the story's own `**Status**` to `active` too, with its own `## Changes` entry — the work item is now in progress (`006 §4`). A story's status is informational (it generates no traceable), so it does not change what is regenerated; it is set so `clew status` reports the work as started.
+- When the target is a **story**, set the story's own `**Status**` to `active` too — the work item is now in progress (`006 §4`). A story carries no `## Changes` section (`006 §1`); its `**Status**` field and git record the transition. A story's status is informational (it generates no traceable), so it does not change what is regenerated; it is set so `clew status` reports the work as started.
 - Regenerate the traceables with the project's spec command (`clew spec`), so the symbol exists to anchor against. If the traceables are a **built** package rather than imported from source, build it too — `clew spec` writes the source, but the type-checker resolves the built package, so without the build the anchor will not type-check against the new symbol.
 - If the spec has no bound id, or is `deprecated`, stop and report: this skill implements a promoted, live spec — promote or choose a live one first.
 
@@ -79,7 +79,7 @@ Run `clew coverage <the ids you targeted>` and `clew check`. The per-spec form r
 
 Present the change — the code, the test, and the coverage result — for review, with Covered understood as the link's proof, not the code's correctness. Do not commit.
 
-When the increment is **accepted** after this review, set the carrying story's `**Status**` to `done` (`006 §4`), with a `## Changes` entry — the work item is implemented. Until then it stays `active`.
+When the increment is **accepted** after this review, set the carrying story's `**Status**` to `done` (`006 §4`) — the work item is implemented; the `**Status**` field and git carry the transition, so a story records no `## Changes` entry. Until then it stays `active`.
 
 ## Done when
 
