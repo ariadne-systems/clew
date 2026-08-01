@@ -35,8 +35,7 @@ Skip a relation the code does not actually hold; do not anchor for the sake of a
 
 The markers live in a generated folder whose location is the project's choice, and each target language has its own folder — so read it, never assume a path.
 
-- Read `.clewrc.json` → `generators`. Each entry has a `type` (the target language) and an `outputDir`. Take the entry for the language you are editing.
-- That entry's `outputDir` is that language's traceables folder; if it has no `outputDir`, the generator's own default applies — resolve it from the generator's documentation or from where the generation command writes, not by guessing a path. Different generators write to different folders.
+- Run `clew config` (or `clew config --json`) and read the **resolved** `generators`: each entry has a `type` (the target language) and a resolved `outputDir` — the configured path, or the generator's own default when `.clewrc.json` omits it. Take the entry for the language you are editing; its `outputDir` is that language's traceables folder. Read the *resolved* config, not raw `.clewrc.json`, so the folder always resolves even when no `outputDir` is set — different generators write to different folders.
 - The folder holds the generated verifiable symbols for that language (which name the available spec ids) and, where the language supports it, a helper or utility the generator emits.
 
 ### 2. Read what the generator emitted, before anchoring
