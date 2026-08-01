@@ -139,7 +139,7 @@ function renderHelperModule(specSets: readonly SpecSet[]): GeneratedFile {
     "export type TraceableIds = TraceableId | readonly [TraceableId, ...TraceableId[]];",
     "",
     "// The three relations and every marker form are documented in the README.md",
-    "// in this folder (ADR-0004).",
+    "// in this folder.",
     "",
     "/**",
     " * Marks a type or interface as **realizing** one or more spec ids; the type is unchanged.",
