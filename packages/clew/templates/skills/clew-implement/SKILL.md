@@ -20,7 +20,7 @@ It owns only the **clew-specific frame** around that work — setting the spec `
 
 - **Do not re-specify how to write code or tests.** The actual implementation and testing follow the project's **installed implementation, testing, and language skills** and its conventions (`003`, `005`); this skill adds only the clew frame around them.
 - **Do not slice the target into separate, review-gated steps unless the user asks.** Use the installed skills to write the code, but keep the whole promoted story (with its specs) as one increment — one sweep, one review. A planning or subagent skill may organize the work internally, but it must not fragment the story into pieces the user has to sign off one by one.
-- Do not anchor by hand — delegate to `clew-anchor`. Do not hand-edit the generated traceables folder.
+- Do not invent a marker form by hand or carry one over from another language — `clew-anchor` settles the form (step 4). Do not hand-edit the generated traceables folder.
 - **Do not place an anchor you are unsure is true** to close a coverage gap. When which code *realizes* a spec or which test *verifies* it is unclear — as it often is for a high-altitude stakeholder or system spec — ask the user and leave it unanchored; a guessed anchor is a false claim coverage will show as green.
 - Do not author or promote specs here, and do not implement a spec that is not yet promoted (no bound id) or is `deprecated`.
 - Do not read **Covered** as **correct** (see step 5), and do not skip the review.
@@ -59,7 +59,9 @@ For a **type reshape**, the change set is mostly **unanchored consumers**: resha
 
 ### 4. Anchor the code and the test
 
-Bind the implementation and the test to the spec with the generated trace markers by running **`clew-anchor`**: a `realizes` marker on the code, a `verifies` marker on the test. It resolves the marker form from the generator and the folder from configuration — do not place markers by hand or carry a form over from another language.
+Bind the implementation and the test with the generated trace markers — a `realizes` marker on the code, a `verifies` marker on the test.
+**`clew-anchor` is the authority on the marker *form*:** run it to resolve that form (and the traceables folder) from the generator, and never place a marker by hand from memory or carry a form over from another language.
+It settles the *form*, not one invocation per marker — once the form is established for the project, placing markers inline as you write is fine, because `clew coverage` and `clew check` validate every placement.
 
 ### 5. Verify it closed — the specs you targeted
 
