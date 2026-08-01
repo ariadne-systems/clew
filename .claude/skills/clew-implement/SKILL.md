@@ -21,6 +21,7 @@ It owns only the **clew-specific frame** around that work — setting the spec `
 - **Do not re-specify how to write code or tests.** The actual implementation and testing follow the project's **installed implementation, testing, and language skills** and its conventions (`003`, `005`); this skill adds only the clew frame around them.
 - **Do not slice the target into separate, review-gated steps unless the user asks.** Use the installed skills to write the code, but keep the whole promoted story (with its specs) as one increment — one sweep, one review. A planning or subagent skill may organize the work internally, but it must not fragment the story into pieces the user has to sign off one by one.
 - Do not anchor by hand — delegate to `clew-anchor`. Do not hand-edit the generated traceables folder.
+- **Do not place an anchor you are unsure is true** to close a coverage gap. When which code *realizes* a spec or which test *verifies* it is unclear — as it often is for a high-altitude stakeholder or system spec — ask the user and leave it unanchored; a guessed anchor is a false claim coverage will show as green.
 - Do not author or promote specs here, and do not implement a spec that is not yet promoted (no bound id) or is `deprecated`.
 - Do not read **Covered** as **correct** (see step 5), and do not skip the review.
 - Do not commit.
@@ -65,6 +66,7 @@ Bind the implementation and the test to the spec with the generated trace marker
 Run `clew coverage <the ids you targeted>` and `clew check`. The per-spec form reports each named spec's status directly, so you confirm the increment's specs without reading the whole-corpus report or `coverage.json` by hand: each must now report **Covered** — realized *and* verified.
 
 - If a targeted spec is not Covered, go back and find what is missing — a `realizes` or `verifies` anchor not yet placed, a test not written, a stale regeneration — and close it within this increment.
+- **If where to anchor is unclear, ask — do not guess.** When you cannot confidently say which code *realizes* the spec or which test *verifies* it — common for a high-altitude spec, a stakeholder or system need with no single obvious realization — do **not** place a guess anchor to close the gap. A forced anchor is a false claim the build cannot catch (an anchor is a claim, not a proof): the spec may belong to different code, need a different test, or be waived. Raise it with the user and leave it unanchored until it is clear.
 - If you cannot find what is missing — the anchors look right yet coverage still reports the gap — stop and report the problem to the user; do not invent an anchor to move the number.
 - A spec that coverage reports as uncovered but that this increment did **not** target is out of scope. Do not anchor it to force it Covered — tell the user it is open and leave it for its own increment.
 - **Covered is not fresh.** A spec you *widened* this increment stays Covered on its old test — the number cannot tell you the test went stale. For every widened spec, the confirmation is the re-read from step 3, not a green coverage line.
