@@ -42,11 +42,18 @@ jobs:
           retention-days: 7
 
   lint:
-    # Static checks — Biome plus reference integrity; no build artifacts required.
+    # Static checks — Biome plus corpus reference integrity. The reference check
+    # (`clew check`) runs the CLI, which imports the built `@ariadne-thread/trace`,
+    # so this job needs the `dist` artifact like the type-check and test jobs do.
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: packages
       - run: pnpm lint
       - run: pnpm format:check
       # Every relative markdown link and @import in the spec corpus must resolve —
