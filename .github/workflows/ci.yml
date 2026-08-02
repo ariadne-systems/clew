@@ -103,13 +103,11 @@ jobs:
   # and creates one git tag per published package, which it then pushes back.
   # `needs` lists the whole verify stage, so it waits for it to pass first.
   #
-  # Packages publish PRIVATELY (access `restricted`, per the changeset config and
-  # each package's `publishConfig`) to npmjs.org, so the `@ariadne-thread` scope
-  # need not match the GitHub owner. This needs a paid npm org and an automation
-  # `NPM_TOKEN` repo secret with publish rights to it. Tag pushes use the checkout's
-  # GITHUB_TOKEN credentials, which require `contents: write`. When the tool goes
-  # public, flip access back to `public` (changeset config + each publishConfig) and
-  # run `npm access set status=public @ariadne-thread/<pkg>` for the published ones.
+  # Packages publish PUBLICLY (access `public`, per the changeset config and each
+  # package's `publishConfig`) to npmjs.org, under the `@ariadne-thread` scope,
+  # which need not match the GitHub owner. This needs an automation `NPM_TOKEN`
+  # repo secret with publish rights to the scope. Tag pushes use the checkout's
+  # GITHUB_TOKEN credentials, which require `contents: write`.
   release:
     needs: [lint, typecheck, test, package-checks]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
