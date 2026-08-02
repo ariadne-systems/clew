@@ -13,11 +13,14 @@ The reference below documents every command.
 Scaffold a runnable configuration and layout.
 
 ```bash
-clew setup [--generator <type>] [--agent <harness>]
+clew setup [--generator <type>] [--type <name>] [--skills-dir <dir>] [--governance-dir <dir>] [--entry-file <file>]
 ```
 
 - `--generator <type>` — the target generator to configure (for example `typescript`, `java`).
-- `--agent <harness>` — the agent harness to emit the method (governance + skills) for (default: `claude`).
+- `--type <name>` — a label for the target agent (for example `claude`, `cursor`); recorded in the config so a reader can tell its target, never used by the engine.
+- `--skills-dir <dir>` — the directory to emit the skills into (default: `.claude/skills`).
+- `--governance-dir <dir>` — the directory to emit the governance contract into (default: `.claude/.ai-project-context`).
+- `--entry-file <file>` — the entry file that loads the governance (default: `CLAUDE.md`). Claude Code needs no flags; other agents pass their own (for example Cursor: `--skills-dir .cursor/skills --entry-file AGENTS.md`).
 
 Writes `.clewrc.json`, the spec-tree layout, and clew's skills for your agent.
 The id state (`.clew/state.json`) is created on the first mint, and the generated-traceables output folder when `clew spec` first runs — not by setup.

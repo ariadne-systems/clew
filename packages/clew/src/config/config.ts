@@ -10,6 +10,7 @@ import {
 } from "@ariadne-thread/trace";
 import { ClewError, ErrorCode } from "../errors.js";
 import { resolveBuiltinGenerator } from "../generators/registry.js";
+import { DEFAULT_PLACEMENT, type Placement } from "../harness/placement.js";
 import type { Generator } from "../spec/generator.js";
 
 /** Default location of the project configuration file. */
@@ -26,9 +27,6 @@ export const DEFAULT_MODE: IdGenerationMode = concerns(
   ArchTraceables.ARCH_001_PLUGGABLE_ID_STRATEGY,
   "sequential",
 );
-
-/** The harness the method scaffold targets when the configuration records none. */
-export const DEFAULT_AGENT = "claude";
 
 /** A configured generator: its target-language `type` and, optionally, where it writes. */
 export type GeneratorConfig = {
@@ -208,8 +206,8 @@ export type ResolvedConfiguration = Realizes<
     prefixes: string[];
     layout: Layout;
     generators: ResolvedGenerator[];
-    /** The harness the method scaffold was emitted for. */
-    agent: string;
+    /** The agent's locations for clew's method: the skills dir, governance dir, and entry file. */
+    agent: Placement;
   }
 >;
 
@@ -240,19 +238,25 @@ export const resolveConfiguration: (
     const { configFile } = options;
     const resolveGenerator =
       options.resolveGenerator ?? resolveBuiltinGenerator;
-    const [lenses, prefixes, layout, generatorConfigs, agent] =
+    const [lenses, prefixes, layout, generatorConfigs, placement] =
       await Promise.all([
         readLenses(configFile),
         readConfiguredPrefixes(configFile),
         readLayout(configFile),
         readGenerators(configFile),
-        readAgent(configFile),
+        readPlacement(configFile),
       ]);
     const generators = generatorConfigs.map((config) => ({
       type: config.type,
       outputDir: resolveOutputDir(config, resolveGenerator),
     }));
-    return { lenses, prefixes: [...prefixes], layout, generators, agent };
+    return {
+      lenses,
+      prefixes: [...prefixes],
+      layout,
+      generators,
+      agent: placement,
+    };
   },
 );
 
@@ -445,14 +449,30 @@ export async function readWaivers(
 }
 
 /**
- * Reads the `agent` field: the harness the method scaffold targets, recorded by
- * setup so a re-run re-emits for the same one. A missing field falls back to the default.
+ * Reads the `agent` placement: where the method scaffold lands, recorded by setup
+ * so a re-run re-emits to the same locations. A missing or malformed field falls
+ * back to the shipped default, so an older configuration (which recorded a bare
+ * `agent` string, or nothing) resolves to the default without a migration step.
  */
-export async function readAgent(
+export async function readPlacement(
   file: string = DEFAULT_CONFIG_FILE,
-): Promise<string> {
+): Promise<Placement> {
   const raw = (await readRawConfig(file)).agent;
-  return typeof raw === "string" && raw.length > 0 ? raw : DEFAULT_AGENT;
+  return isPlacement(raw) ? raw : DEFAULT_PLACEMENT;
+}
+
+/** Whether a raw config value is a well-formed placement (all three string fields present). */
+function isPlacement(value: unknown): value is Placement {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.type === "string" &&
+    typeof candidate.skillsDir === "string" &&
+    typeof candidate.governanceDir === "string" &&
+    typeof candidate.entryFile === "string"
+  );
 }
 
 /** Whether a configuration file exists at `file`. */

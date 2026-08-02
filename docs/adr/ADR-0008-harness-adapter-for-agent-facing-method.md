@@ -103,3 +103,19 @@ Shipping the materials as assets (D6) adds a build-time copy and runtime asset r
 Reversibility.
 As with ADR-0007, the interface seam is what keeps this cheap to revisit.
 More harnesses, or the third-party dynamic-import path, are additive on top of a preserved contract, not a teardown.
+
+## Revision — 2026-08-02: The agent's locations are caller-supplied data, not one adapter per harness (revises D2, D3)
+
+Since this ADR, the ecosystem converged on two open standards — Agent Skills (`SKILL.md`) and `AGENTS.md` — so the method's content and format are standard across agents; only *where the files land*, and *which entry file loads the governance*, varies.
+That variance is data an agent knows about itself, which makes "one in-tree adapter per harness" the wrong shape: it carries volatile, target-specific locations in the core as code.
+
+- **D1 stands.** The method is still held as harness-neutral materials.
+- **The locations are caller-supplied data** — a `{ type, skillsDir, governanceDir, entryFile }` record (the `type` a label only) — consumed by a single emitter. The known agents' locations live as **data at a single presets registry**; `--type <name>` resolves one (the agent gives only its name), and `--skills-dir` / `--governance-dir` / `--entry-file` override per field or stand alone for a custom agent. The recorded `agent` attribute (ENT-002) holds the resolved locations, widening the former bare-string `agent`.
+- **The governance stays layered.** The `000`–`006` files are written as separate files under the governance directory; one rendered entry file lists them in load order. Claude and Gemini treat each `@path` line as a hard import; the `AGENTS.md` agents (Cursor, Zed, Amp, Codex, Copilot) read the same list and open the files themselves — a softer guarantee accepted deliberately, since `AGENTS.md` has not standardized an import directive.
+- **D2 is narrowed.** There is no per-agent adapter *module* and no registry of adapter modules; instead the known agents are **data** at a single presets registry (`harness/presets.ts`) — the one place clew names an agent, mirroring the generator registry (ARCH-003). The architecture test shifts from "no concrete adapter named outside the registry" to **"no production source outside the presets registry names a target agent"**; the emitter branches on none.
+- **D3 is withdrawn.** A new agent is **one data entry** in the presets registry (or a caller's `--skills-dir`/etc. for a one-off), not a new in-tree adapter module. The agent supplies only its own name.
+- The **generator seam** (ARCH-003, ADR-0007) keeps its per-language *modules* (a generator carries real per-language behaviour); the presets registry holds *data* (paths). Same single-registry shape, different entry kind — D2's "one pattern" argument is honoured, not abandoned.
+
+Unchanged: D4 (tool-owned, re-emittable), D5 (clew ships the method, not the project's content), D6 (materials ship as assets — still sourced from clew's own `.claude/...` dogfood layout, which is the default).
+
+Realized by STR-043.

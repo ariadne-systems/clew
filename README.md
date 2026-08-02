@@ -25,6 +25,11 @@ npm install -g @ariadne-thread/clew
 
 It works with **TypeScript** and **Java** today; language support is generator-based, so more can be added.
 
+> **Built with Claude, open to other agents.**
+> clew is developed and tested with [Claude Code](https://claude.com/claude-code).
+> Its skills are authored in the open [Agent Skills](https://agentskills.io) (`SKILL.md`) format that many agents read, and it wires its governance into each agent's own instructions file.
+> It also ships integration for **Gemini, Cursor, Zed, Amp, Codex, and Copilot**, built to their documented conventions but **not yet tested by us** — if you run clew under another agent, feedback is explicitly welcome.
+
 ## How clew holds the thread
 
 clew turns each active specification into a generated, language-native symbol: a **Traceable**.
@@ -313,6 +318,16 @@ Install clew:
 ```bash
 npm install -g @ariadne-thread/clew
 ```
+
+Then set it up **from inside your coding agent** — paste this and let the agent run it:
+
+> Set up clew (`@ariadne-thread/clew`) in this repository. Run `clew setup --type <your agent>` — for example `--type claude`, `--type cursor` — then **either start a fresh session** so you pick up the installed skills and governance, **or** read the just-installed files directly and continue right away.
+
+The agent supplies only its **own name**; clew knows where each agent reads its skills and governance and fills the rest. Known agents: **claude** (the default, so `--type` is optional), **gemini**, **cursor**, **zed**, **amp**, **codex**, **copilot**. A different agent instead passes its own `--skills-dir` / `--governance-dir` / `--entry-file`. Add `--generator typescript` (or `java`) to wire the Traceables generator.
+
+**Skills and governance load at an agent's session start** — so once `clew setup` has written them, a **fresh session** is what makes the method ambiently available (the agent can also read the just-installed files directly to continue immediately). From there the `clew-setup` skill establishes your stack and architecture with you.
+
+> Integration for Gemini, Cursor, Zed, Amp, Codex, and Copilot is built to each agent's documented convention but **not yet tested by us** — feedback from those directions is explicitly welcome.
 
 Then continue with:
 

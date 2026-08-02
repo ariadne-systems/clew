@@ -48,23 +48,32 @@ describe("generators are reached only through the interface", () => {
   });
 });
 
-describe("harness adapters are reached only through the interface", () => {
+describe("agents are named only at the presets registry", () => {
   verifies(ArchTraceables.ARCH_008_METHOD_BEHIND_HARNESS_ADAPTER, () => {
-    // The closed set of concrete adapter factory names that no module outside
-    // src/harness may reference.
-    test("no module outside src/harness names a concrete adapter", async () => {
+    // The known agents' locations live as data at a single registry
+    // (harness/presets.ts). Every other module resolves a placement uniformly and
+    // names no target agent; the emitter branches on none.
+    test("no production source outside the presets registry names a non-default agent", async () => {
       const srcRoot = import.meta.dirname;
-      const harnessDir = join(srcRoot, "harness");
+      const presetsFile = join(srcRoot, "harness", "presets.ts");
       const sources = await collectSourceFiles(srcRoot);
-      const concreteFactories = ["createClaudeHarness"];
+      const foreignAgentLiterals = [
+        "GEMINI.md",
+        ".cursor/skills",
+        ".gemini/skills",
+        ".github/skills",
+        ".agents/skills",
+      ];
 
       const offenders: string[] = [];
       for (const source of sources) {
-        if (source.startsWith(harnessDir)) {
+        if (source === presetsFile) {
           continue;
         }
         const contents = await readFile(source, "utf8");
-        if (concreteFactories.some((factory) => contents.includes(factory))) {
+        if (
+          foreignAgentLiterals.some((literal) => contents.includes(literal))
+        ) {
           offenders.push(source);
         }
       }

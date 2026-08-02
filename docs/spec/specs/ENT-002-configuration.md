@@ -34,7 +34,7 @@ An attribute that shapes a machine is grouped under it: `generation` for what be
 | `scan.unexclude` | `List<String>` | Repository-root-relative globs (CON-018) that re-include a path a built-in default (CON-016) would exclude; never overrides a user `scan.exclude` (CON-017). Optional. |
 | `waivers` | `List<{ id?: String, pattern?: String, reason: String }>` | The committed coverage waiver list: each entry targets a spec `id` or a glob `pattern` over ids (exactly one), with a reason, and waives a missing *test* — a matching spec that is implemented but unverified is reported waived rather than an open gap (SW-027, SW-030). A spec missing its realizing code is never waived (CON-021). A waiver that waives nothing is reported as stale. Optional. |
 | `schemas` | `{ story?: String, "spec"?: String }` | Per-document-type validation schema files; clew validates each document against its type's schema when it reads it (SW-036) — the pinned core merged with the project's required fields and enums (ARCH-007). Optional. |
-| `agent` | `String` | The agent harness the method scaffold was emitted for; setup records it so a re-run re-emits for the same one (SW-043). Defaults to `claude`. Optional. |
+| `agent` | `{ type: String, skillsDir: String, governanceDir: String, entryFile: String }` | The agent's locations for clew's method: a `type` label naming the agent (for example `claude`), and the skills directory, the governance directory, and the entry file that loads the governance; setup records them so a re-run re-emits to the same locations (SW-043). The `type` is a label only — the engine never branches on it. Defaults to the shipped default (Claude Code's conventions). Optional. |
 
 **Rationale**
 Pinning the configuration as an explicit entity fixes the one shape every command reads, and the every-attribute-has-a-default invariant is what lets a project state only what it changes.
@@ -59,3 +59,6 @@ At the root they named no object — *ignore what? exclude from what?* — and r
 This changes existing attributes **in place**, which the append-only rule in this entity's description forbids.
 It is taken as an explicit, one-off **exception**, not a relaxation of that rule: the rule exists to protect deployed consumers from a breaking change, and there are none — nothing is released, and clew is its own only reader.
 The rule stands unchanged and binds again from the first release; moving an attribute after that is a migration, not an edit.
+- **2026-08-02** — Widened the `agent` attribute from a bare harness name (a `String`) to the agent's locations (`{ skillsDir, governanceDir, entryFile }`): the method is now emitted to caller-supplied locations, not for a named harness (STR-043; ARCH-008 / ADR-0008 revision).
+This changes an attribute's type **in place**, taken as an explicit one-off **exception** on the same grounds as the 2026-07-17 entry — nothing is released, clew is its own only reader — with the append-only rule binding again from the first release.
+An old configuration's absent or bare-string `agent` field resolves to the default, so no migration is needed.

@@ -11,7 +11,7 @@ The skills carry one loop:
 `clew-setup` establishes the project up front, `clew-context` grounds the work in the corpus, and `clew-critique` stress-tests a risk-bearing spec's sufficiency.
 You can still run `clew coverage` / `clew check` yourself — or in CI — as the assurance view over the whole corpus.
 
-`clew setup` emits these skills into your agent for the configured harness, so after setup the agent already knows the loop.
+`clew setup` emits these skills into your agent's skills directory, so after setup the agent already knows the loop.
 None of them creates a version-control commit; the ones that change files stop for your review first.
 
 | Skill | Role |

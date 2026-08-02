@@ -4,9 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ArchTraceables, ConTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import type { MethodMaterials } from "../harness.js";
-import { METHOD_MARKER } from "../harness.js";
-import { createClaudeHarness } from "./index.js";
+import { emitMaterials } from "./emit.js";
+import type { MethodMaterials } from "./harness.js";
+import { METHOD_MARKER } from "./harness.js";
+import { DEFAULT_PLACEMENT } from "./placement.js";
 
 async function tempDir(): Promise<string> {
   return mkdtemp(join(tmpdir(), "clew-harness-"));
@@ -20,9 +21,9 @@ const materials: MethodMaterials = {
   stubs: [{ name: "004-technology-contract.md", contents: "stub body\n" }],
 };
 
-const GOVERNANCE = ".claude/.ai-project-context";
+const GOVERNANCE = DEFAULT_PLACEMENT.governanceDir;
 
-describe("the Claude harness adapter", () => {
+describe("emitting the method into a placement", () => {
   verifies(
     [
       ArchTraceables.ARCH_008_METHOD_BEHIND_HARNESS_ADAPTER,
@@ -32,7 +33,7 @@ describe("the Claude harness adapter", () => {
       test("places baselines and skills as tool-owned marked files", async () => {
         const root = await tempDir();
 
-        const result = await createClaudeHarness().emit(materials, root);
+        const result = await emitMaterials(DEFAULT_PLACEMENT, materials, root);
 
         const baseline = await readFile(
           join(root, GOVERNANCE, "000-agent-instructions.md"),
@@ -54,12 +55,11 @@ describe("the Claude harness adapter", () => {
 
       test("preserves a hand edit on re-emit, and reports it preserved", async () => {
         const root = await tempDir();
-        const adapter = createClaudeHarness();
-        await adapter.emit(materials, root);
+        await emitMaterials(DEFAULT_PLACEMENT, materials, root);
         const path = join(root, GOVERNANCE, "000-agent-instructions.md");
         await writeFile(path, "hand edit\n", "utf8");
 
-        const result = await adapter.emit(materials, root);
+        const result = await emitMaterials(DEFAULT_PLACEMENT, materials, root);
 
         expect(await readFile(path, "utf8")).toContain("hand edit");
         expect(result.preserved).toContain(
@@ -72,8 +72,7 @@ describe("the Claude harness adapter", () => {
 
       test("updates an unedited tool file when the tool's content changes", async () => {
         const root = await tempDir();
-        const adapter = createClaudeHarness();
-        await adapter.emit(materials, root);
+        await emitMaterials(DEFAULT_PLACEMENT, materials, root);
         const updated: MethodMaterials = {
           ...materials,
           baselines: [
@@ -84,7 +83,7 @@ describe("the Claude harness adapter", () => {
           ],
         };
 
-        const result = await adapter.emit(updated, root);
+        const result = await emitMaterials(DEFAULT_PLACEMENT, updated, root);
 
         const path = join(root, GOVERNANCE, "000-agent-instructions.md");
         expect(await readFile(path, "utf8")).toContain(
@@ -97,43 +96,45 @@ describe("the Claude harness adapter", () => {
 
       test("seeds a project stub once, never overwriting it", async () => {
         const root = await tempDir();
-        const adapter = createClaudeHarness();
         const stubPath = join(root, GOVERNANCE, "004-technology-contract.md");
 
-        const first = await adapter.emit(materials, root);
+        const first = await emitMaterials(DEFAULT_PLACEMENT, materials, root);
 
         expect(first.seeded).toContain(
           `${GOVERNANCE}/004-technology-contract.md`,
         );
-        expect(first.seeded).toContain("CLAUDE.md");
+        expect(first.seeded).toContain(DEFAULT_PLACEMENT.entryFile);
         const seeded = await readFile(stubPath, "utf8");
         expect(seeded).toBe("stub body\n");
         expect(seeded).not.toContain(METHOD_MARKER);
 
         await writeFile(stubPath, "filled by project\n", "utf8");
-        const second = await adapter.emit(materials, root);
+        const second = await emitMaterials(DEFAULT_PLACEMENT, materials, root);
 
         expect(second.seeded).toEqual([]);
         expect(await readFile(stubPath, "utf8")).toBe("filled by project\n");
       });
 
-      test("seeds a CLAUDE.md index that @imports the governance in order", async () => {
+      test("seeds an entry file that lists the governance in order", async () => {
         const root = await tempDir();
 
-        await createClaudeHarness().emit(materials, root);
+        await emitMaterials(DEFAULT_PLACEMENT, materials, root);
 
-        const claudeMd = await readFile(join(root, "CLAUDE.md"), "utf8");
-        expect(claudeMd).toContain(`@${GOVERNANCE}/000-agent-instructions.md`);
-        expect(claudeMd).toContain(`@${GOVERNANCE}/004-technology-contract.md`);
-        expect(claudeMd.indexOf("000-agent-instructions")).toBeLessThan(
-          claudeMd.indexOf("004-technology-contract"),
+        const entry = await readFile(
+          join(root, DEFAULT_PLACEMENT.entryFile),
+          "utf8",
+        );
+        expect(entry).toContain(`@${GOVERNANCE}/000-agent-instructions.md`);
+        expect(entry).toContain(`@${GOVERNANCE}/004-technology-contract.md`);
+        expect(entry.indexOf("000-agent-instructions")).toBeLessThan(
+          entry.indexOf("004-technology-contract"),
         );
       });
 
-      test("with seedProjectFiles false, re-emits tool-owned only — no stubs or CLAUDE.md", async () => {
+      test("with seedProjectFiles false, re-emits tool-owned only — no stubs or entry file", async () => {
         const root = await tempDir();
 
-        const result = await createClaudeHarness().emit(materials, root, {
+        const result = await emitMaterials(DEFAULT_PLACEMENT, materials, root, {
           seedProjectFiles: false,
         });
 
@@ -142,7 +143,7 @@ describe("the Claude harness adapter", () => {
         expect(
           existsSync(join(root, GOVERNANCE, "004-technology-contract.md")),
         ).toBe(false);
-        expect(existsSync(join(root, "CLAUDE.md"))).toBe(false);
+        expect(existsSync(join(root, DEFAULT_PLACEMENT.entryFile))).toBe(false);
       });
     },
   );

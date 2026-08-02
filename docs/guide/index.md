@@ -48,7 +48,7 @@ That stability is only worth anything if the id is unique and durable, so `clew`
 Reuse a number and every old anchor would silently point at the wrong intent; let two branches guess the next one and they collide.
 Allocation is the CLI's job, not the agent's or a human's, because the id is what the compiler-enforced link ultimately hangs on.
 
-Setting this up is one step — `clew setup` scaffolds the configuration and emits clew's skills into your agent.
+Getting started runs through your agent: it runs `clew setup` to scaffold the configuration and emit clew's skills, and a fresh session then has them.
 From then on you direct the agent in plain language and review its work; see the [Quickstart](getting-started/quickstart.md).
 
 ## Where to go next

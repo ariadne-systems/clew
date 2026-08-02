@@ -11,17 +11,15 @@ Skim [What is CAS-DD?](../concepts/what-is-cas-dd.md) first — this page moves 
 
 ## 1. Scaffold the project
 
-Run setup once in your project root, choosing a generator and your agent harness (the AI coding tool you use — for example Claude):
+Setting clew up is the agent's first job. With clew [installed](installation.md), tell your agent to bootstrap it — paste this:
 
-```bash
-clew setup --generator typescript --agent claude
-```
+> Set up clew (`@ariadne-thread/clew`) here. Run `clew setup --type <your agent> --generator typescript` (for example `--type claude`) — then start a fresh session (or read the just-installed files directly) so you pick up the skills and governance.
 
-This writes `.clewrc.json` (your lenses and layout), the spec-tree layout, and **emits clew's skills and governance into your agent** so it knows how to set up, draft, promote, implement, and anchor.
-The generated-traceables folder — `src/clew/traceables` by default — is created when the traceables are first generated (by `clew spec`), not by setup.
-Inspect the resolved configuration any time with `clew config`.
+The agent supplies only its own name; clew knows where each agent reads its skills and governance and fills the rest (`claude` is the default, so `--type` is optional there). A different agent passes its own `--skills-dir` / `--governance-dir` / `--entry-file` — see the [command reference](../reference/commands.md). This writes `.clewrc.json` (your lenses and layout), the spec-tree layout, and **emits clew's skills and governance into your agent's locations** so it knows how to set up, draft, promote, implement, and anchor.
 
-Before you go on, read the **governance** the scaffold emitted — the charter, and the architecture, coding, testing, and spec conventions in `.claude/.ai-project-context/` — and adjust it to your project.
+Skills and governance load at an agent's **session start**, so a fresh session is what makes clew ambiently available after setup. The generated-traceables folder appears later, when `clew spec` first runs, not at setup. Inspect the resolved configuration any time with `clew config`.
+
+Before you go on, read the **governance** the scaffold emitted — the charter, and the architecture, coding, testing, and spec conventions in your governance directory (`clew config` shows it; the default is `.claude/.ai-project-context/`) — and adjust it to your project.
 It is the contract your agent works under, so shape it first; everything it does afterwards is bound by it.
 
 ## 2. Set up the project

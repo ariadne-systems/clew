@@ -239,15 +239,21 @@ A waiver that matches no realized spec is reported as a **stale waiver**, so the
 
 ## `agent`
 
-The agent harness clew's skills are emitted for.
+Your agent's locations for clew's method — a `type` label naming the agent, the skills directory, the governance directory, and the entry file that loads the governance. clew names no target agent; these are data, and `type` is a label the engine never branches on.
 
 ```json
-{ "agent": "claude" }
+{
+  "agent": {
+    "type": "claude",
+    "skillsDir": ".claude/skills",
+    "governanceDir": ".claude/.ai-project-context",
+    "entryFile": "CLAUDE.md"
+  }
+}
 ```
 
-Recorded by `clew setup` so that re-running it emits for the same harness.
-Supported values: `claude` — the only harness adapter clew ships today; a value naming no adapter fails with `E_UNKNOWN_HARNESS`.
-Defaults to `claude`.
+Recorded by `clew setup` so that re-running it emits to the same locations.
+Defaults to the shipped default (Claude Code's conventions) shown above; a run with no `--type` / `--skills-dir` / `--governance-dir` / `--entry-file` uses it. An older configuration that recorded a bare `agent` string instead resolves to the default, so no migration is needed.
 
 ## Validation and errors
 
@@ -258,7 +264,6 @@ What it *does* enforce, it enforces with a stable error code:
 | --- | --- |
 | No `.clewrc.json` at the project root | `E_NO_CONFIG` |
 | A `generators` type no generator provides | `E_UNKNOWN_GENERATOR` |
-| An `agent` naming no harness adapter | `E_UNKNOWN_HARNESS` |
 | A spec matching more than one `generation.sets` set | `E_SPEC_SET_OVERLAP` |
 | A spec matching no set and no `catchAll` | `E_SPEC_SET_UNMATCHED` |
 | A `scan` glob that will not compile | `E_INVALID_EXCLUSION_PATTERN` |

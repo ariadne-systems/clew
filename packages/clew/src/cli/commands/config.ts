@@ -47,5 +47,10 @@ function formatResolvedConfiguration(config: ResolvedConfiguration): string {
       lines.push(`  ${generator.type} -> ${generator.outputDir}`);
     }
   }
+  lines.push("Agent:");
+  lines.push(`  type: ${config.agent.type}`);
+  lines.push(`  skills: ${config.agent.skillsDir}`);
+  lines.push(`  governance: ${config.agent.governanceDir}`);
+  lines.push(`  entry: ${config.agent.entryFile}`);
   return `${lines.join("\n")}\n`;
 }

@@ -4,26 +4,23 @@ import { ConTraceables, realizes, SwTraceables } from "@ariadne-thread/trace";
 import { ClewError, ErrorCode } from "../errors.js";
 import { readFileOrEmpty, writeIfAbsent } from "../fs/files.js";
 import { resolveBuiltinGenerator } from "../generators/registry.js";
-import type {
-  EmitOptions,
-  EmittedMethod,
-  HarnessAdapter,
-} from "../harness/harness.js";
+import { emitMaterials } from "../harness/emit.js";
+import type { EmitOptions, EmittedMethod } from "../harness/harness.js";
 import { loadAdrTemplate, loadMethodMaterials } from "../harness/materials.js";
+import { DEFAULT_PLACEMENT, type Placement } from "../harness/placement.js";
+import { AGENT_PRESETS } from "../harness/presets.js";
 import { reconcileMethodFile } from "../harness/reconcile.js";
-import { resolveBuiltinHarness } from "../harness/registry.js";
 import type { Generator } from "../spec/generator.js";
 import {
   configExists,
-  DEFAULT_AGENT,
   DEFAULT_CONFIG_FILE,
   DEFAULT_LAYOUT,
   DEFAULT_LENSES,
   DEFAULT_MODE,
   DEFAULT_PADDING,
   type GeneratorConfig,
-  readAgent,
   readGenerators,
+  readPlacement,
   type SchemaConfig,
 } from "./config.js";
 import {
@@ -50,10 +47,14 @@ export type SetupOptions = {
   generator?: string;
   /** Resolves a generator name to its implementation, for validation. Defaults to the in-tree registry. */
   resolveGenerator?: (name: string) => Generator | undefined;
-  /** The agent harness to emit the method for. Defaults to the recorded one, else claude. */
-  agent?: string;
-  /** Resolves a harness name to its adapter. Defaults to the in-tree registry. */
-  resolveHarness?: (name: string) => HarnessAdapter | undefined;
+  /** A label identifying the target agent (for example `claude`, `cursor`); recorded as the placement's `type`, never used by the engine. */
+  type?: string;
+  /** The skills directory to emit into. Defaults to the shipped default; a re-run re-emits to the recorded placement. */
+  skillsDir?: string;
+  /** The governance directory to emit the layered contract into. Defaults to the shipped default. */
+  governanceDir?: string;
+  /** The entry file that loads the governance (for example `CLAUDE.md`, `AGENTS.md`). Defaults to the shipped default. */
+  entryFile?: string;
 };
 
 export type SetupResult = {
@@ -71,8 +72,8 @@ export type SetupResult = {
   schemas: string[];
   /** Whether the project's `.gitignore` was created or appended to. */
   gitignoreUpdated: boolean;
-  /** The harness the method was emitted for. */
-  agent: string;
+  /** The agent's locations for clew's method: the skills dir, governance dir, and entry file. */
+  agent: Placement;
   /** The method files written to the tool's current version, relative to the project root. */
   methodWritten: string[];
   /** The project stubs and index seeded (only those that were absent). */
@@ -94,22 +95,20 @@ export const setup: (options?: SetupOptions) => Promise<SetupResult> = realizes(
     const root = dirname(configFile);
     const resolveGenerator =
       options.resolveGenerator ?? resolveBuiltinGenerator;
-    const resolveHarness = options.resolveHarness ?? resolveBuiltinHarness;
     // Validate the generator first, before touching disk.
     const generators = generatorsSection(options.generator, resolveGenerator);
     const exists = await configExists(configFile);
-    // The agent is chosen at scaffold time and recorded; a re-run re-emits for the
-    // recorded harness, not an override.
-    const agent = exists
-      ? await readAgent(configFile)
-      : (options.agent ?? DEFAULT_AGENT);
-    const adapter = resolveHarnessOrThrow(agent, resolveHarness);
+    // The placement is chosen at scaffold time and recorded; a re-run re-emits to
+    // the recorded placement, not an override.
+    const placement = exists
+      ? await readPlacement(configFile)
+      : resolvePlacement(options);
     if (exists) {
       // Re-emit the tool-owned method for the recorded harness; the configuration
       // and every project-owned file (stubs, index) are left as they are, save the
       // one additive exception below.
       const generatorAdded = await fillGeneratorIfEmpty(configFile, generators);
-      const method = await emitMethod(adapter, root, {
+      const method = await emitMethod(placement, root, {
         seedProjectFiles: false,
       });
       const adr = await emitAdrTemplate(root);
@@ -121,7 +120,7 @@ export const setup: (options?: SetupOptions) => Promise<SetupResult> = realizes(
         generator: generatorAdded,
         schemas: [],
         gitignoreUpdated: false,
-        agent,
+        agent: placement,
         methodWritten: [...method.written, ...adr.written],
         methodSeeded: [...method.seeded],
         methodPreserved: [...method.preserved, ...adr.preserved],
@@ -138,7 +137,7 @@ export const setup: (options?: SetupOptions) => Promise<SetupResult> = realizes(
     const { schemas, written } = await scaffoldSchemas(root);
     const gitignoreUpdated = await scaffoldGitignore(root);
     await seedArchitectureDoc(root);
-    const method = await emitMethod(adapter, root);
+    const method = await emitMethod(placement, root);
     const adr = await emitAdrTemplate(root);
     // Write the config last, so a config on disk always implies a complete scaffold.
     const config = {
@@ -148,7 +147,7 @@ export const setup: (options?: SetupOptions) => Promise<SetupResult> = realizes(
       generators,
       schemas,
       waivers: DEFAULT_WAIVERS,
-      agent,
+      agent: placement,
     };
     await writeFile(configFile, `${JSON.stringify(config, null, 2)}\n`, "utf8");
     return {
@@ -159,7 +158,7 @@ export const setup: (options?: SetupOptions) => Promise<SetupResult> = realizes(
       generator: options.generator ?? null,
       schemas: written,
       gitignoreUpdated,
-      agent,
+      agent: placement,
       methodWritten: [...method.written, ...adr.written],
       methodSeeded: [...method.seeded],
       methodPreserved: [...method.preserved, ...adr.preserved],
@@ -167,9 +166,9 @@ export const setup: (options?: SetupOptions) => Promise<SetupResult> = realizes(
   },
 );
 
-/** Loads the neutral method materials and emits them through the harness adapter. */
+/** Loads the neutral method materials and emits them into the placement. */
 const emitMethod: (
-  adapter: HarnessAdapter,
+  placement: Placement,
   root: string,
   options?: EmitOptions,
 ) => Promise<EmittedMethod> = realizes(
@@ -178,12 +177,12 @@ const emitMethod: (
     SwTraceables.SW_044_SETUP_SEEDS_PROJECT_STUBS,
   ],
   async (
-    adapter: HarnessAdapter,
+    placement: Placement,
     root: string,
     options?: EmitOptions,
   ): Promise<EmittedMethod> => {
     const materials = await loadMethodMaterials();
-    return adapter.emit(materials, root, options);
+    return emitMaterials(placement, materials, root, options);
   },
 );
 
@@ -266,23 +265,27 @@ const fillGeneratorIfEmpty: (
   },
 );
 
-/** Resolves the harness adapter, failing fast when the requested harness is unknown. */
-function resolveHarnessOrThrow(
-  name: string,
-  resolveHarness: (name: string) => HarnessAdapter | undefined,
-): HarnessAdapter {
-  const adapter = resolveHarness(name);
-  if (adapter === undefined) {
-    throw unknownHarness(name);
+/** Builds the placement from the setup options, defaulting each field to the shipped default. */
+function resolvePlacement(options: SetupOptions): Placement {
+  const overriddenDirs =
+    options.skillsDir !== undefined ||
+    options.governanceDir !== undefined ||
+    options.entryFile !== undefined;
+  const preset =
+    options.type !== undefined ? AGENT_PRESETS[options.type] : undefined;
+  if (options.type !== undefined && preset === undefined && !overriddenDirs) {
+    throw new ClewError(
+      ErrorCode.INVALID_OPTIONS,
+      `Unknown agent type "${options.type}". Use a known type (${Object.keys(AGENT_PRESETS).join(", ")}), or supply --skills-dir / --governance-dir / --entry-file for a custom agent.`,
+    );
   }
-  return adapter;
-}
-
-function unknownHarness(name: string): ClewError {
-  return new ClewError(
-    ErrorCode.UNKNOWN_HARNESS,
-    `Unknown agent "${name}". Run setup without \`--agent\`, or pass one the tool provides.`,
-  );
+  const base = preset ?? DEFAULT_PLACEMENT;
+  return {
+    type: options.type ?? (overriddenDirs ? "custom" : base.type),
+    skillsDir: options.skillsDir ?? base.skillsDir,
+    governanceDir: options.governanceDir ?? base.governanceDir,
+    entryFile: options.entryFile ?? base.entryFile,
+  };
 }
 
 /**

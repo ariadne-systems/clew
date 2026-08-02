@@ -1,5 +1,3 @@
-import type { ArchTraceables, Realizes } from "@ariadne-thread/trace";
-
 /** A method file to emit: a neutral name and its content; the adapter maps the name to a harness path. */
 export interface MethodFile {
   readonly name: string;
@@ -27,26 +25,6 @@ export interface EmittedMethod {
 export interface EmitOptions {
   /** Seed the project-owned files (stubs, index)? False on a re-run, which refreshes only the tool-owned method. */
   readonly seedProjectFiles?: boolean;
-}
-
-/**
- * A harness-specific adapter that materializes the neutral method materials into
- * its harness's locations and conventions. One in-tree implementation per harness,
- * bound at a single registry point (mirrors the generator seam).
- */
-export interface HarnessAdapter
-  extends Realizes<
-    [ArchTraceables.ARCH_008_METHOD_BEHIND_HARNESS_ADAPTER],
-    unknown
-  > {
-  /** Stable name matched against the configured harness. */
-  readonly name: string;
-  /** Emits the materials into this harness's locations under the project root. */
-  emit(
-    materials: MethodMaterials,
-    projectRoot: string,
-    options?: EmitOptions,
-  ): Promise<EmittedMethod>;
 }
 
 /** The tool tag a method file's marker carries; the marker itself is built with the file's content hash in `reconcile.ts`. */

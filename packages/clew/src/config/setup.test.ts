@@ -9,7 +9,7 @@ import {
   verifies,
 } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
-import type { HarnessAdapter, MethodMaterials } from "../harness/harness.js";
+import { DEFAULT_PLACEMENT, type Placement } from "../harness/placement.js";
 import { mint, setup } from "../index.js";
 import { validateDocument } from "../spec/document-schema.js";
 import { loadSchemas } from "../spec/document-schema-loader.js";
@@ -408,13 +408,13 @@ describe("setup emits the agent-facing method", () => {
       SwTraceables.SW_044_SETUP_SEEDS_PROJECT_STUBS,
     ],
     () => {
-      test("emits the governance and skills and records the agent", async () => {
+      test("emits the governance and skills and records the placement", async () => {
         const dir = await tempDir();
         const configFile = join(dir, ".clewrc.json");
 
         const result = await setup({ configFile });
 
-        expect(result.agent).toBe("claude");
+        expect(result.agent).toEqual(DEFAULT_PLACEMENT);
         expect(
           existsSync(
             join(dir, ".claude/.ai-project-context/000-agent-instructions.md"),
@@ -424,9 +424,9 @@ describe("setup emits the agent-facing method", () => {
           existsSync(join(dir, ".claude/skills/clew-setup/SKILL.md")),
         ).toBe(true);
         const config = JSON.parse(await readFile(configFile, "utf8")) as {
-          agent: string;
+          agent: Placement;
         };
-        expect(config.agent).toBe("claude");
+        expect(config.agent).toEqual(DEFAULT_PLACEMENT);
       });
 
       test("seeds the project stubs as skeletons", async () => {
@@ -442,15 +442,25 @@ describe("setup emits the agent-facing method", () => {
         expect(stub).toContain("PROJECT STUB");
       });
 
-      test("rejects an unknown agent before writing anything", async () => {
+      test("records a caller-supplied placement and a re-run re-emits to it", async () => {
         const dir = await tempDir();
         const configFile = join(dir, ".clewrc.json");
+        const placement = {
+          type: "codex",
+          skillsDir: ".agents/skills",
+          governanceDir: ".ai-project-context",
+          entryFile: "AGENTS.md",
+        };
 
-        await expect(setup({ configFile, agent: "emacs" })).rejects.toThrow(
-          /emacs/,
+        await setup({ configFile, ...placement });
+        // A re-run with no placement options re-emits to the recorded placement.
+        const rerun = await setup({ configFile });
+
+        expect(rerun.agent).toEqual(placement);
+        expect(rerun.methodWritten).toContain(
+          ".agents/skills/clew-setup/SKILL.md",
         );
-
-        expect(existsSync(configFile)).toBe(false);
+        expect(existsSync(join(dir, ".claude"))).toBe(false);
       });
 
       test("re-running preserves a hand-edited method file and leaves the config unchanged", async () => {
@@ -499,31 +509,40 @@ describe("setup emits the agent-facing method", () => {
   );
 });
 
-describe("setup emits through the harness-adapter interface", () => {
+describe("setup emits to a caller-supplied placement, naming no target agent", () => {
   verifies(ArchTraceables.ARCH_008_METHOD_BEHIND_HARNESS_ADAPTER, () => {
-    test("drives the injected adapter with the materials, and the adapter is the sole writer of harness output", async () => {
+    test("resolves a known agent type to its preset locations, writing nothing in the default's", async () => {
       const dir = await tempDir();
       const configFile = join(dir, ".clewrc.json");
-      const received: MethodMaterials[] = [];
-      const fake: HarnessAdapter = {
-        name: "fake",
-        async emit(materials: MethodMaterials) {
-          received.push(materials);
-          return { written: ["fake/marker.md"], seeded: [], preserved: [] };
-        },
-      };
 
-      const result = await setup({
-        configFile,
-        agent: "fake",
-        resolveHarness: (name) => (name === "fake" ? fake : undefined),
+      const result = await setup({ configFile, type: "cursor" });
+
+      expect(result.agent).toEqual({
+        type: "cursor",
+        skillsDir: ".cursor/skills",
+        governanceDir: ".ai-project-context",
+        entryFile: "AGENTS.md",
       });
-
-      expect(result.agent).toBe("fake");
-      expect(received).toHaveLength(1);
-      expect(received[0]?.baselines.length).toBeGreaterThan(0);
-      expect(received[0]?.skills.length).toBeGreaterThan(0);
+      expect(existsSync(join(dir, ".cursor/skills/clew-setup/SKILL.md"))).toBe(
+        true,
+      );
+      expect(
+        existsSync(join(dir, ".ai-project-context/000-agent-instructions.md")),
+      ).toBe(true);
+      expect(existsSync(join(dir, "AGENTS.md"))).toBe(true);
+      // The engine wrote to the resolved preset, not a hard-coded Claude location.
       expect(existsSync(join(dir, ".claude"))).toBe(false);
+    });
+
+    test("rejects an unknown agent type that gives no explicit locations", async () => {
+      const dir = await tempDir();
+      const configFile = join(dir, ".clewrc.json");
+
+      await expect(setup({ configFile, type: "emacs" })).rejects.toThrow(
+        /emacs/,
+      );
+
+      expect(existsSync(configFile)).toBe(false);
     });
   });
 });
