@@ -17,7 +17,7 @@ So clew runs a real thread between the two: each spec is tied to the code that r
 
 **Follow the thread** to the answer.
 
-clew is the open-source CLI for **Code-Anchored Spec-Driven Development — CAS-DD**.
+clew is the open-source CLI for **Code-Anchored Spec-Driven Development — CAS-DD**, a method set out in full in [this article](https://ariadne-thread.io/blog/code-anchored-spec-driven-development.html).
 
 ```bash
 npm install -g @ariadne-thread/clew

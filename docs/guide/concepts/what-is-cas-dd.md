@@ -2,6 +2,8 @@
 
 CAS-DD — **code-anchored spec-driven development** — is the idea clew is built on: take spec-driven development, and anchor the specs *into the code*, so the thread between intent and implementation is one you can follow — instead of one you hope is still true.
 
+For the full method, read the article [Code-Anchored Spec-Driven Development](https://ariadne-thread.io/blog/code-anchored-spec-driven-development.html) — this page is the short version.
+
 ## Where plain spec-driven development stops
 
 Writing the spec first is worth doing.
