@@ -51,7 +51,7 @@ jobs:
       - run: pnpm format:check
       # Every relative markdown link and @import in the spec corpus must resolve —
       # the prose-layer rot the type-checker can't see (e.g. a renamed spec's links).
-      - run: pnpm check:refs
+      - run: pnpm check:specs
 
   typecheck:
     needs: build
