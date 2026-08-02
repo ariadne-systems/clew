@@ -327,8 +327,6 @@ The agent supplies only its **own name**; clew knows where each agent reads its 
 
 **Skills and governance load at an agent's session start** — so once `clew setup` has written them, a **fresh session** is what makes the method ambiently available (the agent can also read the just-installed files directly to continue immediately). From there the `clew-setup` skill establishes your stack and architecture with you.
 
-> Integration for Gemini, Cursor, Zed, Amp, Codex, and Copilot is built to each agent's documented convention but **not yet tested by us** — feedback from those directions is explicitly welcome.
-
 Then continue with:
 
 * [Quickstart](docs/guide/getting-started/quickstart.md) — from an empty project to checked coverage
@@ -412,6 +410,12 @@ Node 22 LTS is the supported floor.
 | `pnpm dev <command>` | Run the CLI directly from source with tsx |
 
 `pnpm build` runs before `pnpm typecheck`, `pnpm test`, and `pnpm check:pkg`, because workspace packages resolve one another through their built output.
+
+## Contributing
+
+clew is open for **use and feedback**, but not yet for external code contributions.
+Bug reports and feedback — especially on running clew under agents other than Claude Code — are welcome via [issues](https://github.com/ariadne-systems/clew/issues); see [CONTRIBUTING.md](CONTRIBUTING.md).
+For security reports, see [SECURITY.md](SECURITY.md).
 
 ## License
 
