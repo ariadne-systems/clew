@@ -55,6 +55,7 @@ From then on you direct the agent in plain language and review its work; see the
 
 - **New here?** Read [What is CAS-DD?](concepts/what-is-cas-dd.md) and [The spec lifecycle](concepts/spec-lifecycle.md) — the model in a few minutes.
 - **Want to try it now?** Jump to the [Quickstart](getting-started/quickstart.md) — an empty project to checked coverage.
+- **Already have a codebase?** See [Adopting clew in an existing codebase](getting-started/adopting-an-existing-codebase.md) — seed the load-bearing decisions, anchor at the change edge.
 - **Installing?** See [Installation](getting-started/installation.md).
 - **Working through the agent?** See the [Skill reference](reference/skills.md) — the skills that drive the loop.
 - **Looking up a command?** See the [Command reference](reference/commands.md).

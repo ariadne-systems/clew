@@ -35,7 +35,7 @@ The agent runs the **setup** skill. On a new project it interviews you; on an ex
 
 For a new project it then drafts a **workspace-setup story** whose steps stand the workspace up to that architecture. It writes nothing else — no installs, no builds — so you review the two documents and the story, promote the story, and have the agent carry it out.
 
-> **Adopting clew into an existing project?** The setup skill derives your `004` and architecture from the build files, code, and docs instead of interviewing — and drafts a workspace-setup story *only if* it judges the workspace does not yet match that frame. Often it needs none: you get the documented frame and go straight to authoring specs for the code that already exists.
+> **Adopting clew into an existing project?** The setup skill derives your `004` and architecture from the build files, code, and docs instead of interviewing — and drafts a workspace-setup story *only if* it judges the workspace does not yet match that frame. Often it needs none: you get the documented frame and go straight to authoring specs for the code that already exists. See [Adopting clew in an existing codebase](adopting-an-existing-codebase.md) for how to bring clew to code you already have — seed the load-bearing decisions, and anchor at the change edge.
 
 This is the frame every later story is written against: the architecture's enforceable rules become `ARCH` and `CON` specs as the code they constrain is built.
 
