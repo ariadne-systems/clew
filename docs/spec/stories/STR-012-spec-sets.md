@@ -1,6 +1,8 @@
 **Title**
 Group traceables into configured spec sets
 
+**Status**: done
+
 **Business Value**
 The `spec` command's skeleton emits one symbol set per group, but the only grouping is the default by-lens; a project cannot define its own sets.
 Letting a project declare its spec sets — each by a matcher over the spec's filename — lets it shape the generated enums to how it actually thinks about its specs (a security set, a public-API set, …), the way a dedicated query per set does in an issue tracker.

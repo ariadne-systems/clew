@@ -1,6 +1,8 @@
 **Title**
 Spec cross-references carry only the target's id, so no title label can go stale
 
+**Status**: done
+
 **Business Value**
 clew's promise is that the link between specs and code cannot rot silently.
 Today a relation is cited as `[SYS-002 — <title>]` over a path `SYS-002-slug.md` — id, title, and path — and `clew check` already guards the path (CON-029).

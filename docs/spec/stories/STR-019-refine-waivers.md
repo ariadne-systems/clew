@@ -1,6 +1,8 @@
 **Title**
 Refine the waiver list — match by pattern, and waive only a missing test
 
+**Status**: done
+
 **Business Value**
 The waiver list (STR-018) accepts a not-Covered spec whole, by id: "this spec is not Covered, and that is fine."
 Two things make it noisier than the reviewed inventory it should be:

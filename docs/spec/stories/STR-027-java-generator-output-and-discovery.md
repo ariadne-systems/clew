@@ -1,6 +1,8 @@
 **Title**
 Emit the Java generator's traceable output — per-set enums and anchoring annotations — and discover them back
 
+**Status**: done
+
 **Business Value**
 clew's promise (SYS-008) is that the same compile-checked traceability and reverse scan work across a team's languages, not TypeScript alone.
 The Java generator today is only the STR-011 skeleton: it emits a placeholder enum shape but nothing a Java codebase can anchor to, and its discovery returns nothing — so a Java project can neither mark code as realizing a spec nor have those anchors appear in coverage.

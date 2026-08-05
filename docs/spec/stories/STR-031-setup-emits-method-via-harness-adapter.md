@@ -1,6 +1,8 @@
 **Title**
 `clew setup` emits the agent-facing method via a harness adapter
 
+**Status**: done
+
 **Business Value**
 A scaffolded configuration lets the *tool* run (STR-029), but an *agent* still cannot work the project's method.
 The generic governance contract — the `000`–`003` and `006` baselines — and the clew skills that drive the loop live in this repository and are not shipped by setup, so a human hand-copies them into every new project.

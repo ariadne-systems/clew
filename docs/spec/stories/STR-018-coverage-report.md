@@ -1,6 +1,8 @@
 **Title**
 Add `clew coverage` — report which specs are covered
 
+**Status**: done
+
 **Business Value**
 The scan (STR-016) reads the code's anchors, but nothing compares them against the specs to answer the question the tool exists for: is every spec implemented and tested?
 This story computes a per-spec **coverage** report — the artifact a reviewer or agent reads to answer "are my specs covered?" — leaving the pass/fail gate to a later story.

@@ -1,6 +1,8 @@
 **Title**
 clew's reports surface the states a clean summary would hide
 
+**Status**: planned
+
 **Business Value**
 clew's reports are how a reader — or an agent — knows where a project stands.
 But three of them let a clean-looking summary stand for a state that is not done: coverage reports `20/20 covered` while four just-promoted specs sit planned and unbuilt, a glob waiver silently marks a spec covered that has no test, and promote finishes without saying a draft was left behind.

@@ -1,6 +1,8 @@
 **Title**
 Consolidate the engine, generators, and CLI into a single package behind the generator interface
 
+**Status**: done
+
 **Business Value**
 The tool ships as five packages — `core`, `cli`, `gen-java`, `gen-typescript`, `trace` — a shape whose only payoff is that a third party could add a generator without touching the core.
 That payoff is not on the roadmap, and the split is not free: the CLI carries a composition-root that every command re-invokes, threading a `resolveGenerator` port through generation, scanning, coverage, and check; the CLI loads the built core, so a stale export in one command can take down unrelated ones.

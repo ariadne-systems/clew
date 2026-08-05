@@ -1,6 +1,8 @@
 **Title**
 Make project configuration first-class and adopt the lens model
 
+**Status**: done
+
 **Business Value**
 The tool already reads a few settings from `.clewrc.json`, but the configuration has no spec — its location, shape, and defaults live only in the code, and the options are scattered across CON-003, CON-005, and ARCH-001.
 Two concrete gaps make this urgent: `init` hard-codes the directory it scans (`docs/spec`), and the set of valid id prefixes is frozen in the schema and a regex rather than declared by the project.

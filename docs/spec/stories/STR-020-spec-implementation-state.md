@@ -1,6 +1,8 @@
 **Title**
 Each spec declares its implementation state, which filters generation
 
+**Status**: done
+
 **Business Value**
 The coverage gate holds **every** spec to Covered-or-waived. A spec-first project authors specs ahead of the code, so that gate would flag the whole backlog — you would waive dozens of specs you simply have not built yet, which is exactly the noise the waiver list exists to avoid.
 This story adds an **implementation status** to each spec and makes generation emit a traceable only for built specs: the coverage universe is exactly the active (and deprecated) specs, and the backlog is simply not generated, so it never enters coverage at all.

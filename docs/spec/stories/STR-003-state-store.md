@@ -1,6 +1,8 @@
 **Title**
 Lock and persist the tool's state in a version-controlled file
 
+**Status**: done
+
 **Business Value**
 The tool's stateful data — sequence counters now, more later — needs one durable, shared, race-safe home.
 A small StateStore that owns the file, the lock, and atomic writes is the foundation every stateful feature builds on.

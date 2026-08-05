@@ -1,6 +1,8 @@
 **Title**
 Initialize the StateStore from existing artifacts
 
+**Status**: done
+
 **Business Value**
 Adopting the tool on a project that already has ids, or recovering after the state file is lost or stale, requires the StateStore to reflect every id already in use.
 Computing those high-water marks by hand from the files is error-prone and is exactly the manual calculation the tool exists to remove.

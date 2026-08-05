@@ -1,6 +1,8 @@
 **Title**
 Close an increment from spec to Covered through an agent skill
 
+**Status**: done
+
 **Business Value**
 A developer takes a promoted spec to working, tested, anchored, **Covered** code by directing the agent once.
 The coding is done the project's own way, and the traceability is closed as the increment is built — not reconstructed afterwards.

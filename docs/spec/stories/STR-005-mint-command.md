@@ -1,6 +1,8 @@
 **Title**
 Add the `clew mint` command that allocates ids
 
+**Status**: done
+
 **Business Value**
 Minting exists in core (STR-004) but nothing reaches it from the command line yet.
 This is the first business command — the point at which an agent or a human actually produces ids — and the payoff of the StateStore (STR-003) and the sequential strategy (STR-004).

@@ -1,6 +1,8 @@
 **Title**
 `clew check` catches a cited ADR id that resolves to no ADR
 
+**Status**: planned
+
 **Business Value**
 ADRs are the durable *why* behind the ARCH and CON specs — cited around forty times across the corpus, from Rationale throughout.
 But an ADR citation is a bare `ADR-NNNN` token in prose, not a markdown link, so reference-rot (CON-029, which resolves links) never checks it: an ADR that is renamed or never added leaves every citation of it dangling, and `clew check` reports OK.

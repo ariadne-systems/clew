@@ -1,6 +1,8 @@
 **Title**
 Establish the `clew` CLI shell that prints help
 
+**Status**: done
+
 **Business Value**
 The CLI is how the agent and humans drive the tool.
 A small, intentional CLI shell — with clear help and one place to register commands — lets every later capability be added as its own focused command, one story at a time.

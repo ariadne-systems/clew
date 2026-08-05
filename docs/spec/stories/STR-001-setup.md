@@ -1,6 +1,8 @@
 **Title**
 Set up the ariadne-thread-cli monorepo and toolchain
 
+**Status**: done
+
 **Business Value**
 A clean project skeleton lets every later feature be built, typed, tested, and linted from day one.
 It establishes the package layout and conventions that the SRDD work and the architecture rules will build on.

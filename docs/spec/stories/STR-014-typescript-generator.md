@@ -1,6 +1,8 @@
 **Title**
 Emit the TypeScript generator's traceable output — per-set string enums and anchoring helpers
 
+**Status**: done
+
 **Business Value**
 The skeleton TypeScript generator emits one placeholder file; this defines the real output — the means by which TypeScript code anchors to a spec id with existence enforced by `tsc`, the equivalent of the Java annotation referencing a generated enum.
 Without it the TypeScript target has no working compile-checked trace, so the tool's core promise does not reach a TypeScript codebase.

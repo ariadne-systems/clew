@@ -1,6 +1,8 @@
 **Title**
 clew validates each spec and story against a configurable schema
 
+**Status**: done
+
 **Business Value**
 A spec or story that is structurally malformed — a missing required field, a typo'd status, an id that does not fit — silently weakens the corpus, because no contract says what a document must satisfy.
 Nothing catches a drafting mistake until something downstream breaks.

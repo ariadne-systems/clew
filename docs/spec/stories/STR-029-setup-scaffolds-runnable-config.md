@@ -1,6 +1,8 @@
 **Title**
 `clew setup` scaffolds a runnable configuration
 
+**Status**: done
+
 **Business Value**
 Today `clew setup` writes only the configuration skeleton — the lenses and the layout (SW-011).
 A project scaffolded that way cannot run the loop: `clew spec` emits nothing because no generator is configured, and no story or spec is validated because no schemas are present.

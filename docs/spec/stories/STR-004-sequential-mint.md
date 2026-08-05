@@ -1,6 +1,8 @@
 **Title**
 Mint sequential ids using the state store
 
+**Status**: done
+
 **Business Value**
 This turns the state into the ids the agent actually uses, in the readable sequential scheme suited to solo or low-contention work.
 It is the first time the tool produces a real id.

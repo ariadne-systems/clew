@@ -1,6 +1,8 @@
 **Title**
 The tool resolves spec ids to their anchor sites through an agent-facing `anchors` command
 
+**Status**: done
+
 **Business Value**
 The lateral scan — from a spec to the *other* sites that anchor it — is how an agent finds the tests and sibling code that share a unit of intent.
 clew-context's own step 5 tells the agent to "look up everything that anchors it (the tool's resolver, or grep its traceable)" — but no such resolver exists; the command surface is reconcile / mint / setup / spec / scan / coverage / check / config / promote.

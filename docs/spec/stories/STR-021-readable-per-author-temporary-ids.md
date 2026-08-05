@@ -1,6 +1,8 @@
 **Title**
 Temporary draft ids are readable per-author sequences, not opaque tokens
 
+**Status**: done
+
 **Business Value**
 While authoring, an agent and a reviewer cross-reference a story and its dependent specs many times before anything is bound.
 An opaque handle like `STR-021` carries no meaning: drafts cannot be told apart at a glance, and the relations between in-flight drafts are unreadable.

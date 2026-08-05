@@ -1,6 +1,8 @@
 **Title**
 Group the configuration by the machine it configures — `generation` and `scan` sections in `.clewrc.json`
 
+**Status**: done
+
 **Business Value**
 `.clewrc.json` is the first file a project meets, and four of its keys do not say what they act on.
 `ignore` — ignore what? `exclude` / `unexclude` — exclude from what?

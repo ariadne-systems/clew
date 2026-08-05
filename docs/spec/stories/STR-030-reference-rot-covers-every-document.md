@@ -1,6 +1,8 @@
 **Title**
 `clew check`'s reference-rot covers every document, retiring the repo-local reference lint
 
+**Status**: done
+
 **Business Value**
 The project runs two reference checkers: `clew check`'s reference-rot member, which walks only the spec tree, and a repo-local `scripts/check-references.mjs`, which walks the whole document corpus — `CLAUDE.md`, the ADRs, the governance baselines, the skills — and also resolves `@import` includes.
 ARCH-005 already says every deterministic check is a member of the one `clew check` suite, never a repo-local script; the script survives only because the suite's reference-rot is too narrow to replace it.

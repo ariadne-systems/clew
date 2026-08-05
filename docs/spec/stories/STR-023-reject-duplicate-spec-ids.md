@@ -1,6 +1,8 @@
 **Title**
 A duplicate spec id is rejected, not silently collapsed
 
+**Status**: done
+
 **Business Value**
 The whole trace graph is keyed on the spec id, and the system promises ids are unique and stable (SYS-003).
 But two files can end up declaring the same id — most easily when two branches each mint the next id off the shared state file and then merge.

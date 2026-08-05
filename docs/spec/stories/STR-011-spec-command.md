@@ -1,6 +1,8 @@
 **Title**
 Add an `clew spec` command that generates traceables via language-specific generators
 
+**Status**: done
+
 **Business Value**
 The tool's promise is compile-checked traceability, but nothing yet turns a spec into the verifiable symbol that binds code to it.
 `clew spec` is that step: it scans the specs for their ids and has the configured language generators materialize each id as a symbol — and the utility files around it — that the target compiler can check, so deleting or renaming a spec breaks the build of the code that references it.

@@ -1,6 +1,8 @@
 **Title**
 Add configurable scan exclusion — `exclude` and `unexclude` in `.clewrc.json`
 
+**Status**: done
+
 **Business Value**
 The scan finds anchors in *all* the project's source, but not every part of a codebase carries real traceability intent.
 A project's own test infrastructure or fixtures can contain marker-shaped code that should not count, and a project's source layout can collide with a built-in exclusion (the classic `adapter/out` vs the `out` build directory).

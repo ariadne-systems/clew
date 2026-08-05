@@ -1,6 +1,8 @@
 **Title**
 Add an unbound `--tmp` mode to `clew mint` for preparing drafts
 
+**Status**: done
+
 **Business Value**
 An agent prepares a story and its dependent specs before anyone approves them — sometimes several drafts over hours or days.
 Binding real sequential ids that early wastes numbers on drafts that may still change or be rejected.

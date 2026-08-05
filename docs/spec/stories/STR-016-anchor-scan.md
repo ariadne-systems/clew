@@ -1,6 +1,8 @@
 **Title**
 Add a `clew scan` that finds where code anchors specs — the reverse of generation
 
+**Status**: done
+
 **Business Value**
 `clew spec` makes the forward link — a spec becomes a symbol the compiler checks at the anchor site — but nothing yet reads the code *back* to see which specs are anchored, and where.
 That reverse read is the foundation the tool's real promise stands on: coverage (is every spec implemented and tested?) and traceback (what realizes `SW-001`, and where?).

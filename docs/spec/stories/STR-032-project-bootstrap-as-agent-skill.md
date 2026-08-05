@@ -1,6 +1,8 @@
 **Title**
 Bootstrap a project's workspace through an agent skill
 
+**Status**: done
+
 **Business Value**
 A team reaches a tailored technology contract and a reviewed workspace-setup plan through a short interview.
 The stack is checked against current standards at setup time, and the human gates what actually runs.

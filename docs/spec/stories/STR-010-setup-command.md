@@ -1,6 +1,8 @@
 **Title**
 Add an `clew setup` command and require a configuration before minting
 
+**Status**: done
+
 **Business Value**
 The project configuration is otherwise invisible — its defaults live only in the tool's code — and without an explicit setup the user's very first `mint` commits to a lens set they never chose.
 An enforced `setup` makes the first interaction a deliberate moment: the standards are written out to edit, the project chooses its lenses before allocating any id, and a newcomer is oriented — the onboarding step that project tools (git, terraform, npm) all require.

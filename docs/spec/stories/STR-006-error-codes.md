@@ -1,6 +1,8 @@
 **Title**
 Identify errors with stable, machine-readable codes
 
+**Status**: done
+
 **Business Value**
 The tool is driven by agents and CI and is heading for open source.
 A failure needs a stable identifier that automation can branch on and that survives rewording, translation, and releases.

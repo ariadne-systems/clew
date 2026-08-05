@@ -1,6 +1,8 @@
 **Title**
 The tool runs its deterministic integrity checks as one `clew check` command
 
+**Status**: done
+
 **Business Value**
 clew's whole pitch is that the link between specs and code cannot rot silently.
 Yet the integrity of the corpus *itself* — a relation link that points at nothing, a temporary id left behind after promotion, an invalid status, a spec id smuggled into a code comment, two files claiming one id — is checked by nothing until a build breaks, and some of it never breaks the build at all.

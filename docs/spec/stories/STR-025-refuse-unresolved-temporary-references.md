@@ -1,6 +1,8 @@
 **Title**
 Promotion refuses a draft with an unresolved temporary reference, and never rewrites the promoted tree
 
+**Status**: done
+
 **Business Value**
 clew's promise is that it never silently corrupts the corpus it governs.
 Promotion breaks that promise two ways today, and both come from the same root: it substitutes a draft's temporary id by raw text match across the *whole* spec tree.

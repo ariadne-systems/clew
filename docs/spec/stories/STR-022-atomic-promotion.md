@@ -1,6 +1,8 @@
 **Title**
 A failed promotion leaves the spec tree unchanged
 
+**Status**: done
+
 **Business Value**
 Promotion mints permanent ids and rewrites many version-controlled files in one run.
 Today a mid-run failure — a file locked by an editor on Windows, a permission error, a full disk — leaves a half-promoted corpus: some files substituted, some drafts moved, some not.

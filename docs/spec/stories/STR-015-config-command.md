@@ -1,6 +1,8 @@
 **Title**
 Add a `config` command that prints the resolved project configuration
 
+**Status**: done
+
 **Business Value**
 Every skill and command already needs the project's *resolved* configuration — the lenses, the valid id prefixes, where artifacts live, and where each generator writes — yet that resolved view exists nowhere a caller can simply read.
 `.clewrc.json` is usually partial, so the resolved configuration is the file plus the tool's defaults and derivations; today each skill re-reads the file and re-applies those defaults itself, duplicating the resolution and drifting from it when a default changes.

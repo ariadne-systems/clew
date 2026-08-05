@@ -1,6 +1,8 @@
 **Title**
 `clew scan` keeps the index fresh incrementally, rescanning only what changed
 
+**Status**: done
+
 **Business Value**
 `clew scan` writes the locations index the whole tool stands on — coverage, check, and the new `anchors` reverse-lookup all read it.
 Today every scan re-reads and re-discovers the entire codebase; on a large project — tens of thousands of lines — that makes the index expensive to keep fresh, so it drifts, and a stale index silently misleads every consumer.

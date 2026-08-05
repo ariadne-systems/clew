@@ -1,6 +1,8 @@
 **Title**
 Add an `clew promote` command that finalizes reviewed drafts into the spec tree
 
+**Status**: done
+
 **Business Value**
 Promotion has two halves: integrating a draft into the corpus (judgment) and finalizing it (mechanics — bind a real id, replace its temporary id everywhere, move it into place).
 The finalize half is done today by the agent with ad-hoc shell scripting, which is slow, unverifiable, and easy to get wrong: a single missed occurrence of a temporary id leaves a dangling reference in an already-promoted spec or another draft.
