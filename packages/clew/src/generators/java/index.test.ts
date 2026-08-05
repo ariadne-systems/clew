@@ -1,9 +1,4 @@
-import {
-  ArchTraceables,
-  SwTraceables,
-  SysTraceables,
-  verifies,
-} from "@ariadne-thread/trace";
+import { ArchTraceables, SwTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 import type { GeneratedFile, SpecSet } from "../../spec/generator.js";
 import { createJavaGenerator } from "./index.js";
@@ -42,7 +37,6 @@ describe("java generator output", () => {
     [
       SwTraceables.SW_037_JAVA_ANNOTATION_ANCHORED_OUTPUT,
       ArchTraceables.ARCH_003_GENERATOR_INTERFACE,
-      SysTraceables.SYS_008_LANGUAGE_NEUTRAL_EXTENSIBILITY,
     ],
     () => {
       test("emits one enum per set, package from the output dir, constants from filenames, read via id()", async () => {

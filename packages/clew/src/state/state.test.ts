@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -8,6 +8,7 @@ import {
   verifies,
 } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
+import { TEMP_SUFFIX } from "../fs/atomic-write.js";
 import { ErrorCode, withState } from "../index.js";
 
 async function tempStateFile(): Promise<string> {
@@ -43,64 +44,87 @@ describe("loading", () => {
 });
 
 describe("persistence", () => {
-  verifies(
-    [
-      NfTraceables.NF_002_ATOMIC_STATE_WRITE,
-      SysTraceables.SYS_004_CONFIGURATION_AND_STATE,
-    ],
-    () => {
-      test("mutations are persisted across sessions", async () => {
-        const file = await tempStateFile();
-        await withState(
-          (state) => {
-            state.sequences.SW = 3;
-          },
-          { file },
-        );
-        const value = await withState((state) => state.sequences.SW, { file });
-        expect(value).toBe(3);
-      });
+  verifies(SysTraceables.SYS_004_CONFIGURATION_AND_STATE, () => {
+    test("mutations are persisted across sessions", async () => {
+      const file = await tempStateFile();
+      await withState(
+        (state) => {
+          state.sequences.SW = 3;
+        },
+        { file },
+      );
+      const value = await withState((state) => state.sequences.SW, { file });
+      expect(value).toBe(3);
+    });
 
-      test("saving preserves sections the caller did not touch", async () => {
-        const file = await tempStateFile();
-        await writeFile(
-          file,
-          JSON.stringify({ sequences: { SW: 1 }, lastScannedCommit: "abc123" }),
-          "utf8",
-        );
-        await withState(
-          (state) => {
-            state.sequences.SW = 2;
-          },
-          { file },
-        );
-        const state = await readState(file);
-        expect(state.sequences.SW).toBe(2);
-        expect(state.lastScannedCommit).toBe("abc123");
-      });
+    test("saving preserves sections the caller did not touch", async () => {
+      const file = await tempStateFile();
+      await writeFile(
+        file,
+        JSON.stringify({ sequences: { SW: 1 }, lastScannedCommit: "abc123" }),
+        "utf8",
+      );
+      await withState(
+        (state) => {
+          state.sequences.SW = 2;
+        },
+        { file },
+      );
+      const state = await readState(file);
+      expect(state.sequences.SW).toBe(2);
+      expect(state.lastScannedCommit).toBe("abc123");
+    });
 
-      test("a failing run does not persist", async () => {
-        const file = await tempStateFile();
-        await withState(
+    test("a failing run does not persist", async () => {
+      const file = await tempStateFile();
+      await withState(
+        (state) => {
+          state.sequences.SW = 1;
+        },
+        { file },
+      );
+      await expect(
+        withState(
           (state) => {
-            state.sequences.SW = 1;
+            state.sequences.SW = 99;
+            throw new Error("boom");
           },
           { file },
-        );
-        await expect(
-          withState(
-            (state) => {
-              state.sequences.SW = 99;
-              throw new Error("boom");
-            },
-            { file },
-          ),
-        ).rejects.toThrow("boom");
-        const value = await withState((state) => state.sequences.SW, { file });
-        expect(value).toBe(1);
-      });
-    },
-  );
+        ),
+      ).rejects.toThrow("boom");
+      const value = await withState((state) => state.sequences.SW, { file });
+      expect(value).toBe(1);
+    });
+  });
+});
+
+describe("atomic state write", () => {
+  verifies(NfTraceables.NF_002_ATOMIC_STATE_WRITE, () => {
+    test("a failing write leaves the prior state file valid and unchanged", async () => {
+      const file = await tempStateFile();
+      await withState(
+        (state) => {
+          state.sequences.SW = 5;
+        },
+        { file },
+      );
+      // Block the atomic writer's staging file so the save fails mid-write: a
+      // temp-then-rename writer leaves `file` untouched (the rename never runs),
+      // whereas a naive writeFile straight to `file` would ignore the blocker,
+      // overwrite it with SW=99, and not throw — so this fails unless the write is atomic.
+      await mkdir(`${file}${TEMP_SUFFIX}`, { recursive: true });
+      await expect(
+        withState(
+          (state) => {
+            state.sequences.SW = 99;
+          },
+          { file },
+        ),
+      ).rejects.toThrow();
+      const state = await readState(file);
+      expect(state.sequences.SW).toBe(5);
+    });
+  });
 });
 
 describe("concurrency", () => {

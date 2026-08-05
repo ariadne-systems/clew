@@ -1,7 +1,7 @@
 import type { Dirent } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { ArchTraceables, verifies } from "@ariadne-thread/trace";
+import { ArchTraceables, SysTraceables, verifies } from "@ariadne-thread/trace";
 import { describe, expect, test } from "vitest";
 
 // Every production `.ts` under src, excluding test files.
@@ -20,32 +20,41 @@ async function collectSourceFiles(dir: string): Promise<string[]> {
 }
 
 describe("generators are reached only through the interface", () => {
-  verifies(ArchTraceables.ARCH_003_GENERATOR_INTERFACE, () => {
-    // The closed set of concrete generator factory names that no module outside
-    // src/generators may reference.
-    test("no module outside src/generators names a concrete generator", async () => {
-      const srcRoot = import.meta.dirname;
-      const generatorsDir = join(srcRoot, "generators");
-      const sources = await collectSourceFiles(srcRoot);
-      const concreteFactories = [
-        "createTypeScriptGenerator",
-        "createJavaGenerator",
-      ];
+  verifies(
+    [
+      ArchTraceables.ARCH_003_GENERATOR_INTERFACE,
+      SysTraceables.SYS_008_LANGUAGE_NEUTRAL_EXTENSIBILITY,
+    ],
+    () => {
+      // The closed set of concrete generator factory names that no module outside
+      // src/generators may reference. The same single-registry-point boundary is
+      // what keeps the core language-neutral: name a concrete generator outside
+      // src/generators and both the generator interface and the language-
+      // extensibility seam it provides are broken, so this test falsifies each.
+      test("no module outside src/generators names a concrete generator", async () => {
+        const srcRoot = import.meta.dirname;
+        const generatorsDir = join(srcRoot, "generators");
+        const sources = await collectSourceFiles(srcRoot);
+        const concreteFactories = [
+          "createTypeScriptGenerator",
+          "createJavaGenerator",
+        ];
 
-      const offenders: string[] = [];
-      for (const source of sources) {
-        if (source.startsWith(generatorsDir)) {
-          continue;
+        const offenders: string[] = [];
+        for (const source of sources) {
+          if (source.startsWith(generatorsDir)) {
+            continue;
+          }
+          const contents = await readFile(source, "utf8");
+          if (concreteFactories.some((factory) => contents.includes(factory))) {
+            offenders.push(source);
+          }
         }
-        const contents = await readFile(source, "utf8");
-        if (concreteFactories.some((factory) => contents.includes(factory))) {
-          offenders.push(source);
-        }
-      }
 
-      expect(offenders).toEqual([]);
-    });
-  });
+        expect(offenders).toEqual([]);
+      });
+    },
+  );
 });
 
 describe("agents are named only at the presets registry", () => {
