@@ -75,6 +75,8 @@ Run `clew coverage <the ids you targeted>` and `clew check`. The per-spec form r
 
 **Covered proves the link, not the code.** The build confirms the code names a live spec and a test names it; it does not confirm the code is right or that the test asserts anything meaningful. So do not read Covered as done — the implementation and the test still need genuine review.
 
+**Then confirm each anchor names the *right* spec.** Covered proves a marker names a *live* spec — never that it names the *correct* one; an anchor on a plausible-but-wrong spec compiles and stays green just the same. Run **`clew-anchor-fit`** over the anchors this increment placed: it reads each against the spec's intent and confirms the fit, flagging any that are mis-targeted or that even a full-context reader cannot confirm. Disposition every finding within this increment — re-anchor it, or, where the spec was too ambiguous to anchor cleanly, sharpen it (`clew-critique`) — before presenting.
+
 ### 6. Stop for review
 
 Present the change — the code, the test, and the coverage result — for review, with Covered understood as the link's proof, not the code's correctness. Do not commit.
@@ -85,4 +87,5 @@ When the increment is **accepted** after this review, set the carrying story's `
 
 - The spec is `active` with its traceable regenerated; the implementation and a test are written following the project's installed skills and conventions; both are anchored (`realizes` / `verifies`) via `clew-anchor`, so the build holds the link.
 - `clew coverage <targeted ids>` shows every spec this increment targeted as **Covered**, and `clew check` is clean; any *other* open coverage was reported to the user, not forced.
+- The increment's anchors were confirmed with `clew-anchor-fit` — each names the right spec, or every mis-targeted or unconfirmed one was dispositioned (re-anchored, or its spec sharpened) — before the change was presented.
 - The change is presented for review — Covered read as the link's proof, not the code's correctness — and nothing is committed.
