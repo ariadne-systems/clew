@@ -1,6 +1,6 @@
 {
   "name": "@ariadne-thread/clew",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "clew — compile-checked, id-anchored traceability for specs and code: the CLI and its engine.",
   "type": "module",
   "engines": {

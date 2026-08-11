@@ -1,5 +1,11 @@
 # @ariadne-thread/clew
 
+## 0.3.0
+
+### Minor Changes
+
+- Rename the `clew-anchor-fit` skill to `clew-review` and run it as `clew-implement`'s mandatory final step: a spec-triggered drift check over the specs an increment changed, flagging `drifted-realize`, `stale-verify`, and `misanchor`. It is read-only and advisory — the spec-conformance half of a review; a full code review for correctness stays the user's to run and is not forced. The skill reference, spec lifecycle, and quickstart are updated to match.
+
 ## 0.2.0
 
 ### Minor Changes
