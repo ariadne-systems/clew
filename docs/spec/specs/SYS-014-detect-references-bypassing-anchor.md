@@ -6,7 +6,7 @@ The system detects a spec reference that bypasses the anchor
 **Status**: active
 
 **Description**
-The system shall detect, mechanically, a code-to-spec reference that is not an anchor — a spec id appearing in a comment or a name rather than inside a `realizes` / `verifies` / `concerns` anchor — and report it located, so a reference the compiler cannot see is caught rather than left to rot.
+The system shall detect, mechanically, a code-to-spec reference that is not an anchor — a spec id appearing in a comment rather than inside a `realizes` / `verifies` / `concerns` anchor — and report it located, so a reference the compiler cannot see is caught rather than left to rot.
 
 **Rationale**
 The compiler guarantees the anchor symbol cannot go stale (SYS-001), but it does not see a spec id written in prose; such a reference is unchecked and drifts silently.
@@ -20,3 +20,8 @@ Given code whose spec reference is a hyphenated id in a comment, the system repo
 **Realizes**
 
 - [STK-001](STK-001-implementation-assurance.md)
+
+## Changes
+
+- **2026-08-05** — Narrowed the detected reference to a spec id in a comment, dropping "or a name".
+The mechanical detection (SW-033) scans comments only; a spec id in a test or suite name is left to convention rather than mechanical detection, matching the shipped scope.
