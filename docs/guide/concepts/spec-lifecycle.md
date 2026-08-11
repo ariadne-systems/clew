@@ -23,7 +23,7 @@ You direct the agent to implement a spec; you do not flip the status by hand.
 draft  →  promote  →  implement & anchor  →  check coverage  →  (next increment)
 ```
 
-The first three steps are driven by clew's **skills**, run by your AI coding agent — you direct and review, rather than running commands by hand; the implement skill folds the coverage check for its own specs into that step.
+The first three steps are driven by clew's **skills**, run by your AI coding agent — you direct and review, rather than running commands by hand; the implement skill folds the coverage check and a spec-to-code drift review (`clew-review`) for its own specs into that step.
 Running `clew coverage` / `clew check` yourself is the whole-corpus assurance view, for you or CI.
 
 - **Draft** (draft skill) — the agent authors a story and the specs it needs with *temporary* ids, so unapproved work never consumes real id numbers; it grounds them in the corpus via the context skill.

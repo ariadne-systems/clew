@@ -81,7 +81,7 @@ export const submitOrder = realizes(SwTraceables.SW_001_SUBMIT_ORDER, (order: Or
 Because the anchor references a generated symbol, `tsc` now holds the code to the spec: delete `SW-001`, regenerate, and this line stops compiling.
 (Under NodeNext module resolution, import the traceables from `../clew/traceables/index.js`.)
 
-As its closing move the implement skill runs coverage and confirms `SW-001` now reports **covered** — the increment closes only once it does.
+As its closing move the implement skill runs coverage and confirms `SW-001` now reports **covered** — the increment closes only once it does — then runs `clew-review` over the spec to confirm the code and test genuinely honor it, not merely that the link exists.
 
 ## 6. See coverage
 

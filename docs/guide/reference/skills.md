@@ -7,9 +7,9 @@ The skills carry one loop:
 
 **draft → promote → implement & anchor → check coverage**
 
-`clew-draft`, `clew-promote`, and `clew-implement` carry those steps end to end — and `clew-implement` folds the coverage check into itself, closing an increment only once its target specs report **Covered**, rather than leaving it a step you run afterwards.
-`clew-setup` establishes the project up front, `clew-context` grounds the work in the corpus, and `clew-critique` stress-tests a risk-bearing spec's sufficiency.
-You can still run `clew coverage` / `clew check` yourself — or in CI — as the assurance view over the whole corpus.
+`clew-draft`, `clew-promote`, and `clew-implement` carry those steps end to end — and `clew-implement` folds two checks into itself: it closes an increment only once its target specs report **Covered**, then runs `clew-review` over the specs it touched to catch spec-to-code drift before presenting.
+`clew-setup` establishes the project up front, `clew-context` grounds the work in the corpus, `clew-anchor` binds code to existing specs, and `clew-critique` stress-tests a risk-bearing spec's sufficiency.
+You can still run `clew coverage` / `clew check` yourself — or in CI — as the assurance view over the whole corpus, and `clew-review` on demand over a wider change.
 
 `clew setup` emits these skills into your agent's skills directory, so after setup the agent already knows the loop.
 None of them creates a version-control commit; the ones that change files stop for your review first.
@@ -22,6 +22,7 @@ None of them creates a version-control commit; the ones that change files stop f
 | `clew-critique` | Stress-test a risk-bearing spec's sufficiency (advisory) |
 | `clew-promote` | Integrate drafts into the corpus and finalize them |
 | `clew-implement` | Take a promoted spec through to Covered |
+| `clew-review` | Check a change's spec-to-code integrity for drift (advisory) |
 | `clew-anchor` | Bind code and tests to existing specs |
 
 New to *corpus*, *traceable*, *anchor*, or *coverage*? See [What is CAS-DD?](../concepts/what-is-cas-dd.md) and [The spec lifecycle](../concepts/spec-lifecycle.md) for the terms these skills use.
@@ -76,7 +77,15 @@ It then applies the confirmed integration edits to affected specs, each with its
 Close one increment: take a promoted spec through to **Covered**.
 It activates the spec and regenerates the traceables, reads the spec's intent (delegating to `clew-context`), implements and tests the behaviour **following your project's own installed implementation and testing skills**, anchors the code and test (delegating to `clew-anchor`), then verifies coverage — closing the increment only once the target spec reports **Covered**.
 It owns only the clew frame around the work — it does not re-specify how you write code.
-**Covered proves the spec-to-code link, not correctness**, so it presents the change for review; the code and tests still need real review.
+**Covered proves the spec-to-code link, not correctness.** So as its required final step it runs `clew-review` over the specs it touched — catching the spec-to-code drift the build cannot see — then presents the change. That drift check is required; a full code review for correctness stays yours to run.
+
+## `clew-review`
+
+Check a change's **spec-to-code integrity** — for each spec the change added or gave a new `## Changes` entry: whether the code still honors the spec's *current* intent (`drifted-realize`), whether its test still exercises that intent (`stale-verify`), and whether each anchor names the right spec (`misanchor`).
+It catches the drift the build cannot — a spec widened in an increment while its code or test stayed on the old claim, with coverage green throughout.
+It is **read-only and advisory**: it proposes findings for you to disposition and never gates the build.
+`clew-implement` runs it as its **required final step**, over the specs that increment touched; you can also run it on demand at PR time or over a wider change.
+It is the **spec-conformance half** of a review only — it does not judge the code for correctness (bugs, security, quality); that code review stays yours to run, and `clew-implement` does not force it.
 
 ## `clew-anchor`
 

@@ -1,6 +1,6 @@
 ---
 name: clew-implement
-description: "Take a promoted spec to Covered: set it active and regenerate, read its intent, implement and test it — following the project's own installed implementation and testing skills — anchor the code and test, then verify coverage. Use when a spec is ready to build — e.g. 'implement SW-001', 'build this spec'. Owns the clew frame (active, regenerate, anchor via clew-anchor, verify coverage) and delegates the actual coding to your installed skills. Not spec authoring (clew-draft) or promotion (clew-promote)."
+description: "Take a promoted spec to Covered: set it active and regenerate, read its intent, implement and test it — following the project's own installed implementation and testing skills — anchor the code and test, then verify coverage. Use when a spec is ready to build — e.g. 'implement SW-001', 'build this spec'. Owns the clew frame (active, regenerate, anchor via clew-anchor, verify coverage, check drift via clew-review) and delegates the actual coding to your installed skills. Not spec authoring (clew-draft) or promotion (clew-promote)."
 ---
 
 # clew-implement
@@ -23,7 +23,7 @@ It owns only the **clew-specific frame** around that work — setting the spec `
 - Do not invent a marker form by hand or carry one over from another language — `clew-anchor` settles the form (step 4). Do not hand-edit the generated traceables folder.
 - **Do not place an anchor you are unsure is true** to close a coverage gap. When which code *realizes* a spec or which test *verifies* it is unclear — as it often is for a high-altitude stakeholder or system spec — ask the user and leave it unanchored; a guessed anchor is a false claim coverage will show as green.
 - Do not author or promote specs here, and do not implement a spec that is not yet promoted (no bound id) or is `deprecated`.
-- Do not read **Covered** as **correct** (see step 5), and do not skip the review.
+- Do not read **Covered** as **correct** (see step 5), and do not skip the `clew-review` drift check (step 6).
 - Do not commit.
 
 ## Procedure
@@ -73,19 +73,23 @@ Run `clew coverage <the ids you targeted>` and `clew check`. The per-spec form r
 - A spec that coverage reports as uncovered but that this increment did **not** target is out of scope. Do not anchor it to force it Covered — tell the user it is open and leave it for its own increment.
 - **Covered is not fresh.** A spec you *widened* this increment stays Covered on its old test — the number cannot tell you the test went stale. For every widened spec, the confirmation is the re-read from step 3, not a green coverage line.
 
-**Covered proves the link, not the code.** The build confirms the code names a live spec and a test names it; it does not confirm the code is right or that the test asserts anything meaningful. So do not read Covered as done — the implementation and the test still need genuine review.
+**Covered proves the link, not the code.** The build confirms the code names a live spec and a test names it; it does not confirm the code is right or that the test asserts anything meaningful. So Covered does not mean the increment is correct — that judgment is the user's to make, and this skill does not make it.
 
-**Then confirm each anchor names the *right* spec.** Covered proves a marker names a *live* spec — never that it names the *correct* one; an anchor on a plausible-but-wrong spec compiles and stays green just the same. Run **`clew-anchor-fit`** over the anchors this increment placed: it reads each against the spec's intent and confirms the fit, flagging any that are mis-targeted or that even a full-context reader cannot confirm. Disposition every finding within this increment — re-anchor it, or, where the spec was too ambiguous to anchor cleanly, sharpen it (`clew-critique`) — before presenting.
+### 6. Check the increment's specs for drift — `clew-review`
 
-### 6. Stop for review
+A spec this increment **widened** stays Covered on its old test, and its code may still handle only the narrow case — the build sees neither, by design (step 3). So before presenting, run **`clew-review`** over the specs this increment added or changed: it follows each `realizes` anchor to the code and each `verifies` anchor to the test and flags where they no longer honor the spec's *current* text (`drifted-realize`, `stale-verify`) or where an anchor names the wrong spec (`misanchor`). Disposition every finding within this increment.
 
-Present the change — the code, the test, and the coverage result — for review, with Covered understood as the link's proof, not the code's correctness. Do not commit.
+This is the **conformance** half only — clew-review does not judge the code for correctness (bugs, security, quality). That code review is the user's to run and is **not** forced here.
 
-When the increment is **accepted** after this review, set the carrying story's `**Status**` to `done` (`006 §4`) — the work item is implemented; the `**Status**` field and git carry the transition, so a story records no `## Changes` entry. Until then it stays `active`.
+### 7. Present the increment
+
+Present the change — the code, the test, and the coverage result — to the user, with Covered understood as the link's proof, not the code's correctness. Do not commit.
+
+When the increment is **accepted**, set the carrying story's `**Status**` to `done` (`006 §4`) — the work item is implemented; the `**Status**` field and git carry the transition, so a story records no `## Changes` entry. Until then it stays `active`.
 
 ## Done when
 
 - The spec is `active` with its traceable regenerated; the implementation and a test are written following the project's installed skills and conventions; both are anchored (`realizes` / `verifies`) via `clew-anchor`, so the build holds the link.
 - `clew coverage <targeted ids>` shows every spec this increment targeted as **Covered**, and `clew check` is clean; any *other* open coverage was reported to the user, not forced.
-- The increment's anchors were confirmed with `clew-anchor-fit` — each names the right spec, or every mis-targeted or unconfirmed one was dispositioned (re-anchored, or its spec sharpened) — before the change was presented.
-- The change is presented for review — Covered read as the link's proof, not the code's correctness — and nothing is committed.
+- `clew-review` was run over the specs this increment added or changed, and every drift finding (`drifted-realize`, `stale-verify`, `misanchor`) was dispositioned before the change was presented.
+- The change is presented to the user — Covered read as the link's proof, not the code's correctness — and nothing is committed.
