@@ -46,9 +46,27 @@ Seed decisions, not descriptions.
 Code-summary tools have a place here, but a narrow one: as raw material for a seed draft — a first-pass *what* — that you then sharpen into a decision by adding the *why*, the invariant, the alternative that was rejected.
 A first draft, never the deliverable.
 
+## The architecture file
+
+`clew setup` also writes an architecture overview (`docs/spec/architecture.md`) — and here a spec and this file part ways.
+A spec you seed *sparingly*, by hand, one decision at a time.
+The architecture file is a **map**: on an existing project the setup skill derives it broadly from your build files, code, and structure.
+
+Read it as a map of the territory you *have*.
+Correct it to match reality; do not rewrite it into the architecture you wish you had — a map that describes code you do not have is worse than none.
+
+Deriving the map is not "speccing your architecture."
+The file is documentation — the frame every story is written against.
+Its enforceable rules become `ARCH` / `CON` specs only as the code they constrain is built or changed: a handful of load-bearing constraints by hand, the rest at the change edge, exactly as you seed any other decision.
+Having an `architecture.md` is not "my architecture is covered."
+
+Where the real architecture is inconsistent, say so — do not smooth it over.
+The map records what *is*; the direction you mean to steer toward is a decision you draft and anchor when you move the code there, at the change edge.
+The gap between the two is visible work, not a fiction to hide in the file.
+
 ## Your first week
 
-1. Bootstrap clew as in the [Quickstart](quickstart.md#1-scaffold-the-project) — `clew setup --type <your agent>`, then have the agent run the setup skill, which on an existing project derives your `004` and architecture from your build files, code, and docs.
+1. Bootstrap clew as in the [Quickstart](quickstart.md#1-scaffold-the-project) — `clew setup --type <your agent>`, then have the agent run the setup skill, which on an existing project derives your `004` and architecture from your build files, code, and docs — confirm the architecture describes the code you *have*, not the one you want.
 2. Pick your next real change.
    Draft its story and spec, promote, implement, and anchor.
    Run `clew coverage` — you have your first **Covered** spec, anchored in your real code.
